@@ -1,0 +1,278 @@
+import AppKit
+import SwiftUI
+
+/// Creates and manages full-screen blackout overlay windows — one per connected display.
+/// The overlay sits at screenSaver window level so it covers everything.
+/// During a blackout, a global event tap suppresses keyboard input to background apps.
+class BlackoutWindowController {
+
+    private var windows: [NSWindow] = []
+    private var dismissTimer: DispatchWorkItem?
+    private var keyEventMonitor: Any?
+    private var globalEventTap: CFMachPort?
+    private var globalRunLoopSource: CFRunLoopSource?
+    private var completionHandler: (() -> Void)?
+    private var screenObserver: NSObjectProtocol?
+
+    /// Fade animation duration in seconds
+    private let fadeDuration: TimeInterval = 2.0
+
+    /// Whether a blackout is currently being displayed
+    var isActive: Bool { !windows.isEmpty }
+
+    init() {
+        // Watch for screen configuration changes (plugging/unplugging displays)
+        screenObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleScreenChange()
+        }
+    }
+
+    deinit {
+        if let observer = screenObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    // MARK: - Show / Dismiss
+
+    /// Cover all screens with the blackout overlay for a given duration
+    func show(
+        duration: TimeInterval,
+        visualType: BlackoutVisualType = .plainBlack,
+        customText: String = "",
+        imagePath: String = "",
+        videoPath: String = "",
+        completion: (() -> Void)? = nil
+    ) {
+        guard !isActive else { return }
+        self.completionHandler = completion
+
+        // Play start gong immediately (before fade begins)
+        GongPlayer.shared.playStartIfEnabled()
+
+        // Create one overlay window per connected screen, starting fully transparent
+        for screen in NSScreen.screens {
+            let window = makeOverlayWindow(
+                for: screen,
+                visualType: visualType,
+                customText: customText,
+                imagePath: imagePath,
+                videoPath: videoPath
+            )
+            window.alphaValue = 0
+            window.orderFrontRegardless()
+            windows.append(window)
+        }
+
+        // Make the first overlay window key so it captures keyboard input
+        windows.first?.makeKeyAndOrderFront(nil)
+
+        // Fade in over 2 seconds
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = fadeDuration
+            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            for window in windows {
+                window.animator().alphaValue = 1
+            }
+        }
+
+        // Install keyboard monitors — local to handle ESC/dismiss, global to suppress typing
+        installKeyboardMonitor()
+        installGlobalEventTap()
+
+        // Schedule automatic dismissal after the configured duration
+        let work = DispatchWorkItem { [weak self] in
+            self?.dismiss()
+        }
+        dismissTimer = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: work)
+    }
+
+    /// Fade out and close all overlay windows, playing the end gong
+    func dismiss() {
+        dismissTimer?.cancel()
+        dismissTimer = nil
+        removeKeyboardMonitor()
+        removeGlobalEventTap()
+
+        // Play deeper end gong immediately so the user hears it while the screen fades back
+        GongPlayer.shared.playEndIfEnabled()
+
+        let windowsToClose = windows
+        windows.removeAll()
+
+        // Fade out over 2 seconds, then close
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = fadeDuration
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            for window in windowsToClose {
+                window.animator().alphaValue = 0
+            }
+        }, completionHandler: { [weak self] in
+            for window in windowsToClose {
+                window.orderOut(nil)
+            }
+            let handler = self?.completionHandler
+            self?.completionHandler = nil
+            handler?()
+        })
+    }
+
+    // MARK: - Screen Change Handling
+
+    /// When displays are connected/disconnected during a blackout, adjust overlays to match
+    private func handleScreenChange() {
+        guard isActive else { return }
+
+        // Remove windows for screens that no longer exist
+        let currentFrames = Set(NSScreen.screens.map { NSStringFromRect($0.frame) })
+        windows.removeAll { window in
+            let frameStr = NSStringFromRect(window.frame)
+            if !currentFrames.contains(frameStr) {
+                window.orderOut(nil)
+                return true
+            }
+            return false
+        }
+
+        // Add windows for any new screens
+        let existingFrames = Set(windows.map { NSStringFromRect($0.frame) })
+        for screen in NSScreen.screens {
+            let frameStr = NSStringFromRect(screen.frame)
+            if !existingFrames.contains(frameStr) {
+                let window = makeOverlayWindow(for: screen, visualType: .plainBlack, customText: "")
+                window.orderFrontRegardless()
+                windows.append(window)
+            }
+        }
+    }
+
+    // MARK: - Local Keyboard Monitor (for ESC / Cmd+Q dismissal)
+
+    private func installKeyboardMonitor() {
+        keyEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self, self.isActive else { return event }
+
+            // In handcuffs mode, swallow key events — user cannot escape
+            if SettingsManager.shared.handcuffsMode {
+                return nil
+            }
+
+            // ESC or Cmd+Q dismisses the blackout early
+            let isEscape = event.keyCode == 53
+            let isCmdQ = event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "q"
+
+            if isEscape || isCmdQ {
+                self.dismiss()
+                return nil
+            }
+
+            return nil  // swallow all other keys during blackout
+        }
+    }
+
+    private func removeKeyboardMonitor() {
+        if let monitor = keyEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyEventMonitor = nil
+        }
+    }
+
+    // MARK: - Global Event Tap (suppress keystrokes to background apps)
+
+    /// Install a CGEvent tap that eats all keyboard events system-wide during blackout.
+    /// This prevents accidental typing into background apps while the screen is blacked out.
+    /// Requires Accessibility permission — if not granted, the tap simply won't be created
+    /// and keystrokes will pass through as before (graceful degradation).
+    private func installGlobalEventTap() {
+        let eventMask: CGEventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
+
+        guard let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: eventMask,
+            callback: { _, _, event, _ in
+                // Suppress the event by returning nil
+                return nil
+            },
+            userInfo: nil
+        ) else {
+            // Accessibility permission not granted — degrade gracefully
+            return
+        }
+
+        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
+
+        globalEventTap = tap
+        globalRunLoopSource = source
+    }
+
+    private func removeGlobalEventTap() {
+        if let tap = globalEventTap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+            globalEventTap = nil
+        }
+        if let source = globalRunLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
+            globalRunLoopSource = nil
+        }
+    }
+
+    // MARK: - Window Factory
+
+    private func makeOverlayWindow(
+        for screen: NSScreen,
+        visualType: BlackoutVisualType,
+        customText: String,
+        imagePath: String = "",
+        videoPath: String = ""
+    ) -> NSWindow {
+        let window = BlackoutWindow(
+            contentRect: screen.frame,
+            styleMask: .borderless,
+            backing: .buffered,
+            defer: false,
+            screen: screen
+        )
+
+        // Window configuration for a full-screen overlay
+        window.level = .screenSaver
+        window.backgroundColor = .black
+        window.isOpaque = true
+        window.hasShadow = false
+        window.ignoresMouseEvents = false
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        window.acceptsKeyInput = true
+
+        // Host the SwiftUI content view
+        let contentView = BlackoutContentView(
+            visualType: visualType,
+            customText: customText,
+            imagePath: imagePath,
+            videoPath: videoPath
+        )
+        window.contentView = NSHostingView(rootView: contentView)
+
+        return window
+    }
+}
+
+// MARK: - BlackoutWindow subclass
+
+/// Custom NSWindow subclass that can become key window to capture keyboard focus.
+/// This pulls keyboard focus away from whatever app was active before the blackout.
+class BlackoutWindow: NSWindow {
+
+    var acceptsKeyInput = false
+
+    override var canBecomeKey: Bool {
+        return acceptsKeyInput
+    }
+}

@@ -1,0 +1,21 @@
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# macOS
+.DS_Store
+*.dSYM
+
+# Build artifacts
+build/
+*.app
+
+# Icon intermediate files (keep the .icns, not the .iconset)
+SupportFiles/AppIcon.iconset/
