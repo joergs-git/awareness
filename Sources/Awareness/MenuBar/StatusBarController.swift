@@ -184,6 +184,11 @@ class StatusBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
+        // Help
+        let helpItem = NSMenuItem(title: "How to Use...", action: #selector(showHelp), keyEquivalent: "?")
+        helpItem.target = self
+        menu.addItem(helpItem)
+
         // About
         let aboutItem = NSMenuItem(title: "About Awareness...", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
@@ -266,6 +271,31 @@ class StatusBarController: NSObject {
         settingsWindowController.showSettings()
     }
 
+    @objc private func showHelp() {
+        let alert = NSAlert()
+        alert.messageText = "How to Use Awareness"
+        alert.informativeText = """
+            Awareness runs quietly in your menu bar (☯ icon).
+
+            How it works:
+            • At random intervals, your screen fades to black for a few seconds
+            • A gong sounds at the start and end of each blackout
+            • Use this pause to breathe, close your eyes, and reset
+
+            Controls:
+            • ESC or Cmd+Q — dismiss a blackout early (unless Handcuffs mode is on)
+            • Snooze — temporarily pause from the menu bar
+            • Settings — configure timing, visuals, and sounds
+
+            The app detects active camera/microphone usage and will skip blackouts during video calls.
+            """
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+
+        NSApp.activate(ignoringOtherApps: true)
+        alert.runModal()
+    }
+
     @objc private func showAbout() {
         let alert = NSAlert()
         alert.messageText = "Awareness"
@@ -275,15 +305,18 @@ class StatusBarController: NSObject {
 
             by joergsflow
             Version 1.0
+
+            github.com/joergs-git/awareness
             """
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "Visit Astrobin Gallery")
+        alert.addButton(withTitle: "View on GitHub")
         alert.icon = NSImage(named: NSImage.applicationIconName)
 
+        NSApp.activate(ignoringOtherApps: true)
         let response = alert.runModal()
         if response == .alertSecondButtonReturn {
-            if let url = URL(string: "https://app.astrobin.com/u/joergsflow#gallery") {
+            if let url = URL(string: "https://github.com/joergs-git/awareness") {
                 NSWorkspace.shared.open(url)
             }
         }
