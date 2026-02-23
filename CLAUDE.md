@@ -86,6 +86,6 @@ Sources/Awareness/
 ## Notes for Development
 
 - The app icon is `SupportFiles/AppIcon.icns` (yin-yang design), referenced via `CFBundleIconFile` in Info.plist
-- Resources are bundled via SPM `.copy("Resources")` and accessed at runtime via `Bundle.module`
+- Resources (gong sounds, default image) are copied by the Makefile into `Contents/Resources/` and accessed via `Bundle.main` — not SPM's `Bundle.module`, which resolves to the .app root and breaks codesigning
 - The global event tap for keystroke suppression requires Accessibility permission — degrades gracefully if not granted
 - Settings migration: old `gongEnabled` key is auto-migrated to `startGongEnabled` + `endGongEnabled`
