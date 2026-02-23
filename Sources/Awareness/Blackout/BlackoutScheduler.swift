@@ -59,6 +59,14 @@ class BlackoutScheduler {
             .store(in: &cancellables)
     }
 
+    /// Public entry point: reschedule with a fresh random delay if the scheduler is running.
+    /// Called after system wakes from sleep/lock/screensaver so the next blackout is relative
+    /// to the moment the user returned, not the stale pre-sleep schedule.
+    func rescheduleIfRunning() {
+        guard isRunning else { return }
+        reschedule()
+    }
+
     /// Cancel the current timer and schedule a fresh one with updated settings
     private func reschedule() {
         timer?.cancel()
@@ -103,6 +111,12 @@ class BlackoutScheduler {
 
         // Skip if camera or microphone is actively in use
         if MediaUsageDetector.shared.isMediaInUse() {
+            scheduleNext()
+            return
+        }
+
+        // Skip if system is idle (sleeping, display off, locked, or screensaver)
+        if SystemStateDetector.shared.isSystemIdle() {
             scheduleNext()
             return
         }

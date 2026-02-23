@@ -21,12 +21,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Auto-start the scheduler
         scheduler.start()
 
+        // Pause blackouts when the system is idle (sleep, lock screen, screensaver)
+        configureSystemStateDetector()
+
         // Show a welcome message on first launch
         showWelcomeIfFirstLaunch()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         scheduler?.stop()
+    }
+
+    // MARK: - System State Detection
+
+    /// Wire up idle/active callbacks so blackouts don't fire while the user is away
+    private func configureSystemStateDetector() {
+        let detector = SystemStateDetector.shared
+
+        // When the system goes idle, silently dismiss any active blackout
+        detector.onSystemDidBecomeIdle = { [weak self] in
+            guard let self = self else { return }
+            if self.blackoutController.isActive {
+                self.blackoutController.dismiss(silent: true)
+            }
+        }
+
+        // When the user comes back, reschedule with a fresh random delay
+        detector.onSystemDidBecomeActive = { [weak self] in
+            self?.scheduler?.rescheduleIfRunning()
+        }
     }
 
     // MARK: - First Launch Welcome

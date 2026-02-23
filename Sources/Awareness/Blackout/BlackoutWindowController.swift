@@ -92,15 +92,19 @@ class BlackoutWindowController {
         DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: work)
     }
 
-    /// Fade out and close all overlay windows, playing the end gong
-    func dismiss() {
+    /// Fade out and close all overlay windows, optionally playing the end gong.
+    /// Pass `silent: true` when dismissing due to system idle (sleep/lock/screensaver)
+    /// to avoid playing sounds while the user isn't at the screen.
+    func dismiss(silent: Bool = false) {
         dismissTimer?.cancel()
         dismissTimer = nil
         removeKeyboardMonitor()
         removeGlobalEventTap()
 
-        // Play deeper end gong immediately so the user hears it while the screen fades back
-        GongPlayer.shared.playEndIfEnabled()
+        // Play deeper end gong unless this is a silent dismiss (system went idle)
+        if !silent {
+            GongPlayer.shared.playEndIfEnabled()
+        }
 
         let windowsToClose = windows
         windows.removeAll()
