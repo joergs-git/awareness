@@ -125,4 +125,6 @@ by [joergsflow](https://app.astrobin.com/u/joergsflow#gallery)
 
 ---
 
+*The goal of this app is to not need it anymore a little bit later.*
+
 *Breathe. You are here.*

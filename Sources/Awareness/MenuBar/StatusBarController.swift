@@ -303,6 +303,8 @@ class StatusBarController: NSObject {
             A mindfulness timer for your Mac.
             Randomly pauses your screen to help you breathe.
 
+            The goal of this app is to not need it anymore a little bit later.
+
             by joergsflow
             Version 1.0
 
