@@ -15,10 +15,12 @@ bundle: build
 	@cp $(BUILD_DIR)/release/$(APP_NAME) $(MACOS_DIR)/$(APP_NAME)
 	@cp SupportFiles/Info.plist $(CONTENTS_DIR)/Info.plist
 	@cp SupportFiles/AppIcon.icns $(RESOURCES_DIR)/AppIcon.icns
-	@# Copy bundled resources if they exist
-	@if [ -d "$(BUILD_DIR)/release/Awareness_Awareness.bundle" ]; then \
-		cp -R "$(BUILD_DIR)/release/Awareness_Awareness.bundle" $(RESOURCES_DIR)/; \
-	fi
+	@# Copy resource files directly into Contents/Resources/ for Bundle.main access.
+	@# We intentionally bypass SPM's Awareness_Awareness.bundle because its generated
+	@# Bundle.module accessor resolves to the .app root, which breaks codesigning.
+	@cp Sources/Awareness/Resources/awareness-gong.aiff $(RESOURCES_DIR)/
+	@cp Sources/Awareness/Resources/awareness-gong-end.aiff $(RESOURCES_DIR)/
+	@cp Sources/Awareness/Resources/default-blackout.png $(RESOURCES_DIR)/
 	@codesign --force --sign - $(BUNDLE_DIR)
 	@echo "Built $(BUNDLE_DIR)"
 

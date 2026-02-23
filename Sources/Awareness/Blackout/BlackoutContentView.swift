@@ -72,10 +72,9 @@ struct BlackoutContentView: View {
 
     /// Load the bundled default-blackout.png from the SPM resource bundle
     private func loadBundledDefaultImage() -> NSImage? {
-        guard let url = Bundle.module.url(
+        guard let url = Bundle.main.url(
             forResource: "default-blackout",
-            withExtension: "png",
-            subdirectory: "Resources"
+            withExtension: "png"
         ) else { return nil }
         return NSImage(contentsOf: url)
     }

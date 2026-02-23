@@ -28,7 +28,7 @@ class GongPlayer {
 
     /// Play the higher-pitched start gong
     func playStart() {
-        guard let url = Bundle.module.url(forResource: "awareness-gong", withExtension: "aiff", subdirectory: "Resources") else {
+        guard let url = Bundle.main.url(forResource: "awareness-gong", withExtension: "aiff") else {
             print("Awareness: start gong sound not found in bundle")
             return
         }
@@ -37,7 +37,7 @@ class GongPlayer {
 
     /// Play the deeper-pitched end gong
     func playEnd() {
-        guard let url = Bundle.module.url(forResource: "awareness-gong-end", withExtension: "aiff", subdirectory: "Resources") else {
+        guard let url = Bundle.main.url(forResource: "awareness-gong-end", withExtension: "aiff") else {
             print("Awareness: end gong sound not found in bundle")
             return
         }
