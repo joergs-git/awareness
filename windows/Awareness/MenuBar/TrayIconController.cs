@@ -349,7 +349,7 @@ public class TrayIconController : IDisposable
             "Randomly pauses your screen to help you breathe.\n\n" +
             "The goal of this app is to not need it anymore a little bit later.\n\n" +
             "by joergsflow\n" +
-            "Version 1.0\n\n" +
+            "Version 1.1\n\n" +
             "github.com/joergs-git/awareness\n\n" +
             "Click OK to close, or Cancel to open GitHub.",
             "Awareness",

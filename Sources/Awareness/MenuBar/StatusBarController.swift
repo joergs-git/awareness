@@ -317,7 +317,7 @@ class StatusBarController: NSObject {
             The goal of this app is to not need it anymore a little bit later.
 
             by joergsflow
-            Version 1.0
+            Version 1.1
 
             github.com/joergs-git/awareness
             """
