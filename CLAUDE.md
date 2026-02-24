@@ -179,6 +179,7 @@ windows/Awareness/
 - Resources (gong sounds, default image) are copied by the Makefile into `Contents/Resources/` and accessed via `Bundle.main` — not SPM's `Bundle.module`, which resolves to the .app root and breaks codesigning
 - The global event tap for keystroke suppression requires Accessibility permission — degrades gracefully if not granted
 - Settings migration: old `gongEnabled` key is auto-migrated to `startGongEnabled` + `endGongEnabled`
+- About dialog version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — update `SupportFiles/Info.plist` only when bumping versions
 - Update checker: `UpdateChecker.shared` fetches `api.github.com/repos/joergs-git/awareness/releases/latest`, strips `v` prefix from `tag_name`, compares against `CFBundleShortVersionString`. Menu item appears between "About" and "Quit" when an update is available.
 
 ### Windows
@@ -190,4 +191,5 @@ windows/Awareness/
 - Display power notifications require a window handle — `SystemStateDetector` creates a hidden message-only window (`HWND_MESSAGE`) for this
 - `UseWindowsForms` is enabled in the `.csproj` for `System.Windows.Forms.Screen` multi-monitor enumeration
 - Video looping uses `MediaElement` with `MediaEnded` handler resetting `Position` to zero
+- About dialog version is read dynamically from the assembly version (`Version` in `.csproj`) — no hardcoded version strings
 - Update checker: `UpdateChecker.Shared` uses `HttpClient` to query the GitHub releases API, compares `tag_name` against assembly version (`Version` in `.csproj`). Menu item appears between "About" and "Quit" when an update is available.
