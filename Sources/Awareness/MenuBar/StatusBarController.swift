@@ -308,6 +308,7 @@ class StatusBarController: NSObject {
     }
 
     @objc private func showAbout() {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let alert = NSAlert()
         alert.messageText = "Awareness"
         alert.informativeText = """
@@ -317,7 +318,7 @@ class StatusBarController: NSObject {
             The goal of this app is to not need it anymore a little bit later.
 
             by joergsflow
-            Version 1.1
+            Version \(version)
 
             github.com/joergs-git/awareness
             """

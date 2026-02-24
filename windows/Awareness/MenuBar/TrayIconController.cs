@@ -344,12 +344,13 @@ public class TrayIconController : IDisposable
 
     private void ShowAbout()
     {
+        var version = typeof(App).Assembly.GetName().Version?.ToString(2) ?? "?";
         var result = MessageBox.Show(
             "A mindfulness timer for your PC.\n" +
             "Randomly pauses your screen to help you breathe.\n\n" +
             "The goal of this app is to not need it anymore a little bit later.\n\n" +
             "by joergsflow\n" +
-            "Version 1.1\n\n" +
+            $"Version {version}\n\n" +
             "github.com/joergs-git/awareness\n\n" +
             "Click OK to close, or Cancel to open GitHub.",
             "Awareness",
