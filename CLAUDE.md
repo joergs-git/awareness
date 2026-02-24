@@ -73,6 +73,7 @@ Sources/Awareness/
 │   └── SettingsView.swift              # SwiftUI Form, range slider, file pickers
 ├── Audio/
 │   └── GongPlayer.swift               # AVAudioPlayer for start/end gong sounds
+├── UpdateChecker.swift                 # GitHub release update checker (singleton)
 ├── Models/
 │   ├── BlackoutVisualType.swift        # Enum: plainBlack/text/image/video
 │   └── TimeWindow.swift               # Active hours model
@@ -88,6 +89,7 @@ Sources/Awareness/
 windows/Awareness/
 ├── Awareness.csproj                    # .NET 8 WinExe project
 ├── App.xaml / App.xaml.cs              # Bootstrap, single instance, tray-only
+├── UpdateChecker.cs                    # GitHub release update checker (singleton)
 ├── Models/
 │   ├── BlackoutVisualType.cs           # Enum with serialization helpers
 │   └── TimeWindow.cs                   # Active hours model
@@ -133,6 +135,7 @@ windows/Awareness/
 | Snooze | `snoozeUntil: Date?` in UserDefaults; scheduler checks before firing; auto-resumes on expiry |
 | Fade animation | `NSAnimationContext` with 2s duration and easing curves |
 | Launch at Login | `SMAppService.mainApp` (macOS 13+) |
+| Update checker | `URLSession` queries GitHub releases API once on startup; shows menu item if newer version exists |
 
 ### Windows
 
@@ -155,6 +158,7 @@ windows/Awareness/
 | DPI scaling | `Screen.Bounds / dpiScale` fallback for tray-only apps without a main window |
 | Audio | NAudio `WaveOutEvent` with self-disposing playback (new instance per gong) |
 | Single instance | Named `Mutex("Awareness-SingleInstance")` |
+| Update checker | `HttpClient` queries GitHub releases API once on startup; shows menu item if newer version exists |
 
 ## Configurable Settings
 
@@ -175,6 +179,7 @@ windows/Awareness/
 - Resources (gong sounds, default image) are copied by the Makefile into `Contents/Resources/` and accessed via `Bundle.main` — not SPM's `Bundle.module`, which resolves to the .app root and breaks codesigning
 - The global event tap for keystroke suppression requires Accessibility permission — degrades gracefully if not granted
 - Settings migration: old `gongEnabled` key is auto-migrated to `startGongEnabled` + `endGongEnabled`
+- Update checker: `UpdateChecker.shared` fetches `api.github.com/repos/joergs-git/awareness/releases/latest`, strips `v` prefix from `tag_name`, compares against `CFBundleShortVersionString`. Menu item appears between "About" and "Quit" when an update is available.
 
 ### Windows
 
@@ -185,3 +190,4 @@ windows/Awareness/
 - Display power notifications require a window handle — `SystemStateDetector` creates a hidden message-only window (`HWND_MESSAGE`) for this
 - `UseWindowsForms` is enabled in the `.csproj` for `System.Windows.Forms.Screen` multi-monitor enumeration
 - Video looping uses `MediaElement` with `MediaEnded` handler resetting `Position` to zero
+- Update checker: `UpdateChecker.Shared` uses `HttpClient` to query the GitHub releases API, compares `tag_name` against assembly version (`Version` in `.csproj`). Menu item appears between "About" and "Quit" when an update is available.
