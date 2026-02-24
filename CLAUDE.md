@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Awareness** is a cross-platform mindfulness/breathing timer (macOS + Windows + iOS/iPadOS) that randomly blacks out the screen for a few seconds, forcing the user to pause, breathe, and reset. A vipassana timer for computer work.
+**Awareness** is a cross-platform mindfulness/breathing timer (macOS + Windows + iOS/iPadOS + watchOS) that randomly blacks out the screen for a few seconds, forcing the user to pause, breathe, and reset. A vipassana timer for computer work.
 
 Repository: https://github.com/joergs-git/awareness
 License: MIT
@@ -53,6 +53,20 @@ Or open `ios/Awareness/Awareness.xcodeproj` in Xcode and build for a simulator o
 
 Requires iOS 16+, Xcode 15+.
 
+### watchOS
+
+The watchOS app is built as part of the iOS Xcode project:
+
+```bash
+cd ios/Awareness
+xcodebuild -project Awareness.xcodeproj -scheme AwarenessWatch \
+    -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build
+```
+
+Or open `ios/Awareness/Awareness.xcodeproj` in Xcode, select the `AwarenessWatch` scheme, and build for a watch simulator or device.
+
+Requires watchOS 10+, Xcode 15+.
+
 ## Architecture
 
 ### macOS
@@ -82,6 +96,18 @@ Requires iOS 16+, Xcode 15+.
 - Blackout presented as `fullScreenCover` when user taps notification or app is in foreground
 - Settings stored in `UserDefaults` (same as macOS)
 - Single target for both iPhone and iPad (`TARGETED_DEVICE_FAMILY = "1,2"`)
+- WatchConnectivity: `Connectivity/WatchConnectivityManager.swift` syncs settings bidirectionally with the companion Apple Watch
+
+### watchOS
+
+- **SwiftUI** app with `@main` entry point, part of the iOS Xcode project (`ios/Awareness/Awareness.xcodeproj`)
+- **No third-party dependencies** — only Apple frameworks (SwiftUI, WatchKit, UserNotifications, WatchConnectivity, HealthKit, WidgetKit)
+- Uses **local notifications** (same 30-notification architecture as iOS) with default system sound
+- Blackout presented as `fullScreenCover` with `WKExtendedRuntimeSession(.mindfulness)` to keep the app alive
+- Haptic feedback via `WKInterfaceDevice.current().play()` (`.start` at begin, `.success` at end)
+- Settings stored in `UserDefaults`, synced bidirectionally with companion iPhone via `WCSession.updateApplicationContext()`
+- Shared source files via target membership: `BlackoutVisualType`, `TimeWindow`, `SettingsManager`, `HealthKitManager`, `UpdateChecker`
+- WidgetKit complication extension for watch face (accessoryCircular, accessoryRectangular, accessoryInline)
 
 ## Project Structure
 
@@ -183,11 +209,30 @@ ios/Awareness/
     │   └── NotificationScheduler.swift # UNUserNotificationCenter scheduling
     ├── Health/
     │   └── HealthKitManager.swift     # Mindful session logging to Apple Health
+    ├── Connectivity/
+    │   └── WatchConnectivityManager.swift  # iOS-side WCSession delegate for watch sync
     ├── Assets.xcassets/                # App icon (1024x1024), accent color
     └── Resources/
         ├── awareness-gong.aiff         # Start gong (notification sound + in-app)
         ├── awareness-gong-end.aiff     # End gong (in-app only)
         └── default-blackout.png        # Default image for image mode
+```
+
+### watchOS (`ios/Awareness/AwarenessWatch/`)
+
+```
+ios/Awareness/AwarenessWatch/
+├── AwarenessWatchApp.swift             # @main entry point, WKApplicationDelegateAdaptor, notification delegate
+├── ContentView.swift                   # Status, next blackout, test, snooze, settings link
+├── BlackoutView.swift                  # Full-screen blackout with WKExtendedRuntimeSession
+├── SettingsView.swift                  # Compact Form: hours, intervals, duration, haptics, health
+├── HapticPlayer.swift                  # WKInterfaceDevice haptic wrapper (.start / .success)
+├── NotificationScheduler.swift         # 30 pre-scheduled notifications, no image attachment
+├── WatchConnectivityManager.swift      # watchOS-side WCSession delegate for iPhone sync
+├── AwarenessWatch.entitlements         # HealthKit entitlement
+├── Assets.xcassets/                    # Watch app icon (1024x1024), accent color
+└── Complications/
+    └── ComplicationProvider.swift      # WidgetKit TimelineProvider + circular/rectangular/inline views
 ```
 
 ## Key Technical Decisions
@@ -253,6 +298,26 @@ ios/Awareness/
 | Haptics | `UIImpactFeedbackGenerator(style: .heavy)` at blackout start, `UINotificationFeedbackGenerator(.success)` at end; opt-in via `vibrationEnabled` |
 | End flash | White `Color.white` overlay flashes for ~1s at end of blackout before fade-out; opt-in via `endFlashEnabled` |
 | Update checker | Same as macOS — `URLSession` queries GitHub releases API once on startup |
+| WatchConnectivity | `WatchConnectivityManager.shared` syncs settings to/from companion Apple Watch via `WCSession.updateApplicationContext()` |
+
+### watchOS
+
+| Topic | Approach |
+|---|---|
+| App lifecycle | SwiftUI `@main` with `WKApplicationDelegateAdaptor` for notification handling |
+| Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled notifications (same as iOS), default system sound |
+| Blackout | `fullScreenCover` presenting `BlackoutView` with `WKExtendedRuntimeSession(.mindfulness)` to prevent suspension |
+| Foreground notification | `userNotificationCenter(_:willPresent:)` skips banner and shows blackout directly |
+| Background notification | User taps notification → `didReceive response:` → posts `.showBlackout` notification → shows blackout |
+| Haptics | `WKInterfaceDevice.current().play(.start)` at begin, `.play(.success)` at end; opt-in via `hapticStartEnabled` / `hapticEndEnabled` |
+| Settings storage | `UserDefaults.standard` with `register(defaults:)` (same as iOS/macOS) |
+| Settings sync | `WCSession.updateApplicationContext()` — bidirectional, last-write-wins, `isApplyingRemoteContext` guard prevents sync loops |
+| Snooze | Removes all pending notifications; syncs snooze state to companion iPhone |
+| Dismiss | Tap gesture (disabled in handcuffs mode); auto-dismiss timer with randomized duration |
+| HealthKit | Shared `HealthKitManager.shared` logs mindful sessions (same code as iOS via target membership) |
+| Visual modes | Plain black or custom text only (no image/video on watch) |
+| Complication | WidgetKit extension: `accessoryCircular` (☯ with status tint), `accessoryRectangular` ("Awareness" + next time), `accessoryInline` |
+| Update checker | Same as iOS — `URLSession` queries GitHub releases API once on startup |
 
 ## Configurable Settings
 
@@ -264,9 +329,11 @@ ios/Awareness/
 - **End gong** — play a deeper sound when blackout ends (default: on)
 - **Handcuffs mode** — if on, user cannot dismiss blackout early (default: off)
 - **Snooze** — pause for 10/20/30/60/120 minutes or indefinitely
-- **Apple Health** (iOS only) — log each blackout as Mindful Minutes in Apple Health (default: off)
+- **Apple Health** (iOS/watchOS) — log each blackout as Mindful Minutes in Apple Health (default: off)
 - **Vibration** (iOS only) — haptic feedback at start (heavy impact) and end (success notification) of blackout (default: off)
 - **End flash** (iOS only) — 1-second white screen blink at end of blackout, visible through closed eyelids (default: off)
+- **Start haptic** (watchOS only) — Taptic Engine feedback when blackout begins (default: on)
+- **End haptic** (watchOS only) — Taptic Engine feedback when blackout ends (default: on)
 
 ## Notes for Development
 
@@ -310,3 +377,21 @@ ios/Awareness/
 - **HealthKit encouragement**: On first launch, an alert prompts users to enable Apple Health logging. Controlled by `healthKitPromptShown` (Bool, default false). Shown once; dismissed permanently with either "Enable" or "Not Now".
 - **Haptic vibration**: `vibrationEnabled` setting (Bool, default false). Heavy impact at blackout start, success notification at end. No extra imports needed — UIKit haptics available via SwiftUI bridging. Does not work on simulator.
 - **End flash**: `endFlashEnabled` setting (Bool, default false). White overlay layer with 0.15s ease-in, 1s hold, 0.15s ease-out. Main fade-out delayed by 1.3s when flash is active.
+- **WatchConnectivity**: `Connectivity/WatchConnectivityManager.swift` on the iOS side syncs settings bidirectionally with the companion Apple Watch. Uses `objectWillChange` (not Combine merge chains) to observe settings changes — complex merge chains cause Swift type-checker timeouts. `isApplyingRemoteContext` guard prevents infinite sync loops. Required `sessionDidBecomeInactive` / `sessionDidDeactivate` stubs are iOS-only.
+
+### watchOS
+
+- Part of the iOS Xcode project (`ios/Awareness/Awareness.xcodeproj`), not a separate project
+- Two targets: `AwarenessWatch` (watchOS app, E30099) and `AwarenessWatchComplication` (WidgetKit extension, E40099)
+- `project.pbxproj` uses A3/B3/C3/D3/E3/F3/G3 hex IDs for watch target, A4/B4/C4/D4/E4/F4 for widget extension (iOS uses A1/B1, macOS uses A2/B2 — no collision)
+- Shared files via target membership: `BlackoutVisualType.swift`, `TimeWindow.swift`, `SettingsManager.swift`, `HealthKitManager.swift`, `UpdateChecker.swift`
+- `SettingsManager.swift` uses `#if os(watchOS)` / `#if !os(watchOS)` guards for platform-specific settings (haptics on watch, gong/vibration/endFlash/image/video on iOS)
+- Watch-specific settings: `hapticStartEnabled` (default: true), `hapticEndEnabled` (default: true)
+- `WKExtendedRuntimeSession(.mindfulness)` keeps the app alive during blackouts (up to 1 hour)
+- Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
+- WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` prevents echo loops.
+- Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, and `HealthKitManager` via target membership
+- Bundle IDs: `com.joergsflow.awareness.ios.watchkitapp` (watch app), `com.joergsflow.awareness.ios.watchkitapp.complication` (widget extension)
+- `WKCompanionAppBundleIdentifier`: `com.joergsflow.awareness.ios`
+- Entitlements: `AwarenessWatch/AwarenessWatch.entitlements` with `com.apple.developer.healthkit`
+- iOS target has "Embed Watch Content" build phase that embeds `AwarenessWatch.app`; watch target has "Embed App Extensions" phase for the complication

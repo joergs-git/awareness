@@ -1,6 +1,6 @@
 # Awareness ☯
 
-A mindfulness timer for macOS, Windows, and iOS/iPadOS that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
+A mindfulness timer for macOS, Windows, iOS/iPadOS, and Apple Watch that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
 
 ## Why?
 
@@ -34,6 +34,9 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 - **Apple Health integration** (iOS) — each mindful pause is logged as Mindful Minutes in Apple Health, so you can track your practice over time
 - **Haptic vibration** (iOS) — optional vibration at the start and end of each blackout, useful when the phone is on silent and your eyes are closed
 - **End flash** (iOS) — optional 1-second white screen blink at the end of a blackout, visible through closed eyelids to signal the session is ending
+- **Apple Watch companion** — standalone watchOS app with haptic feedback, notification scheduling, and WidgetKit complications for your watch face
+- **Settings sync** — bidirectional settings sync between iPhone and Apple Watch via WatchConnectivity
+- **Watch face complications** — see your status and next blackout time directly on your watch face (circular, rectangular, and inline styles)
 - **Update checker** — checks GitHub for newer releases on startup and shows an "Update Available" menu item linking to the download page
 
 ## Installation
@@ -121,6 +124,20 @@ Or open `ios/Awareness/Awareness.xcodeproj` in Xcode and run on a simulator or d
 
 **Note:** The iOS version uses local notifications to remind you to pause and breathe. When you tap a notification, the app opens and shows a full-screen blackout. The app must be granted notification permission on first launch.
 
+### watchOS
+
+The Apple Watch app is built as part of the iOS Xcode project:
+
+```bash
+cd awareness/ios/Awareness
+xcodebuild -project Awareness.xcodeproj -scheme AwarenessWatch \
+    -destination 'generic/platform=watchOS Simulator' build
+```
+
+Or open `ios/Awareness/Awareness.xcodeproj` in Xcode, select the `AwarenessWatch` scheme, and build for a watch simulator or paired device.
+
+**Note:** The watch app works both standalone (without iPhone nearby) and as a companion. Settings sync automatically between iPhone and Apple Watch when both are available.
+
 ## Usage
 
 After launching, a ☯ icon appears in the menu bar. Click it to:
@@ -148,9 +165,11 @@ During a blackout:
 | Start gong | Sound at blackout start | On |
 | End gong | Sound at blackout end | On |
 | Handcuffs mode | Prevent early dismissal | Off |
-| Apple Health (iOS) | Log blackouts as Mindful Minutes | Off |
+| Apple Health (iOS/watchOS) | Log blackouts as Mindful Minutes | Off |
 | Vibration (iOS) | Haptic feedback at start and end of blackout | Off |
 | End flash (iOS) | White screen blink at end of blackout | Off |
+| Start haptic (watchOS) | Taptic Engine feedback at blackout start | On |
+| End haptic (watchOS) | Taptic Engine feedback at blackout end | On |
 
 ## Technical Details
 
@@ -194,6 +213,20 @@ During a blackout:
 - Supports both iPhone and iPad
 - Version shown in home screen is read dynamically from `CFBundleShortVersionString`
 - Deployment target: iOS 16+
+
+### watchOS
+
+- **Swift** with **SwiftUI**, part of the iOS Xcode project
+- No third-party dependencies — only Apple frameworks (SwiftUI, WatchKit, UserNotifications, WatchConnectivity, HealthKit, WidgetKit)
+- Uses local notifications (same 30-notification architecture as iOS) with default system sound
+- `WKExtendedRuntimeSession(.mindfulness)` keeps the app alive during blackouts
+- Haptic feedback via `WKInterfaceDevice` Taptic Engine (`.start` and `.success` types)
+- Bidirectional settings sync with companion iPhone via `WCSession.updateApplicationContext()`
+- WidgetKit complications for watch face: circular (☯ with status tint), rectangular (next blackout time), inline
+- Shared code with iOS via target membership: models, settings, HealthKit, update checker
+- Apple Health integration: same `HealthKitManager` logs mindful sessions on the watch
+- Visual modes: plain black or custom text (no image/video on watch)
+- Deployment target: watchOS 10+
 
 ## Credits
 
