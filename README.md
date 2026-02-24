@@ -1,6 +1,6 @@
 # Awareness ☯
 
-A mindfulness timer for macOS that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
+A mindfulness timer for macOS and Windows that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
 
 ## Why?
 
@@ -16,7 +16,7 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 
 ## Features
 
-- **Menu bar app** — runs quietly with a ☯ icon, no Dock clutter
+- **Menu bar / system tray app** — runs quietly with a ☯ icon, no Dock or Taskbar clutter
 - **Random blackout intervals** — configurable min/max range (e.g. 15–30 minutes) so interruptions feel natural, not mechanical
 - **Configurable duration** — 3 to 120 seconds per blackout
 - **Smart detection** — automatically skips blackouts when your camera or microphone is in use (video calls, meetings)
@@ -28,13 +28,15 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 - **Fade transitions** — screen fades in/out over 2 seconds for a gentle experience
 - **Keystroke suppression** — during blackout, keystrokes are blocked so you don't accidentally type into background apps
 - **Multi-monitor support** — blacks out all connected displays simultaneously
-- **Launch at Login** — start automatically with your Mac
+- **Launch at Login** — start automatically with your Mac or PC
 - **Persistent settings** — all preferences are saved and restored across app restarts
 - **Default image** — a bundled dark visual is shown when image mode is selected but no custom image is configured
 
 ## Installation
 
-### Download (easiest)
+### macOS
+
+#### Download (easiest)
 
 1. Download the latest `Awareness.app.zip` from the [Releases](https://github.com/joergs-git/awareness/releases) page
 2. Unzip and move `Awareness.app` to your `/Applications` folder
@@ -58,7 +60,7 @@ Alternatively, you can remove the quarantine flag via Terminal:
 xattr -cr /Applications/Awareness.app
 ```
 
-### Build from source
+#### Build from source
 
 Requirements: macOS 13+, Xcode Command Line Tools
 
@@ -77,6 +79,26 @@ make bundle
 
 The app will be at `build/Awareness.app`.
 
+### Windows
+
+#### Build from source
+
+Requirements: Windows 10+, [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+```bash
+git clone https://github.com/joergs-git/awareness.git
+cd awareness/windows
+dotnet build
+dotnet run --project Awareness
+```
+
+To publish a self-contained executable:
+```bash
+dotnet publish Awareness -c Release -r win-x64
+```
+
+The output will be in `Awareness/bin/Release/net8.0-windows/win-x64/publish/`.
+
 ## Usage
 
 After launching, a ☯ icon appears in the menu bar. Click it to:
@@ -88,7 +110,7 @@ After launching, a ☯ icon appears in the menu bar. Click it to:
 - **About Awareness...** — version info and credits
 
 During a blackout:
-- **ESC** or **Cmd+Q** dismisses early (unless Handcuffs mode is on)
+- **ESC** (or **Cmd+Q** on macOS) dismisses early (unless Handcuffs mode is on)
 - A higher-pitched gong sounds at the start
 - A deeper gong sounds at the end
 - The screen fades in and out over 2 seconds
@@ -107,6 +129,8 @@ During a blackout:
 
 ## Technical Details
 
+### macOS
+
 - **Swift** with **AppKit** + **SwiftUI**, built via Swift Package Manager
 - No third-party dependencies — only Apple frameworks (AppKit, SwiftUI, AVFoundation, CoreAudio, ServiceManagement)
 - Camera detection: `AVCaptureDevice.isInUseByAnotherApplication` (no TCC prompt)
@@ -114,6 +138,18 @@ During a blackout:
 - Overlay windows at `NSWindow.Level.screenSaver` with `canJoinAllSpaces`
 - Settings persisted via `UserDefaults`
 - Deployment target: macOS 13+
+
+### Windows
+
+- **C# .NET 8** with **WPF**, two NuGet dependencies (NAudio, Hardcodet.NotifyIcon.Wpf)
+- Camera detection: registry `CapabilityAccessManager` (`LastUsedTimeStop == 0`)
+- Microphone detection: NAudio WASAPI session enumeration
+- Overlay windows: `Topmost`, `WindowStyle=None`, `AllowsTransparency` per monitor
+- Keyboard suppression: `SetWindowsHookEx(WH_KEYBOARD_LL)` — no special permissions needed
+- System idle detection: `PowerModeChanged`, `SessionSwitch`, `RegisterPowerSettingNotification`, screensaver polling
+- Settings persisted as JSON in `%APPDATA%\Awareness\settings.json`
+- Launch at Login via `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- Deployment target: Windows 10+
 
 ## Credits
 
