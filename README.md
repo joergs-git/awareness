@@ -56,7 +56,8 @@ To open it anyway:
 
 You only need to do this once. After the first launch, macOS remembers your choice and the app will open normally.
 
-Alternatively, you can remove the quarantine flag via Terminal:
+Alternatively, you can simply go to system settings "date privacy and security", scroll down to the end and click "Open anyway" button.
+Or you can remove the quarantine flag via Terminal:
 ```bash
 xattr -cr /Applications/Awareness.app
 ```
