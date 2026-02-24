@@ -31,6 +31,7 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 - **Launch at Login** — start automatically with your Mac or PC
 - **Persistent settings** — all preferences are saved and restored across app restarts
 - **Default image** — a bundled dark visual is shown when image mode is selected but no custom image is configured
+- **Update checker** — checks GitHub for newer releases on startup and shows an "Update Available" menu item linking to the download page
 
 ## Installation
 
