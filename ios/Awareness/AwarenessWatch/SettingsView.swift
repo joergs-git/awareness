@@ -25,18 +25,42 @@ struct SettingsView: View {
 
             // MARK: - Interval
             Section("Interval (min)") {
-                Stepper("Min: \(Int(settings.minInterval))",
-                        value: $settings.minInterval, in: 1...120, step: 1)
-                Stepper("Max: \(Int(settings.maxInterval))",
-                        value: $settings.maxInterval, in: 1...120, step: 1)
+                Picker("Min", selection: Binding(
+                    get: { Int(settings.minInterval) },
+                    set: { settings.minInterval = Double($0) }
+                )) {
+                    ForEach(1...120, id: \.self) { min in
+                        Text("\(min)").tag(min)
+                    }
+                }
+                Picker("Max", selection: Binding(
+                    get: { Int(settings.maxInterval) },
+                    set: { settings.maxInterval = Double($0) }
+                )) {
+                    ForEach(1...120, id: \.self) { min in
+                        Text("\(min)").tag(min)
+                    }
+                }
             }
 
             // MARK: - Duration
             Section("Duration (sec)") {
-                Stepper("Min: \(Int(settings.minBlackoutDuration))",
-                        value: $settings.minBlackoutDuration, in: 3...120, step: 1)
-                Stepper("Max: \(Int(settings.maxBlackoutDuration))",
-                        value: $settings.maxBlackoutDuration, in: 3...120, step: 1)
+                Picker("Min", selection: Binding(
+                    get: { Int(settings.minBlackoutDuration) },
+                    set: { settings.minBlackoutDuration = Double($0) }
+                )) {
+                    ForEach(3...120, id: \.self) { sec in
+                        Text("\(sec)").tag(sec)
+                    }
+                }
+                Picker("Max", selection: Binding(
+                    get: { Int(settings.maxBlackoutDuration) },
+                    set: { settings.maxBlackoutDuration = Double($0) }
+                )) {
+                    ForEach(3...120, id: \.self) { sec in
+                        Text("\(sec)").tag(sec)
+                    }
+                }
             }
 
             // MARK: - Visual
