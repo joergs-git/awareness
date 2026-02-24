@@ -2,3 +2,10 @@
 build/
 .build/
 Awareness.zip
+
+# .NET build artifacts
+windows/**/bin/
+windows/**/obj/
+windows/**/.vs/
+*.user
+*.suo

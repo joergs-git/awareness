@@ -1,0 +1,34 @@
+<UserControl x:Class="Awareness.Settings.RangeSlider"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="24">
+
+    <Canvas x:Name="SliderCanvas" Background="Transparent"
+            MouseLeftButtonDown="OnCanvasMouseDown"
+            MouseMove="OnCanvasMouseMove"
+            MouseLeftButtonUp="OnCanvasMouseUp"
+            SizeChanged="OnCanvasSizeChanged">
+
+        <!-- Track background -->
+        <Border x:Name="TrackBackground"
+                Canvas.Top="10" Canvas.Left="0"
+                Height="4" CornerRadius="2"
+                Background="#33808080" />
+
+        <!-- Active range highlight -->
+        <Border x:Name="TrackHighlight"
+                Canvas.Top="10"
+                Height="4" CornerRadius="2"
+                Background="#804285F4" />
+
+        <!-- Low thumb -->
+        <Ellipse x:Name="LowThumb"
+                 Width="16" Height="16" Canvas.Top="4"
+                 Fill="#4285F4" Cursor="Hand" />
+
+        <!-- High thumb -->
+        <Ellipse x:Name="HighThumb"
+                 Width="16" Height="16" Canvas.Top="4"
+                 Fill="#4285F4" Cursor="Hand" />
+    </Canvas>
+</UserControl>
