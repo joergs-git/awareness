@@ -25,6 +25,8 @@ final class SettingsManager: ObservableObject {
         static let customText          = "customText"
         static let customImagePath     = "customImagePath"
         static let customVideoPath     = "customVideoPath"
+        static let customImageBookmark = "customImageBookmark"
+        static let customVideoBookmark = "customVideoBookmark"
         static let snoozeUntil         = "snoozeUntil"
     }
 
@@ -160,6 +162,65 @@ final class SettingsManager: ObservableObject {
     func randomBlackoutDuration() -> Double {
         guard maxBlackoutDuration > minBlackoutDuration else { return minBlackoutDuration }
         return Double.random(in: minBlackoutDuration...maxBlackoutDuration)
+    }
+
+    // MARK: - Security-Scoped Bookmarks (Sandbox Support)
+
+    /// Store a security-scoped bookmark for a user-selected image URL.
+    /// In the sandbox, raw file paths lose access after the app restarts;
+    /// bookmarks preserve the access grant across launches.
+    func setCustomImageURL(_ url: URL) {
+        customImagePath = url.path
+        if let data = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            defaults.set(data, forKey: Keys.customImageBookmark)
+        }
+    }
+
+    /// Resolve the stored image bookmark back to a usable URL.
+    /// Falls back to the raw path if no bookmark exists (works outside sandbox).
+    func resolveCustomImageURL() -> URL? {
+        if let data = defaults.data(forKey: Keys.customImageBookmark) {
+            var isStale = false
+            if let url = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale) {
+                _ = url.startAccessingSecurityScopedResource()
+                if isStale, let refreshed = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) {
+                    defaults.set(refreshed, forKey: Keys.customImageBookmark)
+                }
+                return url
+            }
+        }
+        // Fallback: try raw path (works outside sandbox)
+        guard !customImagePath.isEmpty else { return nil }
+        let url = URL(fileURLWithPath: customImagePath)
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        return url
+    }
+
+    /// Store a security-scoped bookmark for a user-selected video URL.
+    func setCustomVideoURL(_ url: URL) {
+        customVideoPath = url.path
+        if let data = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            defaults.set(data, forKey: Keys.customVideoBookmark)
+        }
+    }
+
+    /// Resolve the stored video bookmark back to a usable URL.
+    /// Falls back to the raw path if no bookmark exists (works outside sandbox).
+    func resolveCustomVideoURL() -> URL? {
+        if let data = defaults.data(forKey: Keys.customVideoBookmark) {
+            var isStale = false
+            if let url = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale) {
+                _ = url.startAccessingSecurityScopedResource()
+                if isStale, let refreshed = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) {
+                    defaults.set(refreshed, forKey: Keys.customVideoBookmark)
+                }
+                return url
+            }
+        }
+        guard !customVideoPath.isEmpty else { return nil }
+        let url = URL(fileURLWithPath: customVideoPath)
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        return url
     }
 
     // MARK: - Init

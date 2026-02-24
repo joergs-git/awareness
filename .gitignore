@@ -10,7 +10,7 @@ windows/**/.vs/
 *.user
 *.suo
 
-# Xcode build artifacts
-ios/**/DerivedData/
-ios/**/*.xcuserdata/
-ios/**/xcuserdata/
+# Xcode build artifacts (iOS + macOS)
+**/DerivedData/
+**/*.xcuserdata/
+**/xcuserdata/

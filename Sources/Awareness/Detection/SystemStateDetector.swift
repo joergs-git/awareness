@@ -68,6 +68,9 @@ class SystemStateDetector {
     }
 
     // MARK: - Distributed Notifications (screen lock/unlock, screensaver start/stop)
+    // Sandbox note: DistributedNotificationCenter does not deliver these notifications
+    // inside the App Sandbox. Screen lock and screensaver detection will be inactive
+    // in the Mac App Store build. Sleep/wake via NSWorkspace still works in the sandbox.
 
     private func observeDistributedNotifications() {
         let center = DistributedNotificationCenter.default()

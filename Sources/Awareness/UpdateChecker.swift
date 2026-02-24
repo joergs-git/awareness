@@ -22,7 +22,14 @@ class UpdateChecker {
 
     /// Fetch the latest release tag from GitHub and compare against the running version.
     /// Runs on a background thread; silently ignores any errors.
+    /// Skipped when running inside the App Sandbox — the App Store handles updates.
     func check() {
+        // In the Mac App Store build (sandboxed), updates are delivered through the store.
+        // Showing a "download from GitHub" prompt would be confusing and against App Store guidelines.
+        if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil {
+            return
+        }
+
         guard let url = URL(string: apiURL) else { return }
 
         var request = URLRequest(url: url)

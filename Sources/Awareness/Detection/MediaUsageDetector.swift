@@ -4,6 +4,11 @@ import CoreAudio
 /// Detects whether the camera or microphone is actively in use by another application.
 /// Uses AVCaptureDevice for camera detection and CoreAudio HAL for microphone detection.
 /// These checks do NOT trigger TCC permission prompts — they only query device state.
+///
+/// Sandbox note: In the App Sandbox, AVCaptureDevice discovery may return an empty list
+/// and CoreAudio property queries may fail silently. Both methods return `false` in that
+/// case (assume media is not in use), meaning blackouts may occasionally fire during
+/// video/audio calls. This is an acceptable degradation for the sandboxed App Store build.
 class MediaUsageDetector {
 
     static let shared = MediaUsageDetector()

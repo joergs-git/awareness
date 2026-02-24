@@ -132,14 +132,16 @@ struct SettingsView: View {
                         FilePickerRow(
                             label: "Image",
                             path: $settings.customImagePath,
-                            allowedTypes: ["png", "jpg", "jpeg", "heic", "tiff", "gif"]
+                            allowedTypes: ["png", "jpg", "jpeg", "heic", "tiff", "gif"],
+                            onSelect: { url in settings.setCustomImageURL(url) }
                         )
 
                     case .video:
                         FilePickerRow(
                             label: "Video",
                             path: $settings.customVideoPath,
-                            allowedTypes: ["mp4", "mov", "m4v"]
+                            allowedTypes: ["mp4", "mov", "m4v"],
+                            onSelect: { url in settings.setCustomVideoURL(url) }
                         )
 
                     default:
@@ -242,12 +244,15 @@ struct RangeSliderView: View {
 
 // MARK: - File Picker Row
 
-/// A row showing a file path with a "Choose..." button that opens an NSOpenPanel
+/// A row showing a file path with a "Choose..." button that opens an NSOpenPanel.
+/// Uses security-scoped bookmarks so the chosen file remains accessible in the sandbox.
 struct FilePickerRow: View {
 
     let label: String
     @Binding var path: String
     let allowedTypes: [String]
+    /// Called after the user picks a file; stores a security-scoped bookmark
+    var onSelect: ((URL) -> Void)?
 
     var body: some View {
         HStack {
@@ -291,6 +296,7 @@ struct FilePickerRow: View {
         }
 
         if panel.runModal() == .OK, let url = panel.url {
+            onSelect?(url)
             path = url.path
         }
     }

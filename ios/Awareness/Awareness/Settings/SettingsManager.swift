@@ -27,6 +27,7 @@ final class SettingsManager: ObservableObject {
         static let customImagePath      = "customImagePath"
         static let customVideoPath      = "customVideoPath"
         static let snoozeUntil          = "snoozeUntil"
+        static let healthKitEnabled     = "healthKitEnabled"
     }
 
     // MARK: - Default Values
@@ -44,7 +45,8 @@ final class SettingsManager: ObservableObject {
         Keys.visualType:          BlackoutVisualType.text.rawValue,
         Keys.customText:          "Breathe.",
         Keys.customImagePath:     "",
-        Keys.customVideoPath:     ""
+        Keys.customVideoPath:     "",
+        Keys.healthKitEnabled:    false
     ]
 
     // MARK: - Published Properties
@@ -139,6 +141,11 @@ final class SettingsManager: ObservableObject {
         didSet { defaults.set(snoozeUntil, forKey: Keys.snoozeUntil) }
     }
 
+    /// Whether to log each blackout session to Apple Health as Mindful Minutes
+    @Published var healthKitEnabled: Bool {
+        didSet { defaults.set(healthKitEnabled, forKey: Keys.healthKitEnabled) }
+    }
+
     // MARK: - Computed Helpers
 
     /// The active time window as a TimeWindow model
@@ -186,6 +193,7 @@ final class SettingsManager: ObservableObject {
         customImagePath     = defaults.string(forKey: Keys.customImagePath) ?? ""
         customVideoPath     = defaults.string(forKey: Keys.customVideoPath) ?? ""
         snoozeUntil         = defaults.object(forKey: Keys.snoozeUntil) as? Date
+        healthKitEnabled    = defaults.bool(forKey: Keys.healthKitEnabled)
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue
         visualType = BlackoutVisualType(rawValue: typeRaw) ?? .text

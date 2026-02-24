@@ -18,6 +18,10 @@
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.healthcare-fitness</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright 2025 joergsflow. All rights reserved.</string>
     <!-- Hide from Dock — menu bar only app -->
     <key>LSUIElement</key>
     <true/>

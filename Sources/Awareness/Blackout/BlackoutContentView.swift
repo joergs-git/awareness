@@ -50,8 +50,9 @@ struct BlackoutContentView: View {
 
     @ViewBuilder
     private var imageContent: some View {
-        if !imagePath.isEmpty, let nsImage = NSImage(contentsOfFile: imagePath) {
-            // User-selected custom image
+        if let url = SettingsManager.shared.resolveCustomImageURL(),
+           let nsImage = NSImage(contentsOf: url) {
+            // User-selected custom image (resolved via security-scoped bookmark)
             Image(nsImage: nsImage)
                 .resizable()
                 .scaledToFit()
@@ -83,8 +84,8 @@ struct BlackoutContentView: View {
 
     @ViewBuilder
     private var videoContent: some View {
-        if !videoPath.isEmpty, FileManager.default.fileExists(atPath: videoPath) {
-            VideoLoopView(url: URL(fileURLWithPath: videoPath))
+        if let url = SettingsManager.shared.resolveCustomVideoURL() {
+            VideoLoopView(url: url)
         } else {
             // Fallback when no video is configured
             Text("No video selected")

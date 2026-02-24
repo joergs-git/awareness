@@ -170,6 +170,20 @@ struct SettingsView: View {
                 } footer: {
                     Text("When on, tap cannot dismiss the blackout early.")
                 }
+
+                // MARK: - Health
+                Section {
+                    Toggle("Log to Apple Health", isOn: $settings.healthKitEnabled)
+                        .onChange(of: settings.healthKitEnabled, perform: { enabled in
+                            if enabled {
+                                Task { await HealthKitManager.shared.requestAuthorization() }
+                            }
+                        })
+                } header: {
+                    Label("Health", systemImage: "heart.fill")
+                } footer: {
+                    Text("Records each mindful pause as Mindful Minutes in Apple Health.")
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)

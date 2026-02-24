@@ -56,6 +56,15 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    if settings.healthKitEnabled && HealthKitManager.shared.isAuthorized() {
+                        HStack {
+                            Label("Mindful Minutes", systemImage: "heart.fill")
+                                .foregroundColor(.pink)
+                            Spacer()
+                            Text("Connected")
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 } header: {
                     Text("Schedule")
                 }

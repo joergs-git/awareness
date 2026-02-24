@@ -13,6 +13,8 @@ struct BlackoutView: View {
     @State private var duration: Double = 0
     @State private var opacity: Double = 0
     @State private var dismissTimer: Timer?
+    /// Tracks when the blackout started for HealthKit logging
+    @State private var sessionStart: Date?
 
     var body: some View {
         ZStack {
@@ -45,6 +47,7 @@ struct BlackoutView: View {
             dismissBlackout()
         }
         .onAppear {
+            sessionStart = Date()
             duration = settings.randomBlackoutDuration()
             GongPlayer.shared.playStartIfEnabled()
 
@@ -70,6 +73,12 @@ struct BlackoutView: View {
         dismissTimer?.invalidate()
         dismissTimer = nil
         GongPlayer.shared.playEndIfEnabled()
+
+        // Log the mindful session to Apple Health if enabled
+        if settings.healthKitEnabled, let start = sessionStart {
+            let end = Date()
+            Task { await HealthKitManager.shared.saveMindfulSession(start: start, end: end) }
+        }
 
         withAnimation(.easeOut(duration: 2.0)) {
             opacity = 0
