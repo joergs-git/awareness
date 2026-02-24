@@ -28,6 +28,9 @@ final class SettingsManager: ObservableObject {
         static let customVideoPath      = "customVideoPath"
         static let snoozeUntil          = "snoozeUntil"
         static let healthKitEnabled     = "healthKitEnabled"
+        static let healthKitPromptShown = "healthKitPromptShown"
+        static let vibrationEnabled     = "vibrationEnabled"
+        static let endFlashEnabled      = "endFlashEnabled"
     }
 
     // MARK: - Default Values
@@ -46,7 +49,10 @@ final class SettingsManager: ObservableObject {
         Keys.customText:          "Breathe.",
         Keys.customImagePath:     "",
         Keys.customVideoPath:     "",
-        Keys.healthKitEnabled:    false
+        Keys.healthKitEnabled:    false,
+        Keys.healthKitPromptShown: false,
+        Keys.vibrationEnabled:    false,
+        Keys.endFlashEnabled:     false
     ]
 
     // MARK: - Published Properties
@@ -146,6 +152,21 @@ final class SettingsManager: ObservableObject {
         didSet { defaults.set(healthKitEnabled, forKey: Keys.healthKitEnabled) }
     }
 
+    /// Whether the HealthKit encouragement prompt has been shown (only ask once)
+    @Published var healthKitPromptShown: Bool {
+        didSet { defaults.set(healthKitPromptShown, forKey: Keys.healthKitPromptShown) }
+    }
+
+    /// Whether to vibrate at the start and end of a blackout
+    @Published var vibrationEnabled: Bool {
+        didSet { defaults.set(vibrationEnabled, forKey: Keys.vibrationEnabled) }
+    }
+
+    /// Whether to flash white at the end of a blackout (visible through closed eyelids)
+    @Published var endFlashEnabled: Bool {
+        didSet { defaults.set(endFlashEnabled, forKey: Keys.endFlashEnabled) }
+    }
+
     // MARK: - Computed Helpers
 
     /// The active time window as a TimeWindow model
@@ -194,6 +215,9 @@ final class SettingsManager: ObservableObject {
         customVideoPath     = defaults.string(forKey: Keys.customVideoPath) ?? ""
         snoozeUntil         = defaults.object(forKey: Keys.snoozeUntil) as? Date
         healthKitEnabled    = defaults.bool(forKey: Keys.healthKitEnabled)
+        healthKitPromptShown = defaults.bool(forKey: Keys.healthKitPromptShown)
+        vibrationEnabled    = defaults.bool(forKey: Keys.vibrationEnabled)
+        endFlashEnabled     = defaults.bool(forKey: Keys.endFlashEnabled)
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue
         visualType = BlackoutVisualType(rawValue: typeRaw) ?? .text

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import AVKit
 
 /// Full-screen blackout view for iOS.
@@ -15,6 +16,8 @@ struct BlackoutView: View {
     @State private var dismissTimer: Timer?
     /// Tracks when the blackout started for HealthKit logging
     @State private var sessionStart: Date?
+    /// Opacity of the white end-of-blackout flash layer
+    @State private var flashOpacity: Double = 0
 
     var body: some View {
         ZStack {
@@ -37,6 +40,11 @@ struct BlackoutView: View {
             case .video:
                 videoContent
             }
+
+            // White flash layer — briefly visible at the end of a blackout
+            Color.white
+                .ignoresSafeArea()
+                .opacity(flashOpacity)
         }
         .opacity(opacity)
         .statusBarHidden()
@@ -50,6 +58,11 @@ struct BlackoutView: View {
             sessionStart = Date()
             duration = settings.randomBlackoutDuration()
             GongPlayer.shared.playStartIfEnabled()
+
+            // Haptic feedback at start
+            if settings.vibrationEnabled {
+                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            }
 
             // Fade in
             withAnimation(.easeIn(duration: 2.0)) {
@@ -74,19 +87,38 @@ struct BlackoutView: View {
         dismissTimer = nil
         GongPlayer.shared.playEndIfEnabled()
 
+        // Haptic feedback at end
+        if settings.vibrationEnabled {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+
         // Log the mindful session to Apple Health if enabled
         if settings.healthKitEnabled, let start = sessionStart {
             let end = Date()
             Task { await HealthKitManager.shared.saveMindfulSession(start: start, end: end) }
         }
 
-        withAnimation(.easeOut(duration: 2.0)) {
-            opacity = 0
+        // White flash before fade-out (visible through closed eyelids)
+        if settings.endFlashEnabled {
+            withAnimation(.easeIn(duration: 0.15)) {
+                flashOpacity = 1.0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                withAnimation(.easeOut(duration: 0.15)) {
+                    flashOpacity = 0
+                }
+            }
         }
 
-        // Dismiss after fade-out completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            isPresented = false
+        // Delay fade-out when flash is active so the flash completes first
+        let fadeDelay = settings.endFlashEnabled ? 1.3 : 0.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + fadeDelay) {
+            withAnimation(.easeOut(duration: 2.0)) {
+                opacity = 0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                isPresented = false
+            }
         }
     }
 

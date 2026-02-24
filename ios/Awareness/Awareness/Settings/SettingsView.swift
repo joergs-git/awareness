@@ -154,12 +154,16 @@ struct SettingsView: View {
                     Label("Blackout Visual", systemImage: "paintbrush")
                 }
 
-                // MARK: - Sound
+                // MARK: - Feedback
                 Section {
                     Toggle("Start gong (begin of blackout)", isOn: $settings.startGongEnabled)
                     Toggle("End gong (end of blackout)", isOn: $settings.endGongEnabled)
+                    Toggle("Vibration (start and end)", isOn: $settings.vibrationEnabled)
+                    Toggle("End flash (visible through closed eyes)", isOn: $settings.endFlashEnabled)
                 } header: {
-                    Label("Sound", systemImage: "bell")
+                    Label("Feedback", systemImage: "bell")
+                } footer: {
+                    Text("Vibration is useful when the phone is on silent and your eyes are closed.")
                 }
 
                 // MARK: - Behavior

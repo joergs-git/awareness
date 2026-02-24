@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var showingSettings = false
     @State private var notificationStatus: String = "Checking..."
     @State private var notificationsAuthorized = true
+    @State private var showHealthKitPrompt = false
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
@@ -235,6 +236,11 @@ struct ContentView: View {
                 // Small delay to let the permission dialog finish if it's showing
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await checkNotificationStatus()
+
+                // Show HealthKit encouragement on first launch if available and not yet enabled
+                if !settings.healthKitPromptShown && HealthKitManager.shared.isAvailable && !settings.healthKitEnabled {
+                    showHealthKitPrompt = true
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Re-check whenever app becomes active (e.g. returning from system Settings)
@@ -242,6 +248,18 @@ struct ContentView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
+            }
+            .alert("Track Your Mindful Minutes?", isPresented: $showHealthKitPrompt) {
+                Button("Enable") {
+                    settings.healthKitEnabled = true
+                    settings.healthKitPromptShown = true
+                    Task { await HealthKitManager.shared.requestAuthorization() }
+                }
+                Button("Not Now", role: .cancel) {
+                    settings.healthKitPromptShown = true
+                }
+            } message: {
+                Text("Awareness can log each mindful pause to Apple Health so you can track your practice over time.")
             }
         }
     }
