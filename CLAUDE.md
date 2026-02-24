@@ -249,6 +249,9 @@ ios/Awareness/
 | Image picker | `PhotosPicker` from PhotosUI; saves to app Documents directory |
 | Video picker | `.fileImporter` with movie content types |
 | HealthKit | `HealthKitManager.shared` logs `HKCategorySample(.mindfulSession)` after each blackout; opt-in via settings toggle |
+| HealthKit prompt | One-time alert on first launch encourages enabling Apple Health; controlled by `healthKitPromptShown` flag |
+| Haptics | `UIImpactFeedbackGenerator(style: .heavy)` at blackout start, `UINotificationFeedbackGenerator(.success)` at end; opt-in via `vibrationEnabled` |
+| End flash | White `Color.white` overlay flashes for ~1s at end of blackout before fade-out; opt-in via `endFlashEnabled` |
 | Update checker | Same as macOS — `URLSession` queries GitHub releases API once on startup |
 
 ## Configurable Settings
@@ -262,6 +265,8 @@ ios/Awareness/
 - **Handcuffs mode** — if on, user cannot dismiss blackout early (default: off)
 - **Snooze** — pause for 10/20/30/60/120 minutes or indefinitely
 - **Apple Health** (iOS only) — log each blackout as Mindful Minutes in Apple Health (default: off)
+- **Vibration** (iOS only) — haptic feedback at start (heavy impact) and end (success notification) of blackout (default: off)
+- **End flash** (iOS only) — 1-second white screen blink at end of blackout, visible through closed eyelids (default: off)
 
 ## Notes for Development
 
@@ -302,3 +307,6 @@ ios/Awareness/
 - **HealthKit integration**: `HealthKitManager.shared` logs each blackout as an `HKCategorySample(.mindfulSession)` that appears in Apple Health under "Mindful Minutes". Opt-in via `healthKitEnabled` toggle in Settings. Write-only access requested (`toShare: [mindfulType], read: []`). Silently skips if not authorized.
 - Privacy descriptions in `project.pbxproj`: `NSPhotoLibraryUsageDescription` (PhotosPicker), `NSHealthUpdateUsageDescription` and `NSHealthShareUsageDescription` (HealthKit)
 - HealthKit entitlement in `Awareness/Awareness.entitlements` (`com.apple.developer.healthkit`)
+- **HealthKit encouragement**: On first launch, an alert prompts users to enable Apple Health logging. Controlled by `healthKitPromptShown` (Bool, default false). Shown once; dismissed permanently with either "Enable" or "Not Now".
+- **Haptic vibration**: `vibrationEnabled` setting (Bool, default false). Heavy impact at blackout start, success notification at end. No extra imports needed — UIKit haptics available via SwiftUI bridging. Does not work on simulator.
+- **End flash**: `endFlashEnabled` setting (Bool, default false). White overlay layer with 0.15s ease-in, 1s hold, 0.15s ease-out. Main fade-out delayed by 1.3s when flash is active.
