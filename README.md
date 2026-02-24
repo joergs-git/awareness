@@ -138,6 +138,7 @@ During a blackout:
 - Microphone detection: CoreAudio `kAudioDevicePropertyDeviceIsRunningSomewhere`
 - Overlay windows at `NSWindow.Level.screenSaver` with `canJoinAllSpaces`
 - Settings persisted via `UserDefaults`
+- Version shown in About dialog is read dynamically from `CFBundleShortVersionString`
 - Deployment target: macOS 13+
 
 ### Windows
@@ -150,6 +151,7 @@ During a blackout:
 - System idle detection: `PowerModeChanged`, `SessionSwitch`, `RegisterPowerSettingNotification`, screensaver polling
 - Settings persisted as JSON in `%APPDATA%\Awareness\settings.json`
 - Launch at Login via `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- Version shown in About dialog is read dynamically from the assembly version
 - Deployment target: Windows 10+
 
 ## Credits
