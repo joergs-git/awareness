@@ -18,6 +18,26 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
+                // MARK: - Header
+                Section {
+                    VStack(spacing: 6) {
+                        Image("Logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 72, height: 72)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
+                        Text("Awareness")
+                            .font(.title2.weight(.medium))
+                        Text("A mindfulness timer")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .listRowBackground(Color.clear)
+                }
+
                 // MARK: - Status Section
                 Section {
                     HStack {
@@ -92,6 +112,53 @@ struct ContentView: View {
                     Text("Snooze")
                 }
 
+                // MARK: - How It Works
+                Section {
+                    Label {
+                        Text("At random intervals, you receive a gentle notification reminding you to pause")
+                    } icon: {
+                        Image(systemName: "bell")
+                            .foregroundColor(.accentColor)
+                    }
+                    .font(.callout)
+
+                    Label {
+                        Text("Tap the notification to open a full-screen blackout with a gong sound")
+                    } icon: {
+                        Image(systemName: "rectangle.inset.filled")
+                            .foregroundColor(.accentColor)
+                    }
+                    .font(.callout)
+
+                    Label {
+                        Text("Close your eyes, feel your breath, notice your posture")
+                    } icon: {
+                        Image(systemName: "wind")
+                            .foregroundColor(.accentColor)
+                    }
+                    .font(.callout)
+
+                    Label {
+                        Text("After a few seconds the screen returns — you continue with a moment of clarity")
+                    } icon: {
+                        Image(systemName: "sun.max")
+                            .foregroundColor(.accentColor)
+                    }
+                    .font(.callout)
+                } header: {
+                    Text("How It Works")
+                }
+
+                // MARK: - Background
+                Section {
+                    Text("In the Vipassana tradition, awareness (sati) is the foundation of all practice. We spend hours staring at screens and gradually lose contact with ourselves — forgetting to breathe deeply, forgetting we even have a body.\n\nAwareness interrupts this pattern. A few times per hour, you are gently reminded to pause. These micro-interruptions become anchors of presence threaded through your day.\n\nThe goal of this app is to not need it anymore a little bit later.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 4)
+                } header: {
+                    Text("Why This App?")
+                }
+
                 // MARK: - About
                 Section {
                     let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
@@ -99,6 +166,13 @@ struct ContentView: View {
                         Text("Version")
                         Spacer()
                         Text(version)
+                            .foregroundColor(.secondary)
+                    }
+
+                    HStack {
+                        Text("by")
+                        Spacer()
+                        Text("joergsflow")
                             .foregroundColor(.secondary)
                     }
 
@@ -125,8 +199,6 @@ struct ContentView: View {
                     }
                 } header: {
                     Text("About")
-                } footer: {
-                    Text("A mindfulness timer for your iPhone.\nRandomly reminds you to pause and breathe.")
                 }
             }
             .navigationTitle("Awareness")
@@ -146,7 +218,13 @@ struct ContentView: View {
                 BlackoutView(isPresented: $showingBlackout)
             }
             .task {
+                // Small delay to let the permission dialog finish if it's showing
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await checkNotificationStatus()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                // Re-check whenever app becomes active (e.g. returning from system Settings)
+                Task { await checkNotificationStatus() }
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
