@@ -1,12 +1,14 @@
 import SwiftUI
+import WatchKit
 import UserNotifications
 
-/// Main entry point for the iOS Awareness app.
-/// Handles notification delegation, foreground refresh, and blackout presentation.
+/// Main entry point for the watchOS Awareness app.
+/// Handles notification delegation, WatchConnectivity activation,
+/// and foreground refresh of scheduled notifications.
 @main
-struct AwarenessApp: App {
+struct AwarenessWatchApp: App {
 
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @WKApplicationDelegateAdaptor(WatchAppDelegate.self) var delegate
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
@@ -21,19 +23,15 @@ struct AwarenessApp: App {
     }
 }
 
-// MARK: - App Delegate
+// MARK: - Watch App Delegate
 
-/// Handles UNUserNotificationCenter delegation for foreground notification display
-/// and notification tap responses.
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+/// Handles notification delegation and app lifecycle events on watchOS.
+class WatchAppDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCenterDelegate {
 
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-    ) -> Bool {
+    func applicationDidFinishLaunching() {
         UNUserNotificationCenter.current().delegate = self
 
-        // Activate WatchConnectivity to sync settings with companion Apple Watch
+        // Activate WatchConnectivity to sync settings with companion iPhone
         WatchConnectivityManager.shared.activate()
 
         // Request notification permission and schedule on first launch
@@ -46,8 +44,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         // Check for updates
         UpdateChecker.shared.check()
-
-        return true
     }
 
     /// When a notification arrives while the app is in the foreground, show the blackout directly
@@ -61,7 +57,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: .showBlackout, object: nil)
-            // Refresh notifications to maintain the queue
             NotificationScheduler.shared.refreshOnForeground()
         }
     }
@@ -80,7 +75,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         switch response.actionIdentifier {
         case NotificationScheduler.actionSnooze:
-            // Snooze for 30 minutes without opening the app
+            // Snooze for 30 minutes
             NotificationScheduler.shared.handleSnooze(
                 until: Date().addingTimeInterval(30 * 60)
             )

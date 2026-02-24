@@ -23,7 +23,73 @@
 		A10014 /* default-blackout.png in Resources */ = {isa = PBXBuildFile; fileRef = B10014 /* default-blackout.png */; };
 		A10015 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* HealthKitManager.swift */; };
 		A10016 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10016 /* HealthKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		A30014 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30011 /* WatchConnectivityManager.swift */; };
+		A30001 /* AwarenessWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30001 /* AwarenessWatchApp.swift */; };
+		A30002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30002 /* ContentView.swift */; };
+		A30003 /* BlackoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30003 /* BlackoutView.swift */; };
+		A30004 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30004 /* SettingsView.swift */; };
+		A30005 /* HapticPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30005 /* HapticPlayer.swift */; };
+		A30006 /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30006 /* NotificationScheduler.swift */; };
+		A30007 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30007 /* WatchConnectivityManager.swift */; };
+		A30008 /* BlackoutVisualType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* BlackoutVisualType.swift */; };
+		A30009 /* TimeWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* TimeWindow.swift */; };
+		A30010 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005 /* SettingsManager.swift */; };
+		A30011 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* HealthKitManager.swift */; };
+		A30015 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10010 /* UpdateChecker.swift */; };
+		A30012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30008 /* Assets.xcassets */; };
+		A30013 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30016 /* HealthKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		A30016 /* AwarenessWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B30099 /* AwarenessWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A40001 /* ComplicationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30010 /* ComplicationProvider.swift */; };
+		A40002 /* BlackoutVisualType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* BlackoutVisualType.swift */; };
+		A40003 /* TimeWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* TimeWindow.swift */; };
+		A40004 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005 /* SettingsManager.swift */; };
+		A40005 /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30006 /* NotificationScheduler.swift */; };
+		A40006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30008 /* Assets.xcassets */; };
+		A40007 /* AwarenessWatchComplication.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B40099 /* AwarenessWatchComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A40008 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* HealthKitManager.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		G30001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10099 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E30099;
+			remoteInfo = AwarenessWatch;
+		};
+		G40001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10099 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E40099;
+			remoteInfo = AwarenessWatchComplication;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E30004 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				A30016 /* AwarenessWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E40004 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A40007 /* AwarenessWatchComplication.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		B10001 /* AwarenessApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessApp.swift; sourceTree = "<group>"; };
@@ -43,6 +109,20 @@
 		B10015 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		B10016 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		B10099 /* Awareness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Awareness.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B30001 /* AwarenessWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessWatchApp.swift; sourceTree = "<group>"; };
+		B30002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B30003 /* BlackoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackoutView.swift; sourceTree = "<group>"; };
+		B30004 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B30005 /* HapticPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticPlayer.swift; sourceTree = "<group>"; };
+		B30006 /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		B30007 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
+		B30008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B30009 /* AwarenessWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AwarenessWatch.entitlements; sourceTree = "<group>"; };
+		B30010 /* ComplicationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationProvider.swift; sourceTree = "<group>"; };
+		B30011 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
+		B30016 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		B30099 /* AwarenessWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AwarenessWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B40099 /* AwarenessWatchComplication.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AwarenessWatchComplication.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +134,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C30001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A30013 /* HealthKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C40001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -61,6 +156,7 @@
 			isa = PBXGroup;
 			children = (
 				D10002 /* Awareness */,
+				D30001 /* AwarenessWatch */,
 				D10010 /* Frameworks */,
 				D10099 /* Products */,
 			);
@@ -78,6 +174,7 @@
 				D10006 /* Blackout */,
 				D10007 /* Notifications */,
 				D10009 /* Health */,
+				D30009 /* Connectivity */,
 				D10008 /* Resources */,
 				B10011 /* Assets.xcassets */,
 			);
@@ -148,6 +245,7 @@
 			isa = PBXGroup;
 			children = (
 				B10016 /* HealthKit.framework */,
+				B30016 /* HealthKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -156,8 +254,43 @@
 			isa = PBXGroup;
 			children = (
 				B10099 /* Awareness.app */,
+				B30099 /* AwarenessWatch.app */,
+				B40099 /* AwarenessWatchComplication.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D30001 /* AwarenessWatch */ = {
+			isa = PBXGroup;
+			children = (
+				B30001 /* AwarenessWatchApp.swift */,
+				B30002 /* ContentView.swift */,
+				B30003 /* BlackoutView.swift */,
+				B30004 /* SettingsView.swift */,
+				B30005 /* HapticPlayer.swift */,
+				B30006 /* NotificationScheduler.swift */,
+				B30007 /* WatchConnectivityManager.swift */,
+				B30009 /* AwarenessWatch.entitlements */,
+				B30008 /* Assets.xcassets */,
+				D30002 /* Complications */,
+			);
+			path = AwarenessWatch;
+			sourceTree = "<group>";
+		};
+		D30002 /* Complications */ = {
+			isa = PBXGroup;
+			children = (
+				B30010 /* ComplicationProvider.swift */,
+			);
+			path = Complications;
+			sourceTree = "<group>";
+		};
+		D30009 /* Connectivity */ = {
+			isa = PBXGroup;
+			children = (
+				B30011 /* WatchConnectivityManager.swift */,
+			);
+			path = Connectivity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -170,15 +303,53 @@
 				E10002 /* Sources */,
 				C10001 /* Frameworks */,
 				E10003 /* Resources */,
+				E30004 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				G30002 /* PBXTargetDependency */,
 			);
 			name = Awareness;
 			productName = Awareness;
 			productReference = B10099 /* Awareness.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E30099 /* AwarenessWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F30003 /* Build configuration list for PBXNativeTarget "AwarenessWatch" */;
+			buildPhases = (
+				E30001 /* Sources */,
+				C30001 /* Frameworks */,
+				E30003 /* Resources */,
+				E40004 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				G40002 /* PBXTargetDependency */,
+			);
+			name = AwarenessWatch;
+			productName = AwarenessWatch;
+			productReference = B30099 /* AwarenessWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E40099 /* AwarenessWatchComplication */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F40003 /* Build configuration list for PBXNativeTarget "AwarenessWatchComplication" */;
+			buildPhases = (
+				E40001 /* Sources */,
+				C40001 /* Frameworks */,
+				E40003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AwarenessWatchComplication;
+			productName = AwarenessWatchComplication;
+			productReference = B40099 /* AwarenessWatchComplication.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -191,6 +362,12 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					E10001 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					E30099 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					E40099 = {
 						CreatedOnToolsVersion = 15.4;
 					};
 				};
@@ -209,6 +386,8 @@
 			projectRoot = "";
 			targets = (
 				E10001 /* Awareness */,
+				E30099 /* AwarenessWatch */,
+				E40099 /* AwarenessWatchComplication */,
 			);
 		};
 /* End PBXProject section */
@@ -222,6 +401,22 @@
 				A10012 /* awareness-gong.aiff in Resources */,
 				A10013 /* awareness-gong-end.aiff in Resources */,
 				A10014 /* default-blackout.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A30012 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E40003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A40006 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,10 +438,56 @@
 				A10009 /* NotificationScheduler.swift in Sources */,
 				A10010 /* UpdateChecker.swift in Sources */,
 				A10015 /* HealthKitManager.swift in Sources */,
+				A30014 /* WatchConnectivityManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A30001 /* AwarenessWatchApp.swift in Sources */,
+				A30002 /* ContentView.swift in Sources */,
+				A30003 /* BlackoutView.swift in Sources */,
+				A30004 /* SettingsView.swift in Sources */,
+				A30005 /* HapticPlayer.swift in Sources */,
+				A30006 /* NotificationScheduler.swift in Sources */,
+				A30007 /* WatchConnectivityManager.swift in Sources */,
+				A30008 /* BlackoutVisualType.swift in Sources */,
+				A30009 /* TimeWindow.swift in Sources */,
+				A30010 /* SettingsManager.swift in Sources */,
+				A30011 /* HealthKitManager.swift in Sources */,
+				A30015 /* UpdateChecker.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E40001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A40001 /* ComplicationProvider.swift in Sources */,
+				A40002 /* BlackoutVisualType.swift in Sources */,
+				A40003 /* TimeWindow.swift in Sources */,
+				A40004 /* SettingsManager.swift in Sources */,
+				A40005 /* NotificationScheduler.swift in Sources */,
+				A40008 /* HealthKitManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		G30002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E30099 /* AwarenessWatch */;
+			targetProxy = G30001 /* PBXContainerItemProxy */;
+		};
+		G40002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E40099 /* AwarenessWatchComplication */;
+			targetProxy = G40001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F10011 /* Debug */ = {
@@ -425,6 +666,104 @@
 			};
 			name = Release;
 		};
+		F30021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AwarenessWatch/AwarenessWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Awareness;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Awareness reads your mindful session data to verify logging.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
+				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		F30022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AwarenessWatch/AwarenessWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Awareness;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Awareness reads your mindful session data to verify logging.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
+				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		F40021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Awareness Complication";
+				INFOPLIST_KEY_NSExtension = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watchkitapp.complication;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		F40022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Awareness Complication";
+				INFOPLIST_KEY_NSExtension = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watchkitapp.complication;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -442,6 +781,24 @@
 			buildConfigurations = (
 				F10021 /* Debug */,
 				F10022 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F30003 /* Build configuration list for PBXNativeTarget "AwarenessWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F30021 /* Debug */,
+				F30022 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F40003 /* Build configuration list for PBXNativeTarget "AwarenessWatchComplication" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F40021 /* Debug */,
+				F40022 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

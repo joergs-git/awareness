@@ -3,7 +3,7 @@ import Combine
 
 /// Central settings store backed by UserDefaults.
 /// Published properties allow SwiftUI views to react to changes automatically.
-/// iOS version — mirrors macOS SettingsManager with identical defaults.
+/// Shared between iOS and watchOS targets via #if os() guards.
 final class SettingsManager: ObservableObject {
 
     static let shared = SettingsManager()
@@ -19,43 +19,63 @@ final class SettingsManager: ObservableObject {
         static let maxBlackoutDuration  = "maxBlackoutDuration"
         static let minInterval          = "minInterval"
         static let maxInterval          = "maxInterval"
-        static let startGongEnabled     = "startGongEnabled"
-        static let endGongEnabled       = "endGongEnabled"
         static let handcuffsMode        = "handcuffsMode"
         static let visualType           = "visualType"
         static let customText           = "customText"
-        static let customImagePath      = "customImagePath"
-        static let customVideoPath      = "customVideoPath"
         static let snoozeUntil          = "snoozeUntil"
         static let healthKitEnabled     = "healthKitEnabled"
         static let healthKitPromptShown = "healthKitPromptShown"
+
+        #if !os(watchOS)
+        static let startGongEnabled     = "startGongEnabled"
+        static let endGongEnabled       = "endGongEnabled"
+        static let customImagePath      = "customImagePath"
+        static let customVideoPath      = "customVideoPath"
         static let vibrationEnabled     = "vibrationEnabled"
         static let endFlashEnabled      = "endFlashEnabled"
+        #endif
+
+        #if os(watchOS)
+        static let hapticStartEnabled   = "hapticStartEnabled"
+        static let hapticEndEnabled     = "hapticEndEnabled"
+        #endif
     }
 
     // MARK: - Default Values
 
-    private static let defaultValues: [String: Any] = [
-        Keys.activeStartHour:     6,
-        Keys.activeEndHour:       20,
-        Keys.minBlackoutDuration: 20.0,
-        Keys.maxBlackoutDuration: 20.0,
-        Keys.minInterval:         15.0,    // minutes
-        Keys.maxInterval:         30.0,    // minutes
-        Keys.startGongEnabled:    true,
-        Keys.endGongEnabled:      true,
-        Keys.handcuffsMode:       false,
-        Keys.visualType:          BlackoutVisualType.text.rawValue,
-        Keys.customText:          "Breathe.",
-        Keys.customImagePath:     "",
-        Keys.customVideoPath:     "",
-        Keys.healthKitEnabled:    false,
-        Keys.healthKitPromptShown: false,
-        Keys.vibrationEnabled:    false,
-        Keys.endFlashEnabled:     false
-    ]
+    private static var defaultValues: [String: Any] {
+        var values: [String: Any] = [
+            Keys.activeStartHour:     6,
+            Keys.activeEndHour:       20,
+            Keys.minBlackoutDuration: 20.0,
+            Keys.maxBlackoutDuration: 20.0,
+            Keys.minInterval:         15.0,    // minutes
+            Keys.maxInterval:         30.0,    // minutes
+            Keys.handcuffsMode:       false,
+            Keys.visualType:          BlackoutVisualType.text.rawValue,
+            Keys.customText:          "Breathe.",
+            Keys.healthKitEnabled:    false,
+            Keys.healthKitPromptShown: false
+        ]
 
-    // MARK: - Published Properties
+        #if !os(watchOS)
+        values[Keys.startGongEnabled]  = true
+        values[Keys.endGongEnabled]    = true
+        values[Keys.customImagePath]   = ""
+        values[Keys.customVideoPath]   = ""
+        values[Keys.vibrationEnabled]  = false
+        values[Keys.endFlashEnabled]   = false
+        #endif
+
+        #if os(watchOS)
+        values[Keys.hapticStartEnabled] = true
+        values[Keys.hapticEndEnabled]   = true
+        #endif
+
+        return values
+    }
+
+    // MARK: - Published Properties (shared)
 
     /// Start hour of the active time window (0-23)
     @Published var activeStartHour: Int {
@@ -107,16 +127,6 @@ final class SettingsManager: ObservableObject {
         }
     }
 
-    /// Whether to play the start gong when a blackout begins
-    @Published var startGongEnabled: Bool {
-        didSet { defaults.set(startGongEnabled, forKey: Keys.startGongEnabled) }
-    }
-
-    /// Whether to play the end gong when a blackout finishes
-    @Published var endGongEnabled: Bool {
-        didSet { defaults.set(endGongEnabled, forKey: Keys.endGongEnabled) }
-    }
-
     /// When on, the user cannot dismiss the blackout early
     @Published var handcuffsMode: Bool {
         didSet { defaults.set(handcuffsMode, forKey: Keys.handcuffsMode) }
@@ -130,16 +140,6 @@ final class SettingsManager: ObservableObject {
     /// Custom text displayed during text-mode blackout
     @Published var customText: String {
         didSet { defaults.set(customText, forKey: Keys.customText) }
-    }
-
-    /// File path for custom image blackout (relative to app sandbox)
-    @Published var customImagePath: String {
-        didSet { defaults.set(customImagePath, forKey: Keys.customImagePath) }
-    }
-
-    /// File path for custom video blackout (relative to app sandbox)
-    @Published var customVideoPath: String {
-        didSet { defaults.set(customVideoPath, forKey: Keys.customVideoPath) }
     }
 
     /// Date until which the app is snoozed (nil = not snoozed)
@@ -157,6 +157,29 @@ final class SettingsManager: ObservableObject {
         didSet { defaults.set(healthKitPromptShown, forKey: Keys.healthKitPromptShown) }
     }
 
+    // MARK: - Published Properties (iOS only)
+
+    #if !os(watchOS)
+    /// Whether to play the start gong when a blackout begins
+    @Published var startGongEnabled: Bool {
+        didSet { defaults.set(startGongEnabled, forKey: Keys.startGongEnabled) }
+    }
+
+    /// Whether to play the end gong when a blackout finishes
+    @Published var endGongEnabled: Bool {
+        didSet { defaults.set(endGongEnabled, forKey: Keys.endGongEnabled) }
+    }
+
+    /// File path for custom image blackout (relative to app sandbox)
+    @Published var customImagePath: String {
+        didSet { defaults.set(customImagePath, forKey: Keys.customImagePath) }
+    }
+
+    /// File path for custom video blackout (relative to app sandbox)
+    @Published var customVideoPath: String {
+        didSet { defaults.set(customVideoPath, forKey: Keys.customVideoPath) }
+    }
+
     /// Whether to vibrate at the start and end of a blackout
     @Published var vibrationEnabled: Bool {
         didSet { defaults.set(vibrationEnabled, forKey: Keys.vibrationEnabled) }
@@ -166,6 +189,21 @@ final class SettingsManager: ObservableObject {
     @Published var endFlashEnabled: Bool {
         didSet { defaults.set(endFlashEnabled, forKey: Keys.endFlashEnabled) }
     }
+    #endif
+
+    // MARK: - Published Properties (watchOS only)
+
+    #if os(watchOS)
+    /// Whether to play haptic at start of blackout
+    @Published var hapticStartEnabled: Bool {
+        didSet { defaults.set(hapticStartEnabled, forKey: Keys.hapticStartEnabled) }
+    }
+
+    /// Whether to play haptic at end of blackout
+    @Published var hapticEndEnabled: Bool {
+        didSet { defaults.set(hapticEndEnabled, forKey: Keys.hapticEndEnabled) }
+    }
+    #endif
 
     // MARK: - Computed Helpers
 
@@ -187,12 +225,72 @@ final class SettingsManager: ObservableObject {
         return Double.random(in: minBlackoutDuration...maxBlackoutDuration)
     }
 
+    #if !os(watchOS)
     /// Resolve a sandbox-relative path to a full URL, or return nil if empty/missing
     static func resolvedURL(for path: String) -> URL? {
         guard !path.isEmpty else { return nil }
         let url = URL(fileURLWithPath: path)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         return url
+    }
+    #endif
+
+    // MARK: - WatchConnectivity Sync
+
+    /// Keys that are synced between iOS and watchOS via WCSession applicationContext
+    private static let syncedKeys: [String] = [
+        "activeStartHour", "activeEndHour",
+        "minBlackoutDuration", "maxBlackoutDuration",
+        "minInterval", "maxInterval",
+        "handcuffsMode", "customText",
+        "healthKitEnabled", "snoozeUntil",
+        "visualType"
+    ]
+
+    /// Export settings that should be synced to the companion device
+    func connectivityContext() -> [String: Any] {
+        var context: [String: Any] = [
+            "activeStartHour":     activeStartHour,
+            "activeEndHour":       activeEndHour,
+            "minBlackoutDuration": minBlackoutDuration,
+            "maxBlackoutDuration": maxBlackoutDuration,
+            "minInterval":         minInterval,
+            "maxInterval":         maxInterval,
+            "handcuffsMode":       handcuffsMode,
+            "customText":          customText,
+            "healthKitEnabled":    healthKitEnabled,
+            "visualType":          visualType.rawValue
+        ]
+
+        // Include snooze state if currently snoozed
+        if let snoozeUntil = snoozeUntil {
+            context["snoozeUntil"] = snoozeUntil.timeIntervalSince1970
+        } else {
+            context["snoozeUntil"] = 0.0
+        }
+
+        return context
+    }
+
+    /// Apply settings received from the companion device via WCSession
+    func applyFromConnectivityContext(_ context: [String: Any]) {
+        if let v = context["activeStartHour"] as? Int { activeStartHour = v }
+        if let v = context["activeEndHour"] as? Int { activeEndHour = v }
+        if let v = context["minBlackoutDuration"] as? Double { minBlackoutDuration = v }
+        if let v = context["maxBlackoutDuration"] as? Double { maxBlackoutDuration = v }
+        if let v = context["minInterval"] as? Double { minInterval = v }
+        if let v = context["maxInterval"] as? Double { maxInterval = v }
+        if let v = context["handcuffsMode"] as? Bool { handcuffsMode = v }
+        if let v = context["customText"] as? String { customText = v }
+        if let v = context["healthKitEnabled"] as? Bool { healthKitEnabled = v }
+        if let v = context["visualType"] as? String {
+            visualType = BlackoutVisualType(rawValue: v) ?? .text
+        }
+
+        // Handle snooze sync — 0 means not snoozed
+        if let v = context["snoozeUntil"] as? Double {
+            snoozeUntil = v > 0 ? Date(timeIntervalSince1970: v) : nil
+        }
     }
 
     // MARK: - Init
@@ -207,19 +305,27 @@ final class SettingsManager: ObservableObject {
         maxBlackoutDuration = defaults.double(forKey: Keys.maxBlackoutDuration)
         minInterval         = defaults.double(forKey: Keys.minInterval)
         maxInterval         = defaults.double(forKey: Keys.maxInterval)
-        startGongEnabled    = defaults.bool(forKey: Keys.startGongEnabled)
-        endGongEnabled      = defaults.bool(forKey: Keys.endGongEnabled)
         handcuffsMode       = defaults.bool(forKey: Keys.handcuffsMode)
         customText          = defaults.string(forKey: Keys.customText) ?? "Breathe."
-        customImagePath     = defaults.string(forKey: Keys.customImagePath) ?? ""
-        customVideoPath     = defaults.string(forKey: Keys.customVideoPath) ?? ""
         snoozeUntil         = defaults.object(forKey: Keys.snoozeUntil) as? Date
         healthKitEnabled    = defaults.bool(forKey: Keys.healthKitEnabled)
         healthKitPromptShown = defaults.bool(forKey: Keys.healthKitPromptShown)
-        vibrationEnabled    = defaults.bool(forKey: Keys.vibrationEnabled)
-        endFlashEnabled     = defaults.bool(forKey: Keys.endFlashEnabled)
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue
         visualType = BlackoutVisualType(rawValue: typeRaw) ?? .text
+
+        #if !os(watchOS)
+        startGongEnabled    = defaults.bool(forKey: Keys.startGongEnabled)
+        endGongEnabled      = defaults.bool(forKey: Keys.endGongEnabled)
+        customImagePath     = defaults.string(forKey: Keys.customImagePath) ?? ""
+        customVideoPath     = defaults.string(forKey: Keys.customVideoPath) ?? ""
+        vibrationEnabled    = defaults.bool(forKey: Keys.vibrationEnabled)
+        endFlashEnabled     = defaults.bool(forKey: Keys.endFlashEnabled)
+        #endif
+
+        #if os(watchOS)
+        hapticStartEnabled  = defaults.bool(forKey: Keys.hapticStartEnabled)
+        hapticEndEnabled    = defaults.bool(forKey: Keys.hapticEndEnabled)
+        #endif
     }
 }
