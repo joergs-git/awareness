@@ -84,6 +84,11 @@ struct ContentView: View {
                     } label: {
                         Label("Test Blackout", systemImage: "play.circle")
                     }
+                    Button {
+                        scheduler.scheduleTestNotification()
+                    } label: {
+                        Label("Test Notification (3s)", systemImage: "bell.badge")
+                    }
                 } header: {
                     Text("Actions")
                 }

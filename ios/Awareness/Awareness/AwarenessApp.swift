@@ -63,19 +63,37 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
 
-    /// When the user taps a notification, open the app and show the blackout
+    /// When the user taps a notification or an action button
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        if response.notification.request.content.categoryIdentifier == NotificationScheduler.categoryIdentifier {
+        let category = response.notification.request.content.categoryIdentifier
+        guard category == NotificationScheduler.categoryIdentifier else {
+            completionHandler()
+            return
+        }
+
+        switch response.actionIdentifier {
+        case NotificationScheduler.actionSnooze:
+            // Snooze for 30 minutes without opening the app
+            NotificationScheduler.shared.handleSnooze(
+                until: Date().addingTimeInterval(30 * 60)
+            )
+
+        case NotificationScheduler.actionStart,
+             UNNotificationDefaultActionIdentifier:
+            // Tap on notification or "Start Blackout" button — show blackout
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .showBlackout, object: nil)
-                // Refresh notifications to maintain the queue
                 NotificationScheduler.shared.refreshOnForeground()
             }
+
+        default:
+            break
         }
+
         completionHandler()
     }
 }

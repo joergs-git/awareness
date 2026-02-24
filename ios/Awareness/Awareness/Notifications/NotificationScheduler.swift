@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import UserNotifications
 import Combine
 
@@ -15,6 +16,10 @@ class NotificationScheduler: ObservableObject {
     /// Category identifier for awareness notifications
     static let categoryIdentifier = "awareness.blackout"
 
+    /// Action identifiers for notification buttons
+    static let actionStart = "awareness.action.start"
+    static let actionSnooze = "awareness.action.snooze"
+
     /// Custom notification sound using the bundled gong
     private static let notificationSound = UNNotificationSound(named: UNNotificationSoundName("awareness-gong.aiff"))
 
@@ -26,7 +31,30 @@ class NotificationScheduler: ObservableObject {
     @Published private(set) var nextNotificationDate: Date?
 
     private init() {
+        registerCategory()
         observeSettingsChanges()
+    }
+
+    // MARK: - Category Registration
+
+    /// Register notification category with action buttons
+    private func registerCategory() {
+        let startAction = UNNotificationAction(
+            identifier: NotificationScheduler.actionStart,
+            title: "Start Blackout",
+            options: [.foreground]
+        )
+        let snoozeAction = UNNotificationAction(
+            identifier: NotificationScheduler.actionSnooze,
+            title: "Snooze 30 min",
+            options: []
+        )
+        let category = UNNotificationCategory(
+            identifier: NotificationScheduler.categoryIdentifier,
+            actions: [startAction, snoozeAction],
+            intentIdentifiers: []
+        )
+        center.setNotificationCategories([category])
     }
 
     // MARK: - Permission
@@ -71,11 +99,7 @@ class NotificationScheduler: ObservableObject {
             // Adjust to respect the active time window
             let fireDate = adjustToActiveWindow(candidateDate)
 
-            let content = UNMutableNotificationContent()
-            content.title = "Awareness"
-            content.body = "Time to pause and breathe."
-            content.sound = NotificationScheduler.notificationSound
-            content.categoryIdentifier = NotificationScheduler.categoryIdentifier
+            let content = makeNotificationContent()
 
             let components = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute, .second],
@@ -143,11 +167,7 @@ class NotificationScheduler: ObservableObject {
                 let candidateDate = latestDate.addingTimeInterval(delayMinutes * 60)
                 let fireDate = self.adjustToActiveWindow(candidateDate)
 
-                let content = UNMutableNotificationContent()
-                content.title = "Awareness"
-                content.body = "Time to pause and breathe."
-                content.sound = NotificationScheduler.notificationSound
-                content.categoryIdentifier = NotificationScheduler.categoryIdentifier
+                let content = self.makeNotificationContent()
 
                 let components = Calendar.current.dateComponents(
                     [.year, .month, .day, .hour, .minute, .second],
@@ -203,6 +223,56 @@ class NotificationScheduler: ObservableObject {
     }
 
     // MARK: - Helpers
+
+    /// Build the notification content with title, subtitle, sound, category, and image attachment
+    private func makeNotificationContent() -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = "Awareness ☯"
+        content.subtitle = "Time to pause and breathe"
+        content.body = "Tap to begin a mindful moment. Close your eyes, feel your breath, and return to the present."
+        content.sound = NotificationScheduler.notificationSound
+        content.categoryIdentifier = NotificationScheduler.categoryIdentifier
+
+        // Attach the app icon as a thumbnail image
+        if let attachment = createIconAttachment() {
+            content.attachments = [attachment]
+        }
+
+        return content
+    }
+
+    /// Create a notification attachment from the bundled app icon
+    private func createIconAttachment() -> UNNotificationAttachment? {
+        // Copy the logo image to a temporary file (notifications need a file URL)
+        guard let image = UIImage(named: "Logo"),
+              let data = image.pngData() else { return nil }
+
+        let tempDir = FileManager.default.temporaryDirectory
+        let fileURL = tempDir.appendingPathComponent("notification-icon.png")
+
+        do {
+            try data.write(to: fileURL)
+            return try UNNotificationAttachment(
+                identifier: "icon",
+                url: fileURL,
+                options: [UNNotificationAttachmentOptionsTypeHintKey: "public.png"]
+            )
+        } catch {
+            return nil
+        }
+    }
+
+    /// Schedule a test notification that fires in 3 seconds (for preview/testing)
+    func scheduleTestNotification() {
+        let content = makeNotificationContent()
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "awareness-test",
+            content: content,
+            trigger: trigger
+        )
+        center.add(request)
+    }
 
     /// Returns a random interval in minutes between the configured min and max
     private func randomInterval() -> Double {
