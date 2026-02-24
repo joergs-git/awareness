@@ -31,6 +31,7 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 - **Launch at Login** — start automatically with your Mac or PC
 - **Persistent settings** — all preferences are saved and restored across app restarts
 - **Default image** — a bundled dark visual is shown when image mode is selected but no custom image is configured
+- **Apple Health integration** (iOS) — each mindful pause is logged as Mindful Minutes in Apple Health, so you can track your practice over time
 - **Update checker** — checks GitHub for newer releases on startup and shows an "Update Available" menu item linking to the download page
 
 ## Installation
@@ -145,17 +146,19 @@ During a blackout:
 | Start gong | Sound at blackout start | On |
 | End gong | Sound at blackout end | On |
 | Handcuffs mode | Prevent early dismissal | Off |
+| Apple Health (iOS) | Log blackouts as Mindful Minutes | Off |
 
 ## Technical Details
 
 ### macOS
 
-- **Swift** with **AppKit** + **SwiftUI**, built via Swift Package Manager
+- **Swift** with **AppKit** + **SwiftUI**, built via Swift Package Manager or Xcode
 - No third-party dependencies — only Apple frameworks (AppKit, SwiftUI, AVFoundation, CoreAudio, ServiceManagement)
+- Three distribution channels: SPM dev build, Mac App Store (Xcode project with App Sandbox), direct distribution (Developer ID + notarization)
 - Camera detection: `AVCaptureDevice.isInUseByAnotherApplication` (no TCC prompt)
 - Microphone detection: CoreAudio `kAudioDevicePropertyDeviceIsRunningSomewhere`
 - Overlay windows at `NSWindow.Level.screenSaver` with `canJoinAllSpaces`
-- Settings persisted via `UserDefaults`
+- Settings persisted via `UserDefaults`; security-scoped bookmarks for user-selected files in the sandbox
 - Version shown in About dialog is read dynamically from `CFBundleShortVersionString`
 - Deployment target: macOS 13+
 
@@ -175,11 +178,12 @@ During a blackout:
 ### iOS/iPadOS
 
 - **Swift** with **SwiftUI**, standard Xcode project
-- No third-party dependencies — only Apple frameworks (SwiftUI, AVFoundation, UserNotifications, PhotosUI)
+- No third-party dependencies — only Apple frameworks (SwiftUI, AVFoundation, UserNotifications, PhotosUI, HealthKit)
 - Uses local notifications (`UNUserNotificationCenter`) instead of background timers
 - Pre-schedules 30 notifications at random intervals within the active time window
 - Blackout presented as a full-screen cover when user taps notification
 - Gong sounds play even in silent mode via `AVAudioSession(.playback)`
+- Apple Health integration: each blackout is logged as Mindful Minutes via HealthKit (opt-in)
 - Settings persisted via `UserDefaults` (same as macOS)
 - Supports both iPhone and iPad
 - Version shown in home screen is read dynamically from `CFBundleShortVersionString`
