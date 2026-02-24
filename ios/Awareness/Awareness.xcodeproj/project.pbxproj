@@ -728,7 +728,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness Complication";
-				INFOPLIST_KEY_NSExtension = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watchkitapp.complication;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -750,7 +749,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness Complication";
-				INFOPLIST_KEY_NSExtension = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watchkitapp.complication;
 				PRODUCT_NAME = "$(TARGET_NAME)";
