@@ -391,7 +391,7 @@ ios/Awareness/AwarenessWatch/
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` prevents echo loops.
 - Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, and `HealthKitManager` via target membership
-- Bundle IDs: `com.joergsflow.awareness.ios.watchkitapp` (watch app), `com.joergsflow.awareness.ios.watchkitapp.complication` (widget extension)
+- Bundle IDs: `com.joergsflow.awareness.ios.watch` (watch app), `com.joergsflow.awareness.ios.watch.widget` (widget extension)
 - `WKCompanionAppBundleIdentifier`: `com.joergsflow.awareness.ios`
 - Entitlements: `AwarenessWatch/AwarenessWatch.entitlements` with `com.apple.developer.healthkit`
 - iOS target has "Embed Watch Content" build phase that embeds `AwarenessWatch.app`; watch target has "Embed App Extensions" phase for the complication
