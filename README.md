@@ -32,6 +32,8 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 - **Persistent settings** — all preferences are saved and restored across app restarts
 - **Default image** — a bundled dark visual is shown when image mode is selected but no custom image is configured
 - **Apple Health integration** (iOS) — each mindful pause is logged as Mindful Minutes in Apple Health, so you can track your practice over time
+- **Haptic vibration** (iOS) — optional vibration at the start and end of each blackout, useful when the phone is on silent and your eyes are closed
+- **End flash** (iOS) — optional 1-second white screen blink at the end of a blackout, visible through closed eyelids to signal the session is ending
 - **Update checker** — checks GitHub for newer releases on startup and shows an "Update Available" menu item linking to the download page
 
 ## Installation
@@ -147,6 +149,8 @@ During a blackout:
 | End gong | Sound at blackout end | On |
 | Handcuffs mode | Prevent early dismissal | Off |
 | Apple Health (iOS) | Log blackouts as Mindful Minutes | Off |
+| Vibration (iOS) | Haptic feedback at start and end of blackout | Off |
+| End flash (iOS) | White screen blink at end of blackout | Off |
 
 ## Technical Details
 
@@ -183,7 +187,9 @@ During a blackout:
 - Pre-schedules 30 notifications at random intervals within the active time window
 - Blackout presented as a full-screen cover when user taps notification
 - Gong sounds play even in silent mode via `AVAudioSession(.playback)`
-- Apple Health integration: each blackout is logged as Mindful Minutes via HealthKit (opt-in)
+- Apple Health integration: each blackout is logged as Mindful Minutes via HealthKit (opt-in). First-launch prompt encourages enabling it.
+- Haptic feedback: heavy impact at blackout start, success notification at end (opt-in)
+- End flash: 1-second white screen blink before fade-out, visible through closed eyelids (opt-in)
 - Settings persisted via `UserDefaults` (same as macOS)
 - Supports both iPhone and iPad
 - Version shown in home screen is read dynamically from `CFBundleShortVersionString`
