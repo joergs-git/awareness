@@ -53,14 +53,18 @@
 
             <!-- Blackout Duration -->
             <GroupBox Header="👁  Blackout Duration" Margin="0,0,0,12" Padding="10">
-                <DockPanel Margin="0,4,0,0">
-                    <TextBlock x:Name="DurationLabel" DockPanel.Dock="Right" Width="45"
-                               TextAlignment="Right" Foreground="#4285F4" FontFamily="Consolas"
-                               VerticalAlignment="Center" />
-                    <Slider x:Name="DurationSlider" Minimum="3" Maximum="120"
-                            IsSnapToTickEnabled="True" TickFrequency="1"
-                            ValueChanged="OnDurationChanged" />
-                </DockPanel>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                        <TextBlock x:Name="MinDurationLabel" Width="40" TextAlignment="Right"
+                                   Foreground="#4285F4" FontFamily="Consolas" />
+                        <TextBlock Text=" – " Foreground="Gray" />
+                        <TextBlock x:Name="MaxDurationLabel" Width="40"
+                                   Foreground="#4285F4" FontFamily="Consolas" />
+                    </StackPanel>
+                    <settings:RangeSlider x:Name="DurationSlider"
+                                          Minimum="3" Maximum="120" Step="1"
+                                          LowValue="20" HighValue="20" />
+                </StackPanel>
             </GroupBox>
 
             <!-- Blackout Visual -->

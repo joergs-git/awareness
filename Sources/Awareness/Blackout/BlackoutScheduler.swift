@@ -123,7 +123,7 @@ class BlackoutScheduler {
 
         // Trigger the blackout with all configured visual settings
         blackoutController.show(
-            duration: settings.blackoutDuration,
+            duration: settings.randomBlackoutDuration(),
             visualType: settings.visualType,
             customText: settings.customText,
             imagePath: settings.customImagePath,

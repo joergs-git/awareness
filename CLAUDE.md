@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Awareness** is a cross-platform mindfulness/breathing timer (macOS + Windows) that randomly blacks out the screen for a few seconds, forcing the user to pause, breathe, and reset. A vipassana timer for computer work.
+**Awareness** is a cross-platform mindfulness/breathing timer (macOS + Windows + iOS/iPadOS) that randomly blacks out the screen for a few seconds, forcing the user to pause, breathe, and reset. A vipassana timer for computer work.
 
 Repository: https://github.com/joergs-git/awareness
 License: MIT
@@ -33,6 +33,18 @@ dotnet publish Awareness -c Release -r win-x64   # self-contained exe
 
 Requires Windows 10+, .NET 8 SDK.
 
+### iOS/iPadOS
+
+```bash
+cd ios/Awareness
+xcodebuild -project Awareness.xcodeproj -scheme Awareness \
+    -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+```
+
+Or open `ios/Awareness/Awareness.xcodeproj` in Xcode and build for a simulator or device.
+
+Requires iOS 16+, Xcode 15+.
+
 ## Architecture
 
 ### macOS
@@ -50,6 +62,16 @@ Requires Windows 10+, .NET 8 SDK.
 - **NuGet dependencies**: NAudio (audio playback + WASAPI mic detection), Hardcodet.NotifyIcon.Wpf (system tray icon)
 - Tray-only app: `ShutdownMode="OnExplicitShutdown"`, single instance via named `Mutex`
 - Settings persisted as JSON in `%APPDATA%\Awareness\settings.json`
+
+### iOS/iPadOS
+
+- **SwiftUI** app with `@main` entry point (no UIKit storyboards)
+- **No third-party dependencies** — only Apple frameworks (SwiftUI, AVFoundation, UserNotifications, PhotosUI)
+- Uses **local notifications** instead of background timers (iOS does not allow persistent background execution)
+- Pre-schedules 30 `UNNotificationRequest` at random intervals; tops up when app returns to foreground
+- Blackout presented as `fullScreenCover` when user taps notification or app is in foreground
+- Settings stored in `UserDefaults` (same as macOS)
+- Single target for both iPhone and iPad (`TARGETED_DEVICE_FAMILY = "1,2"`)
 
 ## Project Structure
 
@@ -119,6 +141,34 @@ windows/Awareness/
     └── tray-icon.ico                   # Yin-yang tray icon
 ```
 
+### iOS/iPadOS (`ios/Awareness/Awareness/`)
+
+```
+ios/Awareness/
+├── Awareness.xcodeproj                 # Xcode project (iOS 16+, iPhone + iPad)
+└── Awareness/
+    ├── AwarenessApp.swift              # @main entry point, notification delegate
+    ├── ContentView.swift               # Home screen (status, snooze, test, settings)
+    ├── UpdateChecker.swift             # GitHub release update checker (singleton)
+    ├── Models/
+    │   ├── BlackoutVisualType.swift    # Enum: plainBlack/text/image/video
+    │   └── TimeWindow.swift           # Active hours model
+    ├── Settings/
+    │   ├── SettingsManager.swift       # UserDefaults wrapper, @ObservableObject
+    │   └── SettingsView.swift          # iOS Form with NavigationStack, PhotosPicker
+    ├── Audio/
+    │   └── GongPlayer.swift           # AVAudioPlayer + AVAudioSession for silent mode
+    ├── Blackout/
+    │   └── BlackoutView.swift         # Full-screen blackout (UIImage, tap dismiss, video loop)
+    ├── Notifications/
+    │   └── NotificationScheduler.swift # UNUserNotificationCenter scheduling
+    ├── Assets.xcassets/                # App icon (1024x1024), accent color
+    └── Resources/
+        ├── awareness-gong.aiff         # Start gong (notification sound + in-app)
+        ├── awareness-gong-end.aiff     # End gong (in-app only)
+        └── default-blackout.png        # Default image for image mode
+```
+
 ## Key Technical Decisions
 
 ### macOS
@@ -160,10 +210,27 @@ windows/Awareness/
 | Single instance | Named `Mutex("Awareness-SingleInstance")` |
 | Update checker | `HttpClient` queries GitHub releases API once on startup; shows menu item if newer version exists |
 
+### iOS/iPadOS
+
+| Topic | Approach |
+|---|---|
+| App lifecycle | SwiftUI `@main` with `UIApplicationDelegateAdaptor` for notification handling |
+| Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled `UNCalendarNotificationTrigger` requests |
+| Blackout | `fullScreenCover` presenting `BlackoutView` with `.statusBarHidden()` and `.persistentSystemOverlays(.hidden)` |
+| Foreground notification | `userNotificationCenter(_:willPresent:)` skips banner and shows blackout directly |
+| Background notification | User taps notification → `didReceive response:` → posts `.showBlackout` notification → shows blackout |
+| Sound | `AVAudioSession(.playback)` so gong plays even in silent mode; notification uses custom sound |
+| Settings storage | `UserDefaults.standard` with `register(defaults:)` (same as macOS) |
+| Snooze | Removes all pending notifications; reschedules on resume |
+| Dismiss | Tap gesture (disabled in handcuffs mode); auto-dismiss timer with randomized duration |
+| Image picker | `PhotosPicker` from PhotosUI; saves to app Documents directory |
+| Video picker | `.fileImporter` with movie content types |
+| Update checker | Same as macOS — `URLSession` queries GitHub releases API once on startup |
+
 ## Configurable Settings
 
 - **Active time window** — hours during which interruptions occur (default: 06:00–20:00)
-- **Blackout duration** — how long the screen stays blacked out (default: 20 seconds)
+- **Blackout duration range** — min and max duration for each blackout; random duration picked within range (default: 20–20 seconds, i.e. fixed)
 - **Blackout visual** — plain black, custom text, image, or looping video (default: text "Breathe.")
 - **Random interval range** — min and max delay between interruptions (default: 15–30 minutes)
 - **Start gong** — play a higher-pitched sound when blackout begins (default: on)
@@ -178,7 +245,7 @@ windows/Awareness/
 - The app icon is `SupportFiles/AppIcon.icns` (yin-yang design), referenced via `CFBundleIconFile` in Info.plist
 - Resources (gong sounds, default image) are copied by the Makefile into `Contents/Resources/` and accessed via `Bundle.main` — not SPM's `Bundle.module`, which resolves to the .app root and breaks codesigning
 - The global event tap for keystroke suppression requires Accessibility permission — degrades gracefully if not granted
-- Settings migration: old `gongEnabled` key is auto-migrated to `startGongEnabled` + `endGongEnabled`
+- Settings migration: old `gongEnabled` key is auto-migrated to `startGongEnabled` + `endGongEnabled`; old `blackoutDuration` key is auto-migrated to `minBlackoutDuration` + `maxBlackoutDuration`
 - About dialog version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — update `SupportFiles/Info.plist` only when bumping versions
 - Update checker: `UpdateChecker.shared` fetches `api.github.com/repos/joergs-git/awareness/releases/latest`, strips `v` prefix from `tag_name`, compares against `CFBundleShortVersionString`. Menu item appears between "About" and "Quit" when an update is available.
 
@@ -193,3 +260,14 @@ windows/Awareness/
 - Video looping uses `MediaElement` with `MediaEnded` handler resetting `Position` to zero
 - About dialog version is read dynamically from the assembly version (`Version` in `.csproj`) — no hardcoded version strings
 - Update checker: `UpdateChecker.Shared` uses `HttpClient` to query the GitHub releases API, compares `tag_name` against assembly version (`Version` in `.csproj`). Menu item appears between "About" and "Quit" when an update is available.
+- Settings migration: if JSON has old `blackoutDuration` but no `minBlackoutDuration`/`maxBlackoutDuration`, the old value is mapped to both new fields
+
+### iOS/iPadOS
+
+- Reuses model files (`BlackoutVisualType`, `TimeWindow`), `UpdateChecker`, and `SettingsManager` from macOS with minimal changes
+- `GongPlayer` adds `AVAudioSession.sharedInstance().setCategory(.playback)` so gong plays in silent mode
+- The notification sound file must be in the app bundle as `.aiff` — iOS supports AIFF for custom notification sounds
+- `NotificationScheduler` pre-schedules 30 notifications and tops up when the app returns to foreground (iOS limits pending notifications to 64)
+- `adjustToActiveWindow()` shifts fire dates that fall outside the active time window to the start of the next active period
+- About screen version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — update `MARKETING_VERSION` in the Xcode project when bumping versions
+- Update checker works identically to macOS

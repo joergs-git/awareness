@@ -9,3 +9,8 @@ windows/**/obj/
 windows/**/.vs/
 *.user
 *.suo
+
+# Xcode build artifacts
+ios/**/DerivedData/
+ios/**/*.xcuserdata/
+ios/**/xcuserdata/

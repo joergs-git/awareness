@@ -1,6 +1,6 @@
 # Awareness ☯
 
-A mindfulness timer for macOS and Windows that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
+A mindfulness timer for macOS, Windows, and iOS/iPadOS that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
 
 ## Why?
 
@@ -18,7 +18,7 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 
 - **Menu bar / system tray app** — runs quietly with a ☯ icon, no Dock or Taskbar clutter
 - **Random blackout intervals** — configurable min/max range (e.g. 15–30 minutes) so interruptions feel natural, not mechanical
-- **Configurable duration** — 3 to 120 seconds per blackout
+- **Configurable duration range** — 3 to 120 seconds per blackout, with optional random variation between a min/max range
 - **Smart detection** — automatically skips blackouts when your camera or microphone is in use (video calls, meetings)
 - **Active time window** — only interrupts during configured hours (e.g. 06:00–20:00)
 - **Visual modes** — plain black, custom text ("Breathe."), an image, or a looping video
@@ -101,6 +101,23 @@ dotnet publish Awareness -c Release -r win-x64
 
 The output will be in `Awareness/bin/Release/net8.0-windows/win-x64/publish/`.
 
+### iOS/iPadOS
+
+#### Build from source
+
+Requirements: iOS 16+, Xcode 15+
+
+```bash
+git clone https://github.com/joergs-git/awareness.git
+cd awareness/ios/Awareness
+xcodebuild -project Awareness.xcodeproj -scheme Awareness \
+    -destination 'generic/platform=iOS Simulator' build
+```
+
+Or open `ios/Awareness/Awareness.xcodeproj` in Xcode and run on a simulator or device.
+
+**Note:** The iOS version uses local notifications to remind you to pause and breathe. When you tap a notification, the app opens and shows a full-screen blackout. The app must be granted notification permission on first launch.
+
 ## Usage
 
 After launching, a ☯ icon appears in the menu bar. Click it to:
@@ -123,7 +140,7 @@ During a blackout:
 |---|---|---|
 | Active hours | Time window for blackouts | 06:00 – 20:00 |
 | Interval range | Min/max minutes between blackouts | 15 – 30 min |
-| Duration | How long each blackout lasts | 20 seconds |
+| Duration range | Min/max seconds per blackout | 20 – 20 seconds |
 | Visual mode | Plain black / custom text / image / video | Text ("Breathe.") |
 | Start gong | Sound at blackout start | On |
 | End gong | Sound at blackout end | On |
@@ -154,6 +171,19 @@ During a blackout:
 - Launch at Login via `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - Version shown in About dialog is read dynamically from the assembly version
 - Deployment target: Windows 10+
+
+### iOS/iPadOS
+
+- **Swift** with **SwiftUI**, standard Xcode project
+- No third-party dependencies — only Apple frameworks (SwiftUI, AVFoundation, UserNotifications, PhotosUI)
+- Uses local notifications (`UNUserNotificationCenter`) instead of background timers
+- Pre-schedules 30 notifications at random intervals within the active time window
+- Blackout presented as a full-screen cover when user taps notification
+- Gong sounds play even in silent mode via `AVAudioSession(.playback)`
+- Settings persisted via `UserDefaults` (same as macOS)
+- Supports both iPhone and iPad
+- Version shown in home screen is read dynamically from `CFBundleShortVersionString`
+- Deployment target: iOS 16+
 
 ## Credits
 

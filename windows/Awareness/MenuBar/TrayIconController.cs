@@ -296,7 +296,7 @@ public class TrayIconController : IDisposable
     {
         var settings = SettingsManager.Shared;
         _blackoutController.Show(
-            duration: settings.BlackoutDuration,
+            duration: settings.RandomBlackoutDuration(),
             visualType: settings.VisualType,
             customText: settings.CustomText,
             imagePath: settings.CustomImagePath,

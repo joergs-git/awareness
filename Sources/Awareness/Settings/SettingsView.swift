@@ -88,12 +88,27 @@ struct SettingsView: View {
 
                 // MARK: - Blackout Duration
                 Section {
-                    HStack {
-                        Slider(value: $settings.blackoutDuration, in: 3...120, step: 1)
-                        Text("\(Int(settings.blackoutDuration))s")
-                            .monospacedDigit()
-                            .foregroundColor(.accentColor)
-                            .frame(width: 45, alignment: .trailing)
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("\(Int(settings.minBlackoutDuration))s")
+                                .monospacedDigit()
+                                .foregroundColor(.accentColor)
+                                .frame(width: 40, alignment: .trailing)
+                            Text("–")
+                                .foregroundColor(.secondary)
+                            Text("\(Int(settings.maxBlackoutDuration))s")
+                                .monospacedDigit()
+                                .foregroundColor(.accentColor)
+                                .frame(width: 40, alignment: .leading)
+                            Spacer()
+                        }
+
+                        RangeSliderView(
+                            low: $settings.minBlackoutDuration,
+                            high: $settings.maxBlackoutDuration,
+                            range: 3...120,
+                            step: 1
+                        )
                     }
                 } header: {
                     Label("Blackout Duration", systemImage: "eye.slash")

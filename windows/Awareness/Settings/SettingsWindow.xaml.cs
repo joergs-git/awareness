@@ -68,8 +68,31 @@ public partial class SettingsWindow : Window
         };
 
         // Blackout Duration
-        DurationSlider.Value = _settings.BlackoutDuration;
-        UpdateDurationLabel();
+        DurationSlider.LowValue = _settings.MinBlackoutDuration;
+        DurationSlider.HighValue = _settings.MaxBlackoutDuration;
+        UpdateDurationLabels();
+
+        // Subscribe to duration range slider changes
+        DurationSlider.Loaded += (_, _) =>
+        {
+            var lowDesc = System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
+                RangeSlider.LowValueProperty, typeof(RangeSlider));
+            lowDesc?.AddValueChanged(DurationSlider, (_, _) =>
+            {
+                if (_isLoading) return;
+                _settings.MinBlackoutDuration = DurationSlider.LowValue;
+                UpdateDurationLabels();
+            });
+
+            var highDesc = System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
+                RangeSlider.HighValueProperty, typeof(RangeSlider));
+            highDesc?.AddValueChanged(DurationSlider, (_, _) =>
+            {
+                if (_isLoading) return;
+                _settings.MaxBlackoutDuration = DurationSlider.HighValue;
+                UpdateDurationLabels();
+            });
+        };
 
         // Visual Type
         switch (_settings.VisualType)
@@ -115,17 +138,12 @@ public partial class SettingsWindow : Window
 
     // MARK: - Duration
 
-    private void OnDurationChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void UpdateDurationLabels()
     {
-        if (_isLoading) return;
-        _settings.BlackoutDuration = DurationSlider.Value;
-        UpdateDurationLabel();
-    }
-
-    private void UpdateDurationLabel()
-    {
-        if (DurationLabel != null)
-            DurationLabel.Text = $"{(int)DurationSlider.Value}s";
+        if (MinDurationLabel != null)
+            MinDurationLabel.Text = $"{(int)DurationSlider.LowValue}s";
+        if (MaxDurationLabel != null)
+            MaxDurationLabel.Text = $"{(int)DurationSlider.HighValue}s";
     }
 
     // MARK: - Visual Type

@@ -158,7 +158,7 @@ public class BlackoutScheduler
 
         // Trigger the blackout with all configured visual settings
         _blackoutController.Show(
-            duration: _settings.BlackoutDuration,
+            duration: _settings.RandomBlackoutDuration(),
             visualType: _settings.VisualType,
             customText: _settings.CustomText,
             imagePath: _settings.CustomImagePath,

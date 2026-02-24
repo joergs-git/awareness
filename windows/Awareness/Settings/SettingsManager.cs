@@ -30,7 +30,8 @@ public class SettingsManager : INotifyPropertyChanged
 
     private int _activeStartHour = 6;
     private int _activeEndHour = 20;
-    private double _blackoutDuration = 20.0;
+    private double _minBlackoutDuration = 20.0;
+    private double _maxBlackoutDuration = 20.0;
     private double _minInterval = 15.0;   // minutes
     private double _maxInterval = 30.0;   // minutes
     private bool _startGongEnabled = true;
@@ -58,11 +59,36 @@ public class SettingsManager : INotifyPropertyChanged
         set { if (SetField(ref _activeEndHour, value)) ScheduleSave(); }
     }
 
-    /// <summary>How long each blackout lasts (seconds)</summary>
-    public double BlackoutDuration
+    /// <summary>Minimum blackout duration (seconds)</summary>
+    public double MinBlackoutDuration
     {
-        get => _blackoutDuration;
-        set { if (SetField(ref _blackoutDuration, value)) ScheduleSave(); }
+        get => _minBlackoutDuration;
+        set
+        {
+            if (SetField(ref _minBlackoutDuration, value))
+            {
+                // Enforce: min cannot exceed max
+                if (_minBlackoutDuration > _maxBlackoutDuration)
+                    MaxBlackoutDuration = _minBlackoutDuration;
+                ScheduleSave();
+            }
+        }
+    }
+
+    /// <summary>Maximum blackout duration (seconds)</summary>
+    public double MaxBlackoutDuration
+    {
+        get => _maxBlackoutDuration;
+        set
+        {
+            if (SetField(ref _maxBlackoutDuration, value))
+            {
+                // Enforce: max cannot be less than min
+                if (_maxBlackoutDuration < _minBlackoutDuration)
+                    MinBlackoutDuration = _maxBlackoutDuration;
+                ScheduleSave();
+            }
+        }
     }
 
     /// <summary>Minimum delay between blackouts (minutes)</summary>
@@ -161,6 +187,17 @@ public class SettingsManager : INotifyPropertyChanged
     /// <summary>Whether the app is currently snoozed</summary>
     public bool IsSnoozed => SnoozeUntil.HasValue && DateTime.Now < SnoozeUntil.Value;
 
+    /// <summary>
+    /// Returns a random blackout duration between min and max (seconds).
+    /// If both values are equal, returns the fixed duration.
+    /// </summary>
+    public double RandomBlackoutDuration()
+    {
+        if (_maxBlackoutDuration <= _minBlackoutDuration)
+            return _minBlackoutDuration;
+        return _minBlackoutDuration + Random.Shared.NextDouble() * (_maxBlackoutDuration - _minBlackoutDuration);
+    }
+
     // MARK: - Init
 
     private SettingsManager()
@@ -186,7 +223,19 @@ public class SettingsManager : INotifyPropertyChanged
 
             _activeStartHour = data.ActiveStartHour;
             _activeEndHour = data.ActiveEndHour;
-            _blackoutDuration = data.BlackoutDuration;
+
+            // Migrate: if JSON has old blackoutDuration but no min/max, map it
+            if (data.MinBlackoutDuration == 0 && data.MaxBlackoutDuration == 0 && data.BlackoutDuration > 0)
+            {
+                _minBlackoutDuration = data.BlackoutDuration;
+                _maxBlackoutDuration = data.BlackoutDuration;
+            }
+            else
+            {
+                _minBlackoutDuration = data.MinBlackoutDuration > 0 ? data.MinBlackoutDuration : 20.0;
+                _maxBlackoutDuration = data.MaxBlackoutDuration > 0 ? data.MaxBlackoutDuration : 20.0;
+            }
+
             _minInterval = data.MinInterval;
             _maxInterval = data.MaxInterval;
             _startGongEnabled = data.StartGongEnabled;
@@ -217,7 +266,8 @@ public class SettingsManager : INotifyPropertyChanged
             {
                 ActiveStartHour = _activeStartHour,
                 ActiveEndHour = _activeEndHour,
-                BlackoutDuration = _blackoutDuration,
+                MinBlackoutDuration = _minBlackoutDuration,
+                MaxBlackoutDuration = _maxBlackoutDuration,
                 MinInterval = _minInterval,
                 MaxInterval = _maxInterval,
                 StartGongEnabled = _startGongEnabled,
@@ -274,7 +324,13 @@ public class SettingsManager : INotifyPropertyChanged
         public int ActiveEndHour { get; set; } = 20;
 
         [JsonPropertyName("blackoutDuration")]
-        public double BlackoutDuration { get; set; } = 20.0;
+        public double BlackoutDuration { get; set; } = 0;
+
+        [JsonPropertyName("minBlackoutDuration")]
+        public double MinBlackoutDuration { get; set; } = 20.0;
+
+        [JsonPropertyName("maxBlackoutDuration")]
+        public double MaxBlackoutDuration { get; set; } = 20.0;
 
         [JsonPropertyName("minInterval")]
         public double MinInterval { get; set; } = 15.0;
