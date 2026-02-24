@@ -194,6 +194,17 @@ class StatusBarController: NSObject {
         aboutItem.target = self
         menu.addItem(aboutItem)
 
+        // Update Available (shown only when a newer release exists on GitHub)
+        if UpdateChecker.shared.updateAvailable, let version = UpdateChecker.shared.latestVersion {
+            let updateItem = NSMenuItem(
+                title: "Update Available (v\(version))",
+                action: #selector(openReleasePage),
+                keyEquivalent: ""
+            )
+            updateItem.target = self
+            menu.addItem(updateItem)
+        }
+
         menu.addItem(NSMenuItem.separator())
 
         // Quit
@@ -321,6 +332,12 @@ class StatusBarController: NSObject {
             if let url = URL(string: "https://github.com/joergs-git/awareness") {
                 NSWorkspace.shared.open(url)
             }
+        }
+    }
+
+    @objc private func openReleasePage() {
+        if let url = URL(string: UpdateChecker.shared.releaseURL) {
+            NSWorkspace.shared.open(url)
         }
     }
 

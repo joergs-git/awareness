@@ -24,6 +24,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Pause blackouts when the system is idle (sleep, lock screen, screensaver)
         configureSystemStateDetector()
 
+        // Check for updates on GitHub (background, non-blocking)
+        UpdateChecker.shared.check()
+
         // Show a welcome message on first launch
         showWelcomeIfFirstLaunch()
     }

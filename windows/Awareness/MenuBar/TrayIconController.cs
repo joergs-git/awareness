@@ -213,6 +213,18 @@ public class TrayIconController : IDisposable
         var aboutItem = new MenuItem { Header = "About Awareness..." };
         aboutItem.Click += (_, _) => ShowAbout();
         menu.Items.Add(aboutItem);
+
+        // Update Available (shown only when a newer release exists on GitHub)
+        if (UpdateChecker.Shared.UpdateAvailable && UpdateChecker.Shared.LatestVersion != null)
+        {
+            var updateItem = new MenuItem
+            {
+                Header = $"Update Available (v{UpdateChecker.Shared.LatestVersion})"
+            };
+            updateItem.Click += (_, _) => OpenReleasePage();
+            menu.Items.Add(updateItem);
+        }
+
         menu.Items.Add(new Separator());
 
         // Quit
@@ -320,6 +332,14 @@ public class TrayIconController : IDisposable
             "How to Use Awareness",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
+    }
+
+    private static void OpenReleasePage()
+    {
+        Process.Start(new ProcessStartInfo(UpdateChecker.ReleaseUrl)
+        {
+            UseShellExecute = true
+        });
     }
 
     private void ShowAbout()

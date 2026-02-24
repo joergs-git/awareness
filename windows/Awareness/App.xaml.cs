@@ -48,6 +48,9 @@ public partial class App : Application
         // Register for display power change notifications (requires UI thread)
         SystemStateDetector.Shared.RegisterDisplayNotifications();
 
+        // Check for updates on GitHub (background, non-blocking)
+        _ = UpdateChecker.Shared.CheckAsync();
+
         // Show a welcome message on first launch
         ShowWelcomeIfFirstLaunch();
     }
