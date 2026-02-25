@@ -1,0 +1,5 @@
+What's New in v1.4:
+
+- Progress tracking: See your practice at a glance with a donut chart, daily and lifetime statistics, and a 14-day history bar chart
+- Localization: Full English and German language support
+- Bug fixes and stability improvements

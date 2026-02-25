@@ -1,0 +1,5 @@
+Neu in Version 1.4:
+
+- Fortschrittsverfolgung: Sieh deine Praxis auf einen Blick mit Donut-Diagramm, Tages- und Gesamtstatistiken und einem 14-Tage-Balkendiagramm
+- Lokalisierung: Vollständige Unterstützung für Englisch und Deutsch
+- Fehlerbehebungen und Stabilitätsverbesserungen

@@ -37,6 +37,8 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 - **Apple Watch companion** — standalone watchOS app with haptic feedback, notification scheduling, and WidgetKit complications for your watch face
 - **Settings sync** — bidirectional settings sync between iPhone and Apple Watch via WatchConnectivity
 - **Watch face complications** — see your status and next blackout time directly on your watch face (circular, rectangular, and inline styles)
+- **Progress tracking** — donut chart showing today's completion, lifetime statistics, and a 14-day bar chart history
+- **Localization** — English and German (EN/DE)
 - **Update checker** — checks GitHub for newer releases on startup and shows an "Update Available" menu item linking to the download page
 
 ## Installation

@@ -106,7 +106,7 @@ Requires watchOS 10+, Xcode 15+.
 - Blackout presented as `fullScreenCover` with `WKExtendedRuntimeSession(.mindfulness)` to keep the app alive
 - Haptic feedback via `WKInterfaceDevice.current().play()` (`.start` at begin, `.success` at end)
 - Settings stored in `UserDefaults`, synced bidirectionally with companion iPhone via `WCSession.updateApplicationContext()`
-- Shared source files via target membership: `BlackoutVisualType`, `TimeWindow`, `SettingsManager`, `HealthKitManager`, `UpdateChecker`
+- Shared source files via target membership: `BlackoutVisualType`, `TimeWindow`, `SettingsManager`, `HealthKitManager`, `UpdateChecker`, `ProgressTracker`
 - WidgetKit complication extension for watch face (accessoryCircular, accessoryRectangular, accessoryInline)
 
 ## Project Structure
@@ -143,7 +143,12 @@ Sources/Awareness/
 ├── Models/
 │   ├── BlackoutVisualType.swift        # Enum: plainBlack/text/image/video
 │   └── TimeWindow.swift               # Active hours model
+├── Progress/
+│   ├── ProgressTracker.swift           # Singleton tracking triggered/completed blackouts per day
+│   ├── ProgressView.swift             # SwiftUI donut chart, today stats, 14-day bar chart
+│   └── ProgressWindowController.swift # NSWindow hosting SwiftUI progress view
 └── Resources/
+    ├── Localizable.xcstrings           # String catalog (EN/DE localization)
     ├── awareness-gong.aiff             # Higher-pitched start gong
     ├── awareness-gong-end.aiff         # Deeper-pitched end gong
     └── default-blackout.png            # Default image for image mode
@@ -178,7 +183,13 @@ windows/Awareness/
 ├── Interop/
 │   ├── NativeMethods.cs                # P/Invoke declarations
 │   └── LowLevelKeyboardHook.cs         # WH_KEYBOARD_LL keystroke suppression
+├── Progress/
+│   ├── ProgressTracker.cs              # Singleton tracking triggered/completed blackouts per day
+│   └── ProgressWindow.xaml/.cs         # WPF progress window with donut chart, stats, bar chart
 └── Resources/
+    ├── Strings.resx                    # English resource strings (localization)
+    ├── Strings.de.resx                 # German resource strings (localization)
+    ├── Strings.Designer.cs             # Auto-generated string accessor class
     ├── awareness-gong.wav              # Start gong (converted from .aiff)
     ├── awareness-gong-end.wav          # End gong (converted from .aiff)
     ├── default-blackout.png            # Default image for image mode
@@ -209,8 +220,12 @@ ios/Awareness/
     │   └── NotificationScheduler.swift # UNUserNotificationCenter scheduling
     ├── Health/
     │   └── HealthKitManager.swift     # Mindful session logging to Apple Health
+    ├── Progress/
+    │   ├── ProgressTracker.swift       # Singleton tracking triggered/completed blackouts per day
+    │   └── ProgressView.swift         # SwiftUI donut chart, today stats, 14-day bar chart
     ├── Connectivity/
     │   └── WatchConnectivityManager.swift  # iOS-side WCSession delegate for watch sync
+    ├── Localizable.xcstrings           # String catalog (EN/DE localization)
     ├── Assets.xcassets/                # App icon (1024x1024), accent color
     └── Resources/
         ├── awareness-gong.aiff         # Start gong (notification sound + in-app)
@@ -228,6 +243,7 @@ ios/Awareness/AwarenessWatch/
 ├── SettingsView.swift                  # Compact Form: hours, intervals, duration, haptics, health
 ├── HapticPlayer.swift                  # WKInterfaceDevice haptic wrapper (.start / .success)
 ├── NotificationScheduler.swift         # 30 pre-scheduled notifications, no image attachment
+├── ProgressView.swift                  # Compact progress display (donut, today stats, 7-day chart)
 ├── WatchConnectivityManager.swift      # watchOS-side WCSession delegate for iPhone sync
 ├── AwarenessWatch.entitlements         # HealthKit entitlement
 ├── Assets.xcassets/                    # Watch app icon (1024x1024), accent color
@@ -254,6 +270,8 @@ ios/Awareness/AwarenessWatch/
 | Launch at Login | `SMAppService.mainApp` (macOS 13+) |
 | Update checker | `URLSession` queries GitHub releases API once on startup; skipped in sandbox (App Store handles updates) |
 | Distribution | SPM dev build (`make bundle`), Mac App Store (Xcode + sandbox), Direct (`make release-direct` + notarization) |
+| Progress tracking | `ProgressTracker.shared` stores daily triggered/completed counts in `UserDefaults`; donut chart + 14-day bar chart in `ProgressView` |
+| Localization | `Localizable.xcstrings` string catalog with EN/DE; `String(localized:)` API |
 
 ### Windows
 
@@ -277,6 +295,8 @@ ios/Awareness/AwarenessWatch/
 | Audio | NAudio `WaveOutEvent` with self-disposing playback (new instance per gong) |
 | Single instance | Named `Mutex("Awareness-SingleInstance")` |
 | Update checker | `HttpClient` queries GitHub releases API once on startup; shows menu item if newer version exists |
+| Progress tracking | `ProgressTracker.Shared` stores daily triggered/completed counts in `progress.json` (`%APPDATA%`); donut chart + 14-day bar chart in `ProgressWindow` |
+| Localization | `.resx` resource files (`Strings.resx` EN, `Strings.de.resx` DE); `Strings.Designer.cs` auto-generated accessor |
 
 ### iOS/iPadOS
 
@@ -299,6 +319,8 @@ ios/Awareness/AwarenessWatch/
 | End flash | White `Color.white` overlay flashes for ~1s at end of blackout before fade-out; opt-in via `endFlashEnabled` |
 | Update checker | Same as macOS — `URLSession` queries GitHub releases API once on startup |
 | WatchConnectivity | `WatchConnectivityManager.shared` syncs settings to/from companion Apple Watch via `WCSession.updateApplicationContext()` |
+| Progress tracking | `ProgressTracker.shared` stores daily triggered/completed counts in `UserDefaults`; donut chart + 14-day bar chart in `ProgressView` |
+| Localization | `Localizable.xcstrings` string catalog with EN/DE; `String(localized:)` API |
 
 ### watchOS
 
@@ -318,6 +340,7 @@ ios/Awareness/AwarenessWatch/
 | Visual modes | Plain black or custom text only (no image/video on watch) |
 | Complication | WidgetKit extension: `accessoryCircular` (☯ with status tint), `accessoryRectangular` ("Awareness" + next time), `accessoryInline` |
 | Update checker | Same as iOS — `URLSession` queries GitHub releases API once on startup |
+| Progress tracking | Shared `ProgressTracker.shared` via target membership (same code as iOS); compact donut + 7-day chart in `ProgressView` |
 
 ## Configurable Settings
 
@@ -334,6 +357,7 @@ ios/Awareness/AwarenessWatch/
 - **End flash** (iOS only) — 1-second white screen blink at end of blackout, visible through closed eyelids (default: off)
 - **Start haptic** (watchOS only) — Taptic Engine feedback when blackout begins (default: on)
 - **End haptic** (watchOS only) — Taptic Engine feedback when blackout ends (default: on)
+- **Progress** — view today's completion donut, lifetime stats, and 14-day (macOS/iOS) or 7-day (watchOS) bar chart history; accessible from menu bar (macOS), navigation (iOS/watchOS), or tray menu (Windows)
 
 ## Notes for Development
 
@@ -348,6 +372,8 @@ ios/Awareness/AwarenessWatch/
 - **Mac App Store distribution**: `Awareness.xcodeproj` at repo root references all sources in `Sources/Awareness/`. Uses `SupportFiles/Awareness.entitlements` (App Sandbox with network client + user-selected file access). Security-scoped bookmarks in `SettingsManager` preserve file access across launches. `DistributedNotificationCenter` won't deliver screen lock/screensaver notifications in the sandbox — sleep/wake via `NSWorkspace` still works.
 - **Direct distribution**: `make bundle-signed` signs with Developer ID + hardened runtime using `SupportFiles/Awareness-Direct.entitlements`. `make release-direct` additionally creates a ZIP, submits for notarization, and staples the ticket. Requires one-time `xcrun notarytool store-credentials` setup.
 - Xcode project uses A2/B2/C2/D2/E2/F2 hex IDs in `project.pbxproj` (iOS project uses A1/B1 series — no collision)
+- **Progress tracking**: `ProgressTracker.shared` persists daily stats (triggered/completed counts, keyed by `yyyy-MM-dd`) in `UserDefaults`. `ProgressView` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Opened from the menu bar via `ProgressWindowController`.
+- **Localization**: `Localizable.xcstrings` (string catalog) in `Resources/` with EN (development language) and DE translations. Uses `String(localized:)` throughout UI code.
 
 ### Windows
 
@@ -361,6 +387,8 @@ ios/Awareness/AwarenessWatch/
 - About dialog version is read dynamically from the assembly version (`Version` in `.csproj`) — no hardcoded version strings
 - Update checker: `UpdateChecker.Shared` uses `HttpClient` to query the GitHub releases API, compares `tag_name` against assembly version (`Version` in `.csproj`). Menu item appears between "About" and "Quit" when an update is available.
 - Settings migration: if JSON has old `blackoutDuration` but no `minBlackoutDuration`/`maxBlackoutDuration`, the old value is mapped to both new fields
+- **Progress tracking**: `ProgressTracker.Shared` persists daily stats in `progress.json` (same `%APPDATA%\Awareness\` directory as settings). `ProgressWindow` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Opened from the tray context menu.
+- **Localization**: `Strings.resx` (EN) and `Strings.de.resx` (DE) in `Resources/`. `Strings.Designer.cs` is auto-generated. All UI strings referenced via `Strings.KeyName`. Language follows system locale.
 
 ### iOS/iPadOS
 
@@ -378,20 +406,23 @@ ios/Awareness/AwarenessWatch/
 - **Haptic vibration**: `vibrationEnabled` setting (Bool, default false). Heavy impact at blackout start, success notification at end. No extra imports needed — UIKit haptics available via SwiftUI bridging. Does not work on simulator.
 - **End flash**: `endFlashEnabled` setting (Bool, default false). White overlay layer with 0.15s ease-in, 1s hold, 0.15s ease-out. Main fade-out delayed by 1.3s when flash is active.
 - **WatchConnectivity**: `Connectivity/WatchConnectivityManager.swift` on the iOS side syncs settings bidirectionally with the companion Apple Watch. Uses `objectWillChange` (not Combine merge chains) to observe settings changes — complex merge chains cause Swift type-checker timeouts. `isApplyingRemoteContext` guard prevents infinite sync loops. Required `sessionDidBecomeInactive` / `sessionDidDeactivate` stubs are iOS-only.
+- **Progress tracking**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation. `ProgressTracker.swift` is shared with watchOS via target membership.
+- **Localization**: `Localizable.xcstrings` (string catalog) at `Awareness/Localizable.xcstrings` with EN and DE translations. Uses `String(localized:)` throughout UI code.
 
 ### watchOS
 
 - Part of the iOS Xcode project (`ios/Awareness/Awareness.xcodeproj`), not a separate project
 - Two targets: `AwarenessWatch` (watchOS app, E30099) and `AwarenessWatchComplication` (WidgetKit extension, E40099)
 - `project.pbxproj` uses A3/B3/C3/D3/E3/F3/G3 hex IDs for watch target, A4/B4/C4/D4/E4/F4 for widget extension (iOS uses A1/B1, macOS uses A2/B2 — no collision)
-- Shared files via target membership: `BlackoutVisualType.swift`, `TimeWindow.swift`, `SettingsManager.swift`, `HealthKitManager.swift`, `UpdateChecker.swift`
+- Shared files via target membership: `BlackoutVisualType.swift`, `TimeWindow.swift`, `SettingsManager.swift`, `HealthKitManager.swift`, `UpdateChecker.swift`, `ProgressTracker.swift`
 - `SettingsManager.swift` uses `#if os(watchOS)` / `#if !os(watchOS)` guards for platform-specific settings (haptics on watch, gong/vibration/endFlash/image/video on iOS)
 - Watch-specific settings: `hapticStartEnabled` (default: true), `hapticEndEnabled` (default: true)
 - `WKExtendedRuntimeSession(.mindfulness)` keeps the app alive during blackouts (up to 1 hour)
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` prevents echo loops.
-- Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, and `HealthKitManager` via target membership
+- Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, `HealthKitManager`, and `ProgressTracker` via target membership
 - Bundle IDs: `com.joergsflow.awareness.ios.watch` (watch app), `com.joergsflow.awareness.ios.watch.widget` (widget extension)
 - `WKCompanionAppBundleIdentifier`: `com.joergsflow.awareness.ios`
 - Entitlements: `AwarenessWatch/AwarenessWatch.entitlements` with `com.apple.developer.healthkit`
 - iOS target has "Embed Watch Content" build phase that embeds `AwarenessWatch.app`; watch target has "Embed App Extensions" phase for the complication
+- **Progress tracking**: Shared `ProgressTracker.shared` (same code as iOS via target membership). `ProgressView.swift` is watch-specific with a compact layout: donut chart, today stats, and 7-day bar chart. Complication widget extension also has `ProgressTracker` via target membership.
