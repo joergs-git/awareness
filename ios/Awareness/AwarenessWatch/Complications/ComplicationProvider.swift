@@ -48,16 +48,17 @@ struct AwarenessEntry: TimelineEntry {
 
 // MARK: - Complication Views
 
-/// Circular complication — ☯ symbol with green/orange tint
+/// Circular complication — yin-yang icon from image asset
 struct AccessoryCircularView: View {
     let entry: AwarenessEntry
 
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
-            Image(systemName: "yinyang")
-                .font(.title2)
-                .foregroundColor(entry.isSnoozed ? .orange : .green)
+            Image("YinYang")
+                .resizable()
+                .scaledToFit()
+                .clipShape(Circle())
         }
     }
 }
@@ -68,24 +69,24 @@ struct AccessoryRectangularView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("Awareness")
+            Text(String(localized: "Awareness"))
                 .font(.headline)
                 .widgetAccentable()
             if entry.isSnoozed {
                 if let until = entry.snoozeUntil, until < Date.distantFuture {
-                    Text("Snoozed until \(formatTime(until))")
+                    Text(String(localized: "Snoozed until \(formatTime(until))"))
                         .font(.caption)
                         .foregroundColor(.orange)
                 } else {
-                    Text("Snoozed")
+                    Text(String(localized: "Snoozed"))
                         .font(.caption)
                         .foregroundColor(.orange)
                 }
             } else if let next = entry.nextBlackout {
-                Text("Next: \(formatTime(next))")
+                Text(String(localized: "Next: \(formatTime(next))"))
                     .font(.caption)
             } else {
-                Text("Active")
+                Text(String(localized: "Active"))
                     .font(.caption)
             }
         }
@@ -104,11 +105,11 @@ struct AccessoryInlineView: View {
 
     var body: some View {
         if entry.isSnoozed {
-            Text("Awareness ☯ Snoozed")
+            Text(String(localized: "Awareness ☯ Snoozed"))
         } else if let next = entry.nextBlackout {
-            Text("Awareness ☯ Next \(formatTime(next))")
+            Text(String(localized: "Awareness ☯ Next \(formatTime(next))"))
         } else {
-            Text("Awareness ☯ Active")
+            Text(String(localized: "Awareness ☯ Active"))
         }
     }
 
@@ -136,8 +137,8 @@ struct AwarenessComplicationWidget: Widget {
                 complicationView(for: entry)
             }
         }
-        .configurationDisplayName("Awareness")
-        .description("Shows your next mindful moment.")
+        .configurationDisplayName(String(localized: "Awareness"))
+        .description(String(localized: "Shows your next mindful moment."))
         .supportedFamilies([
             .accessoryCircular,
             .accessoryRectangular,

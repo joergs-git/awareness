@@ -65,7 +65,7 @@ struct BlackoutContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             // Last resort fallback
-            Text("Breathe.")
+            Text(String(localized: "Breathe."))
                 .font(.system(size: 36, weight: .light))
                 .foregroundColor(.white.opacity(0.5))
         }
@@ -88,7 +88,7 @@ struct BlackoutContentView: View {
             VideoLoopView(url: url)
         } else {
             // Fallback when no video is configured
-            Text("No video selected")
+            Text(String(localized: "No video selected"))
                 .foregroundColor(.white.opacity(0.3))
                 .font(.title2)
         }

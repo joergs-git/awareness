@@ -16,25 +16,25 @@ struct SettingsView: View {
             Form {
                 // MARK: - Active Hours
                 Section {
-                    Picker("From", selection: $settings.activeStartHour) {
+                    Picker(String(localized: "From"), selection: $settings.activeStartHour) {
                         ForEach(0..<24, id: \.self) { hour in
                             Text(formatHour(hour)).tag(hour)
                         }
                     }
-                    Picker("Until", selection: $settings.activeEndHour) {
+                    Picker(String(localized: "Until"), selection: $settings.activeEndHour) {
                         ForEach(0..<24, id: \.self) { hour in
                             Text(formatHour(hour)).tag(hour)
                         }
                     }
                 } header: {
-                    Label("Active Hours", systemImage: "clock")
+                    Label(String(localized: "Active Hours"), systemImage: "clock")
                 }
 
                 // MARK: - Interval Range
                 Section {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Min: \(Int(settings.minInterval)) min")
+                            Text(String(localized: "Min: \(Int(settings.minInterval)) min"))
                                 .monospacedDigit()
                             Spacer()
                         }
@@ -42,21 +42,21 @@ struct SettingsView: View {
                     }
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Max: \(Int(settings.maxInterval)) min")
+                            Text(String(localized: "Max: \(Int(settings.maxInterval)) min"))
                                 .monospacedDigit()
                             Spacer()
                         }
                         Slider(value: $settings.maxInterval, in: 1...120, step: 1)
                     }
                 } header: {
-                    Label("Interval Between Blackouts", systemImage: "timer")
+                    Label(String(localized: "Interval Between Blackouts"), systemImage: "timer")
                 }
 
                 // MARK: - Blackout Duration
                 Section {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Min: \(Int(settings.minBlackoutDuration))s")
+                            Text(String(localized: "Min: \(Int(settings.minBlackoutDuration))s"))
                                 .monospacedDigit()
                             Spacer()
                         }
@@ -64,19 +64,19 @@ struct SettingsView: View {
                     }
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Max: \(Int(settings.maxBlackoutDuration))s")
+                            Text(String(localized: "Max: \(Int(settings.maxBlackoutDuration))s"))
                                 .monospacedDigit()
                             Spacer()
                         }
                         Slider(value: $settings.maxBlackoutDuration, in: 3...120, step: 1)
                     }
                 } header: {
-                    Label("Blackout Duration", systemImage: "eye.slash")
+                    Label(String(localized: "Blackout Duration"), systemImage: "eye.slash")
                 }
 
                 // MARK: - Visual Type
                 Section {
-                    Picker("Style", selection: $settings.visualType) {
+                    Picker(String(localized: "Style"), selection: $settings.visualType) {
                         ForEach(BlackoutVisualType.allCases) { type in
                             Text(type.displayName).tag(type)
                         }
@@ -85,7 +85,7 @@ struct SettingsView: View {
 
                     switch settings.visualType {
                     case .text:
-                        TextField("Display text", text: $settings.customText)
+                        TextField(String(localized: "Display text"), text: $settings.customText)
 
                     case .image:
                         PhotosPicker(
@@ -94,13 +94,13 @@ struct SettingsView: View {
                             photoLibrary: .shared()
                         ) {
                             HStack {
-                                Text("Choose Image")
+                                Text(String(localized: "Choose Image"))
                                 Spacer()
                                 if !settings.customImagePath.isEmpty {
-                                    Text("Selected")
+                                    Text(String(localized: "Selected"))
                                         .foregroundColor(.secondary)
                                 } else {
-                                    Text("Default")
+                                    Text(String(localized: "Default"))
                                         .foregroundColor(.secondary)
                                 }
                             }
@@ -110,7 +110,7 @@ struct SettingsView: View {
                         })
 
                         if !settings.customImagePath.isEmpty {
-                            Button("Clear Selection", role: .destructive) {
+                            Button(String(localized: "Clear Selection"), role: .destructive) {
                                 settings.customImagePath = ""
                             }
                         }
@@ -120,13 +120,13 @@ struct SettingsView: View {
                             showingVideoImporter = true
                         } label: {
                             HStack {
-                                Text("Choose Video")
+                                Text(String(localized: "Choose Video"))
                                 Spacer()
                                 if !settings.customVideoPath.isEmpty {
-                                    Text("Selected")
+                                    Text(String(localized: "Selected"))
                                         .foregroundColor(.secondary)
                                 } else {
-                                    Text("None")
+                                    Text(String(localized: "None"))
                                         .foregroundColor(.secondary)
                                 }
                             }
@@ -142,7 +142,7 @@ struct SettingsView: View {
                         }
 
                         if !settings.customVideoPath.isEmpty {
-                            Button("Clear Selection", role: .destructive) {
+                            Button(String(localized: "Clear Selection"), role: .destructive) {
                                 settings.customVideoPath = ""
                             }
                         }
@@ -151,49 +151,49 @@ struct SettingsView: View {
                         EmptyView()
                     }
                 } header: {
-                    Label("Blackout Visual", systemImage: "paintbrush")
+                    Label(String(localized: "Blackout Visual"), systemImage: "paintbrush")
                 }
 
                 // MARK: - Feedback
                 Section {
-                    Toggle("Start gong (begin of blackout)", isOn: $settings.startGongEnabled)
-                    Toggle("End gong (end of blackout)", isOn: $settings.endGongEnabled)
-                    Toggle("Vibration (start and end)", isOn: $settings.vibrationEnabled)
-                    Toggle("End flash (visible through closed eyes)", isOn: $settings.endFlashEnabled)
+                    Toggle(String(localized: "Start gong (begin of blackout)"), isOn: $settings.startGongEnabled)
+                    Toggle(String(localized: "End gong (end of blackout)"), isOn: $settings.endGongEnabled)
+                    Toggle(String(localized: "Vibration (start and end)"), isOn: $settings.vibrationEnabled)
+                    Toggle(String(localized: "End flash (visible through closed eyes)"), isOn: $settings.endFlashEnabled)
                 } header: {
-                    Label("Feedback", systemImage: "bell")
+                    Label(String(localized: "Feedback"), systemImage: "bell")
                 } footer: {
-                    Text("Vibration is useful when the phone is on silent and your eyes are closed.")
+                    Text(String(localized: "Vibration is useful when the phone is on silent and your eyes are closed."))
                 }
 
                 // MARK: - Behavior
                 Section {
-                    Toggle("Handcuffs mode", isOn: $settings.handcuffsMode)
+                    Toggle(String(localized: "Handcuffs mode"), isOn: $settings.handcuffsMode)
                 } header: {
-                    Label("Behavior", systemImage: "lock")
+                    Label(String(localized: "Behavior"), systemImage: "lock")
                 } footer: {
-                    Text("When on, tap cannot dismiss the blackout early.")
+                    Text(String(localized: "When on, tap cannot dismiss the blackout early."))
                 }
 
                 // MARK: - Health
                 Section {
-                    Toggle("Log to Apple Health", isOn: $settings.healthKitEnabled)
+                    Toggle(String(localized: "Log to Apple Health"), isOn: $settings.healthKitEnabled)
                         .onChange(of: settings.healthKitEnabled, perform: { enabled in
                             if enabled {
                                 Task { await HealthKitManager.shared.requestAuthorization() }
                             }
                         })
                 } header: {
-                    Label("Health", systemImage: "heart.fill")
+                    Label(String(localized: "Health"), systemImage: "heart.fill")
                 } footer: {
-                    Text("Records each mindful pause as Mindful Minutes in Apple Health.")
+                    Text(String(localized: "Records each mindful pause as Mindful Minutes in Apple Health."))
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(String(localized: "Settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button(String(localized: "Done")) {
                         dismiss()
                     }
                 }

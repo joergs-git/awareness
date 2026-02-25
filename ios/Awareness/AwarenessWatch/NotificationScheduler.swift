@@ -37,12 +37,12 @@ class NotificationScheduler: ObservableObject {
     private func registerCategory() {
         let startAction = UNNotificationAction(
             identifier: NotificationScheduler.actionStart,
-            title: "Start Blackout",
+            title: String(localized: "Start Blackout"),
             options: [.foreground]
         )
         let snoozeAction = UNNotificationAction(
             identifier: NotificationScheduler.actionSnooze,
-            title: "Snooze 30 min",
+            title: String(localized: "Snooze 30 min"),
             options: []
         )
         let category = UNNotificationCategory(
@@ -230,9 +230,9 @@ class NotificationScheduler: ObservableObject {
     /// Build notification content — no image attachment on watchOS, uses default sound
     private func makeNotificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = "Awareness ☯"
-        content.subtitle = "Time to pause and breathe"
-        content.body = "Tap to begin a mindful moment."
+        content.title = String(localized: "Awareness ☯")
+        content.subtitle = String(localized: "Time to pause and breathe")
+        content.body = String(localized: "Tap to begin a mindful moment.")
         content.sound = .default
         content.categoryIdentifier = NotificationScheduler.categoryIdentifier
         return content

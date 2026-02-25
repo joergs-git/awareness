@@ -28,9 +28,9 @@ struct ContentView: View {
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
-                        Text("Awareness")
+                        Text(String(localized: "Awareness"))
                             .font(.title2.weight(.medium))
-                        Text("A mindfulness timer")
+                        Text(String(localized: "A mindfulness timer"))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -42,7 +42,7 @@ struct ContentView: View {
                 // MARK: - Status Section
                 Section {
                     HStack {
-                        Label("Status", systemImage: "circle.fill")
+                        Label(String(localized: "Status"), systemImage: "circle.fill")
                             .foregroundColor(statusColor)
                         Spacer()
                         Text(statusText)
@@ -51,7 +51,7 @@ struct ContentView: View {
 
                     if let nextDate = scheduler.nextNotificationDate, !settings.isSnoozed {
                         HStack {
-                            Label("Next", systemImage: "clock")
+                            Label(String(localized: "Next"), systemImage: "clock")
                             Spacer()
                             Text(formatTime(nextDate))
                                 .foregroundColor(.secondary)
@@ -59,15 +59,15 @@ struct ContentView: View {
                     }
                     if settings.healthKitEnabled && HealthKitManager.shared.isAuthorized() {
                         HStack {
-                            Label("Mindful Minutes", systemImage: "heart.fill")
+                            Label(String(localized: "Mindful Minutes"), systemImage: "heart.fill")
                                 .foregroundColor(.pink)
                             Spacer()
-                            Text("Connected")
+                            Text(String(localized: "Connected"))
                                 .foregroundColor(.secondary)
                         }
                     }
                 } header: {
-                    Text("Schedule")
+                    Text(String(localized: "Schedule"))
                 }
 
                 // MARK: - Notification Warning
@@ -76,10 +76,10 @@ struct ContentView: View {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.orange)
-                            Text("Notifications are disabled. Awareness needs notifications to remind you to pause.")
+                            Text(String(localized: "Notifications are disabled. Awareness needs notifications to remind you to pause."))
                                 .font(.callout)
                         }
-                        Button("Open Settings") {
+                        Button(String(localized: "Open Settings")) {
                             if let url = URL(string: UIApplication.openSettingsURLString) {
                                 UIApplication.shared.open(url)
                             }
@@ -92,15 +92,15 @@ struct ContentView: View {
                     Button {
                         showingBlackout = true
                     } label: {
-                        Label("Test Blackout", systemImage: "play.circle")
+                        Label(String(localized: "Test Blackout"), systemImage: "play.circle")
                     }
                     Button {
                         scheduler.scheduleTestNotification()
                     } label: {
-                        Label("Test Notification (3s)", systemImage: "bell.badge")
+                        Label(String(localized: "Test Notification (3s)"), systemImage: "bell.badge")
                     }
                 } header: {
-                    Text("Actions")
+                    Text(String(localized: "Actions"))
                 }
 
                 // MARK: - Snooze
@@ -109,7 +109,7 @@ struct ContentView: View {
                         Button {
                             scheduler.handleResume()
                         } label: {
-                            Label("Resume", systemImage: "play.fill")
+                            Label(String(localized: "Resume"), systemImage: "play.fill")
                                 .foregroundColor(.green)
                         }
                     } else {
@@ -120,17 +120,31 @@ struct ContentView: View {
                                 }
                             }
                         } label: {
-                            Label("Snooze", systemImage: "moon.fill")
+                            Label(String(localized: "Snooze"), systemImage: "moon.fill")
                         }
                     }
                 } header: {
-                    Text("Snooze")
+                    Text(String(localized: "Snooze"))
+                }
+
+                // MARK: - Progress
+                Section {
+                    NavigationLink {
+                        ProgressView()
+                    } label: {
+                        HStack {
+                            Label(String(localized: "Progress"), systemImage: "chart.pie")
+                            Spacer()
+                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
 
                 // MARK: - How It Works
                 Section {
                     Label {
-                        Text("At random intervals, you receive a gentle notification reminding you to pause")
+                        Text(String(localized: "At random intervals, you receive a gentle notification reminding you to pause"))
                     } icon: {
                         Image(systemName: "bell")
                             .foregroundColor(.accentColor)
@@ -138,7 +152,7 @@ struct ContentView: View {
                     .font(.callout)
 
                     Label {
-                        Text("Tap the notification to open a full-screen blackout with a gong sound")
+                        Text(String(localized: "Tap the notification to open a full-screen blackout with a gong sound"))
                     } icon: {
                         Image(systemName: "rectangle.inset.filled")
                             .foregroundColor(.accentColor)
@@ -146,7 +160,7 @@ struct ContentView: View {
                     .font(.callout)
 
                     Label {
-                        Text("Close your eyes, feel your breath, notice your posture")
+                        Text(String(localized: "Close your eyes, feel your breath, notice your posture"))
                     } icon: {
                         Image(systemName: "wind")
                             .foregroundColor(.accentColor)
@@ -154,38 +168,38 @@ struct ContentView: View {
                     .font(.callout)
 
                     Label {
-                        Text("After a few seconds the screen returns — you continue with a moment of clarity")
+                        Text(String(localized: "After a few seconds the screen returns — you continue with a moment of clarity"))
                     } icon: {
                         Image(systemName: "sun.max")
                             .foregroundColor(.accentColor)
                     }
                     .font(.callout)
                 } header: {
-                    Text("How It Works")
+                    Text(String(localized: "How It Works"))
                 }
 
                 // MARK: - Background
                 Section {
-                    Text("In the Vipassana tradition, awareness (sati) is the foundation of all practice. We spend hours staring at screens and gradually lose contact with ourselves — forgetting to breathe deeply, forgetting we even have a body.\n\nAwareness interrupts this pattern. A few times per hour, you are gently reminded to pause. These micro-interruptions become anchors of presence threaded through your day.\n\nThe goal of this app is to not need it anymore a little bit later.")
+                    Text(String(localized: "In the Vipassana tradition, awareness (sati) is the foundation of all practice. We spend hours staring at screens and gradually lose contact with ourselves — forgetting to breathe deeply, forgetting we even have a body.\n\nAwareness interrupts this pattern. A few times per hour, you are gently reminded to pause. These micro-interruptions become anchors of presence threaded through your day.\n\nThe goal of this app is to not need it anymore a little bit later."))
                         .font(.callout)
                         .foregroundColor(.secondary)
                         .padding(.vertical, 4)
                 } header: {
-                    Text("Why This App?")
+                    Text(String(localized: "Why This App?"))
                 }
 
                 // MARK: - About
                 Section {
                     let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
                     HStack {
-                        Text("Version")
+                        Text(String(localized: "Version"))
                         Spacer()
                         Text(version)
                             .foregroundColor(.secondary)
                     }
 
                     HStack {
-                        Text("by")
+                        Text(String(localized: "by"))
                         Spacer()
                         Text("joergsflow")
                             .foregroundColor(.secondary)
@@ -193,7 +207,7 @@ struct ContentView: View {
 
                     Link(destination: URL(string: "https://github.com/joergs-git/awareness")!) {
                         HStack {
-                            Text("GitHub")
+                            Text(String(localized: "GitHub"))
                             Spacer()
                             Image(systemName: "arrow.up.right.square")
                                 .foregroundColor(.secondary)
@@ -204,7 +218,7 @@ struct ContentView: View {
                     if UpdateChecker.shared.updateAvailable, let version = UpdateChecker.shared.latestVersion {
                         Link(destination: URL(string: UpdateChecker.shared.releaseURL)!) {
                             HStack {
-                                Label("Update Available (v\(version))", systemImage: "arrow.down.circle")
+                                Label(String(localized: "Update Available (v\(version))"), systemImage: "arrow.down.circle")
                                     .foregroundColor(.blue)
                                 Spacer()
                                 Image(systemName: "arrow.up.right.square")
@@ -213,10 +227,10 @@ struct ContentView: View {
                         }
                     }
                 } header: {
-                    Text("About")
+                    Text(String(localized: "About"))
                 }
             }
-            .navigationTitle("Awareness")
+            .navigationTitle(String(localized: "Awareness"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -249,17 +263,17 @@ struct ContentView: View {
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
             }
-            .alert("Track Your Mindful Minutes?", isPresented: $showHealthKitPrompt) {
-                Button("Enable") {
+            .alert(String(localized: "Track Your Mindful Minutes?"), isPresented: $showHealthKitPrompt) {
+                Button(String(localized: "Enable")) {
                     settings.healthKitEnabled = true
                     settings.healthKitPromptShown = true
                     Task { await HealthKitManager.shared.requestAuthorization() }
                 }
-                Button("Not Now", role: .cancel) {
+                Button(String(localized: "Not Now"), role: .cancel) {
                     settings.healthKitPromptShown = true
                 }
             } message: {
-                Text("Awareness can log each mindful pause to Apple Health so you can track your practice over time.")
+                Text(String(localized: "Awareness can log each mindful pause to Apple Health so you can track your practice over time."))
             }
         }
     }
@@ -275,12 +289,12 @@ struct ContentView: View {
     private var statusText: String {
         if settings.isSnoozed {
             if let until = settings.snoozeUntil, until < Date.distantFuture {
-                return "Snoozed until \(formatTime(until))"
+                return String(localized: "Snoozed until \(formatTime(until))")
             }
-            return "Snoozed indefinitely"
+            return String(localized: "Snoozed indefinitely")
         }
-        if !notificationsAuthorized { return "Notifications disabled" }
-        return "Active"
+        if !notificationsAuthorized { return String(localized: "Notifications disabled") }
+        return String(localized: "Active")
     }
 
     // MARK: - Helpers
@@ -292,9 +306,9 @@ struct ContentView: View {
     }
 
     private func snoozeLabel(for minutes: Int) -> String {
-        if minutes == 0 { return "Until I resume" }
-        if minutes >= 60 { return "\(minutes / 60) hour\(minutes >= 120 ? "s" : "")" }
-        return "\(minutes) minutes"
+        if minutes == 0 { return String(localized: "Until I resume") }
+        if minutes >= 60 { return "\(minutes / 60) " + (minutes >= 120 ? String(localized: "hours") : String(localized: "hour")) }
+        return String(localized: "\(minutes) minutes")
     }
 
     private func snooze(for minutes: Int) {

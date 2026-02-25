@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Awareness.Models;
+using Awareness.Resources;
 using Microsoft.Win32;
 
 namespace Awareness.Settings;
@@ -20,8 +21,22 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         _settings = SettingsManager.Shared;
+        SetLocalizedHeaders();
         LoadSettingsIntoUI();
         _isLoading = false;
+    }
+
+    /// <summary>
+    /// Set GroupBox headers with emoji prefixes from localized resource strings.
+    /// </summary>
+    private void SetLocalizedHeaders()
+    {
+        ActiveHoursGroup.Header = $"🕐  {Strings.ActiveHours}";
+        IntervalGroup.Header = $"⏱  {Strings.IntervalBetweenBlackouts}";
+        DurationGroup.Header = $"👁  {Strings.BlackoutDuration}";
+        VisualGroup.Header = $"🎨  {Strings.BlackoutVisual}";
+        SoundGroup.Header = $"🔔  {Strings.Sound}";
+        BehaviorGroup.Header = $"🔒  {Strings.Behavior}";
     }
 
     /// <summary>
@@ -180,7 +195,7 @@ public partial class SettingsWindow : Window
         var dialog = new OpenFileDialog
         {
             Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.tiff;*.gif|All Files|*.*",
-            Title = "Choose Blackout Image"
+            Title = Strings.BlackoutVisual
         };
 
         if (dialog.ShowDialog() == true)
@@ -201,7 +216,7 @@ public partial class SettingsWindow : Window
         var dialog = new OpenFileDialog
         {
             Filter = "Video Files|*.mp4;*.avi;*.wmv;*.mov;*.mkv|All Files|*.*",
-            Title = "Choose Blackout Video"
+            Title = Strings.BlackoutVisual
         };
 
         if (dialog.ShowDialog() == true)
@@ -222,7 +237,7 @@ public partial class SettingsWindow : Window
         // Image path
         if (string.IsNullOrEmpty(_settings.CustomImagePath))
         {
-            ImagePathLabel.Text = "Default";
+            ImagePathLabel.Text = Strings.Default;
             ClearImageButton.Visibility = Visibility.Collapsed;
         }
         else
@@ -234,7 +249,7 @@ public partial class SettingsWindow : Window
         // Video path
         if (string.IsNullOrEmpty(_settings.CustomVideoPath))
         {
-            VideoPathLabel.Text = "None";
+            VideoPathLabel.Text = Strings.NoneLabel;
             ClearVideoButton.Visibility = Visibility.Collapsed;
         }
         else

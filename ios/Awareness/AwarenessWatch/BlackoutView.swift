@@ -17,6 +17,10 @@ struct BlackoutView: View {
     @State private var sessionStart: Date?
     /// Extended runtime session to keep the app alive during blackout
     @State private var extendedSession: WKExtendedRuntimeSession?
+    /// Opacity of the white end-of-blackout flash layer
+    @State private var flashOpacity: Double = 0
+    /// Whether the blackout ran its full duration (not dismissed early)
+    @State private var completedFullDuration = false
 
     var body: some View {
         ZStack {
@@ -30,11 +34,17 @@ struct BlackoutView: View {
                     .multilineTextAlignment(.center)
                     .padding(12)
             }
+
+            // White flash layer — briefly visible at the end of a blackout
+            Color.white
+                .ignoresSafeArea()
+                .opacity(flashOpacity)
         }
         .opacity(opacity)
         .onAppear {
             sessionStart = Date()
             duration = settings.randomBlackoutDuration()
+            ProgressTracker.shared.recordTriggered()
 
             // Start extended runtime session to prevent suspension
             startExtendedSession()
@@ -51,6 +61,7 @@ struct BlackoutView: View {
 
             // Auto-dismiss timer
             dismissTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
+                completedFullDuration = true
                 dismissBlackout()
             }
         }
@@ -72,6 +83,11 @@ struct BlackoutView: View {
         dismissTimer?.invalidate()
         dismissTimer = nil
 
+        // Record completion only if the blackout ran its full duration
+        if completedFullDuration {
+            ProgressTracker.shared.recordCompleted()
+        }
+
         // Haptic at end
         if settings.hapticEndEnabled {
             HapticPlayer.playEnd()
@@ -83,13 +99,28 @@ struct BlackoutView: View {
             Task { await HealthKitManager.shared.saveMindfulSession(start: start, end: end) }
         }
 
-        // Fade out
-        withAnimation(.easeOut(duration: 1.0)) {
-            opacity = 0
+        // White flash before fade-out (visible through closed eyelids)
+        if settings.endFlashEnabled {
+            withAnimation(.easeIn(duration: 0.15)) {
+                flashOpacity = 1.0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                withAnimation(.easeOut(duration: 0.15)) {
+                    flashOpacity = 0
+                }
+            }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            stopExtendedSession()
-            isPresented = false
+
+        // Delay fade-out when flash is active so the flash completes first
+        let fadeDelay = settings.endFlashEnabled ? 1.3 : 0.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + fadeDelay) {
+            withAnimation(.easeOut(duration: 1.0)) {
+                opacity = 0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                stopExtendedSession()
+                isPresented = false
+            }
         }
     }
 

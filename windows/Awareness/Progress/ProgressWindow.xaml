@@ -1,0 +1,58 @@
+<Window x:Class="Awareness.Progress.ProgressWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:Awareness.Resources"
+        Title="{x:Static res:Strings.ProgressTitle}"
+        Width="340" Height="460"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16">
+
+            <!-- Donut Chart -->
+            <Canvas x:Name="DonutCanvas" Width="140" Height="140"
+                    HorizontalAlignment="Center" Margin="0,8,0,12" />
+
+            <!-- Stats -->
+            <StackPanel Margin="0,0,0,8">
+                <Grid Margin="0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" FontWeight="SemiBold"
+                               Text="{x:Static res:Strings.Today}" />
+                    <TextBlock Grid.Column="1" x:Name="TodayText"
+                               HorizontalAlignment="Right" Foreground="Gray" />
+                </Grid>
+                <Grid Margin="0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" FontWeight="SemiBold"
+                               Text="{x:Static res:Strings.Lifetime}" />
+                    <TextBlock Grid.Column="1" x:Name="LifetimeText"
+                               HorizontalAlignment="Right" Foreground="Gray" />
+                </Grid>
+            </StackPanel>
+
+            <Separator Margin="0,4" />
+
+            <!-- 14-Day Bar Chart -->
+            <Canvas x:Name="BarChartCanvas" Height="120"
+                    HorizontalAlignment="Stretch" Margin="0,12,0,4" />
+
+            <!-- Legend -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
+                <Rectangle Width="8" Height="8" Fill="#66808080" RadiusX="1" RadiusY="1" />
+                <TextBlock Text="{x:Static res:Strings.Triggered}" Foreground="Gray"
+                           FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
+                <Rectangle Width="8" Height="8" Fill="#4CAF50" RadiusX="1" RadiusY="1" />
+                <TextBlock Text="{x:Static res:Strings.Completed}" Foreground="Gray"
+                           FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>

@@ -1,4 +1,6 @@
 import AppKit
+import IOKit
+import IOKit.pwr_mgt
 import SwiftUI
 
 /// Creates and manages full-screen blackout overlay windows — one per connected display.
@@ -13,6 +15,8 @@ class BlackoutWindowController {
     private var globalRunLoopSource: CFRunLoopSource?
     private var completionHandler: (() -> Void)?
     private var screenObserver: NSObjectProtocol?
+    /// Power assertion ID to prevent screen saver / display sleep during blackout
+    private var idleAssertionID: IOPMAssertionID = 0
 
     /// Fade animation duration in seconds
     private let fadeDuration: TimeInterval = 2.0
@@ -80,12 +84,27 @@ class BlackoutWindowController {
             }
         }
 
+        // Prevent screen saver and display sleep during the blackout
+        let assertionResult = IOPMAssertionCreateWithName(
+            kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
+            IOPMAssertionLevel(kIOPMAssertionLevelOn),
+            "Awareness blackout in progress" as CFString,
+            &idleAssertionID
+        )
+        if assertionResult != kIOReturnSuccess {
+            print("Awareness: failed to create idle display sleep assertion")
+        }
+
         // Install keyboard monitors — local to handle ESC/dismiss, global to suppress typing
         installKeyboardMonitor()
         installGlobalEventTap()
 
+        // Record that a blackout was triggered
+        ProgressTracker.shared.recordTriggered()
+
         // Schedule automatic dismissal after the configured duration
         let work = DispatchWorkItem { [weak self] in
+            ProgressTracker.shared.recordCompleted()
             self?.dismiss()
         }
         dismissTimer = work
@@ -100,6 +119,12 @@ class BlackoutWindowController {
         dismissTimer = nil
         removeKeyboardMonitor()
         removeGlobalEventTap()
+
+        // Release the display sleep prevention assertion
+        if idleAssertionID != 0 {
+            IOPMAssertionRelease(idleAssertionID)
+            idleAssertionID = 0
+        }
 
         // Play deeper end gong unless this is a silent dismiss (system went idle)
         if !silent {

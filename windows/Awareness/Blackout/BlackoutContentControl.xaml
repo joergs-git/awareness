@@ -1,6 +1,7 @@
 <UserControl x:Class="Awareness.Blackout.BlackoutContentControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:Awareness.Resources"
              Background="Black">
 
     <Grid x:Name="ContentGrid">
@@ -9,7 +10,7 @@
         <!-- Text mode: centered white text -->
         <TextBlock x:Name="TextContent"
                    Visibility="Collapsed"
-                   Text="Breathe."
+                   Text="{x:Static res:Strings.Breathe}"
                    Foreground="#CCFFFFFF"
                    FontSize="36"
                    FontWeight="Light"
@@ -38,7 +39,7 @@
         <!-- Video fallback text -->
         <TextBlock x:Name="VideoFallback"
                    Visibility="Collapsed"
-                   Text="No video selected"
+                   Text="{x:Static res:Strings.NoVideoSelected}"
                    Foreground="#4DFFFFFF"
                    FontSize="20"
                    HorizontalAlignment="Center"

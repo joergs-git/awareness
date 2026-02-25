@@ -64,16 +64,27 @@ public class BlackoutWindowController : IDisposable
         if (_windows.Count > 0)
             _windows[0].Activate();
 
+        // Prevent screen saver and display sleep during the blackout
+        NativeMethods.SetThreadExecutionState(
+            NativeMethods.ES_CONTINUOUS | NativeMethods.ES_SYSTEM_REQUIRED | NativeMethods.ES_DISPLAY_REQUIRED);
+
         // Install keyboard hook to suppress typing during blackout
         _keyboardHook.SuppressAll = true;
         _keyboardHook.Install();
+
+        // Record that a blackout was triggered
+        Progress.ProgressTracker.Shared.RecordTriggered();
 
         // Schedule automatic dismissal after the configured duration
         _dismissTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(duration)
         };
-        _dismissTimer.Tick += (_, _) => Dismiss();
+        _dismissTimer.Tick += (_, _) =>
+        {
+            Progress.ProgressTracker.Shared.RecordCompleted();
+            Dismiss();
+        };
         _dismissTimer.Start();
     }
 
@@ -90,6 +101,9 @@ public class BlackoutWindowController : IDisposable
         // Remove keyboard hook
         _keyboardHook.SuppressAll = false;
         _keyboardHook.Uninstall();
+
+        // Restore normal sleep/screensaver behavior
+        NativeMethods.SetThreadExecutionState(NativeMethods.ES_CONTINUOUS);
 
         // Play deeper end gong unless this is a silent dismiss
         if (!silent)

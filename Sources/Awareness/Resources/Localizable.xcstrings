@@ -1,0 +1,596 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Awareness — Snoozed until %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness — Pausiert bis %@"
+          }
+        }
+      }
+    },
+    "Awareness — Snoozed indefinitely" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness — Auf unbestimmte Zeit pausiert"
+          }
+        }
+      }
+    },
+    "Awareness — Next in %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness — Nächster in %@"
+          }
+        }
+      }
+    },
+    "Snoozed until %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausiert bis %@"
+          }
+        }
+      }
+    },
+    "Snoozed indefinitely" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf unbestimmte Zeit pausiert"
+          }
+        }
+      }
+    },
+    "Next blackout in %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächster Blackout in %@"
+          }
+        }
+      }
+    },
+    "Scheduling..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plane..."
+          }
+        }
+      }
+    },
+    "Test Blackout" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test-Blackout"
+          }
+        }
+      }
+    },
+    "Resume" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsetzen"
+          }
+        }
+      }
+    },
+    "Snooze" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlummern"
+          }
+        }
+      }
+    },
+    "Until I resume" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis ich fortsetze"
+          }
+        }
+      }
+    },
+    "%lld minutes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Minuten"
+          }
+        }
+      }
+    },
+    "%lld hour" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Stunde"
+          }
+        }
+      }
+    },
+    "%lld hours" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Stunden"
+          }
+        }
+      }
+    },
+    "Launch at Login" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Anmelden starten"
+          }
+        }
+      }
+    },
+    "Settings..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen..."
+          }
+        }
+      }
+    },
+    "How to Use..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anleitung..."
+          }
+        }
+      }
+    },
+    "About Awareness..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über Awareness..."
+          }
+        }
+      }
+    },
+    "Update Available (v%@)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update verfügbar (v%@)"
+          }
+        }
+      }
+    },
+    "Quit Awareness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness beenden"
+          }
+        }
+      }
+    },
+    "How to Use Awareness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anleitung zu Awareness"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "View on GitHub" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf GitHub ansehen"
+          }
+        }
+      }
+    },
+    "Got it" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verstanden"
+          }
+        }
+      }
+    },
+    "Awareness runs quietly in your menu bar (☯ icon).\n\nHow it works:\n• At random intervals, your screen fades to black for a few seconds\n• A gong sounds at the start and end of each blackout\n• Use this pause to breathe, close your eyes, and reset\n\nControls:\n• ESC or Cmd+Q — dismiss a blackout early (unless Handcuffs mode is on)\n• Snooze — temporarily pause from the menu bar\n• Settings — configure timing, visuals, and sounds\n\nThe app detects active camera/microphone usage and will skip blackouts during video calls." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness läuft unauffällig in der Menüleiste (☯ Symbol).\n\nSo funktioniert's:\n• In zufälligen Abständen wird dein Bildschirm für einige Sekunden schwarz\n• Ein Gong ertönt zu Beginn und am Ende jedes Blackouts\n• Nutze diese Pause zum Atmen, schließe deine Augen und komme zur Ruhe\n\nSteuerung:\n• ESC oder Cmd+Q — Blackout vorzeitig beenden (außer im Handschellen-Modus)\n• Schlummern — vorübergehend pausieren über die Menüleiste\n• Einstellungen — Timing, Darstellung und Klänge anpassen\n\nDie App erkennt aktive Kamera-/Mikrofonnutzung und überspringt Blackouts während Videoanrufen."
+          }
+        }
+      }
+    },
+    "Awareness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness"
+          }
+        }
+      }
+    },
+    "A mindfulness timer for your Mac.\nRandomly pauses your screen to help you breathe.\n\nThe goal of this app is to not need it anymore a little bit later.\n\nby joergsflow\nVersion %@\n\ngithub.com/joergs-git/awareness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Achtsamkeits-Timer für deinen Mac.\nPausiert zufällig deinen Bildschirm, um dir beim Atmen zu helfen.\n\nDas Ziel dieser App ist, sie ein wenig später nicht mehr zu brauchen.\n\nvon joergsflow\nVersion %@\n\ngithub.com/joergs-git/awareness"
+          }
+        }
+      }
+    },
+    "Welcome to Awareness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Willkommen bei Awareness"
+          }
+        }
+      }
+    },
+    "Awareness is now running in your menu bar.\n\nLook for the ☯ icon in the top-right of your screen. Click it to access settings, snooze, or quit.\n\nYour screen will randomly fade to black at gentle intervals — a moment to pause, breathe, and return to the present.\n\nYou can configure everything from the menu bar icon → Settings." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness läuft jetzt in deiner Menüleiste.\n\nSuche das ☯ Symbol oben rechts auf deinem Bildschirm. Klicke darauf, um Einstellungen, Schlummern oder Beenden aufzurufen.\n\nDein Bildschirm wird in sanften Abständen zufällig schwarz — ein Moment zum Innehalten, Atmen und Zurückkehren in die Gegenwart.\n\nDu kannst alles über das Menüleisten-Symbol → Einstellungen anpassen."
+          }
+        }
+      }
+    },
+    "Awareness Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awareness Einstellungen"
+          }
+        }
+      }
+    },
+    "Active Hours" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktive Stunden"
+          }
+        }
+      }
+    },
+    "From" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von"
+          }
+        }
+      }
+    },
+    "Until" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis"
+          }
+        }
+      }
+    },
+    "Interval Between Blackouts" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intervall zwischen Blackouts"
+          }
+        }
+      }
+    },
+    "Blackout Duration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blackout-Dauer"
+          }
+        }
+      }
+    },
+    "Blackout Visual" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blackout-Darstellung"
+          }
+        }
+      }
+    },
+    "Style" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stil"
+          }
+        }
+      }
+    },
+    "Display text" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anzeigetext"
+          }
+        }
+      }
+    },
+    "Image" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild"
+          }
+        }
+      }
+    },
+    "Video" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video"
+          }
+        }
+      }
+    },
+    "Choose..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswählen..."
+          }
+        }
+      }
+    },
+    "Default" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard"
+          }
+        }
+      }
+    },
+    "Sound" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klang"
+          }
+        }
+      }
+    },
+    "Start gong (begin of blackout)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start-Gong (Beginn des Blackouts)"
+          }
+        }
+      }
+    },
+    "End gong (end of blackout)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End-Gong (Ende des Blackouts)"
+          }
+        }
+      }
+    },
+    "Behavior" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verhalten"
+          }
+        }
+      }
+    },
+    "Handcuffs mode" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handschellen-Modus"
+          }
+        }
+      }
+    },
+    "When on, ESC and Cmd+Q cannot dismiss the blackout early." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn aktiv, können ESC und Cmd+Q den Blackout nicht vorzeitig beenden."
+          }
+        }
+      }
+    },
+    "Plain Black" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwarz"
+          }
+        }
+      }
+    },
+    "Custom Text" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eigener Text"
+          }
+        }
+      }
+    },
+    "Breathe." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atme."
+          }
+        }
+      }
+    },
+    "No video selected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Video ausgewählt"
+          }
+        }
+      }
+    },
+    "Progress" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortschritt"
+          }
+        }
+      }
+    },
+    "Progress..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortschritt..."
+          }
+        }
+      }
+    },
+    "Today" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute"
+          }
+        }
+      }
+    },
+    "Lifetime" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamt"
+          }
+        }
+      }
+    },
+    "triggered" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ausgelöst"
+          }
+        }
+      }
+    },
+    "completed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "abgeschlossen"
+          }
+        }
+      }
+    },
+    "Success Rate" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfolgsquote"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -2,6 +2,7 @@ using System.Windows;
 using Awareness.Blackout;
 using Awareness.Detection;
 using Awareness.MenuBar;
+using Awareness.Resources;
 using Awareness.Settings;
 
 namespace Awareness;
@@ -28,8 +29,8 @@ public partial class App : Application
         _singleInstanceMutex = new Mutex(true, "Awareness-SingleInstance", out bool isNew);
         if (!isNew)
         {
-            MessageBox.Show("Awareness is already running in the system tray.",
-                "Awareness", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Strings.AlreadyRunning,
+                Strings.Awareness, MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown();
             return;
         }
@@ -113,13 +114,8 @@ public partial class App : Application
         Dispatcher.BeginInvoke(() =>
         {
             MessageBox.Show(
-                "Awareness is now running in your system tray.\n\n" +
-                "Look for the ☯ icon in the bottom-right of your screen. " +
-                "Right-click it to access settings, snooze, or quit.\n\n" +
-                "Your screen will randomly fade to black at gentle intervals — " +
-                "a moment to pause, breathe, and return to the present.\n\n" +
-                "You can configure everything from the tray icon → Settings.",
-                "Welcome to Awareness",
+                Strings.WelcomeText,
+                Strings.WelcomeTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);

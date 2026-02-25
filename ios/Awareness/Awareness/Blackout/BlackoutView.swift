@@ -18,6 +18,8 @@ struct BlackoutView: View {
     @State private var sessionStart: Date?
     /// Opacity of the white end-of-blackout flash layer
     @State private var flashOpacity: Double = 0
+    /// Whether the blackout ran its full duration (not dismissed early)
+    @State private var completedFullDuration = false
 
     var body: some View {
         ZStack {
@@ -55,8 +57,12 @@ struct BlackoutView: View {
             dismissBlackout()
         }
         .onAppear {
+            // Prevent auto-lock while the blackout is showing
+            UIApplication.shared.isIdleTimerDisabled = true
+
             sessionStart = Date()
             duration = settings.randomBlackoutDuration()
+            ProgressTracker.shared.recordTriggered()
             GongPlayer.shared.playStartIfEnabled()
 
             // Haptic feedback at start
@@ -71,12 +77,15 @@ struct BlackoutView: View {
 
             // Auto-dismiss timer
             dismissTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
+                completedFullDuration = true
                 dismissBlackout()
             }
         }
         .onDisappear {
             dismissTimer?.invalidate()
             dismissTimer = nil
+            // Re-enable auto-lock when the blackout view is removed
+            UIApplication.shared.isIdleTimerDisabled = false
         }
     }
 
@@ -85,6 +94,12 @@ struct BlackoutView: View {
     private func dismissBlackout() {
         dismissTimer?.invalidate()
         dismissTimer = nil
+
+        // Record completion only if the blackout ran its full duration
+        if completedFullDuration {
+            ProgressTracker.shared.recordCompleted()
+        }
+
         GongPlayer.shared.playEndIfEnabled()
 
         // Haptic feedback at end
@@ -117,6 +132,7 @@ struct BlackoutView: View {
                 opacity = 0
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                UIApplication.shared.isIdleTimerDisabled = false
                 isPresented = false
             }
         }
@@ -139,7 +155,7 @@ struct BlackoutView: View {
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            Text("Breathe.")
+            Text(String(localized: "Breathe."))
                 .font(.system(size: 36, weight: .light))
                 .foregroundColor(.white.opacity(0.5))
         }
@@ -161,7 +177,7 @@ struct BlackoutView: View {
         if let url = SettingsManager.resolvedURL(for: settings.customVideoPath) {
             VideoLoopView(url: url)
         } else {
-            Text("No video selected")
+            Text(String(localized: "No video selected"))
                 .foregroundColor(.white.opacity(0.3))
                 .font(.title2)
         }

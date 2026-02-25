@@ -15,7 +15,7 @@ struct SettingsView: View {
                         .font(.title)
                         .foregroundStyle(.secondary)
                 }
-                Text("Awareness Settings")
+                Text(String(localized: "Awareness Settings"))
                     .font(.title2.weight(.medium))
             }
             .padding(.top, 16)
@@ -27,7 +27,7 @@ struct SettingsView: View {
                     // Active time window as two side-by-side pickers
                     HStack(spacing: 16) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("From")
+                            Text(String(localized: "From"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Picker("", selection: $settings.activeStartHour) {
@@ -40,7 +40,7 @@ struct SettingsView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Until")
+                            Text(String(localized: "Until"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Picker("", selection: $settings.activeEndHour) {
@@ -55,7 +55,7 @@ struct SettingsView: View {
                         Spacer()
                     }
                 } header: {
-                    Label("Active Hours", systemImage: "clock")
+                    Label(String(localized: "Active Hours"), systemImage: "clock")
                 }
 
                 // MARK: - Interval Range (single compound control)
@@ -83,7 +83,7 @@ struct SettingsView: View {
                         )
                     }
                 } header: {
-                    Label("Interval Between Blackouts", systemImage: "timer")
+                    Label(String(localized: "Interval Between Blackouts"), systemImage: "timer")
                 }
 
                 // MARK: - Blackout Duration
@@ -111,12 +111,12 @@ struct SettingsView: View {
                         )
                     }
                 } header: {
-                    Label("Blackout Duration", systemImage: "eye.slash")
+                    Label(String(localized: "Blackout Duration"), systemImage: "eye.slash")
                 }
 
                 // MARK: - Visual Type
                 Section {
-                    Picker("Style", selection: $settings.visualType) {
+                    Picker(String(localized: "Style"), selection: $settings.visualType) {
                         ForEach(BlackoutVisualType.allCases) { type in
                             Text(type.displayName).tag(type)
                         }
@@ -125,7 +125,7 @@ struct SettingsView: View {
 
                     switch settings.visualType {
                     case .text:
-                        TextField("Display text", text: $settings.customText)
+                        TextField(String(localized: "Display text"), text: $settings.customText)
                             .textFieldStyle(.roundedBorder)
 
                     case .image:
@@ -148,25 +148,25 @@ struct SettingsView: View {
                         EmptyView()
                     }
                 } header: {
-                    Label("Blackout Visual", systemImage: "paintbrush")
+                    Label(String(localized: "Blackout Visual"), systemImage: "paintbrush")
                 }
 
                 // MARK: - Sound
                 Section {
-                    Toggle("Start gong (begin of blackout)", isOn: $settings.startGongEnabled)
-                    Toggle("End gong (end of blackout)", isOn: $settings.endGongEnabled)
+                    Toggle(String(localized: "Start gong (begin of blackout)"), isOn: $settings.startGongEnabled)
+                    Toggle(String(localized: "End gong (end of blackout)"), isOn: $settings.endGongEnabled)
                 } header: {
-                    Label("Sound", systemImage: "bell")
+                    Label(String(localized: "Sound"), systemImage: "bell")
                 }
 
                 // MARK: - Behavior
                 Section {
-                    Toggle("Handcuffs mode", isOn: $settings.handcuffsMode)
-                    Text("When on, ESC and Cmd+Q cannot dismiss the blackout early.")
+                    Toggle(String(localized: "Handcuffs mode"), isOn: $settings.handcuffsMode)
+                    Text(String(localized: "When on, ESC and Cmd+Q cannot dismiss the blackout early."))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } header: {
-                    Label("Behavior", systemImage: "lock")
+                    Label(String(localized: "Behavior"), systemImage: "lock")
                 }
             }
             .formStyle(.grouped)
@@ -275,14 +275,14 @@ struct FilePickerRow: View {
                 .help("Clear selection")
             }
 
-            Button("Choose...") {
+            Button(String(localized: "Choose...")) {
                 chooseFile()
             }
         }
     }
 
     private var displayPath: String {
-        if path.isEmpty { return "Default" }
+        if path.isEmpty { return String(localized: "Default") }
         return (path as NSString).lastPathComponent
     }
 

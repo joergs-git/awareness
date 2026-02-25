@@ -47,6 +47,14 @@
 		A40006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30008 /* Assets.xcassets */; };
 		A40007 /* AwarenessWatchComplication.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B40099 /* AwarenessWatchComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A40008 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* HealthKitManager.swift */; };
+		A10017 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
+		A10018 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10018 /* ProgressView.swift */; };
+		A30017 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
+		A30018 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30013 /* ProgressView.swift */; };
+		A40009 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
+		B1F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
+		B3F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
+		B4F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -124,6 +132,10 @@
 		B30016 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		B30099 /* AwarenessWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AwarenessWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B40099 /* AwarenessWatchComplication.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AwarenessWatchComplication.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10017 /* ProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTracker.swift; sourceTree = "<group>"; };
+		B10018 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		B30013 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		A1F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,9 +187,11 @@
 				D10006 /* Blackout */,
 				D10007 /* Notifications */,
 				D10009 /* Health */,
+				D10011 /* Progress */,
 				D30009 /* Connectivity */,
 				D10008 /* Resources */,
 				B10011 /* Assets.xcassets */,
+				A1F00001 /* Localizable.xcstrings */,
 			);
 			path = Awareness;
 			sourceTree = "<group>";
@@ -242,6 +256,15 @@
 			path = Health;
 			sourceTree = "<group>";
 		};
+		D10011 /* Progress */ = {
+			isa = PBXGroup;
+			children = (
+				B10017 /* ProgressTracker.swift */,
+				B10018 /* ProgressView.swift */,
+			);
+			path = Progress;
+			sourceTree = "<group>";
+		};
 		D10010 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -271,6 +294,7 @@
 				B30005 /* HapticPlayer.swift */,
 				B30006 /* NotificationScheduler.swift */,
 				B30007 /* WatchConnectivityManager.swift */,
+				B30013 /* ProgressView.swift */,
 				B30009 /* AwarenessWatch.entitlements */,
 				B30008 /* Assets.xcassets */,
 				D30002 /* Complications */,
@@ -380,6 +404,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				de,
 				Base,
 			);
 			mainGroup = D10001;
@@ -403,6 +428,7 @@
 				A10012 /* awareness-gong.aiff in Resources */,
 				A10013 /* awareness-gong-end.aiff in Resources */,
 				A10014 /* default-blackout.png in Resources */,
+				B1F00001 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -411,6 +437,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A30012 /* Assets.xcassets in Resources */,
+				B3F00001 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,6 +446,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A40006 /* Assets.xcassets in Resources */,
+				B4F00001 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,6 +469,8 @@
 				A10010 /* UpdateChecker.swift in Sources */,
 				A10015 /* HealthKitManager.swift in Sources */,
 				A30014 /* WatchConnectivityManager.swift in Sources */,
+				A10017 /* ProgressTracker.swift in Sources */,
+				A10018 /* ProgressView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -460,6 +490,8 @@
 				A30010 /* SettingsManager.swift in Sources */,
 				A30011 /* HealthKitManager.swift in Sources */,
 				A30015 /* UpdateChecker.swift in Sources */,
+				A30017 /* ProgressTracker.swift in Sources */,
+				A30018 /* ProgressView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +505,7 @@
 				A40004 /* SettingsManager.swift in Sources */,
 				A40005 /* NotificationScheduler.swift in Sources */,
 				A40008 /* HealthKitManager.swift in Sources */,
+				A40009 /* ProgressTracker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

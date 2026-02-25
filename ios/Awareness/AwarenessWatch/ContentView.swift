@@ -29,7 +29,7 @@ struct ContentView: View {
                         HStack {
                             Image(systemName: "clock")
                                 .font(.footnote)
-                            Text("Next: \(formatTime(nextDate))")
+                            Text(String(localized: "Next: \(formatTime(nextDate))"))
                                 .font(.footnote)
                         }
                     }
@@ -40,7 +40,17 @@ struct ContentView: View {
                     Button {
                         showingBlackout = true
                     } label: {
-                        Label("Test Blackout", systemImage: "play.circle")
+                        Label(String(localized: "Test Blackout"), systemImage: "play.circle")
+                    }
+                }
+
+                // MARK: - Progress
+                Section {
+                    NavigationLink {
+                        ProgressView()
+                    } label: {
+                        Label(String(localized: "Progress"), systemImage: "chart.pie")
+                            .font(.footnote)
                     }
                 }
 
@@ -50,7 +60,7 @@ struct ContentView: View {
                         Button {
                             scheduler.handleResume()
                         } label: {
-                            Label("Resume", systemImage: "play.fill")
+                            Label(String(localized: "Resume"), systemImage: "play.fill")
                                 .foregroundColor(.green)
                         }
                     } else {
@@ -70,11 +80,11 @@ struct ContentView: View {
                     NavigationLink {
                         SettingsView()
                     } label: {
-                        Label("Settings", systemImage: "gear")
+                        Label(String(localized: "Settings"), systemImage: "gear")
                     }
                 }
             }
-            .navigationTitle("Awareness")
+            .navigationTitle(String(localized: "Awareness"))
             .fullScreenCover(isPresented: $showingBlackout) {
                 BlackoutView(isPresented: $showingBlackout)
             }
@@ -93,11 +103,11 @@ struct ContentView: View {
     private var statusText: String {
         if settings.isSnoozed {
             if let until = settings.snoozeUntil, until < Date.distantFuture {
-                return "Snoozed until \(formatTime(until))"
+                return String(localized: "Snoozed until \(formatTime(until))")
             }
-            return "Snoozed"
+            return String(localized: "Snoozed")
         }
-        return "Active"
+        return String(localized: "Active")
     }
 
     // MARK: - Helpers
@@ -109,7 +119,7 @@ struct ContentView: View {
     }
 
     private func snoozeLabel(for minutes: Int) -> String {
-        if minutes == 0 { return "Until I resume" }
+        if minutes == 0 { return String(localized: "Until I resume") }
         if minutes >= 60 { return "\(minutes / 60)h" }
         return "\(minutes) min"
     }

@@ -41,12 +41,12 @@ class NotificationScheduler: ObservableObject {
     private func registerCategory() {
         let startAction = UNNotificationAction(
             identifier: NotificationScheduler.actionStart,
-            title: "Start Blackout",
+            title: String(localized: "Start Blackout"),
             options: [.foreground]
         )
         let snoozeAction = UNNotificationAction(
             identifier: NotificationScheduler.actionSnooze,
-            title: "Snooze 30 min",
+            title: String(localized: "Snooze 30 min"),
             options: []
         )
         let category = UNNotificationCategory(
@@ -227,9 +227,9 @@ class NotificationScheduler: ObservableObject {
     /// Build the notification content with title, subtitle, sound, category, and image attachment
     private func makeNotificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = "Awareness ☯"
-        content.subtitle = "Time to pause and breathe"
-        content.body = "Tap to begin a mindful moment. Close your eyes, feel your breath, and return to the present."
+        content.title = String(localized: "Awareness ☯")
+        content.subtitle = String(localized: "Time to pause and breathe")
+        content.body = String(localized: "Tap to begin a mindful moment. Close your eyes, feel your breath, and return to the present.")
         content.sound = NotificationScheduler.notificationSound
         content.categoryIdentifier = NotificationScheduler.categoryIdentifier
 

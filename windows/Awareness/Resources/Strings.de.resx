@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- TrayIconController strings -->
+  <data name="Awareness" xml:space="preserve"><value>Awareness</value></data>
+  <data name="SnoozedUntil" xml:space="preserve"><value>Pausiert bis {0}</value></data>
+  <data name="SnoozedIndefinitely" xml:space="preserve"><value>Auf unbestimmte Zeit pausiert</value></data>
+  <data name="NextIn" xml:space="preserve"><value>Awareness — Nächster in {0}</value></data>
+  <data name="TooltipSnoozedUntil" xml:space="preserve"><value>Awareness — Pausiert bis {0}</value></data>
+  <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Awareness — Auf unbestimmte Zeit pausiert</value></data>
+  <data name="NextBlackoutIn" xml:space="preserve"><value>Nächster Blackout in {0}</value></data>
+  <data name="Scheduling" xml:space="preserve"><value>Plane...</value></data>
+  <data name="TestBlackout" xml:space="preserve"><value>Test-Blackout</value></data>
+  <data name="Resume" xml:space="preserve"><value>Fortsetzen</value></data>
+  <data name="Snooze" xml:space="preserve"><value>Schlummern</value></data>
+  <data name="UntilIResume" xml:space="preserve"><value>Bis ich fortsetze</value></data>
+  <data name="MinutesFormat" xml:space="preserve"><value>{0} Minuten</value></data>
+  <data name="HourFormat" xml:space="preserve"><value>{0} Stunde</value></data>
+  <data name="HoursFormat" xml:space="preserve"><value>{0} Stunden</value></data>
+  <data name="LaunchAtLogin" xml:space="preserve"><value>Beim Anmelden starten</value></data>
+  <data name="SettingsMenu" xml:space="preserve"><value>Einstellungen...</value></data>
+  <data name="HowToUseMenu" xml:space="preserve"><value>Anleitung...</value></data>
+  <data name="AboutMenu" xml:space="preserve"><value>Über Awareness...</value></data>
+  <data name="UpdateAvailable" xml:space="preserve"><value>Update verfügbar (v{0})</value></data>
+  <data name="QuitAwareness" xml:space="preserve"><value>Awareness beenden</value></data>
+  <data name="HowToUseTitle" xml:space="preserve"><value>Anleitung zu Awareness</value></data>
+  <data name="HowToUseText" xml:space="preserve"><value>Awareness läuft unauffällig im Infobereich (☯ Symbol).
+
+So funktioniert's:
+• In zufälligen Abständen wird dein Bildschirm für einige Sekunden schwarz
+• Ein Gong ertönt zu Beginn und am Ende jedes Blackouts
+• Nutze diese Pause zum Atmen, schließe deine Augen und komme zur Ruhe
+
+Steuerung:
+• ESC — Blackout vorzeitig beenden (außer im Handschellen-Modus)
+• Schlummern — vorübergehend pausieren über den Infobereich
+• Einstellungen — Timing, Darstellung und Klänge anpassen
+
+Die App erkennt aktive Kamera-/Mikrofonnutzung und überspringt Blackouts während Videoanrufen.</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>Awareness</value></data>
+  <data name="AboutText" xml:space="preserve"><value>Ein Achtsamkeits-Timer für deinen PC.
+Pausiert zufällig deinen Bildschirm, um dir beim Atmen zu helfen.
+
+Das Ziel dieser App ist, sie ein wenig später nicht mehr zu brauchen.
+
+von joergsflow
+Version {0}
+
+github.com/joergs-git/awareness
+
+Klicke OK zum Schließen oder Abbrechen, um GitHub zu öffnen.</value></data>
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="Now" xml:space="preserve"><value>jetzt</value></data>
+
+  <!-- SettingsWindow.xaml strings -->
+  <data name="AwarenessSettings" xml:space="preserve"><value>Awareness Einstellungen</value></data>
+  <data name="ActiveHours" xml:space="preserve"><value>Aktive Stunden</value></data>
+  <data name="From" xml:space="preserve"><value>Von</value></data>
+  <data name="Until" xml:space="preserve"><value>Bis</value></data>
+  <data name="IntervalBetweenBlackouts" xml:space="preserve"><value>Intervall zwischen Blackouts</value></data>
+  <data name="BlackoutDuration" xml:space="preserve"><value>Blackout-Dauer</value></data>
+  <data name="BlackoutVisual" xml:space="preserve"><value>Blackout-Darstellung</value></data>
+  <data name="PlainBlack" xml:space="preserve"><value>Schwarz</value></data>
+  <data name="CustomText" xml:space="preserve"><value>Eigener Text</value></data>
+  <data name="Image" xml:space="preserve"><value>Bild</value></data>
+  <data name="Video" xml:space="preserve"><value>Video</value></data>
+  <data name="DisplayText" xml:space="preserve"><value>Anzeigetext:</value></data>
+  <data name="Choose" xml:space="preserve"><value>Auswählen...</value></data>
+  <data name="ImageLabel" xml:space="preserve"><value>Bild:</value></data>
+  <data name="Default" xml:space="preserve"><value>Standard</value></data>
+  <data name="VideoLabel" xml:space="preserve"><value>Video:</value></data>
+  <data name="NoneLabel" xml:space="preserve"><value>Keins</value></data>
+  <data name="Sound" xml:space="preserve"><value>Klang</value></data>
+  <data name="StartGong" xml:space="preserve"><value>Start-Gong (Beginn des Blackouts)</value></data>
+  <data name="EndGong" xml:space="preserve"><value>End-Gong (Ende des Blackouts)</value></data>
+  <data name="Behavior" xml:space="preserve"><value>Verhalten</value></data>
+  <data name="HandcuffsMode" xml:space="preserve"><value>Handschellen-Modus</value></data>
+  <data name="HandcuffsDescription" xml:space="preserve"><value>Wenn aktiv, kann ESC den Blackout nicht vorzeitig beenden.</value></data>
+
+  <!-- BlackoutContentControl.xaml strings -->
+  <data name="Breathe" xml:space="preserve"><value>Atme.</value></data>
+  <data name="NoVideoSelected" xml:space="preserve"><value>Kein Video ausgewählt</value></data>
+
+  <!-- App.xaml.cs strings -->
+  <data name="AlreadyRunning" xml:space="preserve"><value>Awareness läuft bereits im Infobereich.</value></data>
+  <data name="WelcomeTitle" xml:space="preserve"><value>Willkommen bei Awareness</value></data>
+  <!-- ProgressWindow strings -->
+  <data name="ProgressMenu" xml:space="preserve"><value>Fortschritt...</value></data>
+  <data name="ProgressTitle" xml:space="preserve"><value>Fortschritt</value></data>
+  <data name="Today" xml:space="preserve"><value>Heute</value></data>
+  <data name="Lifetime" xml:space="preserve"><value>Gesamt</value></data>
+  <data name="Triggered" xml:space="preserve"><value>ausgelöst</value></data>
+  <data name="Completed" xml:space="preserve"><value>abgeschlossen</value></data>
+  <data name="SuccessRate" xml:space="preserve"><value>Erfolgsquote</value></data>
+
+  <data name="WelcomeText" xml:space="preserve"><value>Awareness läuft jetzt im Infobereich.
+
+Suche das ☯ Symbol unten rechts auf deinem Bildschirm. Klicke es mit der rechten Maustaste an, um Einstellungen, Schlummern oder Beenden aufzurufen.
+
+Dein Bildschirm wird in sanften Abständen zufällig schwarz — ein Moment zum Innehalten, Atmen und Zurückkehren in die Gegenwart.
+
+Du kannst alles über das Symbol im Infobereich → Einstellungen anpassen.</value></data>
+</root>

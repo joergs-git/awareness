@@ -11,10 +11,10 @@ enum BlackoutVisualType: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .plainBlack: return "Plain Black"
-        case .text:       return "Custom Text"
-        case .image:      return "Image"
-        case .video:      return "Video"
+        case .plainBlack: return String(localized: "Plain Black")
+        case .text:       return String(localized: "Custom Text")
+        case .image:      return String(localized: "Image")
+        case .video:      return String(localized: "Video")
         }
     }
 }

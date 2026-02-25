@@ -44,6 +44,7 @@ public class GongPlayer
     /// Play an embedded WAV resource. Each call creates a new WaveOutEvent
     /// so multiple sounds can play simultaneously (e.g. start/end gong overlap).
     /// The player self-disposes when playback completes.
+    /// A 2-second fade-out is applied at the end for a smooth ending.
     /// </summary>
     private void PlayResource(string resourceName)
     {
@@ -66,15 +67,42 @@ public class GongPlayer
             var waveOut = new WaveOutEvent();
             waveOut.Init(reader);
 
+            // Schedule a 2-second fade-out near the end of the sound
+            var duration = reader.TotalTime.TotalSeconds;
+            var fadeDelay = Math.Max(0, duration - 2.0);
+            System.Timers.Timer? fadeTimer = null;
+            System.Timers.Timer? delayTimer = null;
+
             // Self-cleanup when playback finishes
             waveOut.PlaybackStopped += (_, _) =>
             {
+                delayTimer?.Dispose();
+                fadeTimer?.Dispose();
                 waveOut.Dispose();
                 reader.Dispose();
                 memStream.Dispose();
             };
 
             waveOut.Play();
+
+            // Start fade-out after delay — step volume down in 20 intervals over 2 seconds
+            delayTimer = new System.Timers.Timer(fadeDelay * 1000);
+            delayTimer.AutoReset = false;
+            delayTimer.Elapsed += (_, _) =>
+            {
+                int steps = 0;
+                fadeTimer = new System.Timers.Timer(100);
+                fadeTimer.AutoReset = true;
+                fadeTimer.Elapsed += (_, _) =>
+                {
+                    steps++;
+                    var volume = Math.Max(0f, 1.0f - (steps / 20f));
+                    try { waveOut.Volume = volume; } catch { /* already disposed */ }
+                    if (steps >= 20) fadeTimer?.Stop();
+                };
+                fadeTimer.Start();
+            };
+            delayTimer.Start();
         }
         catch (Exception ex)
         {

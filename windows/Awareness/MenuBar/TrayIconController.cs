@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Awareness.Blackout;
+using Awareness.Resources;
 using Awareness.Settings;
 using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Win32;
@@ -20,6 +21,7 @@ public class TrayIconController : IDisposable
     private readonly BlackoutWindowController _blackoutController;
     private readonly BlackoutScheduler _scheduler;
     private Settings.SettingsWindow? _settingsWindow;
+    private Progress.ProgressWindow? _progressWindow;
     private readonly DispatcherTimer _tooltipTimer;
     private readonly DispatcherTimer _snoozeCheckTimer;
     private bool _disposed;
@@ -36,7 +38,7 @@ public class TrayIconController : IDisposable
         _trayIcon = new TaskbarIcon
         {
             Icon = LoadTrayIcon(),
-            ToolTipText = "Awareness",
+            ToolTipText = Strings.Awareness,
             ContextMenu = BuildMenu()
         };
 
@@ -88,25 +90,25 @@ public class TrayIconController : IDisposable
         if (settings.IsSnoozed)
         {
             if (settings.SnoozeUntil.HasValue && settings.SnoozeUntil.Value < DateTime.MaxValue)
-                _trayIcon.ToolTipText = $"Awareness — Snoozed until {settings.SnoozeUntil.Value:t}";
+                _trayIcon.ToolTipText = string.Format(Strings.TooltipSnoozedUntil, settings.SnoozeUntil.Value.ToString("t"));
             else
-                _trayIcon.ToolTipText = "Awareness — Snoozed indefinitely";
+                _trayIcon.ToolTipText = Strings.TooltipSnoozedIndefinitely;
             return;
         }
 
         if (_scheduler.NextBlackoutDate.HasValue)
         {
-            _trayIcon.ToolTipText = $"Awareness — Next in {FormatRemainingTime(_scheduler.NextBlackoutDate.Value)}";
+            _trayIcon.ToolTipText = string.Format(Strings.NextIn, FormatRemainingTime(_scheduler.NextBlackoutDate.Value));
             return;
         }
 
-        _trayIcon.ToolTipText = "Awareness";
+        _trayIcon.ToolTipText = Strings.Awareness;
     }
 
     private static string FormatRemainingTime(DateTime date)
     {
         var remaining = date - DateTime.Now;
-        if (remaining.TotalSeconds <= 0) return "now";
+        if (remaining.TotalSeconds <= 0) return Strings.Now;
 
         int minutes = (int)remaining.TotalMinutes;
         int seconds = remaining.Seconds;
@@ -137,16 +139,16 @@ public class TrayIconController : IDisposable
         if (settings.IsSnoozed)
         {
             statusText = settings.SnoozeUntil.HasValue && settings.SnoozeUntil.Value < DateTime.MaxValue
-                ? $"Snoozed until {settings.SnoozeUntil.Value:t}"
-                : "Snoozed indefinitely";
+                ? string.Format(Strings.SnoozedUntil, settings.SnoozeUntil.Value.ToString("t"))
+                : Strings.SnoozedIndefinitely;
         }
         else if (_scheduler.NextBlackoutDate.HasValue)
         {
-            statusText = $"Next blackout in {FormatRemainingTime(_scheduler.NextBlackoutDate.Value)}";
+            statusText = string.Format(Strings.NextBlackoutIn, FormatRemainingTime(_scheduler.NextBlackoutDate.Value));
         }
         else
         {
-            statusText = "Scheduling...";
+            statusText = Strings.Scheduling;
         }
 
         var statusItem = new MenuItem { Header = statusText, IsEnabled = false };
@@ -154,7 +156,7 @@ public class TrayIconController : IDisposable
         menu.Items.Add(new Separator());
 
         // Test Blackout
-        var testItem = new MenuItem { Header = "Test Blackout" };
+        var testItem = new MenuItem { Header = Strings.TestBlackout };
         testItem.Click += (_, _) => TestBlackout();
         menu.Items.Add(testItem);
         menu.Items.Add(new Separator());
@@ -162,22 +164,22 @@ public class TrayIconController : IDisposable
         // Snooze / Resume
         if (settings.IsSnoozed || !_scheduler.IsCurrentlyRunning)
         {
-            var resumeItem = new MenuItem { Header = "Resume" };
+            var resumeItem = new MenuItem { Header = Strings.Resume };
             resumeItem.Click += (_, _) => ResumeFromSnooze();
             menu.Items.Add(resumeItem);
         }
         else
         {
-            var snoozeItem = new MenuItem { Header = "Snooze" };
+            var snoozeItem = new MenuItem { Header = Strings.Snooze };
             foreach (int minutes in SnoozeDurations)
             {
                 string title;
                 if (minutes == 0)
-                    title = "Until I resume";
+                    title = Strings.UntilIResume;
                 else if (minutes >= 60)
-                    title = $"{minutes / 60} hour{(minutes >= 120 ? "s" : "")}";
+                    title = string.Format(minutes >= 120 ? Strings.HoursFormat : Strings.HourFormat, minutes / 60);
                 else
-                    title = $"{minutes} minutes";
+                    title = string.Format(Strings.MinutesFormat, minutes);
 
                 var subItem = new MenuItem { Header = title, Tag = minutes };
                 subItem.Click += OnSnoozeSelected;
@@ -191,26 +193,31 @@ public class TrayIconController : IDisposable
         // Launch at Login
         var launchAtLogin = new MenuItem
         {
-            Header = "Launch at Login",
+            Header = Strings.LaunchAtLogin,
             IsCheckable = true,
             IsChecked = IsLaunchAtLoginEnabled()
         };
         launchAtLogin.Click += (_, _) => ToggleLaunchAtLogin();
         menu.Items.Add(launchAtLogin);
 
+        // Progress
+        var progressItem = new MenuItem { Header = Strings.ProgressMenu };
+        progressItem.Click += (_, _) => ShowProgress();
+        menu.Items.Add(progressItem);
+
         // Settings
-        var settingsItem = new MenuItem { Header = "Settings..." };
+        var settingsItem = new MenuItem { Header = Strings.SettingsMenu };
         settingsItem.Click += (_, _) => OpenSettings();
         menu.Items.Add(settingsItem);
         menu.Items.Add(new Separator());
 
         // Help
-        var helpItem = new MenuItem { Header = "How to Use..." };
+        var helpItem = new MenuItem { Header = Strings.HowToUseMenu };
         helpItem.Click += (_, _) => ShowHelp();
         menu.Items.Add(helpItem);
 
         // About
-        var aboutItem = new MenuItem { Header = "About Awareness..." };
+        var aboutItem = new MenuItem { Header = Strings.AboutMenu };
         aboutItem.Click += (_, _) => ShowAbout();
         menu.Items.Add(aboutItem);
 
@@ -219,7 +226,7 @@ public class TrayIconController : IDisposable
         {
             var updateItem = new MenuItem
             {
-                Header = $"Update Available (v{UpdateChecker.Shared.LatestVersion})"
+                Header = string.Format(Strings.UpdateAvailable, UpdateChecker.Shared.LatestVersion)
             };
             updateItem.Click += (_, _) => OpenReleasePage();
             menu.Items.Add(updateItem);
@@ -228,7 +235,7 @@ public class TrayIconController : IDisposable
         menu.Items.Add(new Separator());
 
         // Quit
-        var quitItem = new MenuItem { Header = "Quit Awareness" };
+        var quitItem = new MenuItem { Header = Strings.QuitAwareness };
         quitItem.Click += (_, _) => Application.Current.Shutdown();
         menu.Items.Add(quitItem);
 
@@ -303,6 +310,19 @@ public class TrayIconController : IDisposable
             videoPath: settings.CustomVideoPath);
     }
 
+    private void ShowProgress()
+    {
+        if (_progressWindow != null)
+        {
+            _progressWindow.Activate();
+            return;
+        }
+
+        _progressWindow = new Progress.ProgressWindow();
+        _progressWindow.Closed += (_, _) => _progressWindow = null;
+        _progressWindow.Show();
+    }
+
     private void OpenSettings()
     {
         if (_settingsWindow != null)
@@ -319,17 +339,8 @@ public class TrayIconController : IDisposable
     private void ShowHelp()
     {
         MessageBox.Show(
-            "Awareness runs quietly in your system tray (☯ icon).\n\n" +
-            "How it works:\n" +
-            "• At random intervals, your screen fades to black for a few seconds\n" +
-            "• A gong sounds at the start and end of each blackout\n" +
-            "• Use this pause to breathe, close your eyes, and reset\n\n" +
-            "Controls:\n" +
-            "• ESC — dismiss a blackout early (unless Handcuffs mode is on)\n" +
-            "• Snooze — temporarily pause from the system tray\n" +
-            "• Settings — configure timing, visuals, and sounds\n\n" +
-            "The app detects active camera/microphone usage and will skip blackouts during video calls.",
-            "How to Use Awareness",
+            Strings.HowToUseText,
+            Strings.HowToUseTitle,
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }
@@ -346,14 +357,8 @@ public class TrayIconController : IDisposable
     {
         var version = typeof(App).Assembly.GetName().Version?.ToString(2) ?? "?";
         var result = MessageBox.Show(
-            "A mindfulness timer for your PC.\n" +
-            "Randomly pauses your screen to help you breathe.\n\n" +
-            "The goal of this app is to not need it anymore a little bit later.\n\n" +
-            "by joergsflow\n" +
-            $"Version {version}\n\n" +
-            "github.com/joergs-git/awareness\n\n" +
-            "Click OK to close, or Cancel to open GitHub.",
-            "Awareness",
+            string.Format(Strings.AboutText, version),
+            Strings.AboutTitle,
             MessageBoxButton.OKCancel,
             MessageBoxImage.Information);
 

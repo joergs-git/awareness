@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:settings="clr-namespace:Awareness.Settings"
-        Title="Awareness Settings"
+        xmlns:res="clr-namespace:Awareness.Resources"
+        Title="{x:Static res:Strings.AwarenessSettings}"
         Width="480" Height="640"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -15,20 +16,20 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
                 <TextBlock Text="☯" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0"
                            Foreground="Gray" />
-                <TextBlock Text="Awareness Settings" FontSize="20" FontWeight="Medium"
+                <TextBlock Text="{x:Static res:Strings.AwarenessSettings}" FontSize="20" FontWeight="Medium"
                            VerticalAlignment="Center" />
             </StackPanel>
 
             <!-- Active Hours -->
-            <GroupBox Header="🕐  Active Hours" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="ActiveHoursGroup" Margin="0,0,0,12" Padding="10">
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                     <StackPanel>
-                        <TextBlock Text="From" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
+                        <TextBlock Text="{x:Static res:Strings.From}" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
                         <ComboBox x:Name="StartHourCombo" Width="90"
                                   SelectionChanged="OnStartHourChanged" />
                     </StackPanel>
                     <StackPanel Margin="16,0,0,0">
-                        <TextBlock Text="Until" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
+                        <TextBlock Text="{x:Static res:Strings.Until}" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
                         <ComboBox x:Name="EndHourCombo" Width="90"
                                   SelectionChanged="OnEndHourChanged" />
                     </StackPanel>
@@ -36,7 +37,7 @@
             </GroupBox>
 
             <!-- Interval Between Blackouts -->
-            <GroupBox Header="⏱  Interval Between Blackouts" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="IntervalGroup" Margin="0,0,0,12" Padding="10">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                         <TextBlock x:Name="MinIntervalLabel" Width="55" TextAlignment="Right"
@@ -52,7 +53,7 @@
             </GroupBox>
 
             <!-- Blackout Duration -->
-            <GroupBox Header="👁  Blackout Duration" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="DurationGroup" Margin="0,0,0,12" Padding="10">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                         <TextBlock x:Name="MinDurationLabel" Width="40" TextAlignment="Right"
@@ -68,53 +69,53 @@
             </GroupBox>
 
             <!-- Blackout Visual -->
-            <GroupBox Header="🎨  Blackout Visual" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="VisualGroup" Margin="0,0,0,12" Padding="10">
                 <StackPanel>
                     <!-- Visual type selector as radio buttons in a horizontal panel -->
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
-                        <RadioButton x:Name="RadioPlainBlack" Content="Plain Black"
+                        <RadioButton x:Name="RadioPlainBlack" Content="{x:Static res:Strings.PlainBlack}"
                                      GroupName="VisualType" Margin="0,0,12,0"
                                      Checked="OnVisualTypeChanged" />
-                        <RadioButton x:Name="RadioText" Content="Custom Text"
+                        <RadioButton x:Name="RadioText" Content="{x:Static res:Strings.CustomText}"
                                      GroupName="VisualType" Margin="0,0,12,0"
                                      Checked="OnVisualTypeChanged" />
-                        <RadioButton x:Name="RadioImage" Content="Image"
+                        <RadioButton x:Name="RadioImage" Content="{x:Static res:Strings.Image}"
                                      GroupName="VisualType" Margin="0,0,12,0"
                                      Checked="OnVisualTypeChanged" />
-                        <RadioButton x:Name="RadioVideo" Content="Video"
+                        <RadioButton x:Name="RadioVideo" Content="{x:Static res:Strings.Video}"
                                      GroupName="VisualType"
                                      Checked="OnVisualTypeChanged" />
                     </StackPanel>
 
                     <!-- Text input (visible when Text mode is selected) -->
                     <DockPanel x:Name="TextPanel" Visibility="Collapsed" Margin="0,0,0,4">
-                        <TextBlock Text="Display text:" DockPanel.Dock="Left"
+                        <TextBlock Text="{x:Static res:Strings.DisplayText}" DockPanel.Dock="Left"
                                    VerticalAlignment="Center" Margin="0,0,8,0" />
                         <TextBox x:Name="CustomTextBox" TextChanged="OnCustomTextChanged" />
                     </DockPanel>
 
                     <!-- Image picker (visible when Image mode is selected) -->
                     <DockPanel x:Name="ImagePanel" Visibility="Collapsed" Margin="0,0,0,4">
-                        <Button Content="Choose..." DockPanel.Dock="Right" Margin="8,0,0,0"
+                        <Button Content="{x:Static res:Strings.Choose}" DockPanel.Dock="Right" Margin="8,0,0,0"
                                 Click="OnChooseImage" Padding="8,2" />
                         <Button x:Name="ClearImageButton" Content="✕" DockPanel.Dock="Right"
                                 Margin="4,0,0,0" Click="OnClearImage" Padding="4,2"
                                 Visibility="Collapsed" />
-                        <TextBlock Text="Image:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBlock x:Name="ImagePathLabel" Text="Default"
+                        <TextBlock Text="{x:Static res:Strings.ImageLabel}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock x:Name="ImagePathLabel" Text="{x:Static res:Strings.Default}"
                                    Foreground="Gray" VerticalAlignment="Center"
                                    TextTrimming="CharacterEllipsis" />
                     </DockPanel>
 
                     <!-- Video picker (visible when Video mode is selected) -->
                     <DockPanel x:Name="VideoPanel" Visibility="Collapsed" Margin="0,0,0,4">
-                        <Button Content="Choose..." DockPanel.Dock="Right" Margin="8,0,0,0"
+                        <Button Content="{x:Static res:Strings.Choose}" DockPanel.Dock="Right" Margin="8,0,0,0"
                                 Click="OnChooseVideo" Padding="8,2" />
                         <Button x:Name="ClearVideoButton" Content="✕" DockPanel.Dock="Right"
                                 Margin="4,0,0,0" Click="OnClearVideo" Padding="4,2"
                                 Visibility="Collapsed" />
-                        <TextBlock Text="Video:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBlock x:Name="VideoPathLabel" Text="None"
+                        <TextBlock Text="{x:Static res:Strings.VideoLabel}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock x:Name="VideoPathLabel" Text="{x:Static res:Strings.NoneLabel}"
                                    Foreground="Gray" VerticalAlignment="Center"
                                    TextTrimming="CharacterEllipsis" />
                     </DockPanel>
@@ -122,21 +123,21 @@
             </GroupBox>
 
             <!-- Sound -->
-            <GroupBox Header="🔔  Sound" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="SoundGroup" Margin="0,0,0,12" Padding="10">
                 <StackPanel>
-                    <CheckBox x:Name="StartGongCheck" Content="Start gong (begin of blackout)"
+                    <CheckBox x:Name="StartGongCheck" Content="{x:Static res:Strings.StartGong}"
                               Margin="0,4,0,4" Checked="OnStartGongChanged" Unchecked="OnStartGongChanged" />
-                    <CheckBox x:Name="EndGongCheck" Content="End gong (end of blackout)"
+                    <CheckBox x:Name="EndGongCheck" Content="{x:Static res:Strings.EndGong}"
                               Margin="0,0,0,4" Checked="OnEndGongChanged" Unchecked="OnEndGongChanged" />
                 </StackPanel>
             </GroupBox>
 
             <!-- Behavior -->
-            <GroupBox Header="🔒  Behavior" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="BehaviorGroup" Margin="0,0,0,12" Padding="10">
                 <StackPanel>
-                    <CheckBox x:Name="HandcuffsCheck" Content="Handcuffs mode"
+                    <CheckBox x:Name="HandcuffsCheck" Content="{x:Static res:Strings.HandcuffsMode}"
                               Margin="0,4,0,4" Checked="OnHandcuffsChanged" Unchecked="OnHandcuffsChanged" />
-                    <TextBlock Text="When on, ESC cannot dismiss the blackout early."
+                    <TextBlock Text="{x:Static res:Strings.HandcuffsDescription}"
                                FontSize="11" Foreground="Gray" Margin="20,0,0,0" />
                 </StackPanel>
             </GroupBox>

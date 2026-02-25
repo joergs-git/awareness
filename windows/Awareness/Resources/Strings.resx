@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- TrayIconController strings -->
+  <data name="Awareness" xml:space="preserve"><value>Awareness</value></data>
+  <data name="SnoozedUntil" xml:space="preserve"><value>Snoozed until {0}</value></data>
+  <data name="SnoozedIndefinitely" xml:space="preserve"><value>Snoozed indefinitely</value></data>
+  <data name="NextIn" xml:space="preserve"><value>Awareness — Next in {0}</value></data>
+  <data name="TooltipSnoozedUntil" xml:space="preserve"><value>Awareness — Snoozed until {0}</value></data>
+  <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Awareness — Snoozed indefinitely</value></data>
+  <data name="NextBlackoutIn" xml:space="preserve"><value>Next blackout in {0}</value></data>
+  <data name="Scheduling" xml:space="preserve"><value>Scheduling...</value></data>
+  <data name="TestBlackout" xml:space="preserve"><value>Test Blackout</value></data>
+  <data name="Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="Snooze" xml:space="preserve"><value>Snooze</value></data>
+  <data name="UntilIResume" xml:space="preserve"><value>Until I resume</value></data>
+  <data name="MinutesFormat" xml:space="preserve"><value>{0} minutes</value></data>
+  <data name="HourFormat" xml:space="preserve"><value>{0} hour</value></data>
+  <data name="HoursFormat" xml:space="preserve"><value>{0} hours</value></data>
+  <data name="LaunchAtLogin" xml:space="preserve"><value>Launch at Login</value></data>
+  <data name="SettingsMenu" xml:space="preserve"><value>Settings...</value></data>
+  <data name="HowToUseMenu" xml:space="preserve"><value>How to Use...</value></data>
+  <data name="AboutMenu" xml:space="preserve"><value>About Awareness...</value></data>
+  <data name="UpdateAvailable" xml:space="preserve"><value>Update Available (v{0})</value></data>
+  <data name="QuitAwareness" xml:space="preserve"><value>Quit Awareness</value></data>
+  <data name="HowToUseTitle" xml:space="preserve"><value>How to Use Awareness</value></data>
+  <data name="HowToUseText" xml:space="preserve"><value>Awareness runs quietly in your system tray (☯ icon).
+
+How it works:
+• At random intervals, your screen fades to black for a few seconds
+• A gong sounds at the start and end of each blackout
+• Use this pause to breathe, close your eyes, and reset
+
+Controls:
+• ESC — dismiss a blackout early (unless Handcuffs mode is on)
+• Snooze — temporarily pause from the system tray
+• Settings — configure timing, visuals, and sounds
+
+The app detects active camera/microphone usage and will skip blackouts during video calls.</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>Awareness</value></data>
+  <data name="AboutText" xml:space="preserve"><value>A mindfulness timer for your PC.
+Randomly pauses your screen to help you breathe.
+
+The goal of this app is to not need it anymore a little bit later.
+
+by joergsflow
+Version {0}
+
+github.com/joergs-git/awareness
+
+Click OK to close, or Cancel to open GitHub.</value></data>
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Now" xml:space="preserve"><value>now</value></data>
+
+  <!-- SettingsWindow.xaml strings -->
+  <data name="AwarenessSettings" xml:space="preserve"><value>Awareness Settings</value></data>
+  <data name="ActiveHours" xml:space="preserve"><value>Active Hours</value></data>
+  <data name="From" xml:space="preserve"><value>From</value></data>
+  <data name="Until" xml:space="preserve"><value>Until</value></data>
+  <data name="IntervalBetweenBlackouts" xml:space="preserve"><value>Interval Between Blackouts</value></data>
+  <data name="BlackoutDuration" xml:space="preserve"><value>Blackout Duration</value></data>
+  <data name="BlackoutVisual" xml:space="preserve"><value>Blackout Visual</value></data>
+  <data name="PlainBlack" xml:space="preserve"><value>Plain Black</value></data>
+  <data name="CustomText" xml:space="preserve"><value>Custom Text</value></data>
+  <data name="Image" xml:space="preserve"><value>Image</value></data>
+  <data name="Video" xml:space="preserve"><value>Video</value></data>
+  <data name="DisplayText" xml:space="preserve"><value>Display text:</value></data>
+  <data name="Choose" xml:space="preserve"><value>Choose...</value></data>
+  <data name="ImageLabel" xml:space="preserve"><value>Image:</value></data>
+  <data name="Default" xml:space="preserve"><value>Default</value></data>
+  <data name="VideoLabel" xml:space="preserve"><value>Video:</value></data>
+  <data name="NoneLabel" xml:space="preserve"><value>None</value></data>
+  <data name="Sound" xml:space="preserve"><value>Sound</value></data>
+  <data name="StartGong" xml:space="preserve"><value>Start gong (begin of blackout)</value></data>
+  <data name="EndGong" xml:space="preserve"><value>End gong (end of blackout)</value></data>
+  <data name="Behavior" xml:space="preserve"><value>Behavior</value></data>
+  <data name="HandcuffsMode" xml:space="preserve"><value>Handcuffs mode</value></data>
+  <data name="HandcuffsDescription" xml:space="preserve"><value>When on, ESC cannot dismiss the blackout early.</value></data>
+
+  <!-- BlackoutContentControl.xaml strings -->
+  <data name="Breathe" xml:space="preserve"><value>Breathe.</value></data>
+  <data name="NoVideoSelected" xml:space="preserve"><value>No video selected</value></data>
+
+  <!-- App.xaml.cs strings -->
+  <data name="AlreadyRunning" xml:space="preserve"><value>Awareness is already running in the system tray.</value></data>
+  <data name="WelcomeTitle" xml:space="preserve"><value>Welcome to Awareness</value></data>
+  <!-- ProgressWindow strings -->
+  <data name="ProgressMenu" xml:space="preserve"><value>Progress...</value></data>
+  <data name="ProgressTitle" xml:space="preserve"><value>Progress</value></data>
+  <data name="Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Lifetime" xml:space="preserve"><value>Lifetime</value></data>
+  <data name="Triggered" xml:space="preserve"><value>triggered</value></data>
+  <data name="Completed" xml:space="preserve"><value>completed</value></data>
+  <data name="SuccessRate" xml:space="preserve"><value>Success Rate</value></data>
+
+  <data name="WelcomeText" xml:space="preserve"><value>Awareness is now running in your system tray.
+
+Look for the ☯ icon in the bottom-right of your screen. Right-click it to access settings, snooze, or quit.
+
+Your screen will randomly fade to black at gentle intervals — a moment to pause, breathe, and return to the present.
+
+You can configure everything from the tray icon → Settings.</value></data>
+</root>

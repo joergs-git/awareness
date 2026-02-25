@@ -47,8 +47,16 @@ class GongPlayer {
     private func playSound(at url: URL) -> AVAudioPlayer? {
         do {
             let player = try AVAudioPlayer(contentsOf: url)
+            player.volume = 1.0
             player.prepareToPlay()
             player.play()
+
+            // Fade out over the last 2 seconds for a smooth ending
+            let fadeStart = max(0, player.duration - 2.0)
+            DispatchQueue.main.asyncAfter(deadline: .now() + fadeStart) { [weak player] in
+                player?.setVolume(0, fadeDuration: 2.0)
+            }
+
             return player
         } catch {
             print("Awareness: failed to play sound — \(error.localizedDescription)")

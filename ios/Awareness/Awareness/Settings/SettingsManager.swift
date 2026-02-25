@@ -38,6 +38,7 @@ final class SettingsManager: ObservableObject {
         #if os(watchOS)
         static let hapticStartEnabled   = "hapticStartEnabled"
         static let hapticEndEnabled     = "hapticEndEnabled"
+        static let endFlashEnabled      = "endFlashEnabled"
         #endif
     }
 
@@ -70,6 +71,7 @@ final class SettingsManager: ObservableObject {
         #if os(watchOS)
         values[Keys.hapticStartEnabled] = true
         values[Keys.hapticEndEnabled]   = true
+        values[Keys.endFlashEnabled]    = false
         #endif
 
         return values
@@ -203,6 +205,11 @@ final class SettingsManager: ObservableObject {
     @Published var hapticEndEnabled: Bool {
         didSet { defaults.set(hapticEndEnabled, forKey: Keys.hapticEndEnabled) }
     }
+
+    /// Whether to flash white at the end of a blackout (visible through closed eyelids)
+    @Published var endFlashEnabled: Bool {
+        didSet { defaults.set(endFlashEnabled, forKey: Keys.endFlashEnabled) }
+    }
     #endif
 
     // MARK: - Computed Helpers
@@ -326,6 +333,7 @@ final class SettingsManager: ObservableObject {
         #if os(watchOS)
         hapticStartEnabled  = defaults.bool(forKey: Keys.hapticStartEnabled)
         hapticEndEnabled    = defaults.bool(forKey: Keys.hapticEndEnabled)
+        endFlashEnabled     = defaults.bool(forKey: Keys.endFlashEnabled)
         #endif
     }
 }

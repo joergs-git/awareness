@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Awareness.Models;
+using Awareness.Resources;
 
 namespace Awareness.Blackout;
 
@@ -36,7 +37,7 @@ public partial class BlackoutContentControl : UserControl
                 break;
 
             case BlackoutVisualType.Text:
-                TextContent.Text = string.IsNullOrEmpty(customText) ? "Breathe." : customText;
+                TextContent.Text = string.IsNullOrEmpty(customText) ? Strings.Breathe : customText;
                 TextContent.Visibility = Visibility.Visible;
                 break;
 
@@ -90,7 +91,7 @@ public partial class BlackoutContentControl : UserControl
             catch
             {
                 // Last resort: show text instead
-                TextContent.Text = "Breathe.";
+                TextContent.Text = Strings.Breathe;
                 TextContent.Foreground = new System.Windows.Media.SolidColorBrush(
                     System.Windows.Media.Color.FromArgb(128, 255, 255, 255));
                 TextContent.Visibility = Visibility.Visible;

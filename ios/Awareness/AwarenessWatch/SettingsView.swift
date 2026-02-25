@@ -10,13 +10,13 @@ struct SettingsView: View {
     var body: some View {
         Form {
             // MARK: - Active Hours
-            Section("Active Hours") {
-                Picker("From", selection: $settings.activeStartHour) {
+            Section(String(localized: "Active Hours")) {
+                Picker(String(localized: "From"), selection: $settings.activeStartHour) {
                     ForEach(0..<24, id: \.self) { hour in
                         Text(formatHour(hour)).tag(hour)
                     }
                 }
-                Picker("Until", selection: $settings.activeEndHour) {
+                Picker(String(localized: "Until"), selection: $settings.activeEndHour) {
                     ForEach(0..<24, id: \.self) { hour in
                         Text(formatHour(hour)).tag(hour)
                     }
@@ -24,8 +24,8 @@ struct SettingsView: View {
             }
 
             // MARK: - Interval
-            Section("Interval (min)") {
-                Picker("Min", selection: Binding(
+            Section(String(localized: "Interval (min)")) {
+                Picker(String(localized: "Min"), selection: Binding(
                     get: { Int(settings.minInterval) },
                     set: { settings.minInterval = Double($0) }
                 )) {
@@ -33,7 +33,7 @@ struct SettingsView: View {
                         Text("\(min)").tag(min)
                     }
                 }
-                Picker("Max", selection: Binding(
+                Picker(String(localized: "Max"), selection: Binding(
                     get: { Int(settings.maxInterval) },
                     set: { settings.maxInterval = Double($0) }
                 )) {
@@ -44,8 +44,8 @@ struct SettingsView: View {
             }
 
             // MARK: - Duration
-            Section("Duration (sec)") {
-                Picker("Min", selection: Binding(
+            Section(String(localized: "Duration (sec)")) {
+                Picker(String(localized: "Min"), selection: Binding(
                     get: { Int(settings.minBlackoutDuration) },
                     set: { settings.minBlackoutDuration = Double($0) }
                 )) {
@@ -53,7 +53,7 @@ struct SettingsView: View {
                         Text("\(sec)").tag(sec)
                     }
                 }
-                Picker("Max", selection: Binding(
+                Picker(String(localized: "Max"), selection: Binding(
                     get: { Int(settings.maxBlackoutDuration) },
                     set: { settings.maxBlackoutDuration = Double($0) }
                 )) {
@@ -64,42 +64,43 @@ struct SettingsView: View {
             }
 
             // MARK: - Visual
-            Section("Visual") {
-                Picker("Style", selection: $settings.visualType) {
-                    Text("Black").tag(BlackoutVisualType.plainBlack)
-                    Text("Text").tag(BlackoutVisualType.text)
+            Section(String(localized: "Visual")) {
+                Picker(String(localized: "Style"), selection: $settings.visualType) {
+                    Text(String(localized: "Black")).tag(BlackoutVisualType.plainBlack)
+                    Text(String(localized: "Text")).tag(BlackoutVisualType.text)
                 }
                 if settings.visualType == .text {
-                    TextField("Text", text: $settings.customText)
+                    TextField(String(localized: "Text"), text: $settings.customText)
                 }
             }
 
-            // MARK: - Haptics
-            Section("Haptics") {
-                Toggle("Start haptic", isOn: $settings.hapticStartEnabled)
-                Toggle("End haptic", isOn: $settings.hapticEndEnabled)
+            // MARK: - Feedback
+            Section(String(localized: "Feedback")) {
+                Toggle(String(localized: "Start haptic"), isOn: $settings.hapticStartEnabled)
+                Toggle(String(localized: "End haptic"), isOn: $settings.hapticEndEnabled)
+                Toggle(String(localized: "End flash"), isOn: $settings.endFlashEnabled)
             }
 
             // MARK: - Behavior
             Section {
-                Toggle("Handcuffs", isOn: $settings.handcuffsMode)
+                Toggle(String(localized: "Handcuffs"), isOn: $settings.handcuffsMode)
             } footer: {
-                Text("Prevents dismissing blackout early.")
+                Text(String(localized: "Prevents dismissing blackout early."))
             }
 
             // MARK: - Health
             Section {
-                Toggle("Apple Health", isOn: $settings.healthKitEnabled)
+                Toggle(String(localized: "Apple Health"), isOn: $settings.healthKitEnabled)
                     .onChange(of: settings.healthKitEnabled, perform: { enabled in
                         if enabled {
                             Task { await HealthKitManager.shared.requestAuthorization() }
                         }
                     })
             } footer: {
-                Text("Log mindful minutes to Health.")
+                Text(String(localized: "Log mindful minutes to Health."))
             }
         }
-        .navigationTitle("Settings")
+        .navigationTitle(String(localized: "Settings"))
     }
 
     // MARK: - Helpers

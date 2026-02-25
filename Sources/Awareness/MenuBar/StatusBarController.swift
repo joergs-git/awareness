@@ -8,6 +8,7 @@ class StatusBarController: NSObject {
     private let blackoutController: BlackoutWindowController
     private let scheduler: BlackoutScheduler
     private let settingsWindowController = SettingsWindowController()
+    private let progressWindowController = ProgressWindowController()
     private var tooltipTimer: Timer?
     private var snoozeCheckTimer: Timer?
 
@@ -61,9 +62,9 @@ class StatusBarController: NSObject {
 
         if settings.isSnoozed {
             if let until = settings.snoozeUntil {
-                button.toolTip = "Awareness — Snoozed until \(formatTime(until))"
+                button.toolTip = String(localized: "Awareness — Snoozed until \(formatTime(until))")
             } else {
-                button.toolTip = "Awareness — Snoozed indefinitely"
+                button.toolTip = String(localized: "Awareness — Snoozed indefinitely")
             }
             return
         }
@@ -73,7 +74,7 @@ class StatusBarController: NSObject {
             return
         }
 
-        button.toolTip = "Awareness — Next in \(formatRemainingTime(until: nextDate))"
+        button.toolTip = String(localized: "Awareness — Next in \(formatRemainingTime(until: nextDate))")
     }
 
     private func formatRemainingTime(until date: Date) -> String {
@@ -120,14 +121,14 @@ class StatusBarController: NSObject {
         let statusText: String
         if settings.isSnoozed {
             if let until = settings.snoozeUntil {
-                statusText = "Snoozed until \(formatTime(until))"
+                statusText = String(localized: "Snoozed until \(formatTime(until))")
             } else {
-                statusText = "Snoozed indefinitely"
+                statusText = String(localized: "Snoozed indefinitely")
             }
         } else if let nextDate = scheduler.nextBlackoutDate {
-            statusText = "Next blackout in \(formatRemainingTime(until: nextDate))"
+            statusText = String(localized: "Next blackout in \(formatRemainingTime(until: nextDate))")
         } else {
-            statusText = "Scheduling..."
+            statusText = String(localized: "Scheduling...")
         }
         let statusMenuItem = NSMenuItem(title: statusText, action: nil, keyEquivalent: "")
         statusMenuItem.isEnabled = false
@@ -136,7 +137,7 @@ class StatusBarController: NSObject {
         menu.addItem(NSMenuItem.separator())
 
         // Test Blackout
-        let testItem = NSMenuItem(title: "Test Blackout", action: #selector(testBlackout), keyEquivalent: "t")
+        let testItem = NSMenuItem(title: String(localized: "Test Blackout"), action: #selector(testBlackout), keyEquivalent: "t")
         testItem.target = self
         menu.addItem(testItem)
 
@@ -144,7 +145,7 @@ class StatusBarController: NSObject {
 
         // Snooze / Resume
         if settings.isSnoozed || !scheduler.isCurrentlyRunning {
-            let resumeItem = NSMenuItem(title: "Resume", action: #selector(resumeAction), keyEquivalent: "r")
+            let resumeItem = NSMenuItem(title: String(localized: "Resume"), action: #selector(resumeAction), keyEquivalent: "r")
             resumeItem.target = self
             menu.addItem(resumeItem)
         } else {
@@ -152,11 +153,14 @@ class StatusBarController: NSObject {
             for minutes in StatusBarController.snoozeDurations {
                 let title: String
                 if minutes == 0 {
-                    title = "Until I resume"
+                    title = String(localized: "Until I resume")
                 } else if minutes >= 60 {
-                    title = "\(minutes / 60) hour\(minutes >= 120 ? "s" : "")"
+                    let hours = minutes / 60
+                    title = hours >= 2
+                        ? String(localized: "\(hours) hours")
+                        : String(localized: "\(hours) hour")
                 } else {
-                    title = "\(minutes) minutes"
+                    title = String(localized: "\(minutes) minutes")
                 }
                 let item = NSMenuItem(title: title, action: #selector(snoozeSelected(_:)), keyEquivalent: "")
                 item.target = self
@@ -164,7 +168,7 @@ class StatusBarController: NSObject {
                 snoozeMenu.addItem(item)
             }
 
-            let snoozeItem = NSMenuItem(title: "Snooze", action: nil, keyEquivalent: "")
+            let snoozeItem = NSMenuItem(title: String(localized: "Snooze"), action: nil, keyEquivalent: "")
             snoozeItem.submenu = snoozeMenu
             menu.addItem(snoozeItem)
         }
@@ -172,32 +176,37 @@ class StatusBarController: NSObject {
         menu.addItem(NSMenuItem.separator())
 
         // Launch at Login
-        let launchAtLogin = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin(_:)), keyEquivalent: "")
+        let launchAtLogin = NSMenuItem(title: String(localized: "Launch at Login"), action: #selector(toggleLaunchAtLogin(_:)), keyEquivalent: "")
         launchAtLogin.target = self
         launchAtLogin.state = isLaunchAtLoginEnabled() ? .on : .off
         menu.addItem(launchAtLogin)
 
+        // Progress
+        let progressItem = NSMenuItem(title: String(localized: "Progress..."), action: #selector(showProgress), keyEquivalent: "p")
+        progressItem.target = self
+        menu.addItem(progressItem)
+
         // Settings
-        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: String(localized: "Settings..."), action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
 
         menu.addItem(NSMenuItem.separator())
 
         // Help
-        let helpItem = NSMenuItem(title: "How to Use...", action: #selector(showHelp), keyEquivalent: "?")
+        let helpItem = NSMenuItem(title: String(localized: "How to Use..."), action: #selector(showHelp), keyEquivalent: "?")
         helpItem.target = self
         menu.addItem(helpItem)
 
         // About
-        let aboutItem = NSMenuItem(title: "About Awareness...", action: #selector(showAbout), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: String(localized: "About Awareness..."), action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 
         // Update Available (shown only when a newer release exists on GitHub)
         if UpdateChecker.shared.updateAvailable, let version = UpdateChecker.shared.latestVersion {
             let updateItem = NSMenuItem(
-                title: "Update Available (v\(version))",
+                title: String(localized: "Update Available (v\(version))"),
                 action: #selector(openReleasePage),
                 keyEquivalent: ""
             )
@@ -208,7 +217,7 @@ class StatusBarController: NSObject {
         menu.addItem(NSMenuItem.separator())
 
         // Quit
-        let quitItem = NSMenuItem(title: "Quit Awareness", action: #selector(quitApp), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: String(localized: "Quit Awareness"), action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
@@ -278,30 +287,20 @@ class StatusBarController: NSObject {
         )
     }
 
+    @objc private func showProgress() {
+        progressWindowController.showProgress()
+    }
+
     @objc private func openSettings() {
         settingsWindowController.showSettings()
     }
 
     @objc private func showHelp() {
         let alert = NSAlert()
-        alert.messageText = "How to Use Awareness"
-        alert.informativeText = """
-            Awareness runs quietly in your menu bar (☯ icon).
-
-            How it works:
-            • At random intervals, your screen fades to black for a few seconds
-            • A gong sounds at the start and end of each blackout
-            • Use this pause to breathe, close your eyes, and reset
-
-            Controls:
-            • ESC or Cmd+Q — dismiss a blackout early (unless Handcuffs mode is on)
-            • Snooze — temporarily pause from the menu bar
-            • Settings — configure timing, visuals, and sounds
-
-            The app detects active camera/microphone usage and will skip blackouts during video calls.
-            """
+        alert.messageText = String(localized: "How to Use Awareness")
+        alert.informativeText = String(localized: "Awareness runs quietly in your menu bar (☯ icon).\n\nHow it works:\n• At random intervals, your screen fades to black for a few seconds\n• A gong sounds at the start and end of each blackout\n• Use this pause to breathe, close your eyes, and reset\n\nControls:\n• ESC or Cmd+Q — dismiss a blackout early (unless Handcuffs mode is on)\n• Snooze — temporarily pause from the menu bar\n• Settings — configure timing, visuals, and sounds\n\nThe app detects active camera/microphone usage and will skip blackouts during video calls.")
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: String(localized: "OK"))
 
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
@@ -311,20 +310,10 @@ class StatusBarController: NSObject {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let alert = NSAlert()
         alert.messageText = "Awareness"
-        alert.informativeText = """
-            A mindfulness timer for your Mac.
-            Randomly pauses your screen to help you breathe.
-
-            The goal of this app is to not need it anymore a little bit later.
-
-            by joergsflow
-            Version \(version)
-
-            github.com/joergs-git/awareness
-            """
+        alert.informativeText = String(localized: "A mindfulness timer for your Mac.\nRandomly pauses your screen to help you breathe.\n\nThe goal of this app is to not need it anymore a little bit later.\n\nby joergsflow\nVersion \(version)\n\ngithub.com/joergs-git/awareness")
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "View on GitHub")
+        alert.addButton(withTitle: String(localized: "OK"))
+        alert.addButton(withTitle: String(localized: "View on GitHub"))
         alert.icon = NSImage(named: NSImage.applicationIconName)
 
         NSApp.activate(ignoringOtherApps: true)

@@ -65,18 +65,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Small delay so the menu bar icon is visible before the alert appears
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             let alert = NSAlert()
-            alert.messageText = "Welcome to Awareness"
-            alert.informativeText = """
-                Awareness is now running in your menu bar.
-
-                Look for the ☯ icon in the top-right of your screen. Click it to access settings, snooze, or quit.
-
-                Your screen will randomly fade to black at gentle intervals — a moment to pause, breathe, and return to the present.
-
-                You can configure everything from the menu bar icon → Settings.
-                """
+            alert.messageText = String(localized: "Welcome to Awareness")
+            alert.informativeText = String(localized: "Awareness is now running in your menu bar.\n\nLook for the ☯ icon in the top-right of your screen. Click it to access settings, snooze, or quit.\n\nYour screen will randomly fade to black at gentle intervals — a moment to pause, breathe, and return to the present.\n\nYou can configure everything from the menu bar icon → Settings.")
             alert.alertStyle = .informational
-            alert.addButton(withTitle: "Got it")
+            alert.addButton(withTitle: String(localized: "Got it"))
             NSApp.activate(ignoringOtherApps: true)
             alert.runModal()
         }

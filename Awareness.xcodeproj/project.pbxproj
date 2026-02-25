@@ -26,6 +26,10 @@
 		A20052 /* awareness-gong-end.aiff in Resources */ = {isa = PBXBuildFile; fileRef = B20052; };
 		A20053 /* default-blackout.png in Resources */ = {isa = PBXBuildFile; fileRef = B20053; };
 		A20054 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = B20054; };
+		A20016 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20016; };
+		A20017 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20017; };
+		A20018 /* ProgressWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20018; };
+		B2F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A2F00001; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,7 +54,11 @@
 		B20054 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "AppIcon.icns"; path = "SupportFiles/AppIcon.icns"; sourceTree = SOURCE_ROOT; };
 		B20055 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info.plist"; path = "SupportFiles/Info.plist"; sourceTree = SOURCE_ROOT; };
 		B20056 /* Awareness.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = "Awareness.entitlements"; path = "SupportFiles/Awareness.entitlements"; sourceTree = SOURCE_ROOT; };
+		B20016 /* ProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTracker.swift; sourceTree = "<group>"; };
+		B20017 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		B20018 /* ProgressWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressWindowController.swift; sourceTree = "<group>"; };
 		B20099 /* Awareness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Awareness.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +93,7 @@
 				D20006 /* Settings */,
 				D20007 /* Audio */,
 				D20008 /* Models */,
+				D20011 /* Progress */,
 				D20009 /* Resources */,
 			);
 			path = "Sources/Awareness";
@@ -144,12 +153,23 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		D20011 /* Progress */ = {
+			isa = PBXGroup;
+			children = (
+				B20016 /* ProgressTracker.swift */,
+				B20017 /* ProgressView.swift */,
+				B20018 /* ProgressWindowController.swift */,
+			);
+			path = Progress;
+			sourceTree = "<group>";
+		};
 		D20009 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				B20051 /* awareness-gong.aiff */,
 				B20052 /* awareness-gong-end.aiff */,
 				B20053 /* default-blackout.png */,
+				A2F00001 /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -214,6 +234,7 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
 			);
 			mainGroup = D20001;
 			productRefGroup = D20099 /* Products */;
@@ -234,6 +255,7 @@
 				A20052 /* awareness-gong-end.aiff in Resources */,
 				A20053 /* default-blackout.png in Resources */,
 				A20054 /* AppIcon.icns in Resources */,
+				B2F00001 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,6 +281,9 @@
 				A20013 /* UpdateChecker.swift in Sources */,
 				A20014 /* BlackoutVisualType.swift in Sources */,
 				A20015 /* TimeWindow.swift in Sources */,
+				A20016 /* ProgressTracker.swift in Sources */,
+				A20017 /* ProgressView.swift in Sources */,
+				A20018 /* ProgressWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,7 +409,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = SupportFiles/Info.plist;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -399,7 +424,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = SupportFiles/Info.plist;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
