@@ -8,7 +8,7 @@
     <RootNamespace>Awareness</RootNamespace>
     <AssemblyName>Awareness</AssemblyName>
     <ApplicationIcon>Resources\tray-icon.ico</ApplicationIcon>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Description>Awareness — a mindfulness timer for your computer</Description>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
