@@ -120,6 +120,23 @@ struct AccessoryInlineView: View {
     }
 }
 
+/// Entry view that switches layout based on the widget family
+struct ComplicationEntryView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: AwarenessEntry
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular:
+            AccessoryCircularView(entry: entry)
+        case .accessoryInline:
+            AccessoryInlineView(entry: entry)
+        default:
+            AccessoryRectangularView(entry: entry)
+        }
+    }
+}
+
 // MARK: - Widget Definition
 
 /// WidgetKit widget for watch face complications.
@@ -148,6 +165,6 @@ struct AwarenessComplicationWidget: Widget {
 
     @ViewBuilder
     private func complicationView(for entry: AwarenessEntry) -> some View {
-        AccessoryRectangularView(entry: entry)
+        ComplicationEntryView(entry: entry)
     }
 }
