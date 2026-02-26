@@ -30,6 +30,9 @@ class NotificationScheduler: ObservableObject {
     /// The approximate date of the next scheduled notification
     @Published private(set) var nextNotificationDate: Date?
 
+    /// Fire dates from the most recent rescheduleAll(), shared with watchOS
+    private(set) var scheduledFireDates: [Date] = []
+
     private init() {
         registerCategory()
         observeSettingsChanges()
@@ -79,17 +82,20 @@ class NotificationScheduler: ObservableObject {
 
     /// Schedule notifications up to the maximum, starting from now.
     /// Removes all existing pending notifications and creates fresh ones.
+    /// Also pushes the generated fire dates to the companion watch for coordinated scheduling.
     func rescheduleAll() {
         // Clear existing
         center.removeAllPendingNotificationRequests()
 
         guard !settings.isSnoozed else {
             nextNotificationDate = nil
+            scheduledFireDates = []
             return
         }
 
         var lastDate = Date()
         var firstDate: Date?
+        var fireDates: [Date] = []
 
         for i in 0..<NotificationScheduler.maxPending {
             // Pick a random delay for the next notification
@@ -113,6 +119,7 @@ class NotificationScheduler: ObservableObject {
             )
 
             center.add(request)
+            fireDates.append(fireDate)
 
             if firstDate == nil {
                 firstDate = fireDate
@@ -121,6 +128,10 @@ class NotificationScheduler: ObservableObject {
         }
 
         nextNotificationDate = firstDate
+        scheduledFireDates = fireDates
+
+        // Push fire dates to the companion watch for coordinated scheduling
+        WatchConnectivityManager.shared.pushScheduleToWatch(fireDates)
     }
 
     /// Top up pending notifications when the app returns to foreground.

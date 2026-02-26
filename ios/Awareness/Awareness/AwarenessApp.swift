@@ -50,20 +50,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         return true
     }
 
-    /// When a notification arrives while the app is in the foreground, show the blackout directly
+    /// When a notification arrives while the app is in the foreground,
+    /// show the banner so the user can actively tap to start a blackout.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        // Don't show the banner — present the blackout view instead
-        completionHandler([])
-
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .showBlackout, object: nil)
-            // Refresh notifications to maintain the queue
-            NotificationScheduler.shared.refreshOnForeground()
-        }
+        completionHandler([.banner, .sound])
+        NotificationScheduler.shared.refreshOnForeground()
     }
 
     /// When the user taps a notification or an action button

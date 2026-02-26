@@ -31,21 +31,60 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         observeSettingsChanges()
     }
 
-    /// Push current settings to the companion Apple Watch
+    /// Push current settings and progress to the companion Apple Watch
     func pushSettingsToWatch() {
         guard WCSession.default.activationState == .activated else { return }
         guard !isApplyingRemoteContext else { return }
 
-        let context = SettingsManager.shared.connectivityContext()
+        var context = SettingsManager.shared.connectivityContext()
+
+        // Include progress stats for cross-device sync
+        let progressContext = ProgressTracker.shared.connectivityContext()
+        for (key, value) in progressContext {
+            context[key] = value
+        }
+
+        // Include the latest fire dates for coordinated scheduling
+        let timestamps = NotificationScheduler.shared.scheduledFireDates.map { $0.timeIntervalSince1970 }
+        if !timestamps.isEmpty {
+            context["scheduledFireDates"] = timestamps
+        }
+
         try? WCSession.default.updateApplicationContext(context)
     }
 
-    // MARK: - Settings Observation
+    /// Push notification fire dates to the companion watch for coordinated scheduling
+    func pushScheduleToWatch(_ fireDates: [Date]) {
+        guard WCSession.default.activationState == .activated else { return }
 
-    /// Observe local settings changes and push to the watch (debounced).
+        var context = SettingsManager.shared.connectivityContext()
+
+        // Include progress stats
+        let progressContext = ProgressTracker.shared.connectivityContext()
+        for (key, value) in progressContext {
+            context[key] = value
+        }
+
+        // Include fire dates as Unix timestamps
+        context["scheduledFireDates"] = fireDates.map { $0.timeIntervalSince1970 }
+
+        try? WCSession.default.updateApplicationContext(context)
+    }
+
+    // MARK: - Settings & Progress Observation
+
+    /// Observe local settings and progress changes and push to the watch (debounced).
     /// Uses objectWillChange to avoid complex type-checker merge chains.
     private func observeSettingsChanges() {
         SettingsManager.shared.objectWillChange
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.pushSettingsToWatch()
+            }
+            .store(in: &cancellables)
+
+        // Push progress updates to watch after blackout completion
+        ProgressTracker.shared.objectWillChange
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.pushSettingsToWatch()
@@ -68,11 +107,12 @@ extension WatchConnectivityManager: WCSessionDelegate {
         }
     }
 
-    /// Receive updated settings from the companion Apple Watch
+    /// Receive updated settings and progress from the companion Apple Watch
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         DispatchQueue.main.async {
             self.isApplyingRemoteContext = true
             SettingsManager.shared.applyFromConnectivityContext(applicationContext)
+            ProgressTracker.shared.applyFromConnectivityContext(applicationContext)
             self.isApplyingRemoteContext = false
             // Reschedule notifications with updated settings
             NotificationScheduler.shared.rescheduleAll()

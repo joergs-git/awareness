@@ -86,6 +86,68 @@ final class ProgressTracker: ObservableObject {
         save()
     }
 
+    // MARK: - WatchConnectivity Sync
+
+    /// Export progress data as a dictionary for WatchConnectivity applicationContext
+    func connectivityContext() -> [String: Any] {
+        var context: [String: Any] = [:]
+        context["progressLifetimeTriggered"] = lifetimeTriggered
+        context["progressLifetimeCompleted"] = lifetimeCompleted
+
+        if let data = try? JSONEncoder().encode(dailyRecords),
+           let jsonString = String(data: data, encoding: .utf8) {
+            context["progressDailyRecords"] = jsonString
+        }
+
+        return context
+    }
+
+    /// Merge remote progress data received via WatchConnectivity.
+    /// Uses max() per-day to avoid double-counting when devices share a coordinated schedule.
+    func applyFromConnectivityContext(_ context: [String: Any]) {
+        // Decode remote daily records
+        var remoteDailies: [DayRecord] = []
+        if let jsonString = context["progressDailyRecords"] as? String,
+           let data = jsonString.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode([DayRecord].self, from: data) {
+            remoteDailies = decoded
+        }
+
+        guard !remoteDailies.isEmpty else { return }
+
+        // Merge daily records using max() per day to avoid double-counting
+        var mergedByDate: [String: DayRecord] = [:]
+        for record in dailyRecords {
+            mergedByDate[record.date] = record
+        }
+        for remote in remoteDailies {
+            if let existing = mergedByDate[remote.date] {
+                mergedByDate[remote.date] = DayRecord(
+                    date: remote.date,
+                    triggered: max(existing.triggered, remote.triggered),
+                    completed: max(existing.completed, remote.completed)
+                )
+            } else {
+                mergedByDate[remote.date] = remote
+            }
+        }
+
+        dailyRecords = mergedByDate.values.sorted { $0.date < $1.date }
+        pruneOldRecords()
+
+        // Recalculate lifetime from merged dailies to stay consistent
+        lifetimeTriggered = max(
+            lifetimeTriggered,
+            context["progressLifetimeTriggered"] as? Int ?? 0
+        )
+        lifetimeCompleted = max(
+            lifetimeCompleted,
+            context["progressLifetimeCompleted"] as? Int ?? 0
+        )
+
+        save()
+    }
+
     // MARK: - Private Helpers
 
     /// Get or create today's record and apply a mutation

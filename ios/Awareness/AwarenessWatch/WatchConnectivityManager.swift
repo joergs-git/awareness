@@ -31,21 +31,36 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         observeSettingsChanges()
     }
 
-    /// Push current settings to the companion iPhone
+    /// Push current settings and progress to the companion iPhone
     func pushSettingsToPhone() {
         guard WCSession.default.activationState == .activated else { return }
         guard !isApplyingRemoteContext else { return }
 
-        let context = SettingsManager.shared.connectivityContext()
+        var context = SettingsManager.shared.connectivityContext()
+
+        // Include progress stats for cross-device sync
+        let progressContext = ProgressTracker.shared.connectivityContext()
+        for (key, value) in progressContext {
+            context[key] = value
+        }
+
         try? WCSession.default.updateApplicationContext(context)
     }
 
-    // MARK: - Settings Observation
+    // MARK: - Settings & Progress Observation
 
-    /// Observe local settings changes and push to the phone (debounced).
+    /// Observe local settings and progress changes and push to the phone (debounced).
     /// Uses objectWillChange to avoid complex type-checker merge chains.
     private func observeSettingsChanges() {
         SettingsManager.shared.objectWillChange
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.pushSettingsToPhone()
+            }
+            .store(in: &cancellables)
+
+        // Push progress updates to phone after blackout completion
+        ProgressTracker.shared.objectWillChange
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.pushSettingsToPhone()
@@ -68,14 +83,22 @@ extension WatchConnectivityManager: WCSessionDelegate {
         }
     }
 
-    /// Receive updated settings from the companion iPhone app
+    /// Receive updated settings, fire dates, and progress from the companion iPhone app
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         DispatchQueue.main.async {
             self.isApplyingRemoteContext = true
             SettingsManager.shared.applyFromConnectivityContext(applicationContext)
+            ProgressTracker.shared.applyFromConnectivityContext(applicationContext)
             self.isApplyingRemoteContext = false
-            // Reschedule notifications with updated settings
-            NotificationScheduler.shared.rescheduleAll()
+
+            // Apply coordinated fire dates from iOS if available
+            if let timestamps = applicationContext["scheduledFireDates"] as? [Double] {
+                let dates = timestamps.map { Date(timeIntervalSince1970: $0) }
+                NotificationScheduler.shared.applyCoordinatedSchedule(dates)
+            } else {
+                // No fire dates in context — reschedule independently
+                NotificationScheduler.shared.rescheduleAll()
+            }
         }
     }
 

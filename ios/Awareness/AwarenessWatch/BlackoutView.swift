@@ -21,6 +21,8 @@ struct BlackoutView: View {
     @State private var flashOpacity: Double = 0
     /// Whether the blackout ran its full duration (not dismissed early)
     @State private var completedFullDuration = false
+    /// Whether to show the namaste confirmation after blackout ends
+    @State private var showingNamaste = false
 
     var body: some View {
         ZStack {
@@ -39,6 +41,13 @@ struct BlackoutView: View {
             Color.white
                 .ignoresSafeArea()
                 .opacity(flashOpacity)
+
+            // Namaste confirmation shown after blackout fades out
+            if showingNamaste {
+                Text("🙏")
+                    .font(.system(size: 48))
+                    .transition(.opacity)
+            }
         }
         .opacity(opacity)
         .onAppear {
@@ -117,9 +126,21 @@ struct BlackoutView: View {
             withAnimation(.easeOut(duration: 1.0)) {
                 opacity = 0
             }
+            // After fade-out, show namaste confirmation briefly before dismissing
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                stopExtendedSession()
-                isPresented = false
+                withAnimation(.easeIn(duration: 0.3)) {
+                    opacity = 1.0
+                    showingNamaste = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        opacity = 0
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        stopExtendedSession()
+                        isPresented = false
+                    }
+                }
             }
         }
     }
