@@ -36,6 +36,10 @@ The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the bod
 - **End flash** (iOS) — optional 1-second white screen blink at the end of a blackout, visible through closed eyelids to signal the session is ending
 - **Apple Watch companion** — standalone watchOS app with haptic feedback, notification scheduling, and WidgetKit complications for your watch face
 - **Settings sync** — bidirectional settings sync between iPhone and Apple Watch via WatchConnectivity
+- **Active touch blackouts** (iOS/watchOS) — notifications require a tap; no auto-triggering when the app is in the foreground
+- **Coordinated scheduling** — iPhone generates notification times and syncs them to Apple Watch, so both devices stay in harmony
+- **Cross-device progress sync** — your practice stats merge between iPhone and Apple Watch via WatchConnectivity
+- **Namaste confirmation** (watchOS) — a brief namaste shown after each completed blackout
 - **Watch face complications** — see your status and next blackout time directly on your watch face (circular, rectangular, and inline styles)
 - **Progress tracking** — donut chart showing today's completion, lifetime statistics, and a 14-day bar chart history
 - **Localization** — English and German (EN/DE)
@@ -224,8 +228,11 @@ During a blackout:
 - `WKExtendedRuntimeSession(.mindfulness)` keeps the app alive during blackouts
 - Haptic feedback via `WKInterfaceDevice` Taptic Engine (`.start` and `.success` types)
 - Bidirectional settings sync with companion iPhone via `WCSession.updateApplicationContext()`
+- Coordinated scheduling: iPhone pushes notification fire dates to the watch, keeping both devices in sync; falls back to random scheduling when standalone
+- Bidirectional progress sync: practice stats merge between iPhone and Apple Watch using max() strategy
+- Foreground notifications show a banner with sound — user must tap to start the blackout (no auto-triggering)
 - WidgetKit complications for watch face: circular (☯ with status tint), rectangular (next blackout time), inline
-- Shared code with iOS via target membership: models, settings, HealthKit, update checker
+- Shared code with iOS via target membership: models, settings, HealthKit, update checker, progress tracker
 - Apple Health integration: same `HealthKitManager` logs mindful sessions on the watch
 - Visual modes: plain black or custom text (no image/video on watch)
 - Deployment target: watchOS 10+

@@ -17,12 +17,14 @@ KEY FEATURES
 - Apple Health integration — log each pause as Mindful Minutes
 - Haptic feedback and end flash options on iOS
 - Taptic Engine feedback on Apple Watch
+- Coordinated scheduling — iPhone and Apple Watch stay in sync
+- Cross-device progress — stats merge between paired devices
 - Snooze — pause for 10 minutes up to 2 hours, or indefinitely
 - Localized in English and German
 
 APPLE WATCH
 
-The companion watchOS app works standalone or paired with your iPhone. Receive gentle haptic taps on your wrist, view your progress, and customize settings right from your watch face with WidgetKit complications.
+The companion watchOS app works standalone or paired with your iPhone. Coordinated scheduling keeps notification times in sync between devices, and your practice stats merge automatically. Receive gentle haptic taps on your wrist, view your progress, and customize settings right from your watch face with WidgetKit complications.
 
 CROSS-PLATFORM
 

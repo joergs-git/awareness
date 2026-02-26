@@ -1,5 +1,6 @@
-What's New in v1.4:
+What's New in v1.5:
 
-- Progress tracking: See your practice at a glance with a donut chart, daily and lifetime statistics, and a 14-day history bar chart
-- Localization: Full English and German language support
-- Bug fixes and stability improvements
+- Active touch: Blackouts now require a tap — no more auto-triggering when the app is in the foreground
+- Coordinated scheduling: iPhone syncs notification times to Apple Watch so both devices stay in harmony
+- Cross-device progress: Your practice stats now merge between iPhone and Apple Watch
+- Namaste: A brief confirmation shown on Apple Watch after each completed blackout

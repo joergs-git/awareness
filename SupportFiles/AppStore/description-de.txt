@@ -17,12 +17,14 @@ HAUPTFUNKTIONEN
 - Apple Health Integration — jede Pause wird als Achtsame Minuten protokolliert
 - Haptisches Feedback und Endblitz-Optionen auf iOS
 - Taptic Engine Feedback auf der Apple Watch
+- Koordinierte Planung — iPhone und Apple Watch bleiben synchron
+- Geräteübergreifender Fortschritt — Statistiken werden zwischen gekoppelten Geräten zusammengeführt
 - Schlummern — pausiere für 10 Minuten bis 2 Stunden oder auf unbestimmte Zeit
 - Lokalisiert in Englisch und Deutsch
 
 APPLE WATCH
 
-Die watchOS-Begleit-App funktioniert eigenständig oder gekoppelt mit deinem iPhone. Empfange sanfte haptische Impulse am Handgelenk, verfolge deinen Fortschritt und passe Einstellungen direkt auf dem Zifferblatt mit WidgetKit-Komplikationen an.
+Die watchOS-Begleit-App funktioniert eigenständig oder gekoppelt mit deinem iPhone. Koordinierte Planung hält die Benachrichtigungszeiten zwischen den Geräten synchron, und deine Übungsstatistiken werden automatisch zusammengeführt. Empfange sanfte haptische Impulse am Handgelenk, verfolge deinen Fortschritt und passe Einstellungen direkt auf dem Zifferblatt mit WidgetKit-Komplikationen an.
 
 PLATTFORMÜBERGREIFEND
 

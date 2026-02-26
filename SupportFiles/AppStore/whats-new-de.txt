@@ -1,5 +1,6 @@
-Neu in Version 1.4:
+Neu in Version 1.5:
 
-- Fortschrittsverfolgung: Sieh deine Praxis auf einen Blick mit Donut-Diagramm, Tages- und Gesamtstatistiken und einem 14-Tage-Balkendiagramm
-- Lokalisierung: Vollständige Unterstützung für Englisch und Deutsch
-- Fehlerbehebungen und Stabilitätsverbesserungen
+- Aktive Berührung: Verdunkelungen erfordern jetzt ein Tippen — kein automatisches Auslösen mehr, wenn die App im Vordergrund ist
+- Koordinierte Planung: Das iPhone synchronisiert Benachrichtigungszeiten mit der Apple Watch, damit beide Geräte im Einklang bleiben
+- Geräteübergreifender Fortschritt: Deine Übungsstatistiken werden jetzt zwischen iPhone und Apple Watch zusammengeführt
+- Namaste: Eine kurze Bestätigung auf der Apple Watch nach jeder abgeschlossenen Verdunkelung
