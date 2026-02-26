@@ -57,17 +57,46 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                    if settings.healthKitEnabled && HealthKitManager.shared.isAuthorized() {
+                } header: {
+                    Text(String(localized: "Schedule"))
+                }
+
+                // MARK: - Progress
+                Section {
+                    NavigationLink {
+                        ProgressView()
+                    } label: {
                         HStack {
-                            Label(String(localized: "Mindful Minutes"), systemImage: "heart.fill")
-                                .foregroundColor(.pink)
+                            Label(String(localized: "Progress"), systemImage: "chart.pie")
                             Spacer()
-                            Text(String(localized: "Connected"))
+                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
                                 .foregroundColor(.secondary)
                         }
                     }
+                }
+
+                // MARK: - Snooze
+                Section {
+                    if settings.isSnoozed {
+                        Button {
+                            scheduler.handleResume()
+                        } label: {
+                            Label(String(localized: "Resume"), systemImage: "play.fill")
+                                .foregroundColor(.green)
+                        }
+                    } else {
+                        Menu {
+                            ForEach(ContentView.snoozeDurations, id: \.self) { minutes in
+                                Button(snoozeLabel(for: minutes)) {
+                                    snooze(for: minutes)
+                                }
+                            }
+                        } label: {
+                            Label(String(localized: "Snooze"), systemImage: "moon.fill")
+                        }
+                    }
                 } header: {
-                    Text(String(localized: "Schedule"))
+                    Text(String(localized: "Snooze"))
                 }
 
                 // MARK: - Notification Warning
@@ -99,46 +128,17 @@ struct ContentView: View {
                     } label: {
                         Label(String(localized: "Test Notification (3s)"), systemImage: "bell.badge")
                     }
-                } header: {
-                    Text(String(localized: "Actions"))
-                }
-
-                // MARK: - Snooze
-                Section {
-                    if settings.isSnoozed {
-                        Button {
-                            scheduler.handleResume()
-                        } label: {
-                            Label(String(localized: "Resume"), systemImage: "play.fill")
-                                .foregroundColor(.green)
-                        }
-                    } else {
-                        Menu {
-                            ForEach(ContentView.snoozeDurations, id: \.self) { minutes in
-                                Button(snoozeLabel(for: minutes)) {
-                                    snooze(for: minutes)
-                                }
-                            }
-                        } label: {
-                            Label(String(localized: "Snooze"), systemImage: "moon.fill")
-                        }
-                    }
-                } header: {
-                    Text(String(localized: "Snooze"))
-                }
-
-                // MARK: - Progress
-                Section {
-                    NavigationLink {
-                        ProgressView()
-                    } label: {
+                    if settings.healthKitEnabled && HealthKitManager.shared.isAuthorized() {
                         HStack {
-                            Label(String(localized: "Progress"), systemImage: "chart.pie")
+                            Label(String(localized: "Mindful Minutes"), systemImage: "heart.fill")
+                                .foregroundColor(.pink)
                             Spacer()
-                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
+                            Text(String(localized: "Connected"))
                                 .foregroundColor(.secondary)
                         }
                     }
+                } header: {
+                    Text(String(localized: "Actions"))
                 }
 
                 // MARK: - How It Works
