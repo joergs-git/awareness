@@ -35,15 +35,6 @@ struct ContentView: View {
                     }
                 }
 
-                // MARK: - Actions
-                Section {
-                    Button {
-                        showingBlackout = true
-                    } label: {
-                        Label(String(localized: "Test Blackout"), systemImage: "play.circle")
-                    }
-                }
-
                 // MARK: - Progress
                 Section {
                     NavigationLink {
@@ -72,6 +63,15 @@ struct ContentView: View {
                                     .font(.footnote)
                             }
                         }
+                    }
+                }
+
+                // MARK: - Actions
+                Section {
+                    Button {
+                        showingBlackout = true
+                    } label: {
+                        Label(String(localized: "Test Blackout"), systemImage: "play.circle")
                     }
                 }
 
