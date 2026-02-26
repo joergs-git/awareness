@@ -155,10 +155,10 @@ public class TrayIconController : IDisposable
         menu.Items.Add(statusItem);
         menu.Items.Add(new Separator());
 
-        // Test Blackout
-        var testItem = new MenuItem { Header = Strings.TestBlackout };
-        testItem.Click += (_, _) => TestBlackout();
-        menu.Items.Add(testItem);
+        // Progress
+        var progressItem = new MenuItem { Header = Strings.ProgressMenu };
+        progressItem.Click += (_, _) => ShowProgress();
+        menu.Items.Add(progressItem);
         menu.Items.Add(new Separator());
 
         // Snooze / Resume
@@ -190,6 +190,11 @@ public class TrayIconController : IDisposable
 
         menu.Items.Add(new Separator());
 
+        // Test Blackout
+        var testItem = new MenuItem { Header = Strings.TestBlackout };
+        testItem.Click += (_, _) => TestBlackout();
+        menu.Items.Add(testItem);
+
         // Launch at Login
         var launchAtLogin = new MenuItem
         {
@@ -199,11 +204,6 @@ public class TrayIconController : IDisposable
         };
         launchAtLogin.Click += (_, _) => ToggleLaunchAtLogin();
         menu.Items.Add(launchAtLogin);
-
-        // Progress
-        var progressItem = new MenuItem { Header = Strings.ProgressMenu };
-        progressItem.Click += (_, _) => ShowProgress();
-        menu.Items.Add(progressItem);
 
         // Settings
         var settingsItem = new MenuItem { Header = Strings.SettingsMenu };
