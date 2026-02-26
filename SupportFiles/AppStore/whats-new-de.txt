@@ -1,6 +1,4 @@
-Neu in Version 1.5:
+Neu in Version 1.6:
 
-- Aktive Berührung: Verdunkelungen erfordern jetzt ein Tippen — kein automatisches Auslösen mehr, wenn die App im Vordergrund ist
-- Koordinierte Planung: Das iPhone synchronisiert Benachrichtigungszeiten mit der Apple Watch, damit beide Geräte im Einklang bleiben
-- Geräteübergreifender Fortschritt: Deine Übungsstatistiken werden jetzt zwischen iPhone und Apple Watch zusammengeführt
-- Namaste: Eine kurze Bestätigung auf der Apple Watch nach jeder abgeschlossenen Verdunkelung
+- Menüs auf allen Plattformen neu geordnet — Fortschritt erscheint jetzt direkt unter der Statuszeile, gefolgt von Schlummern, dann Aktionen
+- Einheitliche Navigation auf macOS, Windows, iOS und watchOS
