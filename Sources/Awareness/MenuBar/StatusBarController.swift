@@ -136,10 +136,10 @@ class StatusBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
-        // Test Blackout
-        let testItem = NSMenuItem(title: String(localized: "Test Blackout"), action: #selector(testBlackout), keyEquivalent: "t")
-        testItem.target = self
-        menu.addItem(testItem)
+        // Progress
+        let progressItem = NSMenuItem(title: String(localized: "Progress..."), action: #selector(showProgress), keyEquivalent: "p")
+        progressItem.target = self
+        menu.addItem(progressItem)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -175,16 +175,16 @@ class StatusBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
+        // Test Blackout
+        let testItem = NSMenuItem(title: String(localized: "Test Blackout"), action: #selector(testBlackout), keyEquivalent: "t")
+        testItem.target = self
+        menu.addItem(testItem)
+
         // Launch at Login
         let launchAtLogin = NSMenuItem(title: String(localized: "Launch at Login"), action: #selector(toggleLaunchAtLogin(_:)), keyEquivalent: "")
         launchAtLogin.target = self
         launchAtLogin.state = isLaunchAtLoginEnabled() ? .on : .off
         menu.addItem(launchAtLogin)
-
-        // Progress
-        let progressItem = NSMenuItem(title: String(localized: "Progress..."), action: #selector(showProgress), keyEquivalent: "p")
-        progressItem.target = self
-        menu.addItem(progressItem)
 
         // Settings
         let settingsItem = NSMenuItem(title: String(localized: "Settings..."), action: #selector(openSettings), keyEquivalent: ",")
