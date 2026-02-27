@@ -1,7 +1,5 @@
-What's New in v2.12:
+What's New in v2.13:
 
-- Breathing animation: text gently pulses during blackout, providing a calm meditation focus (all platforms)
-- watchOS: fixed blackout ending too late — haptics, flash, and namaste now fire on time even when wrist is down
-- watchOS: fixed instant dismissal on devices where extended runtime session couldn't start
-- Mindful Moments: ignored notifications now correctly count as missed, showing accurate discipline stats
-- macOS: improved input capture so ESC and mouse clicks are reliably detected during blackout
+- Mindful terminology: renamed "Progress" to "Mindful Moments" and "Success Rate" to "Discipline" across all platforms
+- iOS header redesign: new spiritual layout with "Mindfulness in Action" and "In stillness rests the strength"
+- Fixed HealthKit prompt showing on every app launch — now appears only once

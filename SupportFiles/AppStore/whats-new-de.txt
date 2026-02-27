@@ -1,7 +1,5 @@
-Neu in Version 2.12:
+Neu in Version 2.13:
 
-- Atem-Animation: Text pulsiert sanft während des Blackouts und bietet einen ruhigen Meditationsfokus (alle Plattformen)
-- watchOS: Blackout-Ende korrigiert — Haptik, Blitz und Namaste werden jetzt pünktlich ausgelöst, auch wenn das Handgelenk unten ist
-- watchOS: Sofortiges Beenden auf Geräten behoben, bei denen die erweiterte Laufzeitsitzung nicht starten konnte
-- Achtsamkeitsmomente: Ignorierte Benachrichtigungen werden jetzt korrekt als verpasst gezählt und zeigen genaue Disziplin-Statistiken
-- macOS: Verbesserte Eingabeerkennung, sodass ESC und Mausklicks während des Blackouts zuverlässig erkannt werden
+- Achtsame Begriffe: „Fortschritt" umbenannt in „Achtsamkeitsmomente" und „Erfolgsquote" in „Disziplin" auf allen Plattformen
+- iOS-Header neu gestaltet: spirituelles Layout mit „Achtsamkeit im Tun" und „In der Stille ruht die Kraft"
+- HealthKit-Aufforderung erscheint jetzt nur noch einmal beim ersten Start
