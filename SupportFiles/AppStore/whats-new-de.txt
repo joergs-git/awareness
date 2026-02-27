@@ -1,6 +1,6 @@
-Neu in Version 2.1:
+Neu in Version 2.11:
 
-- Synchronisationsschleife zwischen iPhone und Apple Watch behoben — iOS ist jetzt der Master-Planer und verhindert unkontrollierte Synchronisation
-- macOS: ESC-Taste beendet den Blackout jetzt korrekt (wurde zuvor von der Tastatur-Unterdrückung blockiert). Mausklick beendet ebenfalls.
-- End-Blitz (weißes Blinken, durch geschlossene Augenlider sichtbar) ist jetzt standardmäßig aktiviert auf iOS und watchOS
-- watchOS: Haptische Signale getauscht — sanfte Impulse laden zum Blackout ein, stärkere Impulse signalisieren das Ende
+- Atem-Animation: Text pulsiert sanft während des Blackouts und bietet einen ruhigen Meditationsfokus (alle Plattformen)
+- watchOS: Blackout-Ende korrigiert — Haptik, Blitz und Namaste werden jetzt pünktlich ausgelöst, auch wenn das Handgelenk unten ist
+- Fortschrittsverfolgung: Ignorierte Benachrichtigungen werden jetzt korrekt als verpasst gezählt und zeigen genaue Abschlussstatistiken
+- macOS: Verbesserte Eingabeerkennung, sodass ESC und Mausklicks während des Blackouts zuverlässig erkannt werden

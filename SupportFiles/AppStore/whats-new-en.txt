@@ -1,6 +1,6 @@
-What's New in v2.1:
+What's New in v2.11:
 
-- Fixed sync loop between iPhone and Apple Watch — iOS is now the master scheduler, eliminating potential runaway synchronization
-- macOS: ESC key now properly dismisses the blackout (was blocked by the keystroke suppression layer). Mouse click also dismisses.
-- End flash (white blink visible through closed eyelids) is now enabled by default on iOS and watchOS
-- watchOS: Reversed haptic signals — gentle pulses invite you into the blackout, stronger pulses signal the end
+- Breathing animation: text gently pulses during blackout, providing a calm meditation focus (all platforms)
+- watchOS: fixed blackout ending too late — haptics, flash, and namaste now fire on time even when wrist is down
+- Progress tracking: ignored notifications now correctly count as missed, showing accurate completion stats
+- macOS: improved input capture so ESC and mouse clicks are reliably detected during blackout
