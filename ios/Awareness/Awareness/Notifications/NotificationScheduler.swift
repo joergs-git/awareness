@@ -27,6 +27,10 @@ class NotificationScheduler: ObservableObject {
     private let settings = SettingsManager.shared
     private var cancellables = Set<AnyCancellable>()
 
+    /// Notification IDs already counted as triggered this session.
+    /// Prevents double-counting between willPresent, didReceive, and delivered-check.
+    private var countedTriggerIDs = Set<String>()
+
     /// The approximate date of the next scheduled notification
     @Published private(set) var nextNotificationDate: Date?
 
@@ -84,8 +88,10 @@ class NotificationScheduler: ObservableObject {
     /// Removes all existing pending notifications and creates fresh ones.
     /// Also pushes the generated fire dates to the companion watch for coordinated scheduling.
     func rescheduleAll() {
-        // Clear existing
+        // Clear existing pending and delivered notifications (IDs will be reused)
         center.removeAllPendingNotificationRequests()
+        center.removeAllDeliveredNotifications()
+        countedTriggerIDs.removeAll()
 
         guard !settings.isSnoozed else {
             nextNotificationDate = nil
@@ -136,11 +142,15 @@ class NotificationScheduler: ObservableObject {
 
     /// Top up pending notifications when the app returns to foreground.
     /// Keeps the total count at maxPending by adding new ones after the last existing one.
+    /// Also counts any delivered (ignored) notifications as triggered.
     func refreshOnForeground() {
         // Check if snooze has expired and auto-resume
         if let until = settings.snoozeUntil, Date() >= until {
             settings.snoozeUntil = nil
         }
+
+        // Count any delivered notifications the user didn't respond to
+        countDeliveredNotifications()
 
         center.getPendingNotificationRequests { [weak self] requests in
             guard let self = self else { return }
@@ -337,6 +347,35 @@ class NotificationScheduler: ObservableObject {
         }
         DispatchQueue.main.async {
             self.nextNotificationDate = earliest
+        }
+    }
+
+    // MARK: - Trigger Tracking
+
+    /// Record a specific notification as triggered, guarded against double-counting.
+    /// Called from willPresent (foreground delivery) and didReceive (user tap).
+    func recordNotificationTriggered(_ identifier: String) {
+        if countedTriggerIDs.insert(identifier).inserted {
+            ProgressTracker.shared.recordTriggered()
+        }
+    }
+
+    /// Count any delivered awareness notifications as triggered and clear them.
+    /// Catches notifications the user ignored (never tapped) — they sit in the
+    /// notification center until the app returns to foreground.
+    func countDeliveredNotifications() {
+        center.getDeliveredNotifications { [weak self] notifications in
+            guard let self = self else { return }
+            let awareness = notifications.filter {
+                $0.request.content.categoryIdentifier == NotificationScheduler.categoryIdentifier
+            }
+            for n in awareness {
+                self.recordNotificationTriggered(n.request.identifier)
+            }
+            if !awareness.isEmpty {
+                let ids = awareness.map { $0.request.identifier }
+                self.center.removeDeliveredNotifications(withIdentifiers: ids)
+            }
         }
     }
 }

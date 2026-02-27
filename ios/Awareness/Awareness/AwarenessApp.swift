@@ -52,11 +52,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     /// When a notification arrives while the app is in the foreground,
     /// show the banner so the user can actively tap to start a blackout.
+    /// Also records this notification as triggered for progress tracking.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
+        // Record as triggered — the notification arrived regardless of user response
+        NotificationScheduler.shared.recordNotificationTriggered(notification.request.identifier)
+
         completionHandler([.banner, .sound])
         NotificationScheduler.shared.refreshOnForeground()
     }
@@ -72,6 +76,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             completionHandler()
             return
         }
+
+        // Record as triggered — covers background notifications the user tapped
+        // (foreground ones were already counted in willPresent, dedup prevents double-counting)
+        NotificationScheduler.shared.recordNotificationTriggered(response.notification.request.identifier)
 
         switch response.actionIdentifier {
         case NotificationScheduler.actionSnooze:

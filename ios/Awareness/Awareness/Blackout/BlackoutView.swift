@@ -22,19 +22,34 @@ struct BlackoutView: View {
     @State private var completedFullDuration = false
     /// Whether to show the namaste confirmation after blackout ends
     @State private var showingNamaste = false
+    /// Controls the breathing animation — toggled on after fade-in to start pulsing
+    @State private var isBreathing = false
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
+            // Breathing content — gentle pulsing animation provides a meditation focus
             switch settings.visualType {
             case .plainBlack:
-                EmptyView()
+                // Subtle breathing circle as a minimal visual anchor
+                Circle()
+                    .fill(Color.white.opacity(isBreathing ? 0.08 : 0.015))
+                    .frame(width: isBreathing ? 20 : 12, height: isBreathing ? 20 : 12)
+                    .animation(
+                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                        value: isBreathing
+                    )
 
             case .text:
                 Text(settings.customText)
                     .font(.system(size: 36, weight: .light))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
+                    .scaleEffect(isBreathing ? 1.06 : 0.95)
+                    .animation(
+                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                        value: isBreathing
+                    )
                     .multilineTextAlignment(.center)
                     .padding(40)
 
@@ -71,7 +86,6 @@ struct BlackoutView: View {
 
             sessionStart = Date()
             duration = settings.randomBlackoutDuration()
-            ProgressTracker.shared.recordTriggered()
             GongPlayer.shared.playStartIfEnabled()
 
             // Haptic feedback at start
@@ -82,6 +96,11 @@ struct BlackoutView: View {
             // Fade in
             withAnimation(.easeIn(duration: 2.0)) {
                 opacity = 1.0
+            }
+
+            // Start breathing animation after fade-in completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                isBreathing = true
             }
 
             // Auto-dismiss timer
@@ -103,6 +122,7 @@ struct BlackoutView: View {
     private func dismissBlackout() {
         dismissTimer?.invalidate()
         dismissTimer = nil
+        isBreathing = false
 
         // Record completion only if the blackout ran its full duration
         if completedFullDuration {

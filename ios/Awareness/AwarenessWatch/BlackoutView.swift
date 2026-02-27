@@ -1,9 +1,42 @@
 import SwiftUI
 import WatchKit
 
+/// Delegate for WKExtendedRuntimeSession lifecycle management.
+/// Detects session expiration so the blackout can end gracefully instead of
+/// silently stalling with no haptic feedback.
+class ExtendedSessionDelegate: NSObject, WKExtendedRuntimeSessionDelegate {
+
+    var onExpiration: (() -> Void)?
+
+    func extendedRuntimeSessionDidStart(_ session: WKExtendedRuntimeSession) {
+        // Session started successfully — app will stay alive during blackout
+    }
+
+    func extendedRuntimeSessionWillExpire(_ session: WKExtendedRuntimeSession) {
+        // Session about to expire — trigger dismiss so end haptics still fire
+        DispatchQueue.main.async { [weak self] in
+            self?.onExpiration?()
+        }
+    }
+
+    func extendedRuntimeSession(
+        _ session: WKExtendedRuntimeSession,
+        didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
+        error: Error?
+    ) {
+        // Session was invalidated externally — dismiss if still active
+        if reason != .none {
+            DispatchQueue.main.async { [weak self] in
+                self?.onExpiration?()
+            }
+        }
+    }
+}
+
 /// Full-screen blackout view for Apple Watch.
-/// Shows plain black or text content, uses haptic feedback instead of audio,
-/// and keeps the app alive with a WKExtendedRuntimeSession during the blackout.
+/// Shows plain black or text content with a gentle breathing animation,
+/// uses haptic feedback instead of audio, and keeps the app alive with
+/// a WKExtendedRuntimeSession during the blackout.
 struct BlackoutView: View {
 
     @ObservedObject var settings = SettingsManager.shared
@@ -19,24 +52,46 @@ struct BlackoutView: View {
     @State private var sessionStart: Date?
     /// Extended runtime session to keep the app alive during blackout
     @State private var extendedSession: WKExtendedRuntimeSession?
+    /// Delegate for session lifecycle (must be retained alongside the session)
+    @State private var sessionDelegate: ExtendedSessionDelegate?
     /// Opacity of the white end-of-blackout flash layer
     @State private var flashOpacity: Double = 0
     /// Whether the blackout ran its full duration (not dismissed early)
     @State private var completedFullDuration = false
     /// Whether to show the namaste confirmation after blackout ends
     @State private var showingNamaste = false
+    /// Controls the breathing animation — toggled on after fade-in to start pulsing
+    @State private var isBreathing = false
+    /// Guards against double-dismiss from both timer and session expiration
+    @State private var isDismissing = false
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            // Watch only supports plain black or text (no image/video)
+            // Breathing content — keeps the display active and provides a meditation focus.
+            // The continuous animation signals to watchOS that the view is dynamic,
+            // which helps prevent aggressive display dimming on Always-On Display watches.
             if settings.visualType == .text {
                 Text(settings.customText)
                     .font(.system(size: 20, weight: .light))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
+                    .scaleEffect(isBreathing ? 1.08 : 0.94)
+                    .animation(
+                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                        value: isBreathing
+                    )
                     .multilineTextAlignment(.center)
                     .padding(12)
+            } else {
+                // Plain black mode — subtle breathing circle as a minimal visual anchor
+                Circle()
+                    .fill(Color.white.opacity(isBreathing ? 0.10 : 0.02))
+                    .frame(width: isBreathing ? 12 : 8, height: isBreathing ? 12 : 8)
+                    .animation(
+                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                        value: isBreathing
+                    )
             }
 
             // White flash layer — briefly visible at the end of a blackout
@@ -55,7 +110,6 @@ struct BlackoutView: View {
         .onAppear {
             sessionStart = Date()
             duration = settings.randomBlackoutDuration()
-            ProgressTracker.shared.recordTriggered()
 
             // Start extended runtime session to prevent suspension
             startExtendedSession()
@@ -68,6 +122,11 @@ struct BlackoutView: View {
             // Fade in
             withAnimation(.easeIn(duration: 1.0)) {
                 opacity = 1.0
+            }
+
+            // Start breathing animation after fade-in completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                isBreathing = true
             }
 
             // Auto-dismiss using Date-based checking to avoid watchOS timer throttling.
@@ -99,9 +158,16 @@ struct BlackoutView: View {
     // MARK: - Dismiss
 
     private func dismissBlackout() {
+        // Guard against double-dismiss (timer + session expiration can race)
+        guard !isDismissing else { return }
+        isDismissing = true
+
         dismissTimer?.invalidate()
         dismissTimer = nil
         targetEndDate = nil
+
+        // Stop breathing animation
+        isBreathing = false
 
         // Record completion only if the blackout ran its full duration
         if completedFullDuration {
@@ -158,9 +224,22 @@ struct BlackoutView: View {
 
     // MARK: - Extended Runtime Session
 
-    /// Start a mindfulness extended runtime session to keep the app alive
+    /// Start a mindfulness extended runtime session to keep the app alive.
+    /// Sets a delegate to detect session expiration — without a delegate,
+    /// the session can silently expire and haptics won't fire at the end.
     private func startExtendedSession() {
+        let delegate = ExtendedSessionDelegate()
+        delegate.onExpiration = { [self] in
+            // Session expired — trigger dismiss so end haptics still fire
+            if !isDismissing {
+                completedFullDuration = true
+                dismissBlackout()
+            }
+        }
+        sessionDelegate = delegate
+
         let session = WKExtendedRuntimeSession()
+        session.delegate = delegate
         session.start()
         extendedSession = session
     }
@@ -169,5 +248,6 @@ struct BlackoutView: View {
     private func stopExtendedSession() {
         extendedSession?.invalidate()
         extendedSession = nil
+        sessionDelegate = nil
     }
 }

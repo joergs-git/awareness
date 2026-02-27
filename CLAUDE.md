@@ -312,11 +312,13 @@ ios/Awareness/AwarenessWatch/
 | App lifecycle | SwiftUI `@main` with `UIApplicationDelegateAdaptor` for notification handling |
 | Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled `UNCalendarNotificationTrigger` requests |
 | Blackout | `fullScreenCover` presenting `BlackoutView` with `.statusBarHidden()` and `.persistentSystemOverlays(.hidden)` |
+| Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle; keeps display active |
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
-| Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; user must tap to start blackout |
-| Background notification | User taps notification → `didReceive response:` → posts `.showBlackout` notification → shows blackout |
+| Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; records trigger for progress; user must tap to start blackout |
+| Background notification | User taps notification → `didReceive response:` → records trigger → posts `.showBlackout` notification → shows blackout |
 | Coordinated scheduling | iOS is master scheduler; `rescheduleAll()` pushes fire dates to watch via `WatchConnectivityManager.shared.pushScheduleToWatch()`; watch does not push fire dates back |
 | Progress sync | `ProgressTracker.shared.connectivityContext()` / `applyFromConnectivityContext()` with max() merge |
+| Trigger tracking | Notifications counted as triggered on delivery (`willPresent`), tap (`didReceive`), and via delivered-check on foreground return (`countDeliveredNotifications`); `countedTriggerIDs` Set prevents double-counting |
 | Sound | `AVAudioSession(.playback)` so gong plays even in silent mode; notification uses custom sound |
 | Settings storage | `UserDefaults.standard` with `register(defaults:)` (same as macOS) |
 | Snooze | Removes all pending notifications; reschedules on resume |
@@ -338,12 +340,14 @@ ios/Awareness/AwarenessWatch/
 |---|---|
 | App lifecycle | SwiftUI `@main` with `WKApplicationDelegateAdaptor` for notification handling |
 | Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled notifications (same as iOS), default system sound |
-| Blackout | `fullScreenCover` presenting `BlackoutView` with `WKExtendedRuntimeSession(.mindfulness)` to prevent suspension |
+| Blackout | `fullScreenCover` presenting `BlackoutView` with `WKExtendedRuntimeSession` + `ExtendedSessionDelegate` + `WKBackgroundModes: mindfulness` to prevent suspension |
+| Breathing animation | Text mode: pulsating scale (0.94↔1.08) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle; keeps display active on Always-On Display watches |
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
-| Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; user must tap to start blackout |
-| Background notification | User taps notification → `didReceive response:` → posts `.showBlackout` notification → shows blackout |
+| Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; records trigger for progress; user must tap to start blackout |
+| Background notification | User taps notification → `didReceive response:` → records trigger → posts `.showBlackout` notification → shows blackout |
 | Coordinated scheduling | iOS is master scheduler; `applyCoordinatedSchedule()` uses iOS fire dates; falls back to random only when iOS dates unavailable or all in the past |
 | Progress sync | Same ProgressTracker sync methods via target membership |
+| Trigger tracking | Same architecture as iOS — `recordNotificationTriggered` + `countDeliveredNotifications` + dedup Set |
 | Namaste confirmation | namaste shown for 1.5s after blackout fade-out before dismissing |
 | Haptics | `WKInterfaceDevice.current().play(.success)` 3× at begin (gentle), `.play(.notification)` 4× at end (wake-up); opt-in via `hapticStartEnabled` / `hapticEndEnabled` |
 | Settings storage | `UserDefaults.standard` with `register(defaults:)` (same as iOS/macOS) |
@@ -433,7 +437,7 @@ ios/Awareness/AwarenessWatch/
 - Shared files via target membership: `BlackoutVisualType.swift`, `TimeWindow.swift`, `SettingsManager.swift`, `HealthKitManager.swift`, `UpdateChecker.swift`, `ProgressTracker.swift`
 - `SettingsManager.swift` uses `#if os(watchOS)` / `#if !os(watchOS)` guards for platform-specific settings (haptics on watch, gong/vibration/image/video on iOS; `endFlashEnabled` exists in both blocks)
 - Watch-specific settings: `hapticStartEnabled` (default: true), `hapticEndEnabled` (default: true)
-- `WKExtendedRuntimeSession(.mindfulness)` keeps the app alive during blackouts (up to 1 hour)
+- `WKExtendedRuntimeSession` with `ExtendedSessionDelegate` keeps the app alive during blackouts (up to 1 hour). Requires `WKBackgroundModes: mindfulness` in Info.plist (set via `INFOPLIST_KEY_WKBackgroundModes` build setting). The delegate detects session expiration and triggers dismiss so end haptics still fire.
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` flag + `lastRemoteContextDate` (2s cooldown) prevent echo loops and debounce-timing bypasses.
 - Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, `HealthKitManager`, and `ProgressTracker` via target membership

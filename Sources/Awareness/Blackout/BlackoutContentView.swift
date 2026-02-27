@@ -3,12 +3,16 @@ import AVKit
 
 /// SwiftUI view rendered inside the blackout overlay window.
 /// Displays different content based on the configured visual type.
+/// Text and plain-black modes include a gentle breathing animation.
 struct BlackoutContentView: View {
 
     let visualType: BlackoutVisualType
     let customText: String
     let imagePath: String
     let videoPath: String
+
+    /// Controls the breathing animation — toggled on after a short delay to start pulsing
+    @State private var isBreathing = false
 
     init(
         visualType: BlackoutVisualType,
@@ -28,12 +32,24 @@ struct BlackoutContentView: View {
 
             switch visualType {
             case .plainBlack:
-                EmptyView()
+                // Subtle breathing circle as a minimal visual anchor
+                Circle()
+                    .fill(Color.white.opacity(isBreathing ? 0.08 : 0.015))
+                    .frame(width: isBreathing ? 20 : 12, height: isBreathing ? 20 : 12)
+                    .animation(
+                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                        value: isBreathing
+                    )
 
             case .text:
                 Text(customText)
                     .font(.system(size: 36, weight: .light))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
+                    .scaleEffect(isBreathing ? 1.06 : 0.95)
+                    .animation(
+                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                        value: isBreathing
+                    )
                     .multilineTextAlignment(.center)
                     .padding(40)
 
@@ -42,6 +58,12 @@ struct BlackoutContentView: View {
 
             case .video:
                 videoContent
+            }
+        }
+        .onAppear {
+            // Start breathing animation after the window fade-in (2s)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                isBreathing = true
             }
         }
     }

@@ -12,6 +12,7 @@ class BlackoutWindowController {
     private var dismissTimer: DispatchWorkItem?
     private var keyEventMonitor: Any?
     private var mouseEventMonitor: Any?
+    private var globalMouseMonitor: Any?
     private var globalEventTap: CFMachPort?
     private var globalRunLoopSource: CFRunLoopSource?
     private var completionHandler: (() -> Void)?
@@ -73,6 +74,10 @@ class BlackoutWindowController {
             windows.append(window)
         }
 
+        // Force this application to the foreground so keyboard and mouse events
+        // are delivered to our overlay windows instead of the previously active app
+        NSApp.activate(ignoringOtherApps: true)
+
         // Make the first overlay window key so it captures keyboard input
         windows.first?.makeKeyAndOrderFront(nil)
 
@@ -96,9 +101,11 @@ class BlackoutWindowController {
             print("Awareness: failed to create idle display sleep assertion")
         }
 
-        // Install event monitors — local keyboard/mouse for ESC/click dismiss, global tap to suppress typing
+        // Install event monitors — local keyboard/mouse for ESC/click dismiss,
+        // global tap to suppress typing, global mouse monitor as backup for dismissal
         installKeyboardMonitor()
         installMouseClickMonitor()
+        installGlobalMouseMonitor()
         installGlobalEventTap()
 
         // Record that a blackout was triggered
@@ -121,6 +128,7 @@ class BlackoutWindowController {
         dismissTimer = nil
         removeKeyboardMonitor()
         removeMouseClickMonitor()
+        removeGlobalMouseMonitor()
         removeGlobalEventTap()
 
         // Release the display sleep prevention assertion
@@ -238,6 +246,31 @@ class BlackoutWindowController {
         }
     }
 
+    // MARK: - Global Mouse Monitor (backup dismiss when app loses focus)
+
+    /// Global monitor catches mouse clicks even when another app has focus.
+    /// This handles the case where focus is stolen by a notification or other app
+    /// during the blackout — the local monitor wouldn't fire, but this one will.
+    /// Note: global monitors can observe but not suppress events.
+    private func installGlobalMouseMonitor() {
+        globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
+            guard let self = self, self.isActive else { return }
+            guard !SettingsManager.shared.handcuffsMode else { return }
+
+            // Re-activate our app and dismiss — the click already went to the other app,
+            // but at least we dismiss the blackout so the user isn't stuck
+            NSApp.activate(ignoringOtherApps: true)
+            self.dismiss()
+        }
+    }
+
+    private func removeGlobalMouseMonitor() {
+        if let monitor = globalMouseMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalMouseMonitor = nil
+        }
+    }
+
     // MARK: - Global Event Tap (suppress keystrokes to background apps)
 
     /// Install a CGEvent tap that eats keyboard events system-wide during blackout.
@@ -331,13 +364,17 @@ class BlackoutWindowController {
 
 // MARK: - BlackoutWindow subclass
 
-/// Custom NSWindow subclass that can become key window to capture keyboard focus.
-/// This pulls keyboard focus away from whatever app was active before the blackout.
+/// Custom NSWindow subclass that can become both key and main window to fully
+/// capture keyboard and mouse focus away from whatever app was active before the blackout.
 class BlackoutWindow: NSWindow {
 
     var acceptsKeyInput = false
 
     override var canBecomeKey: Bool {
+        return acceptsKeyInput
+    }
+
+    override var canBecomeMain: Bool {
         return acceptsKeyInput
     }
 }
