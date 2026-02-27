@@ -1,0 +1,137 @@
+# Changelog
+
+All notable changes to Awareness reminder, from initial release to the current version.
+
+---
+
+## v2.13
+
+### Mindful terminology (all platforms)
+- Renamed "Progress" to **Mindful Moments** and "Success Rate" to **Discipline** across macOS, Windows, iOS, and watchOS
+- German: "Fortschritt" → **Achtsamkeitsmomente**, "Erfolgsquote" → **Disziplin**
+
+### iOS header redesign
+- New spiritual header layout: "Mindfulness in Action" / "Achtsamkeit im Tun" above the logo, followed by "In stillness rests the strength" / "In der Stille ruht die Kraft"
+
+### Bug fix
+- Fixed HealthKit prompt showing on every app launch — now appears only once and is permanently dismissed with either "Enable" or "Not Now"
+
+---
+
+## v2.12
+
+### Breathing animation (all platforms)
+- Text mode: gentle pulsating scale and opacity on a 3-second breathing cycle
+- Plain black mode: subtle breathing circle as a minimal visual anchor
+- Helps keep the watchOS display active on Always-On Display watches
+
+### watchOS: Fix blackout suspension
+- Added `WKBackgroundModes: mindfulness` and `ExtendedSessionDelegate` so the app stays alive when the wrist drops
+- End haptics, flash, and namaste now fire on time instead of queuing until wrist-raise
+- Fixed instant dismissal on devices where the extended runtime session couldn't start
+
+### Progress tracking fix
+- Notifications are now counted as "triggered" when delivered, not when the blackout starts
+- Ignored notifications correctly show as missed (e.g. "7 of 12" instead of "7 of 7")
+
+### macOS: Fix input capture during blackout
+- Force app activation when blackout starts so ESC and clicks are properly detected
+- Added global mouse monitor as fallback when another app steals focus
+
+---
+
+## v2.1
+
+- **iOS is now the master scheduler** — eliminates potential sync loops between iPhone and Apple Watch; the watch adopts iOS fire dates when available, only schedules independently as fallback
+- **macOS blackout dismiss fixed** — ESC key now properly dismisses the blackout when handcuffs mode is off; mouse click anywhere on the overlay also dismisses
+- **End flash on by default** — the white end-of-blackout flash (visible through closed eyelids) is now enabled by default on iOS and watchOS
+- **Reversed watchOS haptic signals** — gentle success pulses invite you into the blackout, stronger notification pulses signal the end
+- **Sync loop prevention** — debounced observers on both iOS and watchOS now use timestamp-based cooldowns to prevent echo pushes after receiving remote context
+
+---
+
+## v2.0
+
+- **Renamed to "Awareness reminder"** for clarity across all platforms
+- **Coordinated scheduling fix** — earliest-wins negotiation keeps iPhone and Apple Watch in perfect sync
+- **Namaste confirmation** after each completed blackout on iOS (already on watchOS)
+- **Enhanced haptic patterns on Apple Watch** — distinctive multi-tap start and end feedback
+- **Progress display** now shows completed/triggered (completed first) on all platforms
+- **Inline progress counter** on watchOS home screen
+- **Date-based watchOS timer** — prevents energy-saver mode from extending blackout duration
+- **Recurring HealthKit prompt** on iOS — gently reminds to enable Apple Health if not yet active
+- **New defaults** — active window 6am–10pm, blackout duration 20–40s
+- **Safety reschedule** when dismissing settings on iOS
+
+---
+
+## v1.6
+
+- **Reordered menus across all platforms** — Progress (now Mindful Moments) is directly below the status line, followed by Snooze, then actions. Consistent order on macOS, Windows, iOS, and watchOS.
+
+---
+
+## v1.5
+
+- **Active touch blackouts** (iOS/watchOS) — notifications now require a tap to start the blackout; no more auto-triggering when the app is in the foreground
+- **Coordinated scheduling** — iPhone generates notification times and syncs them to Apple Watch, so both devices stay in harmony
+- **Cross-device progress sync** — practice stats merge between iPhone and Apple Watch via WatchConnectivity
+- **Namaste confirmation** (watchOS) — a brief namaste shown after each completed blackout
+
+---
+
+## v1.4
+
+- **Progress tracking** — donut chart showing today's completion, lifetime statistics, and a 14-day bar chart history (all platforms)
+- **Localization** — full English and German (EN/DE) language support (all platforms)
+
+---
+
+## v1.3
+
+- **Apple Watch app** — standalone and companion support with WatchConnectivity sync
+- **WidgetKit complications** — accessoryCircular, accessoryRectangular, and accessoryInline for the watch face
+- **Haptic feedback** on watchOS — Taptic Engine pulses at blackout start and end
+- **Extended runtime session** keeps the watch app alive during blackouts
+
+---
+
+## v1.2
+
+### iOS/iPadOS
+- **HealthKit encouragement** — on first launch, a prompt asks if you'd like to log mindful pauses to Apple Health
+- **Haptic vibration** — heavy impact at blackout start, gentle success haptic at end (opt-in)
+- **End flash** — 1-second white screen blink at end of blackout, visible through closed eyelids (opt-in)
+- **Feedback section** — sound settings renamed to "Feedback" to group gong, vibration, and flash options
+
+### All platforms
+- **App Store distribution** — macOS Xcode project for Mac App Store with App Sandbox and security-scoped bookmarks
+- **Direct distribution** — Developer ID signing + notarization support via `make release-direct`
+- **HealthKit integration** — iOS logs each blackout as Mindful Minutes in Apple Health (opt-in)
+- **Improved iOS notifications** — rich notifications with mindfulness prompts, action buttons, and custom gong sound
+- **Dynamic version display** — About dialogs read version from bundle/assembly instead of hardcoded strings
+
+---
+
+## v1.1
+
+- **Update checker** — the app checks GitHub for newer releases on startup. If an update is available, an "Update Available" menu item appears linking directly to the releases page.
+
+---
+
+## v1.0
+
+Initial release — macOS + Windows.
+
+- Menu bar / system tray app with yin-yang icon
+- Random blackout intervals (configurable 1–120 min range)
+- Blackout duration 3–120 seconds with 2-second fade transitions
+- Visual modes: plain black, custom text, image, or looping video
+- Start gong + end gong (independently toggleable)
+- Camera/microphone detection — skips blackouts during calls
+- Handcuffs mode — commit to the full duration
+- Snooze (10 min – 2 hours, or indefinitely)
+- Keystroke suppression during blackout (macOS: Accessibility, Windows: low-level keyboard hook)
+- Multi-monitor support
+- Launch at Login
+- Persistent settings (UserDefaults on macOS, JSON on Windows)
