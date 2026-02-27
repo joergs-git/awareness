@@ -1,0 +1,5 @@
+# Screenshot PNGs are large binaries — don't commit to git.
+# Keep the directory structure and capture script only.
+**/*.png
+**/*.jpg
+**/*.jpeg
