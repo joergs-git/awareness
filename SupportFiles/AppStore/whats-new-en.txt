@@ -1,6 +1,7 @@
-What's New in v2.11:
+What's New in v2.12:
 
 - Breathing animation: text gently pulses during blackout, providing a calm meditation focus (all platforms)
 - watchOS: fixed blackout ending too late — haptics, flash, and namaste now fire on time even when wrist is down
+- watchOS: fixed instant dismissal on devices where extended runtime session couldn't start
 - Progress tracking: ignored notifications now correctly count as missed, showing accurate completion stats
 - macOS: improved input capture so ESC and mouse clicks are reliably detected during blackout
