@@ -22,7 +22,7 @@ struct ContentView: View {
                 // MARK: - Header
                 Section {
                     VStack(spacing: 8) {
-                        Text(String(localized: "Awareness reminder"))
+                        Text(String(localized: "Mindfulness in Action"))
                             .font(.title2.weight(.semibold))
                             .multilineTextAlignment(.center)
                         Image("Logo")
@@ -31,8 +31,6 @@ struct ContentView: View {
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
-                        Text(String(localized: "Mindfulness in Action"))
-                            .font(.headline)
                         Text(String(localized: "In stillness rests the strength"))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
