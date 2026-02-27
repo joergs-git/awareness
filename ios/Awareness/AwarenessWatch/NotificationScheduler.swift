@@ -270,8 +270,8 @@ class NotificationScheduler: ObservableObject {
     // MARK: - Settings Observation
 
     /// Reschedule when relevant settings change (debounced).
-    /// Skips rescheduling when a remote context is being applied — the coordinated
-    /// schedule from iOS will follow momentarily via applyCoordinatedSchedule().
+    /// Skips rescheduling when a remote context is being applied or was recently applied —
+    /// the coordinated schedule from iOS is authoritative and should not be overwritten.
     private func observeSettingsChanges() {
         settings.$minInterval
             .merge(with: settings.$maxInterval)
@@ -280,8 +280,19 @@ class NotificationScheduler: ObservableObject {
             .dropFirst(4)
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                guard !NotificationScheduler.shared.isApplyingRemoteContext else { return }
-                self?.rescheduleAll()
+                guard let self = self else { return }
+                guard !self.isApplyingRemoteContext else { return }
+
+                // Skip rescheduling if a coordinated schedule was applied recently —
+                // the debounce fires after the flag is cleared, but the settings
+                // change was from the same remote context, not a local user edit
+                if self.usingCoordinatedSchedule,
+                   let lastSync = self.lastCoordinatedScheduleDate,
+                   Date().timeIntervalSince(lastSync) < 2.0 {
+                    return
+                }
+
+                self.rescheduleAll()
             }
             .store(in: &cancellables)
     }

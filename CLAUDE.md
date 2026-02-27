@@ -259,7 +259,7 @@ ios/Awareness/AwarenessWatch/
 |---|---|
 | Menu bar icon | SF Symbol `"yinyang"` (macOS 14+) with Unicode `"☯"` fallback |
 | Overlay windows | One borderless `NSWindow` per `NSScreen.screens`, level `.screenSaver`, `canJoinAllSpaces + fullScreenAuxiliary` |
-| Keyboard capture | `BlackoutWindow` subclass (`canBecomeKey = true`) + `CGEvent.tapCreate` to suppress global keystrokes |
+| Keyboard capture | `BlackoutWindow` subclass (`canBecomeKey = true`) + `CGEvent.tapCreate` to suppress global keystrokes (ESC passes through when handcuffs off); mouse click also dismisses |
 | Scheduling | `DispatchSourceTimer` with random delay; auto-reschedules on settings change via Combine |
 | Camera detection | `AVCaptureDevice.isInUseByAnotherApplication` (no TCC prompt) |
 | Mic detection | CoreAudio `kAudioDevicePropertyDeviceIsRunningSomewhere` on input devices |
@@ -308,7 +308,7 @@ ios/Awareness/AwarenessWatch/
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
 | Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; user must tap to start blackout |
 | Background notification | User taps notification → `didReceive response:` → posts `.showBlackout` notification → shows blackout |
-| Coordinated scheduling | `rescheduleAll()` pushes fire dates to watch via `WatchConnectivityManager.shared.pushScheduleToWatch()` |
+| Coordinated scheduling | iOS is master scheduler; `rescheduleAll()` pushes fire dates to watch via `WatchConnectivityManager.shared.pushScheduleToWatch()`; watch does not push fire dates back |
 | Progress sync | `ProgressTracker.shared.connectivityContext()` / `applyFromConnectivityContext()` with max() merge |
 | Sound | `AVAudioSession(.playback)` so gong plays even in silent mode; notification uses custom sound |
 | Settings storage | `UserDefaults.standard` with `register(defaults:)` (same as macOS) |
@@ -319,7 +319,7 @@ ios/Awareness/AwarenessWatch/
 | HealthKit | `HealthKitManager.shared` logs `HKCategorySample(.mindfulSession)` after each blackout; opt-in via settings toggle |
 | HealthKit prompt | One-time alert on first launch encourages enabling Apple Health; controlled by `healthKitPromptShown` flag |
 | Haptics | `UIImpactFeedbackGenerator(style: .heavy)` at blackout start, `UINotificationFeedbackGenerator(.success)` at end; opt-in via `vibrationEnabled` |
-| End flash | White `Color.white` overlay flashes for ~1s at end of blackout before fade-out; opt-in via `endFlashEnabled` |
+| End flash | White `Color.white` overlay flashes for ~1s at end of blackout before fade-out; `endFlashEnabled` (default: on) |
 | Update checker | Same as macOS — `URLSession` queries GitHub releases API once on startup |
 | WatchConnectivity | `WatchConnectivityManager.shared` syncs settings to/from companion Apple Watch via `WCSession.updateApplicationContext()` |
 | Progress tracking | `ProgressTracker.shared` stores daily triggered/completed counts in `UserDefaults`; donut chart + 14-day bar chart in `ProgressView` |
@@ -335,7 +335,7 @@ ios/Awareness/AwarenessWatch/
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
 | Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; user must tap to start blackout |
 | Background notification | User taps notification → `didReceive response:` → posts `.showBlackout` notification → shows blackout |
-| Coordinated scheduling | `applyCoordinatedSchedule()` uses iOS fire dates; falls back to random when standalone |
+| Coordinated scheduling | iOS is master scheduler; `applyCoordinatedSchedule()` uses iOS fire dates; falls back to random only when iOS dates unavailable or all in the past |
 | Progress sync | Same ProgressTracker sync methods via target membership |
 | Namaste confirmation | namaste shown for 1.5s after blackout fade-out before dismissing |
 | Haptics | `WKInterfaceDevice.current().play(.start)` at begin, `.play(.success)` at end; opt-in via `hapticStartEnabled` / `hapticEndEnabled` |
@@ -361,7 +361,7 @@ ios/Awareness/AwarenessWatch/
 - **Snooze** — pause for 10/20/30/60/120 minutes or indefinitely
 - **Apple Health** (iOS/watchOS) — log each blackout as Mindful Minutes in Apple Health (default: off)
 - **Vibration** (iOS only) — haptic feedback at start (heavy impact) and end (success notification) of blackout (default: off)
-- **End flash** (iOS only) — 1-second white screen blink at end of blackout, visible through closed eyelids (default: off)
+- **End flash** (iOS/watchOS) — 1-second white screen blink at end of blackout, visible through closed eyelids (default: on)
 - **Start haptic** (watchOS only) — Taptic Engine feedback when blackout begins (default: on)
 - **End haptic** (watchOS only) — Taptic Engine feedback when blackout ends (default: on)
 - **Progress** — view today's completion donut, lifetime stats, and 14-day (macOS/iOS) or 7-day (watchOS) bar chart history; accessible from menu bar (macOS), navigation (iOS/watchOS), or tray menu (Windows)
@@ -411,9 +411,9 @@ ios/Awareness/AwarenessWatch/
 - HealthKit entitlement in `Awareness/Awareness.entitlements` (`com.apple.developer.healthkit`)
 - **HealthKit encouragement**: On first launch, an alert prompts users to enable Apple Health logging. Controlled by `healthKitPromptShown` (Bool, default false). Shown once; dismissed permanently with either "Enable" or "Not Now".
 - **Haptic vibration**: `vibrationEnabled` setting (Bool, default false). Heavy impact at blackout start, success notification at end. No extra imports needed — UIKit haptics available via SwiftUI bridging. Does not work on simulator.
-- **End flash**: `endFlashEnabled` setting (Bool, default false). White overlay layer with 0.15s ease-in, 1s hold, 0.15s ease-out. Main fade-out delayed by 1.3s when flash is active.
+- **End flash**: `endFlashEnabled` setting (Bool, default true). White overlay layer with 0.15s ease-in, 1s hold, 0.15s ease-out. Main fade-out delayed by 1.3s when flash is active.
 - **WatchConnectivity**: `Connectivity/WatchConnectivityManager.swift` on the iOS side syncs settings bidirectionally with the companion Apple Watch. Uses `objectWillChange` (not Combine merge chains) to observe settings changes — complex merge chains cause Swift type-checker timeouts. `isApplyingRemoteContext` guard prevents infinite sync loops. Required `sessionDidBecomeInactive` / `sessionDidDeactivate` stubs are iOS-only.
-- **Coordinated scheduling**: `NotificationScheduler.scheduledFireDates` stores fire dates from most recent `rescheduleAll()`. `WatchConnectivityManager.pushScheduleToWatch(_:)` sends fire dates as Unix timestamps in applicationContext.
+- **Coordinated scheduling**: iOS is the master scheduler. `NotificationScheduler.scheduledFireDates` stores fire dates from most recent `rescheduleAll()`. `WatchConnectivityManager.pushScheduleToWatch(_:)` sends fire dates as Unix timestamps in applicationContext. The watch does NOT send fire dates back to avoid sync loops. Both sides use `lastRemoteContextDate` timestamps (2s cooldown) to prevent debounced observers from echoing remote context changes.
 - **Progress sync**: `ProgressTracker.connectivityContext()` and `applyFromConnectivityContext()` handle cross-device stats merge using max() strategy.
 - **Progress tracking**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation. `ProgressTracker.swift` is shared with watchOS via target membership.
 - **Localization**: `Localizable.xcstrings` (string catalog) at `Awareness/Localizable.xcstrings` with EN and DE translations. Uses `String(localized:)` throughout UI code.
@@ -434,6 +434,6 @@ ios/Awareness/AwarenessWatch/
 - `WKCompanionAppBundleIdentifier`: `com.joergsflow.awareness.ios`
 - Entitlements: `AwarenessWatch/AwarenessWatch.entitlements` with `com.apple.developer.healthkit`
 - iOS target has "Embed Watch Content" build phase that embeds `AwarenessWatch.app`; watch target has "Embed App Extensions" phase for the complication
-- **Coordinated scheduling**: `NotificationScheduler.applyCoordinatedSchedule(_:)` uses synced dates from iOS; falls back to `rescheduleAll()` when no future dates available
+- **Coordinated scheduling**: iOS is the master scheduler. `NotificationScheduler.applyCoordinatedSchedule(_:)` uses synced dates from iOS; falls back to `rescheduleAll()` only when no future dates available. Watch does NOT push fire dates back. `lastCoordinatedScheduleDate` prevents debounced settings observer from overwriting coordinated schedule.
 - **Progress sync**: `ProgressTracker` sync is shared via target membership — same code as iOS
 - **Progress tracking**: Shared `ProgressTracker.shared` (same code as iOS via target membership). `ProgressView.swift` is watch-specific with a compact layout: donut chart, today stats, and 7-day bar chart. Complication widget extension also has `ProgressTracker` via target membership.

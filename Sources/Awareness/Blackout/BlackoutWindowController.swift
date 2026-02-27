@@ -11,6 +11,7 @@ class BlackoutWindowController {
     private var windows: [NSWindow] = []
     private var dismissTimer: DispatchWorkItem?
     private var keyEventMonitor: Any?
+    private var mouseEventMonitor: Any?
     private var globalEventTap: CFMachPort?
     private var globalRunLoopSource: CFRunLoopSource?
     private var completionHandler: (() -> Void)?
@@ -95,8 +96,9 @@ class BlackoutWindowController {
             print("Awareness: failed to create idle display sleep assertion")
         }
 
-        // Install keyboard monitors — local to handle ESC/dismiss, global to suppress typing
+        // Install event monitors — local keyboard/mouse for ESC/click dismiss, global tap to suppress typing
         installKeyboardMonitor()
+        installMouseClickMonitor()
         installGlobalEventTap()
 
         // Record that a blackout was triggered
@@ -118,6 +120,7 @@ class BlackoutWindowController {
         dismissTimer?.cancel()
         dismissTimer = nil
         removeKeyboardMonitor()
+        removeMouseClickMonitor()
         removeGlobalEventTap()
 
         // Release the display sleep prevention assertion
@@ -211,10 +214,34 @@ class BlackoutWindowController {
         }
     }
 
+    // MARK: - Local Mouse Click Monitor (for click-to-dismiss)
+
+    private func installMouseClickMonitor() {
+        mouseEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+            guard let self = self, self.isActive else { return event }
+
+            // In handcuffs mode, swallow mouse clicks — user cannot escape
+            if SettingsManager.shared.handcuffsMode {
+                return nil
+            }
+
+            // Click anywhere on the overlay to dismiss
+            self.dismiss()
+            return nil
+        }
+    }
+
+    private func removeMouseClickMonitor() {
+        if let monitor = mouseEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            mouseEventMonitor = nil
+        }
+    }
+
     // MARK: - Global Event Tap (suppress keystrokes to background apps)
 
-    /// Install a CGEvent tap that eats all keyboard events system-wide during blackout.
-    /// This prevents accidental typing into background apps while the screen is blacked out.
+    /// Install a CGEvent tap that eats keyboard events system-wide during blackout.
+    /// ESC is allowed through when handcuffs mode is off so the local monitor can dismiss.
     /// Requires Accessibility permission — if not granted, the tap simply won't be created
     /// and keystrokes will pass through as before (graceful degradation).
     private func installGlobalEventTap() {
@@ -225,8 +252,17 @@ class BlackoutWindowController {
             place: .headInsertEventTap,
             options: .defaultTap,
             eventsOfInterest: eventMask,
-            callback: { _, _, event, _ in
-                // Suppress the event by returning nil
+            callback: { _, type, event, _ in
+                // Let ESC (keyCode 53) pass through when handcuffs mode is off —
+                // the local keyboard monitor handles dismissal for ESC
+                if !SettingsManager.shared.handcuffsMode,
+                   type == .keyDown || type == .keyUp {
+                    let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+                    if keyCode == 53 { // ESC
+                        return Unmanaged.passUnretained(event)
+                    }
+                }
+                // Suppress all other keyboard events to prevent typing in background apps
                 return nil
             },
             userInfo: nil

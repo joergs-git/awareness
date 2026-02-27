@@ -65,13 +65,13 @@ final class SettingsManager: ObservableObject {
         values[Keys.customImagePath]   = ""
         values[Keys.customVideoPath]   = ""
         values[Keys.vibrationEnabled]  = false
-        values[Keys.endFlashEnabled]   = false
+        values[Keys.endFlashEnabled]   = true
         #endif
 
         #if os(watchOS)
         values[Keys.hapticStartEnabled] = true
         values[Keys.hapticEndEnabled]   = true
-        values[Keys.endFlashEnabled]    = false
+        values[Keys.endFlashEnabled]    = true
         #endif
 
         return values

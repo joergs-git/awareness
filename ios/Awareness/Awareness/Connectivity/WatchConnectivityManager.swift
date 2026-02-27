@@ -16,6 +16,10 @@ class WatchConnectivityManager: NSObject, ObservableObject {
     /// Guards against pushing settings that were just received from the watch
     private var isApplyingRemoteContext = false
 
+    /// Timestamp of the last remote context application, used to prevent debounced
+    /// observers from pushing stale settings back after the flag is cleared
+    private var lastRemoteContextDate: Date?
+
     private override init() {
         super.init()
     }
@@ -53,9 +57,11 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         try? WCSession.default.updateApplicationContext(context)
     }
 
-    /// Push notification fire dates to the companion watch for coordinated scheduling
+    /// Push notification fire dates to the companion watch for coordinated scheduling.
+    /// iOS is the master scheduler — the watch always uses these dates when available.
     func pushScheduleToWatch(_ fireDates: [Date]) {
         guard WCSession.default.activationState == .activated else { return }
+        guard !isApplyingRemoteContext else { return }
 
         var context = SettingsManager.shared.connectivityContext()
 
@@ -74,12 +80,18 @@ class WatchConnectivityManager: NSObject, ObservableObject {
     // MARK: - Settings & Progress Observation
 
     /// Observe local settings and progress changes and push to the watch (debounced).
-    /// Uses objectWillChange to avoid complex type-checker merge chains.
+    /// Skips pushing when a remote context was recently applied — the debounce fires
+    /// after the isApplyingRemoteContext flag is already cleared, so we also check
+    /// the timestamp to prevent echo pushes from the same sync cycle.
     private func observeSettingsChanges() {
         SettingsManager.shared.objectWillChange
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.pushSettingsToWatch()
+                guard let self = self else { return }
+                guard !self.isApplyingRemoteContext else { return }
+                guard self.lastRemoteContextDate == nil ||
+                      Date().timeIntervalSince(self.lastRemoteContextDate!) >= 2.0 else { return }
+                self.pushSettingsToWatch()
             }
             .store(in: &cancellables)
 
@@ -87,7 +99,11 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         ProgressTracker.shared.objectWillChange
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.pushSettingsToWatch()
+                guard let self = self else { return }
+                guard !self.isApplyingRemoteContext else { return }
+                guard self.lastRemoteContextDate == nil ||
+                      Date().timeIntervalSince(self.lastRemoteContextDate!) >= 2.0 else { return }
+                self.pushSettingsToWatch()
             }
             .store(in: &cancellables)
     }
@@ -108,22 +124,18 @@ extension WatchConnectivityManager: WCSessionDelegate {
     }
 
     /// Receive updated settings and progress from the companion Apple Watch.
-    /// If the watch's next fire date is earlier than ours, adopt it via earliest-wins.
+    /// iOS is the master scheduler — it does not adopt fire dates from the watch.
+    /// After applying settings changes, reschedule and push the new schedule to the watch.
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         DispatchQueue.main.async {
             self.isApplyingRemoteContext = true
+            self.lastRemoteContextDate = Date()
             SettingsManager.shared.applyFromConnectivityContext(applicationContext)
             ProgressTracker.shared.applyFromConnectivityContext(applicationContext)
             self.isApplyingRemoteContext = false
 
-            // Earliest-wins: if the watch's next fire date is earlier, adopt it
-            if let watchTimestamp = applicationContext["nextFireDate"] as? Double {
-                let watchDate = Date(timeIntervalSince1970: watchTimestamp)
-                NotificationScheduler.shared.adoptEarliestDate(watchDate)
-            } else {
-                // No fire date from watch — reschedule with updated settings
-                NotificationScheduler.shared.rescheduleAll()
-            }
+            // Reschedule with (potentially updated) settings and push to watch
+            NotificationScheduler.shared.rescheduleAll()
         }
     }
 
