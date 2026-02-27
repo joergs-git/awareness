@@ -34,12 +34,12 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
   <!-- TrayIconController strings -->
-  <data name="Awareness" xml:space="preserve"><value>Awareness</value></data>
+  <data name="Awareness" xml:space="preserve"><value>Awareness reminder</value></data>
   <data name="SnoozedUntil" xml:space="preserve"><value>Snoozed until {0}</value></data>
   <data name="SnoozedIndefinitely" xml:space="preserve"><value>Snoozed indefinitely</value></data>
-  <data name="NextIn" xml:space="preserve"><value>Awareness — Next in {0}</value></data>
-  <data name="TooltipSnoozedUntil" xml:space="preserve"><value>Awareness — Snoozed until {0}</value></data>
-  <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Awareness — Snoozed indefinitely</value></data>
+  <data name="NextIn" xml:space="preserve"><value>Awareness reminder — Next in {0}</value></data>
+  <data name="TooltipSnoozedUntil" xml:space="preserve"><value>Awareness reminder — Snoozed until {0}</value></data>
+  <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Awareness reminder — Snoozed indefinitely</value></data>
   <data name="NextBlackoutIn" xml:space="preserve"><value>Next blackout in {0}</value></data>
   <data name="Scheduling" xml:space="preserve"><value>Scheduling...</value></data>
   <data name="TestBlackout" xml:space="preserve"><value>Test Blackout</value></data>
@@ -52,11 +52,11 @@
   <data name="LaunchAtLogin" xml:space="preserve"><value>Launch at Login</value></data>
   <data name="SettingsMenu" xml:space="preserve"><value>Settings...</value></data>
   <data name="HowToUseMenu" xml:space="preserve"><value>How to Use...</value></data>
-  <data name="AboutMenu" xml:space="preserve"><value>About Awareness...</value></data>
+  <data name="AboutMenu" xml:space="preserve"><value>About Awareness reminder...</value></data>
   <data name="UpdateAvailable" xml:space="preserve"><value>Update Available (v{0})</value></data>
-  <data name="QuitAwareness" xml:space="preserve"><value>Quit Awareness</value></data>
-  <data name="HowToUseTitle" xml:space="preserve"><value>How to Use Awareness</value></data>
-  <data name="HowToUseText" xml:space="preserve"><value>Awareness runs quietly in your system tray (☯ icon).
+  <data name="QuitAwareness" xml:space="preserve"><value>Quit Awareness reminder</value></data>
+  <data name="HowToUseTitle" xml:space="preserve"><value>How to Use Awareness reminder</value></data>
+  <data name="HowToUseText" xml:space="preserve"><value>Awareness reminder runs quietly in your system tray (☯ icon).
 
 How it works:
 • At random intervals, your screen fades to black for a few seconds
@@ -69,7 +69,7 @@ Controls:
 • Settings — configure timing, visuals, and sounds
 
 The app detects active camera/microphone usage and will skip blackouts during video calls.</value></data>
-  <data name="AboutTitle" xml:space="preserve"><value>Awareness</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>Awareness reminder</value></data>
   <data name="AboutText" xml:space="preserve"><value>A mindfulness timer for your PC.
 Randomly pauses your screen to help you breathe.
 
@@ -86,7 +86,7 @@ Click OK to close, or Cancel to open GitHub.</value></data>
   <data name="Now" xml:space="preserve"><value>now</value></data>
 
   <!-- SettingsWindow.xaml strings -->
-  <data name="AwarenessSettings" xml:space="preserve"><value>Awareness Settings</value></data>
+  <data name="AwarenessSettings" xml:space="preserve"><value>Awareness reminder Settings</value></data>
   <data name="ActiveHours" xml:space="preserve"><value>Active Hours</value></data>
   <data name="From" xml:space="preserve"><value>From</value></data>
   <data name="Until" xml:space="preserve"><value>Until</value></data>
@@ -115,8 +115,8 @@ Click OK to close, or Cancel to open GitHub.</value></data>
   <data name="NoVideoSelected" xml:space="preserve"><value>No video selected</value></data>
 
   <!-- App.xaml.cs strings -->
-  <data name="AlreadyRunning" xml:space="preserve"><value>Awareness is already running in the system tray.</value></data>
-  <data name="WelcomeTitle" xml:space="preserve"><value>Welcome to Awareness</value></data>
+  <data name="AlreadyRunning" xml:space="preserve"><value>Awareness reminder is already running in the system tray.</value></data>
+  <data name="WelcomeTitle" xml:space="preserve"><value>Welcome to Awareness reminder</value></data>
   <!-- ProgressWindow strings -->
   <data name="ProgressMenu" xml:space="preserve"><value>Progress...</value></data>
   <data name="ProgressTitle" xml:space="preserve"><value>Progress</value></data>
@@ -126,7 +126,7 @@ Click OK to close, or Cancel to open GitHub.</value></data>
   <data name="Completed" xml:space="preserve"><value>completed</value></data>
   <data name="SuccessRate" xml:space="preserve"><value>Success Rate</value></data>
 
-  <data name="WelcomeText" xml:space="preserve"><value>Awareness is now running in your system tray.
+  <data name="WelcomeText" xml:space="preserve"><value>Awareness reminder is now running in your system tray.
 
 Look for the ☯ icon in the bottom-right of your screen. Right-click it to access settings, snooze, or quit.
 

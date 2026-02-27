@@ -69,7 +69,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness is already running in the system tray..
+        ///   Looks up a localized string similar to Awareness reminder is already running in the system tray..
         /// </summary>
         public static string AlreadyRunning {
             get {
@@ -78,7 +78,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness.
+        ///   Looks up a localized string similar to Awareness reminder.
         /// </summary>
         public static string Awareness {
             get {
@@ -87,7 +87,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness Settings.
+        ///   Looks up a localized string similar to Awareness reminder Settings.
         /// </summary>
         public static string AwarenessSettings {
             get {
@@ -231,7 +231,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to How to Use Awareness.
+        ///   Looks up a localized string similar to How to Use Awareness reminder.
         /// </summary>
         public static string HowToUseMenu {
             get {
@@ -240,7 +240,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness runs quietly in your system tray (☯ icon).
+        ///   Looks up a localized string similar to Awareness reminder runs quietly in your system tray (☯ icon).
         ///
         ///How it works:
         ///...
@@ -252,7 +252,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to How to Use Awareness.
+        ///   Looks up a localized string similar to How to Use Awareness reminder.
         /// </summary>
         public static string HowToUseTitle {
             get {
@@ -315,7 +315,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness — Next in {0}.
+        ///   Looks up a localized string similar to Awareness reminder — Next in {0}.
         /// </summary>
         public static string NextIn {
             get {
@@ -369,7 +369,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Quit Awareness.
+        ///   Looks up a localized string similar to Quit Awareness reminder.
         /// </summary>
         public static string QuitAwareness {
             get {
@@ -459,7 +459,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness — Snoozed indefinitely.
+        ///   Looks up a localized string similar to Awareness reminder — Snoozed indefinitely.
         /// </summary>
         public static string TooltipSnoozedIndefinitely {
             get {
@@ -468,7 +468,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness — Snoozed until {0}.
+        ///   Looks up a localized string similar to Awareness reminder — Snoozed until {0}.
         /// </summary>
         public static string TooltipSnoozedUntil {
             get {
@@ -522,7 +522,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to Awareness.
+        ///   Looks up a localized string similar to Welcome to Awareness reminder.
         /// </summary>
         public static string WelcomeTitle {
             get {
@@ -531,7 +531,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness is now running in your system tray.
+        ///   Looks up a localized string similar to Awareness reminder is now running in your system tray.
         ///
         ///Look for the ☯ icon in the bottom-right of your screen....
         /// </summary>
@@ -605,7 +605,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to About Awareness....
+        ///   Looks up a localized string similar to About Awareness reminder....
         /// </summary>
         public static string AboutMenu {
             get {
@@ -625,7 +625,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Awareness.
+        ///   Looks up a localized string similar to Awareness reminder.
         /// </summary>
         public static string AboutTitle {
             get {

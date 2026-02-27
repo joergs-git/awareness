@@ -1,6 +1,6 @@
-Awareness ist ein Achtsamkeitstimer, der deinen Bildschirm zufällig für einige Sekunden verdunkelt und dich sanft daran erinnert, innezuhalten, zu atmen und in den gegenwärtigen Moment zurückzukehren.
+Awareness reminder ist ein Achtsamkeitstimer, der deinen Bildschirm zufällig für einige Sekunden verdunkelt und dich sanft daran erinnert, innezuhalten, zu atmen und in den gegenwärtigen Moment zurückzukehren.
 
-In der Vipassana-Meditationstradition ist Achtsamkeit (Sati) die Grundlage aller Praxis. Doch wir verbringen Stunden vor Bildschirmen und verlieren dabei nach und nach den Kontakt zu uns selbst. Awareness unterbricht dieses Muster mit kurzen Momenten der Stille, eingewoben in deinen Tag.
+In der Vipassana-Meditationstradition ist Achtsamkeit (Sati) die Grundlage aller Praxis. Doch wir verbringen Stunden vor Bildschirmen und verlieren dabei nach und nach den Kontakt zu uns selbst. Awareness reminder unterbricht dieses Muster mit kurzen Momenten der Stille, eingewoben in deinen Tag.
 
 Ein paar Mal pro Stunde wird dein Bildschirm schwarz. Für einige Sekunden gibt es nichts zu tun. Schließe die Augen. Spüre deinen Atem. Bemerke deine Haltung. Dann kehrt der Bildschirm zurück, und du machst weiter — mit einer kleinen Lücke der Klarheit in deinem Tag.
 
@@ -28,7 +28,7 @@ Die watchOS-Begleit-App funktioniert eigenständig oder gekoppelt mit deinem iPh
 
 PLATTFORMÜBERGREIFEND
 
-Awareness ist auch für macOS und Windows verfügbar, damit deine Praxis auf allen Geräten konsistent bleibt.
+Awareness reminder ist auch für macOS und Windows verfügbar, damit deine Praxis auf allen Geräten konsistent bleibt.
 
 Dies ist kein Produktivitätswerkzeug. Es ist eine Übungshilfe — Mikrounterbrechungen, die zu Ankern der Achtsamkeit in deinem Arbeitstag werden.
 

@@ -13,8 +13,9 @@ class WatchConnectivityManager: NSObject, ObservableObject {
     /// Whether the paired iPhone is reachable
     @Published private(set) var isReachable = false
 
-    /// Guards against pushing settings that were just received from the phone
-    private var isApplyingRemoteContext = false
+    /// Guards against pushing settings that were just received from the phone.
+    /// Also checked by NotificationScheduler to skip spurious rescheduling during sync.
+    private(set) var isApplyingRemoteContext = false
 
     private override init() {
         super.init()
@@ -31,7 +32,8 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         observeSettingsChanges()
     }
 
-    /// Push current settings and progress to the companion iPhone
+    /// Push current settings and progress to the companion iPhone.
+    /// Includes the watch's next fire date so iOS can adopt the earlier time.
     func pushSettingsToPhone() {
         guard WCSession.default.activationState == .activated else { return }
         guard !isApplyingRemoteContext else { return }
@@ -42,6 +44,11 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         let progressContext = ProgressTracker.shared.connectivityContext()
         for (key, value) in progressContext {
             context[key] = value
+        }
+
+        // Include the watch's next fire date for earliest-wins negotiation
+        if let nextDate = NotificationScheduler.shared.nextNotificationDate {
+            context["nextFireDate"] = nextDate.timeIntervalSince1970
         }
 
         try? WCSession.default.updateApplicationContext(context)
@@ -87,9 +94,11 @@ extension WatchConnectivityManager: WCSessionDelegate {
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         DispatchQueue.main.async {
             self.isApplyingRemoteContext = true
+            NotificationScheduler.shared.isApplyingRemoteContext = true
             SettingsManager.shared.applyFromConnectivityContext(applicationContext)
             ProgressTracker.shared.applyFromConnectivityContext(applicationContext)
             self.isApplyingRemoteContext = false
+            NotificationScheduler.shared.isApplyingRemoteContext = false
 
             // Apply coordinated fire dates from iOS if available
             if let timestamps = applicationContext["scheduledFireDates"] as? [Double] {

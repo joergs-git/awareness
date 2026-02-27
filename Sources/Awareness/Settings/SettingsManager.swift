@@ -34,9 +34,9 @@ final class SettingsManager: ObservableObject {
 
     private static let defaultValues: [String: Any] = [
         Keys.activeStartHour:  6,
-        Keys.activeEndHour:    20,
+        Keys.activeEndHour:    22,
         Keys.minBlackoutDuration: 20.0,
-        Keys.maxBlackoutDuration: 20.0,
+        Keys.maxBlackoutDuration: 40.0,
         Keys.minInterval:      15.0,    // minutes
         Keys.maxInterval:      30.0,    // minutes
         Keys.startGongEnabled: true,

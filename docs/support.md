@@ -1,8 +1,8 @@
-# Awareness — Support
+# Awareness reminder — Support
 
 ## Getting Help
 
-Awareness is an open-source mindfulness timer for macOS, Windows, iOS/iPadOS, and Apple Watch. If you need help, this page covers the most common questions.
+Awareness reminder is an open-source mindfulness timer for macOS, Windows, iOS/iPadOS, and Apple Watch. If you need help, this page covers the most common questions.
 
 ## Frequently Asked Questions
 

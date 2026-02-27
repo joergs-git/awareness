@@ -28,7 +28,7 @@ struct ContentView: View {
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
-                        Text(String(localized: "Awareness"))
+                        Text(String(localized: "Awareness reminder"))
                             .font(.title2.weight(.medium))
                         Text(String(localized: "A mindfulness timer"))
                             .font(.subheadline)
@@ -105,7 +105,7 @@ struct ContentView: View {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.orange)
-                            Text(String(localized: "Notifications are disabled. Awareness needs notifications to remind you to pause."))
+                            Text(String(localized: "Notifications are disabled. Awareness reminder needs notifications to remind you to pause."))
                                 .font(.callout)
                         }
                         Button(String(localized: "Open Settings")) {
@@ -230,7 +230,7 @@ struct ContentView: View {
                     Text(String(localized: "About"))
                 }
             }
-            .navigationTitle(String(localized: "Awareness"))
+            .navigationTitle(String(localized: "Awareness reminder"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -240,7 +240,9 @@ struct ContentView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingSettings) {
+            .sheet(isPresented: $showingSettings, onDismiss: {
+                NotificationScheduler.shared.rescheduleAll()
+            }) {
                 SettingsView(settings: settings)
             }
             .fullScreenCover(isPresented: $showingBlackout) {
@@ -251,8 +253,8 @@ struct ContentView: View {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await checkNotificationStatus()
 
-                // Show HealthKit encouragement on first launch if available and not yet enabled
-                if !settings.healthKitPromptShown && HealthKitManager.shared.isAvailable && !settings.healthKitEnabled {
+                // Show HealthKit encouragement if available and not yet enabled
+                if HealthKitManager.shared.isAvailable && !settings.healthKitEnabled {
                     showHealthKitPrompt = true
                 }
             }
@@ -270,7 +272,7 @@ struct ContentView: View {
                     Task { await HealthKitManager.shared.requestAuthorization() }
                 }
                 Button(String(localized: "Not Now"), role: .cancel) {
-                    settings.healthKitPromptShown = true
+                    // Dismissed — will ask again next time app opens
                 }
             } message: {
                 Text(String(localized: "Awareness can log each mindful pause to Apple Health so you can track your practice over time."))

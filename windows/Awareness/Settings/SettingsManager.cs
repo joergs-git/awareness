@@ -321,7 +321,7 @@ public class SettingsManager : INotifyPropertyChanged
         public int ActiveStartHour { get; set; } = 6;
 
         [JsonPropertyName("activeEndHour")]
-        public int ActiveEndHour { get; set; } = 20;
+        public int ActiveEndHour { get; set; } = 22;
 
         [JsonPropertyName("blackoutDuration")]
         public double BlackoutDuration { get; set; } = 0;
@@ -330,7 +330,7 @@ public class SettingsManager : INotifyPropertyChanged
         public double MinBlackoutDuration { get; set; } = 20.0;
 
         [JsonPropertyName("maxBlackoutDuration")]
-        public double MaxBlackoutDuration { get; set; } = 20.0;
+        public double MaxBlackoutDuration { get; set; } = 40.0;
 
         [JsonPropertyName("minInterval")]
         public double MinInterval { get; set; } = 15.0;

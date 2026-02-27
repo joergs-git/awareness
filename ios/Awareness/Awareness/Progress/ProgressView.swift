@@ -25,14 +25,14 @@ struct ProgressView: View {
                 HStack {
                     Text(String(localized: "Today"))
                     Spacer()
-                    Text("\(tracker.todayTriggered) \(String(localized: "triggered")), \(tracker.todayCompleted) \(String(localized: "completed"))")
+                    Text("\(tracker.todayCompleted) \(String(localized: "completed")), \(tracker.todayTriggered) \(String(localized: "triggered"))")
                         .foregroundColor(.secondary)
                 }
 
                 HStack {
                     Text(String(localized: "Lifetime"))
                     Spacer()
-                    Text("\(tracker.lifetimeTriggered) \(String(localized: "triggered")), \(tracker.lifetimeCompleted) \(String(localized: "completed"))")
+                    Text("\(tracker.lifetimeCompleted) \(String(localized: "completed")), \(tracker.lifetimeTriggered) \(String(localized: "triggered"))")
                         .foregroundColor(.secondary)
                 }
             }

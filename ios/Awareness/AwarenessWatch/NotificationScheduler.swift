@@ -26,6 +26,10 @@ class NotificationScheduler: ObservableObject {
     /// The approximate date of the next scheduled notification
     @Published private(set) var nextNotificationDate: Date?
 
+    /// Set to true by WatchConnectivityManager while applying a remote context,
+    /// so the settings observer skips spurious rescheduling.
+    var isApplyingRemoteContext = false
+
     /// Whether the current schedule was received from the companion iPhone
     private var usingCoordinatedSchedule = false
 
@@ -265,7 +269,9 @@ class NotificationScheduler: ObservableObject {
 
     // MARK: - Settings Observation
 
-    /// Reschedule when relevant settings change (debounced)
+    /// Reschedule when relevant settings change (debounced).
+    /// Skips rescheduling when a remote context is being applied — the coordinated
+    /// schedule from iOS will follow momentarily via applyCoordinatedSchedule().
     private func observeSettingsChanges() {
         settings.$minInterval
             .merge(with: settings.$maxInterval)
@@ -274,6 +280,7 @@ class NotificationScheduler: ObservableObject {
             .dropFirst(4)
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] _ in
+                guard !NotificationScheduler.shared.isApplyingRemoteContext else { return }
                 self?.rescheduleAll()
             }
             .store(in: &cancellables)
@@ -284,7 +291,7 @@ class NotificationScheduler: ObservableObject {
     /// Build notification content — no image attachment on watchOS, uses default sound
     private func makeNotificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Awareness ☯")
+        content.title = String(localized: "Awareness reminder ☯")
         content.subtitle = String(localized: "Time to pause and breathe")
         content.body = String(localized: "Tap to begin a mindful moment.")
         content.sound = .default

@@ -202,6 +202,67 @@ class NotificationScheduler: ObservableObject {
         }
     }
 
+    // MARK: - Earliest-Wins Negotiation
+
+    /// Adopt a fire date from the watch if it's earlier than our current next notification.
+    /// Removes the first pending notification and replaces it with one at the earlier date,
+    /// then pushes the updated schedule to the watch.
+    func adoptEarliestDate(_ watchDate: Date) {
+        guard watchDate > Date() else { return }
+
+        // Compare with our own next date — only adopt if watch is earlier
+        if let ownNext = nextNotificationDate, ownNext <= watchDate {
+            return
+        }
+
+        // Replace the first pending notification with the earlier watch date
+        center.getPendingNotificationRequests { [weak self] requests in
+            guard let self = self else { return }
+
+            // Find and remove the earliest pending request
+            var earliestId: String?
+            var earliestDate: Date?
+            for req in requests {
+                if let trigger = req.trigger as? UNCalendarNotificationTrigger,
+                   let date = trigger.nextTriggerDate() {
+                    if earliestDate == nil || date < earliestDate! {
+                        earliestDate = date
+                        earliestId = req.identifier
+                    }
+                }
+            }
+
+            if let idToRemove = earliestId {
+                self.center.removePendingNotificationRequests(withIdentifiers: [idToRemove])
+            }
+
+            // Schedule a replacement at the watch's earlier date
+            let content = self.makeNotificationContent()
+            let components = Calendar.current.dateComponents(
+                [.year, .month, .day, .hour, .minute, .second],
+                from: watchDate
+            )
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            let request = UNNotificationRequest(
+                identifier: "awareness-synced",
+                content: content,
+                trigger: trigger
+            )
+            self.center.add(request)
+
+            DispatchQueue.main.async {
+                self.nextNotificationDate = watchDate
+
+                // Update fire dates array and push to watch
+                if var dates = self.scheduledFireDates.isEmpty ? nil : self.scheduledFireDates {
+                    if !dates.isEmpty { dates[0] = watchDate }
+                    self.scheduledFireDates = dates
+                    WatchConnectivityManager.shared.pushScheduleToWatch(dates)
+                }
+            }
+        }
+    }
+
     // MARK: - Snooze
 
     /// Remove all pending notifications when snoozing
@@ -238,7 +299,7 @@ class NotificationScheduler: ObservableObject {
     /// Build the notification content with title, subtitle, sound, category, and image attachment
     private func makeNotificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Awareness ☯")
+        content.title = String(localized: "Awareness reminder ☯")
         content.subtitle = String(localized: "Time to pause and breathe")
         content.body = String(localized: "Tap to begin a mindful moment. Close your eyes, feel your breath, and return to the present.")
         content.sound = NotificationScheduler.notificationSound

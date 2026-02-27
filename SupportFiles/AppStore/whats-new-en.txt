@@ -1,4 +1,9 @@
-What's New in v1.6:
+What's New in v2.0:
 
-- Reordered menus across all platforms — Progress is now directly below the status line, followed by Snooze, then actions
-- Consistent navigation on macOS, Windows, iOS, and watchOS
+- Renamed to "Awareness reminder" for clarity
+- Coordinated scheduling fix — earliest-wins negotiation keeps iPhone and Apple Watch in perfect sync
+- Namaste confirmation after each completed blackout on iOS (already on watchOS)
+- Enhanced haptic patterns on Apple Watch — distinctive multi-tap start and end feedback
+- Progress display now shows completed/triggered (completed first) on all platforms
+- Inline progress counter on watchOS home screen
+- Safety reschedule when dismissing settings on iOS

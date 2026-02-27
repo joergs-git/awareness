@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Awareness** is a cross-platform mindfulness/breathing timer (macOS + Windows + iOS/iPadOS + watchOS) that randomly blacks out the screen for a few seconds, forcing the user to pause, breathe, and reset. A vipassana timer for computer work.
+**Awareness reminder** is a cross-platform mindfulness/breathing timer (macOS + Windows + iOS/iPadOS + watchOS) that randomly blacks out the screen for a few seconds, forcing the user to pause, breathe, and reset. A vipassana timer for computer work.
 
 Repository: https://github.com/joergs-git/awareness
 License: MIT

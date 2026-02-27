@@ -13,6 +13,8 @@ struct BlackoutView: View {
     @State private var duration: Double = 0
     @State private var opacity: Double = 0
     @State private var dismissTimer: Timer?
+    /// Target wall-clock time when the blackout should end (immune to timer throttling)
+    @State private var targetEndDate: Date?
     /// Tracks when the blackout started for HealthKit logging
     @State private var sessionStart: Date?
     /// Extended runtime session to keep the app alive during blackout
@@ -68,15 +70,23 @@ struct BlackoutView: View {
                 opacity = 1.0
             }
 
-            // Auto-dismiss timer
-            dismissTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
-                completedFullDuration = true
-                dismissBlackout()
+            // Auto-dismiss using Date-based checking to avoid watchOS timer throttling.
+            // A repeating 1s timer checks against the wall-clock target, ensuring
+            // the blackout doesn't overshoot even if timers are delayed by display dimming.
+            targetEndDate = Date().addingTimeInterval(duration)
+            dismissTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+                guard let target = targetEndDate else { return }
+                if Date() >= target {
+                    timer.invalidate()
+                    completedFullDuration = true
+                    dismissBlackout()
+                }
             }
         }
         .onDisappear {
             dismissTimer?.invalidate()
             dismissTimer = nil
+            targetEndDate = nil
             stopExtendedSession()
         }
         // Allow tap to dismiss unless handcuffs mode is on
@@ -91,6 +101,7 @@ struct BlackoutView: View {
     private func dismissBlackout() {
         dismissTimer?.invalidate()
         dismissTimer = nil
+        targetEndDate = nil
 
         // Record completion only if the blackout ran its full duration
         if completedFullDuration {

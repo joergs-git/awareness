@@ -40,8 +40,14 @@ struct ContentView: View {
                     NavigationLink {
                         ProgressView()
                     } label: {
-                        Label(String(localized: "Progress"), systemImage: "chart.pie")
-                            .font(.footnote)
+                        HStack {
+                            Label(String(localized: "Progress"), systemImage: "chart.pie")
+                                .font(.footnote)
+                            Spacer()
+                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
 
@@ -84,7 +90,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle(String(localized: "Awareness"))
+            .navigationTitle(String(localized: "Awareness reminder"))
             .fullScreenCover(isPresented: $showingBlackout) {
                 BlackoutView(isPresented: $showingBlackout)
             }

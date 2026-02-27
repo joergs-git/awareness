@@ -19,7 +19,7 @@ struct ProgressView: View {
                     Text(String(localized: "Today"))
                         .fontWeight(.medium)
                     Spacer()
-                    Text("\(tracker.todayTriggered) \(String(localized: "triggered")), \(tracker.todayCompleted) \(String(localized: "completed"))")
+                    Text("\(tracker.todayCompleted) \(String(localized: "completed")), \(tracker.todayTriggered) \(String(localized: "triggered"))")
                         .foregroundColor(.secondary)
                 }
 
@@ -27,7 +27,7 @@ struct ProgressView: View {
                     Text(String(localized: "Lifetime"))
                         .fontWeight(.medium)
                     Spacer()
-                    Text("\(tracker.lifetimeTriggered) \(String(localized: "triggered")), \(tracker.lifetimeCompleted) \(String(localized: "completed"))")
+                    Text("\(tracker.lifetimeCompleted) \(String(localized: "completed")), \(tracker.lifetimeTriggered) \(String(localized: "triggered"))")
                         .foregroundColor(.secondary)
                 }
             }

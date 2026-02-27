@@ -107,15 +107,23 @@ extension WatchConnectivityManager: WCSessionDelegate {
         }
     }
 
-    /// Receive updated settings and progress from the companion Apple Watch
+    /// Receive updated settings and progress from the companion Apple Watch.
+    /// If the watch's next fire date is earlier than ours, adopt it via earliest-wins.
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         DispatchQueue.main.async {
             self.isApplyingRemoteContext = true
             SettingsManager.shared.applyFromConnectivityContext(applicationContext)
             ProgressTracker.shared.applyFromConnectivityContext(applicationContext)
             self.isApplyingRemoteContext = false
-            // Reschedule notifications with updated settings
-            NotificationScheduler.shared.rescheduleAll()
+
+            // Earliest-wins: if the watch's next fire date is earlier, adopt it
+            if let watchTimestamp = applicationContext["nextFireDate"] as? Double {
+                let watchDate = Date(timeIntervalSince1970: watchTimestamp)
+                NotificationScheduler.shared.adoptEarliestDate(watchDate)
+            } else {
+                // No fire date from watch — reschedule with updated settings
+                NotificationScheduler.shared.rescheduleAll()
+            }
         }
     }
 

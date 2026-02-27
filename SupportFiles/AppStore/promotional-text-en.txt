@@ -1,1 +1,1 @@
-Random screen blackouts remind you to pause and breathe. Now with coordinated scheduling — iPhone and Apple Watch stay perfectly in sync.
+v2.0: Namaste confirmation on iOS, enhanced watch haptics, earliest-wins scheduling sync, and a new name — Awareness reminder.

@@ -25,7 +25,7 @@ struct ProgressView: View {
                     Text(String(localized: "Today"))
                         .font(.footnote)
                     Spacer()
-                    Text("\(tracker.todayTriggered) / \(tracker.todayCompleted)")
+                    Text("\(tracker.todayCompleted) / \(tracker.todayTriggered)")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
@@ -34,7 +34,7 @@ struct ProgressView: View {
                     Text(String(localized: "Lifetime"))
                         .font(.footnote)
                     Spacer()
-                    Text("\(tracker.lifetimeTriggered) / \(tracker.lifetimeCompleted)")
+                    Text("\(tracker.lifetimeCompleted) / \(tracker.lifetimeTriggered)")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }

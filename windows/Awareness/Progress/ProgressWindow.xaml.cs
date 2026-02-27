@@ -24,8 +24,8 @@ public partial class ProgressWindow : Window
         var tracker = ProgressTracker.Shared;
 
         // Update stat labels
-        TodayText.Text = $"{tracker.TodayTriggered} {Strings.Triggered}, {tracker.TodayCompleted} {Strings.Completed}";
-        LifetimeText.Text = $"{tracker.LifetimeTriggered} {Strings.Triggered}, {tracker.LifetimeCompleted} {Strings.Completed}";
+        TodayText.Text = $"{tracker.TodayCompleted} {Strings.Completed}, {tracker.TodayTriggered} {Strings.Triggered}";
+        LifetimeText.Text = $"{tracker.LifetimeCompleted} {Strings.Completed}, {tracker.LifetimeTriggered} {Strings.Triggered}";
 
         DrawDonutChart(tracker);
         DrawBarChart(tracker);

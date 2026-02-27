@@ -1,4 +1,9 @@
-Neu in Version 1.6:
+Neu in Version 2.0:
 
-- Menüs auf allen Plattformen neu geordnet — Fortschritt erscheint jetzt direkt unter der Statuszeile, gefolgt von Schlummern, dann Aktionen
-- Einheitliche Navigation auf macOS, Windows, iOS und watchOS
+- Umbenannt in „Awareness reminder" für mehr Klarheit
+- Koordinierte Planung verbessert — Frühester-gewinnt-Verhandlung hält iPhone und Apple Watch perfekt synchron
+- Namaste-Bestätigung nach jedem abgeschlossenen Blackout auf iOS (bereits auf watchOS)
+- Erweiterte haptische Muster auf der Apple Watch — markante Mehrfach-Impulse bei Start und Ende
+- Fortschrittsanzeige zeigt jetzt abgeschlossen/ausgelöst (abgeschlossen zuerst) auf allen Plattformen
+- Inline-Fortschrittszähler auf dem watchOS-Startbildschirm
+- Sicherheits-Neuplanung beim Schließen der Einstellungen auf iOS

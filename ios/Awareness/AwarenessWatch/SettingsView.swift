@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Compact settings form for Apple Watch.
 /// Offers active hours, intervals, duration, visual type (plain/text only),
-/// haptic toggles, handcuffs mode, and HealthKit toggle.
+/// haptic toggles, and handcuffs mode. HealthKit is managed from the iOS companion app.
 struct SettingsView: View {
 
     @ObservedObject var settings = SettingsManager.shared
@@ -88,17 +88,6 @@ struct SettingsView: View {
                 Text(String(localized: "Prevents dismissing blackout early."))
             }
 
-            // MARK: - Health
-            Section {
-                Toggle(String(localized: "Apple Health"), isOn: $settings.healthKitEnabled)
-                    .onChange(of: settings.healthKitEnabled, perform: { enabled in
-                        if enabled {
-                            Task { await HealthKitManager.shared.requestAuthorization() }
-                        }
-                    })
-            } footer: {
-                Text(String(localized: "Log mindful minutes to Health."))
-            }
         }
         .navigationTitle(String(localized: "Settings"))
     }

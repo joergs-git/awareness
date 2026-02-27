@@ -1,6 +1,6 @@
-Awareness is a mindfulness timer that randomly blacks out your screen for a few seconds, gently reminding you to pause, breathe, and return to the present moment.
+Awareness reminder is a mindfulness timer that randomly blacks out your screen for a few seconds, gently reminding you to pause, breathe, and return to the present moment.
 
-In the Vipassana meditation tradition, awareness (sati) is the foundation of all practice. Yet we spend hours staring at screens, gradually losing contact with ourselves. Awareness interrupts this pattern with brief moments of stillness woven into your day.
+In the Vipassana meditation tradition, awareness (sati) is the foundation of all practice. Yet we spend hours staring at screens, gradually losing contact with ourselves. Awareness reminder interrupts this pattern with brief moments of stillness woven into your day.
 
 A few times per hour, your screen fades to black. For a few seconds, there is nothing to do. Close your eyes. Feel your breath. Notice your posture. Then the screen returns, and you continue — with a small gap of clarity inserted into your day.
 
@@ -28,7 +28,7 @@ The companion watchOS app works standalone or paired with your iPhone. Coordinat
 
 CROSS-PLATFORM
 
-Awareness is also available for macOS and Windows, keeping your practice consistent across all your devices.
+Awareness reminder is also available for macOS and Windows, keeping your practice consistent across all your devices.
 
 This is not a productivity tool. It is a practice aid — micro-interruptions that become anchors of awareness threaded through your working day.
 

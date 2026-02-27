@@ -1,4 +1,4 @@
-# Awareness ☯
+# Awareness reminder ☯
 
 A mindfulness timer for macOS, Windows, iOS/iPadOS, and Apple Watch that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
 
@@ -8,7 +8,7 @@ In the Vipassana meditation tradition, awareness (*sati*) is the foundation of a
 
 The challenge is that we spend hours each day staring at screens — answering emails, writing code, scrolling feeds — and gradually lose contact with ourselves. We forget to breathe deeply. We forget we even have a body. The mind narrows into a tunnel of tasks, and the day slips by on autopilot.
 
-**Awareness** interrupts this pattern. A few times per hour, your screen gently fades to black. For 10, 20, or 30 seconds, there is nothing to do. You can close your eyes. Feel your breath. Notice your posture. Notice what your mind was just doing. Then the screen returns, and you continue — but now with a small gap of clarity inserted into your day.
+**Awareness reminder** interrupts this pattern. A few times per hour, your screen gently fades to black. For 10, 20, or 30 seconds, there is nothing to do. You can close your eyes. Feel your breath. Notice your posture. Notice what your mind was just doing. Then the screen returns, and you continue — but now with a small gap of clarity inserted into your day.
 
 This is not a break timer or a productivity tool. It is a practice aid. If you are walking the path of wisdom — whether through Vipassana, Zen, mindfulness-based practice, or simply a wish to be more present — these micro-interruptions become anchors of awareness threaded through your working day.
 
@@ -152,7 +152,7 @@ After launching, a ☯ icon appears in the menu bar. Click it to:
 - **Test Blackout** — trigger an immediate blackout with your current settings
 - **Snooze** — pause for 10 min, 20 min, 30 min, 1 hour, 2 hours, or indefinitely
 - **Settings...** — open the configuration window
-- **About Awareness...** — version info and credits
+- **About Awareness reminder...** — version info and credits
 
 During a blackout:
 - **ESC** (or **Cmd+Q** on macOS) dismisses early (unless Handcuffs mode is on)

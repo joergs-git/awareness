@@ -63,13 +63,13 @@ struct AccessoryCircularView: View {
     }
 }
 
-/// Rectangular complication — "Awareness" + next time / snoozed status
+/// Rectangular complication — "Awareness reminder" + next time / snoozed status
 struct AccessoryRectangularView: View {
     let entry: AwarenessEntry
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(String(localized: "Awareness"))
+            Text(String(localized: "Awareness reminder"))
                 .font(.headline)
                 .widgetAccentable()
             if entry.isSnoozed {
@@ -99,17 +99,17 @@ struct AccessoryRectangularView: View {
     }
 }
 
-/// Inline complication — "Awareness ☯ Next HH:mm"
+/// Inline complication — "Awareness reminder ☯ Next HH:mm"
 struct AccessoryInlineView: View {
     let entry: AwarenessEntry
 
     var body: some View {
         if entry.isSnoozed {
-            Text(String(localized: "Awareness ☯ Snoozed"))
+            Text(String(localized: "Awareness reminder ☯ Snoozed"))
         } else if let next = entry.nextBlackout {
-            Text(String(localized: "Awareness ☯ Next \(formatTime(next))"))
+            Text(String(localized: "Awareness reminder ☯ Next \(formatTime(next))"))
         } else {
-            Text(String(localized: "Awareness ☯ Active"))
+            Text(String(localized: "Awareness reminder ☯ Active"))
         }
     }
 
@@ -154,7 +154,7 @@ struct AwarenessComplicationWidget: Widget {
                 complicationView(for: entry)
             }
         }
-        .configurationDisplayName(String(localized: "Awareness"))
+        .configurationDisplayName(String(localized: "Awareness reminder"))
         .description(String(localized: "Shows your next mindful moment."))
         .supportedFamilies([
             .accessoryCircular,
