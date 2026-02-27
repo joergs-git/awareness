@@ -451,6 +451,10 @@ ios/Awareness/AwarenessWatch/
 - **Progress sync**: `ProgressTracker` sync is shared via target membership — same code as iOS
 - **Mindful Moments (progress tracking)**: Shared `ProgressTracker.shared` (same code as iOS via target membership). `ProgressView.swift` is watch-specific with a compact layout: donut chart (labeled "Discipline"), today stats, and 7-day bar chart. Complication widget extension also has `ProgressTracker` via target membership.
 
+## Changelog
+
+`CHANGELOG.md` at the repo root contains the full cumulative version history from v1.0 to the current release. Update it when bumping the version. The App Store `whats-new-*.txt` files are overwritten each release (not cumulative).
+
 ## Version Bumping
 
 When bumping the version, update **all four files** (no hardcoded version strings elsewhere — all read dynamically at runtime):
