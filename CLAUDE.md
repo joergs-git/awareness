@@ -210,7 +210,7 @@ ios/Awareness/
 ├── Awareness.xcodeproj                 # Xcode project (iOS 16+, iPhone + iPad)
 └── Awareness/
     ├── AwarenessApp.swift              # @main entry point, notification delegate
-    ├── ContentView.swift               # Home screen (status, snooze, test, settings)
+    ├── ContentView.swift               # Home screen (header, status, snooze, test, settings)
     ├── UpdateChecker.swift             # GitHub release update checker (singleton)
     ├── Awareness.entitlements          # HealthKit entitlement
     ├── Models/
@@ -278,7 +278,7 @@ ios/Awareness/AwarenessWatch/
 | Launch at Login | `SMAppService.mainApp` (macOS 13+) |
 | Update checker | `URLSession` queries GitHub releases API once on startup; skipped in sandbox (App Store handles updates) |
 | Distribution | SPM dev build (`make bundle`), Mac App Store (Xcode + sandbox), Direct (`make release-direct` + notarization) |
-| Progress tracking | `ProgressTracker.shared` stores daily triggered/completed counts in `UserDefaults`; donut chart + 14-day bar chart in `ProgressView` |
+| Mindful Moments | `ProgressTracker.shared` stores daily triggered/completed counts in `UserDefaults`; donut chart (labeled "Discipline") + 14-day bar chart in `ProgressView`; menu item "Mindful Moments..." |
 | Localization | `Localizable.xcstrings` string catalog with EN/DE; `String(localized:)` API |
 
 ### Windows
@@ -303,7 +303,7 @@ ios/Awareness/AwarenessWatch/
 | Audio | NAudio `WaveOutEvent` with self-disposing playback (new instance per gong) |
 | Single instance | Named `Mutex("Awareness-SingleInstance")` |
 | Update checker | `HttpClient` queries GitHub releases API once on startup; shows menu item if newer version exists |
-| Progress tracking | `ProgressTracker.Shared` stores daily triggered/completed counts in `progress.json` (`%APPDATA%`); donut chart + 14-day bar chart in `ProgressWindow` |
+| Mindful Moments | `ProgressTracker.Shared` stores daily triggered/completed counts in `progress.json` (`%APPDATA%`); donut chart (labeled "Discipline") + 14-day bar chart in `ProgressWindow`; menu item "Mindful Moments..." |
 | Localization | `.resx` resource files (`Strings.resx` EN, `Strings.de.resx` DE); `Strings.Designer.cs` auto-generated accessor |
 
 ### iOS/iPadOS
@@ -311,6 +311,7 @@ ios/Awareness/AwarenessWatch/
 | Topic | Approach |
 |---|---|
 | App lifecycle | SwiftUI `@main` with `UIApplicationDelegateAdaptor` for notification handling |
+| Home header | Title ("Awareness reminder") above logo (72×72), then "Mindfulness in Action" (`.headline`) and "In stillness rests the strength" (`.subheadline`, secondary) |
 | Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled `UNCalendarNotificationTrigger` requests |
 | Blackout | `fullScreenCover` presenting `BlackoutView` with `.statusBarHidden()` and `.persistentSystemOverlays(.hidden)` |
 | Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle; keeps display active |
@@ -327,12 +328,12 @@ ios/Awareness/AwarenessWatch/
 | Image picker | `PhotosPicker` from PhotosUI; saves to app Documents directory |
 | Video picker | `.fileImporter` with movie content types |
 | HealthKit | `HealthKitManager.shared` logs `HKCategorySample(.mindfulSession)` after each blackout; opt-in via settings toggle |
-| HealthKit prompt | One-time alert on first launch encourages enabling Apple Health; controlled by `healthKitPromptShown` flag |
+| HealthKit prompt | One-time alert on first launch encourages enabling Apple Health; controlled by `healthKitPromptShown` flag; both "Enable" and "Not Now" set the flag to prevent repeat prompts |
 | Haptics | `UIImpactFeedbackGenerator(style: .heavy)` at blackout start, `UINotificationFeedbackGenerator(.success)` at end; opt-in via `vibrationEnabled` |
 | End flash | White `Color.white` overlay flashes for ~1s at end of blackout before fade-out; `endFlashEnabled` (default: on) |
 | Update checker | Same as macOS — `URLSession` queries GitHub releases API once on startup |
 | WatchConnectivity | `WatchConnectivityManager.shared` syncs settings to/from companion Apple Watch via `WCSession.updateApplicationContext()` |
-| Progress tracking | `ProgressTracker.shared` stores daily triggered/completed counts in `UserDefaults`; donut chart + 14-day bar chart in `ProgressView` |
+| Mindful Moments | `ProgressTracker.shared` stores daily triggered/completed counts in `UserDefaults`; donut chart (labeled "Discipline") + 14-day bar chart in `ProgressView` |
 | Localization | `Localizable.xcstrings` string catalog with EN/DE; `String(localized:)` API |
 
 ### watchOS
@@ -359,7 +360,7 @@ ios/Awareness/AwarenessWatch/
 | Visual modes | Plain black or custom text only (no image/video on watch) |
 | Complication | WidgetKit extension: `accessoryCircular` (☯ with status tint), `accessoryRectangular` ("Awareness" + next time), `accessoryInline` |
 | Update checker | Same as iOS — `URLSession` queries GitHub releases API once on startup |
-| Progress tracking | Shared `ProgressTracker.shared` via target membership (same code as iOS); compact donut + 7-day chart in `ProgressView` |
+| Mindful Moments | Shared `ProgressTracker.shared` via target membership (same code as iOS); compact donut (labeled "Discipline") + 7-day chart in `ProgressView` |
 
 ## Configurable Settings
 
@@ -376,7 +377,7 @@ ios/Awareness/AwarenessWatch/
 - **End flash** (iOS/watchOS) — 1-second white screen blink at end of blackout, visible through closed eyelids (default: on)
 - **Start haptic** (watchOS only) — Taptic Engine feedback when blackout begins (default: on)
 - **End haptic** (watchOS only) — Taptic Engine feedback when blackout ends (default: on)
-- **Progress** — view today's completion donut, lifetime stats, and 14-day (macOS/iOS) or 7-day (watchOS) bar chart history; accessible from menu bar (macOS), navigation (iOS/watchOS), or tray menu (Windows)
+- **Mindful Moments** — view today's discipline donut, lifetime stats, and 14-day (macOS/iOS) or 7-day (watchOS) bar chart history; accessible from menu bar (macOS), navigation (iOS/watchOS), or tray menu (Windows)
 
 ## Notes for Development
 
@@ -391,7 +392,7 @@ ios/Awareness/AwarenessWatch/
 - **Mac App Store distribution**: `Awareness.xcodeproj` at repo root references all sources in `Sources/Awareness/`. Uses `SupportFiles/Awareness.entitlements` (App Sandbox with network client + user-selected file access). Security-scoped bookmarks in `SettingsManager` preserve file access across launches. `DistributedNotificationCenter` won't deliver screen lock/screensaver notifications in the sandbox — sleep/wake via `NSWorkspace` still works.
 - **Direct distribution**: `make bundle-signed` signs with Developer ID + hardened runtime using `SupportFiles/Awareness-Direct.entitlements`. `make release-direct` additionally creates a ZIP, submits for notarization, and staples the ticket. Requires one-time `xcrun notarytool store-credentials` setup.
 - Xcode project uses A2/B2/C2/D2/E2/F2 hex IDs in `project.pbxproj` (iOS project uses A1/B1 series — no collision)
-- **Progress tracking**: `ProgressTracker.shared` persists daily stats (triggered/completed counts, keyed by `yyyy-MM-dd`) in `UserDefaults`. `ProgressView` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Opened from the menu bar via `ProgressWindowController`.
+- **Mindful Moments (progress tracking)**: `ProgressTracker.shared` persists daily stats (triggered/completed counts, keyed by `yyyy-MM-dd`) in `UserDefaults`. `ProgressView` renders a donut chart (labeled "Discipline"), today/lifetime stats, and a 14-day bar chart. Opened from the menu bar ("Mindful Moments...") via `ProgressWindowController`.
 - **Localization**: `Localizable.xcstrings` (string catalog) in `Resources/` with EN (development language) and DE translations. Uses `String(localized:)` throughout UI code.
 
 ### Windows
@@ -406,7 +407,7 @@ ios/Awareness/AwarenessWatch/
 - About dialog version is read dynamically from the assembly version (`Version` in `.csproj`) — no hardcoded version strings
 - Update checker: `UpdateChecker.Shared` uses `HttpClient` to query the GitHub releases API, compares `tag_name` against assembly version (`Version` in `.csproj`). Menu item appears between "About" and "Quit" when an update is available.
 - Settings migration: if JSON has old `blackoutDuration` but no `minBlackoutDuration`/`maxBlackoutDuration`, the old value is mapped to both new fields
-- **Progress tracking**: `ProgressTracker.Shared` persists daily stats in `progress.json` (same `%APPDATA%\Awareness\` directory as settings). `ProgressWindow` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Opened from the tray context menu.
+- **Mindful Moments (progress tracking)**: `ProgressTracker.Shared` persists daily stats in `progress.json` (same `%APPDATA%\Awareness\` directory as settings). `ProgressWindow` renders a donut chart (labeled "Discipline"), today/lifetime stats, and a 14-day bar chart. Opened from the tray context menu ("Mindful Moments...").
 - **Localization**: `Strings.resx` (EN) and `Strings.de.resx` (DE) in `Resources/`. `Strings.Designer.cs` is auto-generated. All UI strings referenced via `Strings.KeyName`. Language follows system locale.
 
 ### iOS/iPadOS
@@ -421,13 +422,13 @@ ios/Awareness/AwarenessWatch/
 - **HealthKit integration**: `HealthKitManager.shared` logs each blackout as an `HKCategorySample(.mindfulSession)` that appears in Apple Health under "Mindful Minutes". Opt-in via `healthKitEnabled` toggle in Settings. Write-only access requested (`toShare: [mindfulType], read: []`). Silently skips if not authorized.
 - Privacy descriptions in `project.pbxproj`: `NSPhotoLibraryUsageDescription` (PhotosPicker), `NSHealthUpdateUsageDescription` and `NSHealthShareUsageDescription` (HealthKit)
 - HealthKit entitlement in `Awareness/Awareness.entitlements` (`com.apple.developer.healthkit`)
-- **HealthKit encouragement**: On first launch, an alert prompts users to enable Apple Health logging. Controlled by `healthKitPromptShown` (Bool, default false). Shown once; dismissed permanently with either "Enable" or "Not Now".
+- **HealthKit encouragement**: On first launch, an alert prompts users to enable Apple Health logging. Controlled by `healthKitPromptShown` (Bool, default false). The `.task` guard checks `!settings.healthKitPromptShown` so the prompt is shown only once; both "Enable" and "Not Now" set `healthKitPromptShown = true` to dismiss permanently.
 - **Haptic vibration**: `vibrationEnabled` setting (Bool, default false). Heavy impact at blackout start, success notification at end. No extra imports needed — UIKit haptics available via SwiftUI bridging. Does not work on simulator.
 - **End flash**: `endFlashEnabled` setting (Bool, default true). White overlay layer with 0.15s ease-in, 1s hold, 0.15s ease-out. Main fade-out delayed by 1.3s when flash is active.
 - **WatchConnectivity**: `Connectivity/WatchConnectivityManager.swift` on the iOS side syncs settings bidirectionally with the companion Apple Watch. Uses `objectWillChange` (not Combine merge chains) to observe settings changes — complex merge chains cause Swift type-checker timeouts. `isApplyingRemoteContext` guard prevents infinite sync loops. Required `sessionDidBecomeInactive` / `sessionDidDeactivate` stubs are iOS-only.
 - **Coordinated scheduling**: iOS is the master scheduler. `NotificationScheduler.scheduledFireDates` stores fire dates from most recent `rescheduleAll()`. `WatchConnectivityManager.pushScheduleToWatch(_:)` sends fire dates as Unix timestamps in applicationContext. The watch does NOT send fire dates back to avoid sync loops. Both sides use `lastRemoteContextDate` timestamps (2s cooldown) to prevent debounced observers from echoing remote context changes.
 - **Progress sync**: `ProgressTracker.connectivityContext()` and `applyFromConnectivityContext()` handle cross-device stats merge using max() strategy.
-- **Progress tracking**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation. `ProgressTracker.swift` is shared with watchOS via target membership. Triggered count is recorded on notification delivery (`willPresent`, `didReceive`, and delivered-check on foreground return), not in BlackoutView — so ignored notifications are counted accurately. `countedTriggerIDs` Set in `NotificationScheduler` prevents double-counting.
+- **Mindful Moments (progress tracking)**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart (labeled "Discipline"), today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation ("Mindful Moments"). `ProgressTracker.swift` is shared with watchOS via target membership. Triggered count is recorded on notification delivery (`willPresent`, `didReceive`, and delivered-check on foreground return), not in BlackoutView — so ignored notifications are counted accurately. `countedTriggerIDs` Set in `NotificationScheduler` prevents double-counting.
 - **Localization**: `Localizable.xcstrings` (string catalog) at `Awareness/Localizable.xcstrings` with EN and DE translations. Uses `String(localized:)` throughout UI code.
 
 ### watchOS
@@ -448,7 +449,7 @@ ios/Awareness/AwarenessWatch/
 - iOS target has "Embed Watch Content" build phase that embeds `AwarenessWatch.app`; watch target has "Embed App Extensions" phase for the complication
 - **Coordinated scheduling**: iOS is the master scheduler. `NotificationScheduler.applyCoordinatedSchedule(_:)` uses synced dates from iOS; falls back to `rescheduleAll()` only when no future dates available. Watch does NOT push fire dates back. `lastCoordinatedScheduleDate` prevents debounced settings observer from overwriting coordinated schedule.
 - **Progress sync**: `ProgressTracker` sync is shared via target membership — same code as iOS
-- **Progress tracking**: Shared `ProgressTracker.shared` (same code as iOS via target membership). `ProgressView.swift` is watch-specific with a compact layout: donut chart, today stats, and 7-day bar chart. Complication widget extension also has `ProgressTracker` via target membership.
+- **Mindful Moments (progress tracking)**: Shared `ProgressTracker.shared` (same code as iOS via target membership). `ProgressView.swift` is watch-specific with a compact layout: donut chart (labeled "Discipline"), today stats, and 7-day bar chart. Complication widget extension also has `ProgressTracker` via target membership.
 
 ## Version Bumping
 
