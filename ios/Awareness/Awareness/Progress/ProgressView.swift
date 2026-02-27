@@ -43,7 +43,7 @@ struct ProgressView: View {
                     .padding(.vertical, 8)
             }
         }
-        .navigationTitle(String(localized: "Progress"))
+        .navigationTitle(String(localized: "Mindful Moments"))
     }
 
     // MARK: - Donut Chart
@@ -70,7 +70,7 @@ struct ProgressView: View {
             VStack(spacing: 2) {
                 Text(hasData ? "\(Int(rate * 100))%" : "—")
                     .font(.system(size: 28, weight: .bold))
-                Text(String(localized: "Success Rate"))
+                Text(String(localized: "Discipline"))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }

@@ -118,13 +118,13 @@ Click OK to close, or Cancel to open GitHub.</value></data>
   <data name="AlreadyRunning" xml:space="preserve"><value>Awareness reminder is already running in the system tray.</value></data>
   <data name="WelcomeTitle" xml:space="preserve"><value>Welcome to Awareness reminder</value></data>
   <!-- ProgressWindow strings -->
-  <data name="ProgressMenu" xml:space="preserve"><value>Progress...</value></data>
-  <data name="ProgressTitle" xml:space="preserve"><value>Progress</value></data>
+  <data name="ProgressMenu" xml:space="preserve"><value>Mindful Moments...</value></data>
+  <data name="ProgressTitle" xml:space="preserve"><value>Mindful Moments</value></data>
   <data name="Today" xml:space="preserve"><value>Today</value></data>
   <data name="Lifetime" xml:space="preserve"><value>Lifetime</value></data>
   <data name="Triggered" xml:space="preserve"><value>triggered</value></data>
   <data name="Completed" xml:space="preserve"><value>completed</value></data>
-  <data name="SuccessRate" xml:space="preserve"><value>Success Rate</value></data>
+  <data name="SuccessRate" xml:space="preserve"><value>Discipline</value></data>
 
   <data name="WelcomeText" xml:space="preserve"><value>Awareness reminder is now running in your system tray.
 

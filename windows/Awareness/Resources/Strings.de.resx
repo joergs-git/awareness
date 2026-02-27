@@ -118,13 +118,13 @@ Klicke OK zum Schließen oder Abbrechen, um GitHub zu öffnen.</value></data>
   <data name="AlreadyRunning" xml:space="preserve"><value>Awareness reminder läuft bereits im Infobereich.</value></data>
   <data name="WelcomeTitle" xml:space="preserve"><value>Willkommen bei Awareness reminder</value></data>
   <!-- ProgressWindow strings -->
-  <data name="ProgressMenu" xml:space="preserve"><value>Fortschritt...</value></data>
-  <data name="ProgressTitle" xml:space="preserve"><value>Fortschritt</value></data>
+  <data name="ProgressMenu" xml:space="preserve"><value>Achtsamkeitsmomente...</value></data>
+  <data name="ProgressTitle" xml:space="preserve"><value>Achtsamkeitsmomente</value></data>
   <data name="Today" xml:space="preserve"><value>Heute</value></data>
   <data name="Lifetime" xml:space="preserve"><value>Gesamt</value></data>
   <data name="Triggered" xml:space="preserve"><value>ausgelöst</value></data>
   <data name="Completed" xml:space="preserve"><value>abgeschlossen</value></data>
-  <data name="SuccessRate" xml:space="preserve"><value>Erfolgsquote</value></data>
+  <data name="SuccessRate" xml:space="preserve"><value>Disziplin</value></data>
 
   <data name="WelcomeText" xml:space="preserve"><value>Awareness reminder läuft jetzt im Infobereich.
 

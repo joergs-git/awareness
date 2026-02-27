@@ -560,7 +560,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Progress....
+        ///   Looks up a localized string similar to Mindful Moments....
         /// </summary>
         public static string ProgressMenu {
             get {
@@ -569,7 +569,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Progress.
+        ///   Looks up a localized string similar to Mindful Moments.
         /// </summary>
         public static string ProgressTitle {
             get {
@@ -578,7 +578,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Success Rate.
+        ///   Looks up a localized string similar to Discipline.
         /// </summary>
         public static string SuccessRate {
             get {

@@ -521,22 +521,22 @@
         }
       }
     },
-    "Progress" : {
+    "Mindful Moments" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fortschritt"
+            "value" : "Achtsamkeitsmomente"
           }
         }
       }
     },
-    "Progress..." : {
+    "Mindful Moments..." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fortschritt..."
+            "value" : "Achtsamkeitsmomente..."
           }
         }
       }
@@ -581,12 +581,12 @@
         }
       }
     },
-    "Success Rate" : {
+    "Discipline" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erfolgsquote"
+            "value" : "Disziplin"
           }
         }
       }

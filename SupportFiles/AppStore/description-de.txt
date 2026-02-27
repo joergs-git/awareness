@@ -13,7 +13,7 @@ HAUPTFUNKTIONEN
 - Visuelle Modi — reines Schwarz, eigener Text, Bild oder Video in Endlosschleife
 - Start- und Endgong — akustische Signale markieren Anfang und Ende jeder Pause
 - Handschellen-Modus — verpflichte dich zur Praxis, indem du vorzeitiges Beenden verhinderst
-- Fortschrittsverfolgung — Donut-Diagramm, Tages- und Gesamtstatistiken, 14-Tage-Verlauf
+- Achtsamkeitsmomente — Donut-Diagramm, Tages- und Gesamtstatistiken, 14-Tage-Verlauf
 - Apple Health Integration — jede Pause wird als Achtsame Minuten protokolliert
 - Haptisches Feedback und Endblitz-Optionen auf iOS
 - Taptic Engine Feedback auf der Apple Watch
@@ -24,7 +24,7 @@ HAUPTFUNKTIONEN
 
 APPLE WATCH
 
-Die watchOS-Begleit-App funktioniert eigenständig oder gekoppelt mit deinem iPhone. Koordinierte Planung hält die Benachrichtigungszeiten zwischen den Geräten synchron, und deine Übungsstatistiken werden automatisch zusammengeführt. Empfange sanfte haptische Impulse am Handgelenk, verfolge deinen Fortschritt und passe Einstellungen direkt auf dem Zifferblatt mit WidgetKit-Komplikationen an.
+Die watchOS-Begleit-App funktioniert eigenständig oder gekoppelt mit deinem iPhone. Koordinierte Planung hält die Benachrichtigungszeiten zwischen den Geräten synchron, und deine Übungsstatistiken werden automatisch zusammengeführt. Empfange sanfte haptische Impulse am Handgelenk, verfolge deine Achtsamkeitsmomente und passe Einstellungen direkt auf dem Zifferblatt mit WidgetKit-Komplikationen an.
 
 PLATTFORMÜBERGREIFEND
 

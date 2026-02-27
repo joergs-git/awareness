@@ -41,7 +41,7 @@ struct ContentView: View {
                         ProgressView()
                     } label: {
                         HStack {
-                            Label(String(localized: "Progress"), systemImage: "chart.pie")
+                            Label(String(localized: "Mindful Moments"), systemImage: "chart.pie")
                                 .font(.footnote)
                             Spacer()
                             Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")

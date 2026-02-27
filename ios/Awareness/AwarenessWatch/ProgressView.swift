@@ -40,7 +40,7 @@ struct ProgressView: View {
                 }
 
                 HStack {
-                    Text(String(localized: "Success Rate"))
+                    Text(String(localized: "Discipline"))
                         .font(.footnote)
                     Spacer()
                     Text(tracker.lifetimeTriggered > 0 ? "\(Int(tracker.successRate * 100))%" : "—")
@@ -49,7 +49,7 @@ struct ProgressView: View {
                 }
             }
         }
-        .navigationTitle(String(localized: "Progress"))
+        .navigationTitle(String(localized: "Mindful Moments"))
     }
 
     // MARK: - Donut Chart

@@ -137,7 +137,7 @@ class StatusBarController: NSObject {
         menu.addItem(NSMenuItem.separator())
 
         // Progress
-        let progressItem = NSMenuItem(title: String(localized: "Progress..."), action: #selector(showProgress), keyEquivalent: "p")
+        let progressItem = NSMenuItem(title: String(localized: "Mindful Moments..."), action: #selector(showProgress), keyEquivalent: "p")
         progressItem.target = self
         menu.addItem(progressItem)
 

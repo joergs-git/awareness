@@ -13,7 +13,7 @@ KEY FEATURES
 - Visual modes — plain black, custom text, image, or looping video
 - Start and end gong — audible tones mark the beginning and end of each pause
 - Handcuffs mode — commit to the practice by preventing early dismissal
-- Progress tracking — donut chart, daily and lifetime stats, 14-day history
+- Mindful Moments — donut chart, daily and lifetime stats, 14-day history
 - Apple Health integration — log each pause as Mindful Minutes
 - Haptic feedback and end flash options on iOS
 - Taptic Engine feedback on Apple Watch
@@ -24,7 +24,7 @@ KEY FEATURES
 
 APPLE WATCH
 
-The companion watchOS app works standalone or paired with your iPhone. Coordinated scheduling keeps notification times in sync between devices, and your practice stats merge automatically. Receive gentle haptic taps on your wrist, view your progress, and customize settings right from your watch face with WidgetKit complications.
+The companion watchOS app works standalone or paired with your iPhone. Coordinated scheduling keeps notification times in sync between devices, and your practice stats merge automatically. Receive gentle haptic taps on your wrist, view your mindful moments, and customize settings right from your watch face with WidgetKit complications.
 
 CROSS-PLATFORM
 

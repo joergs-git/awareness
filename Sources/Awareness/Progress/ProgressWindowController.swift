@@ -24,7 +24,7 @@ class ProgressWindowController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = String(localized: "Progress")
+        window.title = String(localized: "Mindful Moments")
         window.contentView = hostingView
         window.center()
         window.isReleasedWhenClosed = false

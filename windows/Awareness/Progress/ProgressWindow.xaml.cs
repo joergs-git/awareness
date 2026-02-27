@@ -69,7 +69,7 @@ public partial class ProgressWindow : Window
         Canvas.SetTop(percentText, centerY - percentText.DesiredSize.Height / 2 - 6);
         DonutCanvas.Children.Add(percentText);
 
-        // Sub-label: "Success Rate"
+        // Sub-label: "Discipline"
         var labelText = new TextBlock
         {
             Text = Strings.SuccessRate,

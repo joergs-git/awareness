@@ -21,16 +21,19 @@ struct ContentView: View {
             List {
                 // MARK: - Header
                 Section {
-                    VStack(spacing: 6) {
+                    VStack(spacing: 8) {
+                        Text(String(localized: "Awareness reminder"))
+                            .font(.title2.weight(.semibold))
+                            .multilineTextAlignment(.center)
                         Image("Logo")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
-                        Text(String(localized: "Awareness reminder"))
-                            .font(.title2.weight(.medium))
-                        Text(String(localized: "A mindfulness timer"))
+                        Text(String(localized: "Mindfulness in Action"))
+                            .font(.headline)
+                        Text(String(localized: "In stillness rests the strength"))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -67,7 +70,7 @@ struct ContentView: View {
                         ProgressView()
                     } label: {
                         HStack {
-                            Label(String(localized: "Progress"), systemImage: "chart.pie")
+                            Label(String(localized: "Mindful Moments"), systemImage: "chart.pie")
                             Spacer()
                             Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
                                 .foregroundColor(.secondary)
@@ -253,8 +256,8 @@ struct ContentView: View {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await checkNotificationStatus()
 
-                // Show HealthKit encouragement if available and not yet enabled
-                if HealthKitManager.shared.isAvailable && !settings.healthKitEnabled {
+                // Show HealthKit encouragement once if available and not yet enabled
+                if HealthKitManager.shared.isAvailable && !settings.healthKitEnabled && !settings.healthKitPromptShown {
                     showHealthKitPrompt = true
                 }
             }
@@ -272,7 +275,7 @@ struct ContentView: View {
                     Task { await HealthKitManager.shared.requestAuthorization() }
                 }
                 Button(String(localized: "Not Now"), role: .cancel) {
-                    // Dismissed — will ask again next time app opens
+                    settings.healthKitPromptShown = true
                 }
             } message: {
                 Text(String(localized: "Awareness can log each mindful pause to Apple Health so you can track your practice over time."))

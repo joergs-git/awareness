@@ -69,7 +69,7 @@ struct ProgressView: View {
             VStack(spacing: 2) {
                 Text(hasData ? "\(Int(rate * 100))%" : "—")
                     .font(.system(size: 22, weight: .bold))
-                Text(String(localized: "Success Rate"))
+                Text(String(localized: "Discipline"))
                     .font(.system(size: 9))
                     .foregroundColor(.secondary)
             }

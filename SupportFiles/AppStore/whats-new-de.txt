@@ -3,5 +3,5 @@ Neu in Version 2.12:
 - Atem-Animation: Text pulsiert sanft während des Blackouts und bietet einen ruhigen Meditationsfokus (alle Plattformen)
 - watchOS: Blackout-Ende korrigiert — Haptik, Blitz und Namaste werden jetzt pünktlich ausgelöst, auch wenn das Handgelenk unten ist
 - watchOS: Sofortiges Beenden auf Geräten behoben, bei denen die erweiterte Laufzeitsitzung nicht starten konnte
-- Fortschrittsverfolgung: Ignorierte Benachrichtigungen werden jetzt korrekt als verpasst gezählt und zeigen genaue Abschlussstatistiken
+- Achtsamkeitsmomente: Ignorierte Benachrichtigungen werden jetzt korrekt als verpasst gezählt und zeigen genaue Disziplin-Statistiken
 - macOS: Verbesserte Eingabeerkennung, sodass ESC und Mausklicks während des Blackouts zuverlässig erkannt werden
