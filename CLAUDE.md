@@ -103,7 +103,7 @@ Requires watchOS 10+, Xcode 15+.
 - **SwiftUI** app with `@main` entry point, part of the iOS Xcode project (`ios/Awareness/Awareness.xcodeproj`)
 - **No third-party dependencies** — only Apple frameworks (SwiftUI, WatchKit, UserNotifications, WatchConnectivity, HealthKit, WidgetKit)
 - Uses **local notifications** (same 30-notification architecture as iOS) with default system sound
-- Blackout presented as `fullScreenCover` with `WKExtendedRuntimeSession(.mindfulness)` to keep the app alive
+- Blackout presented as `fullScreenCover` with `WKExtendedRuntimeSession` + `ExtendedSessionDelegate` + `WKBackgroundModes: mindfulness` to keep the app alive
 - Haptic feedback via `WKInterfaceDevice.current().play()` — gentle 3× `.success` pulses at begin, stronger 4× `.notification` pulses at end
 - Settings stored in `UserDefaults`, synced bidirectionally with companion iPhone via `WCSession.updateApplicationContext()`
 - Shared source files via target membership: `BlackoutVisualType`, `TimeWindow`, `SettingsManager`, `HealthKitManager`, `UpdateChecker`, `ProgressTracker`
@@ -266,7 +266,8 @@ ios/Awareness/AwarenessWatch/
 |---|---|
 | Menu bar icon | SF Symbol `"yinyang"` (macOS 14+) with Unicode `"☯"` fallback |
 | Overlay windows | One borderless `NSWindow` per `NSScreen.screens`, level `.screenSaver`, `canJoinAllSpaces + fullScreenAuxiliary` |
-| Keyboard capture | `BlackoutWindow` subclass (`canBecomeKey = true`) + `CGEvent.tapCreate` to suppress global keystrokes (ESC passes through when handcuffs off); mouse click also dismisses |
+| Input capture | `BlackoutWindow` subclass (`canBecomeKey/Main = true`) + `NSApp.activate(ignoringOtherApps:)` + `CGEvent.tapCreate` to suppress global keystrokes (ESC passes through when handcuffs off); local + global mouse monitors for click-to-dismiss |
+| Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle |
 | Scheduling | `DispatchSourceTimer` with random delay; auto-reschedules on settings change via Combine |
 | Camera detection | `AVCaptureDevice.isInUseByAnotherApplication` (no TCC prompt) |
 | Mic detection | CoreAudio `kAudioDevicePropertyDeviceIsRunningSomewhere` on input devices |
@@ -383,7 +384,7 @@ ios/Awareness/AwarenessWatch/
 
 - The app icon is `SupportFiles/AppIcon.icns` (yin-yang design), referenced via `CFBundleIconFile` in Info.plist
 - Resources (gong sounds, default image) are copied by the Makefile into `Contents/Resources/` and accessed via `Bundle.main` — not SPM's `Bundle.module`, which resolves to the .app root and breaks codesigning
-- The global event tap for keystroke suppression requires Accessibility permission — degrades gracefully if not granted
+- The global event tap for keystroke suppression requires Accessibility permission — degrades gracefully if not granted. `NSApp.activate(ignoringOtherApps: true)` ensures the overlay captures focus even without the tap. Global mouse monitor provides fallback click-to-dismiss when another app steals focus.
 - Settings migration: old `gongEnabled` key is auto-migrated to `startGongEnabled` + `endGongEnabled`; old `blackoutDuration` key is auto-migrated to `minBlackoutDuration` + `maxBlackoutDuration`
 - About dialog version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — see "Version Bumping" section below
 - Update checker: `UpdateChecker.shared` fetches `api.github.com/repos/joergs-git/awareness/releases/latest`, strips `v` prefix from `tag_name`, compares against `CFBundleShortVersionString`. Menu item appears between "About" and "Quit" when an update is available. Skipped automatically in the sandbox (App Store handles updates).
@@ -426,7 +427,7 @@ ios/Awareness/AwarenessWatch/
 - **WatchConnectivity**: `Connectivity/WatchConnectivityManager.swift` on the iOS side syncs settings bidirectionally with the companion Apple Watch. Uses `objectWillChange` (not Combine merge chains) to observe settings changes — complex merge chains cause Swift type-checker timeouts. `isApplyingRemoteContext` guard prevents infinite sync loops. Required `sessionDidBecomeInactive` / `sessionDidDeactivate` stubs are iOS-only.
 - **Coordinated scheduling**: iOS is the master scheduler. `NotificationScheduler.scheduledFireDates` stores fire dates from most recent `rescheduleAll()`. `WatchConnectivityManager.pushScheduleToWatch(_:)` sends fire dates as Unix timestamps in applicationContext. The watch does NOT send fire dates back to avoid sync loops. Both sides use `lastRemoteContextDate` timestamps (2s cooldown) to prevent debounced observers from echoing remote context changes.
 - **Progress sync**: `ProgressTracker.connectivityContext()` and `applyFromConnectivityContext()` handle cross-device stats merge using max() strategy.
-- **Progress tracking**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation. `ProgressTracker.swift` is shared with watchOS via target membership.
+- **Progress tracking**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart, today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation. `ProgressTracker.swift` is shared with watchOS via target membership. Triggered count is recorded on notification delivery (`willPresent`, `didReceive`, and delivered-check on foreground return), not in BlackoutView — so ignored notifications are counted accurately. `countedTriggerIDs` Set in `NotificationScheduler` prevents double-counting.
 - **Localization**: `Localizable.xcstrings` (string catalog) at `Awareness/Localizable.xcstrings` with EN and DE translations. Uses `String(localized:)` throughout UI code.
 
 ### watchOS
@@ -437,7 +438,7 @@ ios/Awareness/AwarenessWatch/
 - Shared files via target membership: `BlackoutVisualType.swift`, `TimeWindow.swift`, `SettingsManager.swift`, `HealthKitManager.swift`, `UpdateChecker.swift`, `ProgressTracker.swift`
 - `SettingsManager.swift` uses `#if os(watchOS)` / `#if !os(watchOS)` guards for platform-specific settings (haptics on watch, gong/vibration/image/video on iOS; `endFlashEnabled` exists in both blocks)
 - Watch-specific settings: `hapticStartEnabled` (default: true), `hapticEndEnabled` (default: true)
-- `WKExtendedRuntimeSession` with `ExtendedSessionDelegate` keeps the app alive during blackouts (up to 1 hour). Requires `WKBackgroundModes: mindfulness` in Info.plist (set via `INFOPLIST_KEY_WKBackgroundModes` build setting). The delegate detects session expiration and triggers dismiss so end haptics still fire.
+- `WKExtendedRuntimeSession` with `ExtendedSessionDelegate` keeps the app alive during blackouts (up to 1 hour). Requires `WKBackgroundModes: mindfulness` in Info.plist (set via `INFOPLIST_KEY_WKBackgroundModes` build setting). The delegate detects session expiration and triggers dismiss so end haptics still fire. `sessionDidStart` flag prevents instant dismissal when the session fails to start (e.g. on simulator) — only fires `onExpiration` if the session was previously running.
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` flag + `lastRemoteContextDate` (2s cooldown) prevent echo loops and debounce-timing bypasses.
 - Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, `HealthKitManager`, and `ProgressTracker` via target membership
