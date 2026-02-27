@@ -8,8 +8,13 @@ class ExtendedSessionDelegate: NSObject, WKExtendedRuntimeSessionDelegate {
 
     var onExpiration: (() -> Void)?
 
+    /// Tracks whether the session actually started running.
+    /// If the session fails to start (e.g. on simulator, or configuration issue),
+    /// didInvalidate fires immediately — we must NOT dismiss in that case.
+    private var sessionDidStart = false
+
     func extendedRuntimeSessionDidStart(_ session: WKExtendedRuntimeSession) {
-        // Session started successfully — app will stay alive during blackout
+        sessionDidStart = true
     }
 
     func extendedRuntimeSessionWillExpire(_ session: WKExtendedRuntimeSession) {
@@ -24,11 +29,11 @@ class ExtendedSessionDelegate: NSObject, WKExtendedRuntimeSessionDelegate {
         didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
         error: Error?
     ) {
-        // Session was invalidated externally — dismiss if still active
-        if reason != .none {
-            DispatchQueue.main.async { [weak self] in
-                self?.onExpiration?()
-            }
+        // Only dismiss if the session was previously running — startup failures
+        // should not end the blackout (the timer handles dismissal regardless)
+        guard sessionDidStart else { return }
+        DispatchQueue.main.async { [weak self] in
+            self?.onExpiration?()
         }
     }
 }
