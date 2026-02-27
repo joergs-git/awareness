@@ -104,7 +104,7 @@ Requires watchOS 10+, Xcode 15+.
 - **No third-party dependencies** — only Apple frameworks (SwiftUI, WatchKit, UserNotifications, WatchConnectivity, HealthKit, WidgetKit)
 - Uses **local notifications** (same 30-notification architecture as iOS) with default system sound
 - Blackout presented as `fullScreenCover` with `WKExtendedRuntimeSession(.mindfulness)` to keep the app alive
-- Haptic feedback via `WKInterfaceDevice.current().play()` (`.start` at begin, `.success` at end)
+- Haptic feedback via `WKInterfaceDevice.current().play()` — gentle 3× `.success` pulses at begin, stronger 4× `.notification` pulses at end
 - Settings stored in `UserDefaults`, synced bidirectionally with companion iPhone via `WCSession.updateApplicationContext()`
 - Shared source files via target membership: `BlackoutVisualType`, `TimeWindow`, `SettingsManager`, `HealthKitManager`, `UpdateChecker`, `ProgressTracker`
 - WidgetKit complication extension for watch face (accessoryCircular, accessoryRectangular, accessoryInline)
@@ -119,7 +119,14 @@ SupportFiles/
 ├── Info.plist                          # Bundle metadata (LSUIElement, category, copyright)
 ├── AppIcon.icns                        # Yin-yang app icon
 ├── Awareness.entitlements              # App Sandbox entitlements (Mac App Store)
-└── Awareness-Direct.entitlements       # Hardened Runtime entitlements (direct distribution)
+├── Awareness-Direct.entitlements       # Hardened Runtime entitlements (direct distribution)
+└── AppStore/                           # App Store Connect metadata (EN/DE)
+    ├── description-en.txt / -de.txt    # Full app description
+    ├── whats-new-en.txt / -de.txt      # Release notes
+    ├── keywords-en.txt / -de.txt       # Search keywords
+    ├── subtitle-en.txt / -de.txt       # App subtitle
+    ├── promotional-text-en.txt / -de.txt # Promotional text
+    └── screenshot-guide.md             # Screenshot preparation guide
 
 Sources/Awareness/
 ├── main.swift                          # NSApplication bootstrap
@@ -241,7 +248,7 @@ ios/Awareness/AwarenessWatch/
 ├── ContentView.swift                   # Status, next blackout, test, snooze, settings link
 ├── BlackoutView.swift                  # Full-screen blackout with WKExtendedRuntimeSession
 ├── SettingsView.swift                  # Compact Form: hours, intervals, duration, haptics, health
-├── HapticPlayer.swift                  # WKInterfaceDevice haptic wrapper (.start / .success)
+├── HapticPlayer.swift                  # WKInterfaceDevice haptic wrapper (.success start / .notification end)
 ├── NotificationScheduler.swift         # 30 pre-scheduled notifications, no image attachment
 ├── ProgressView.swift                  # Compact progress display (donut, today stats, 7-day chart)
 ├── WatchConnectivityManager.swift      # watchOS-side WCSession delegate for iPhone sync
@@ -338,7 +345,7 @@ ios/Awareness/AwarenessWatch/
 | Coordinated scheduling | iOS is master scheduler; `applyCoordinatedSchedule()` uses iOS fire dates; falls back to random only when iOS dates unavailable or all in the past |
 | Progress sync | Same ProgressTracker sync methods via target membership |
 | Namaste confirmation | namaste shown for 1.5s after blackout fade-out before dismissing |
-| Haptics | `WKInterfaceDevice.current().play(.start)` at begin, `.play(.success)` at end; opt-in via `hapticStartEnabled` / `hapticEndEnabled` |
+| Haptics | `WKInterfaceDevice.current().play(.success)` 3× at begin (gentle), `.play(.notification)` 4× at end (wake-up); opt-in via `hapticStartEnabled` / `hapticEndEnabled` |
 | Settings storage | `UserDefaults.standard` with `register(defaults:)` (same as iOS/macOS) |
 | Settings sync | `WCSession.updateApplicationContext()` — bidirectional, last-write-wins, `isApplyingRemoteContext` guard prevents sync loops |
 | Snooze | Removes all pending notifications; syncs snooze state to companion iPhone |
@@ -351,8 +358,8 @@ ios/Awareness/AwarenessWatch/
 
 ## Configurable Settings
 
-- **Active time window** — hours during which interruptions occur (default: 06:00–20:00)
-- **Blackout duration range** — min and max duration for each blackout; random duration picked within range (default: 20–20 seconds, i.e. fixed)
+- **Active time window** — hours during which interruptions occur (default: 06:00–22:00)
+- **Blackout duration range** — min and max duration for each blackout; random duration picked within range (default: 20–40 seconds)
 - **Blackout visual** — plain black, custom text, image, or looping video (default: text "Breathe.")
 - **Random interval range** — min and max delay between interruptions (default: 15–30 minutes)
 - **Start gong** — play a higher-pitched sound when blackout begins (default: on)
@@ -374,7 +381,7 @@ ios/Awareness/AwarenessWatch/
 - Resources (gong sounds, default image) are copied by the Makefile into `Contents/Resources/` and accessed via `Bundle.main` — not SPM's `Bundle.module`, which resolves to the .app root and breaks codesigning
 - The global event tap for keystroke suppression requires Accessibility permission — degrades gracefully if not granted
 - Settings migration: old `gongEnabled` key is auto-migrated to `startGongEnabled` + `endGongEnabled`; old `blackoutDuration` key is auto-migrated to `minBlackoutDuration` + `maxBlackoutDuration`
-- About dialog version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — update `SupportFiles/Info.plist` only when bumping versions
+- About dialog version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — see "Version Bumping" section below
 - Update checker: `UpdateChecker.shared` fetches `api.github.com/repos/joergs-git/awareness/releases/latest`, strips `v` prefix from `tag_name`, compares against `CFBundleShortVersionString`. Menu item appears between "About" and "Quit" when an update is available. Skipped automatically in the sandbox (App Store handles updates).
 - **Mac App Store distribution**: `Awareness.xcodeproj` at repo root references all sources in `Sources/Awareness/`. Uses `SupportFiles/Awareness.entitlements` (App Sandbox with network client + user-selected file access). Security-scoped bookmarks in `SettingsManager` preserve file access across launches. `DistributedNotificationCenter` won't deliver screen lock/screensaver notifications in the sandbox — sleep/wake via `NSWorkspace` still works.
 - **Direct distribution**: `make bundle-signed` signs with Developer ID + hardened runtime using `SupportFiles/Awareness-Direct.entitlements`. `make release-direct` additionally creates a ZIP, submits for notarization, and staples the ticket. Requires one-time `xcrun notarytool store-credentials` setup.
@@ -404,7 +411,7 @@ ios/Awareness/AwarenessWatch/
 - The notification sound file must be in the app bundle as `.aiff` — iOS supports AIFF for custom notification sounds
 - `NotificationScheduler` pre-schedules 30 notifications and tops up when the app returns to foreground (iOS limits pending notifications to 64)
 - `adjustToActiveWindow()` shifts fire dates that fall outside the active time window to the start of the next active period
-- About screen version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — update `MARKETING_VERSION` in the Xcode project when bumping versions
+- About screen version is read dynamically from `Bundle.main.infoDictionary["CFBundleShortVersionString"]` — see "Version Bumping" section below
 - Update checker works identically to macOS
 - **HealthKit integration**: `HealthKitManager.shared` logs each blackout as an `HKCategorySample(.mindfulSession)` that appears in Apple Health under "Mindful Minutes". Opt-in via `healthKitEnabled` toggle in Settings. Write-only access requested (`toShare: [mindfulType], read: []`). Silently skips if not authorized.
 - Privacy descriptions in `project.pbxproj`: `NSPhotoLibraryUsageDescription` (PhotosPicker), `NSHealthUpdateUsageDescription` and `NSHealthShareUsageDescription` (HealthKit)
@@ -424,11 +431,11 @@ ios/Awareness/AwarenessWatch/
 - Two targets: `AwarenessWatch` (watchOS app, E30099) and `AwarenessWatchComplication` (WidgetKit extension, E40099)
 - `project.pbxproj` uses A3/B3/C3/D3/E3/F3/G3 hex IDs for watch target, A4/B4/C4/D4/E4/F4 for widget extension (iOS uses A1/B1, macOS uses A2/B2 — no collision)
 - Shared files via target membership: `BlackoutVisualType.swift`, `TimeWindow.swift`, `SettingsManager.swift`, `HealthKitManager.swift`, `UpdateChecker.swift`, `ProgressTracker.swift`
-- `SettingsManager.swift` uses `#if os(watchOS)` / `#if !os(watchOS)` guards for platform-specific settings (haptics on watch, gong/vibration/endFlash/image/video on iOS)
+- `SettingsManager.swift` uses `#if os(watchOS)` / `#if !os(watchOS)` guards for platform-specific settings (haptics on watch, gong/vibration/image/video on iOS; `endFlashEnabled` exists in both blocks)
 - Watch-specific settings: `hapticStartEnabled` (default: true), `hapticEndEnabled` (default: true)
 - `WKExtendedRuntimeSession(.mindfulness)` keeps the app alive during blackouts (up to 1 hour)
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
-- WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` prevents echo loops.
+- WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` flag + `lastRemoteContextDate` (2s cooldown) prevent echo loops and debounce-timing bypasses.
 - Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, `HealthKitManager`, and `ProgressTracker` via target membership
 - Bundle IDs: `com.joergsflow.awareness.ios.watch` (watch app), `com.joergsflow.awareness.ios.watch.widget` (widget extension)
 - `WKCompanionAppBundleIdentifier`: `com.joergsflow.awareness.ios`
@@ -437,3 +444,14 @@ ios/Awareness/AwarenessWatch/
 - **Coordinated scheduling**: iOS is the master scheduler. `NotificationScheduler.applyCoordinatedSchedule(_:)` uses synced dates from iOS; falls back to `rescheduleAll()` only when no future dates available. Watch does NOT push fire dates back. `lastCoordinatedScheduleDate` prevents debounced settings observer from overwriting coordinated schedule.
 - **Progress sync**: `ProgressTracker` sync is shared via target membership — same code as iOS
 - **Progress tracking**: Shared `ProgressTracker.shared` (same code as iOS via target membership). `ProgressView.swift` is watch-specific with a compact layout: donut chart, today stats, and 7-day bar chart. Complication widget extension also has `ProgressTracker` via target membership.
+
+## Version Bumping
+
+When bumping the version, update **all four files** (no hardcoded version strings elsewhere — all read dynamically at runtime):
+
+| File | Field | Format |
+|---|---|---|
+| `SupportFiles/Info.plist` | `CFBundleVersion` + `CFBundleShortVersionString` | `X.Y` |
+| `Awareness.xcodeproj/project.pbxproj` | `MARKETING_VERSION` (2 targets: Debug + Release) | `X.Y` |
+| `ios/Awareness/Awareness.xcodeproj/project.pbxproj` | `MARKETING_VERSION` (6 targets: iOS Debug/Release, watchOS Debug/Release, widget Debug/Release) | `X.Y` |
+| `windows/Awareness/Awareness.csproj` | `<Version>` | `X.Y.0` |
