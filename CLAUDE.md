@@ -103,7 +103,7 @@ Requires watchOS 10+, Xcode 15+.
 - **SwiftUI** app with `@main` entry point, part of the iOS Xcode project (`ios/Awareness/Awareness.xcodeproj`)
 - **No third-party dependencies** — only Apple frameworks (SwiftUI, WatchKit, UserNotifications, WatchConnectivity, HealthKit, WidgetKit)
 - Uses **local notifications** (same 30-notification architecture as iOS) with default system sound
-- Blackout presented as `fullScreenCover`; no `WKExtendedRuntimeSession` (allows system-level notification delivery for end-signal haptic); end-signal via `UNTimeIntervalNotificationTrigger`
+- Blackout presented as `fullScreenCover`; `WKExtendedRuntimeSession` in alarm mode with `start(at:)` schedules end-of-blackout haptic via `notifyUser(hapticType:repeatHandler:)` — the only API that works when the wrist is down and display is off
 - **3-signal audio/haptic system**: reminder haptic (2× `.failure`) on notification arrival, synthesized double chime (440Hz → 660Hz via `AVAudioEngine`) at blackout start, end haptic (2× `.directionUp`) at blackout end
 - Settings stored in `UserDefaults`, synced bidirectionally with companion iPhone via `WCSession.updateApplicationContext()`
 - Shared source files via target membership: `BlackoutVisualType`, `TimeWindow`, `SettingsManager`, `HealthKitManager`, `UpdateChecker`, `ProgressTracker`
@@ -246,7 +246,8 @@ ios/Awareness/
 ios/Awareness/AwarenessWatch/
 ├── AwarenessWatchApp.swift             # @main entry point, WKApplicationDelegateAdaptor, notification delegate
 ├── ContentView.swift                   # Status, next blackout, test, snooze, settings link
-├── BlackoutView.swift                  # Full-screen blackout with end-signal notification
+├── BlackoutView.swift                  # Full-screen blackout with alarm session end signal
+├── AlarmSessionManager.swift           # WKExtendedRuntimeSession alarm mode for reliable end haptic
 ├── SettingsView.swift                  # Compact Form: hours, intervals, duration, haptics, health
 ├── HapticPlayer.swift                  # WKInterfaceDevice haptic wrapper (reminder .failure / end .directionUp)
 ├── ChimePlayer.swift                   # AVAudioEngine synthesized double chime (440Hz → 660Hz) for blackout start
@@ -345,7 +346,7 @@ ios/Awareness/AwarenessWatch/
 |---|---|
 | App lifecycle | SwiftUI `@main` with `WKApplicationDelegateAdaptor` for notification handling |
 | Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled notifications (same as iOS), default system sound |
-| Blackout | `fullScreenCover` presenting `BlackoutView`; intentionally NO `WKExtendedRuntimeSession` so watchOS suspends the app when the display dims — this allows the end-signal notification to be delivered by the system (not the throttled `willPresent` delegate) with full haptic; main-thread `Timer.scheduledTimer` with Date check catches up visually on wrist-raise |
+| Blackout | `fullScreenCover` presenting `BlackoutView`; `WKExtendedRuntimeSession` in **alarm mode** with `start(at:)` schedules end-of-blackout haptic at exact end time — `notifyUser(hapticType:repeatHandler:)` delivers haptic even when wrist is down and display is off (the only API that can); main-thread `Timer.scheduledTimer` with Date check catches up visually on wrist-raise; local notification as backup end signal |
 | Breathing animation | Text mode: pulsating scale (0.94↔1.08) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle; wrapped in `TimelineView(.animation)` to signal continuous rendering and extend display-on time |
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
 | Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; records trigger for progress; plays reminder haptic; user must tap to start blackout |
@@ -450,8 +451,7 @@ ios/Awareness/AwarenessWatch/
 - Watch-specific settings: `reminderHapticEnabled` (default: true), `hapticEndEnabled` (default: true)
 - Settings migration: old `hapticStartEnabled` key auto-migrates to `reminderHapticEnabled` on first launch
 - `ChimePlayer.shared` uses `AVAudioEngine` + `AVAudioSourceNode` for real-time synthesis; `.ambient` audio session respects watchOS silent mode; `stop()` called in `onDisappear` to clean up
-- **Display dimming — end signal**: `WKExtendedRuntimeSession` is intentionally NOT used. While it keeps the process alive, it keeps the app in "foreground" state — so notifications route through `willPresent` (main thread, throttled when display dims) instead of system delivery. Without the session, watchOS suspends the app when the display dims, and the end-signal notification (`UNTimeIntervalNotificationTrigger`) fires at the system level with full haptic. `WatchAppDelegate.willPresent` still handles the end signal if the app happens to be in foreground. Main-thread `Timer.scheduledTimer` with Date check catches up visually on wrist-raise. `TimelineView(.animation(minimumInterval: 1.0))` extends display-on time. Note: `WKBackgroundModes: mindfulness` build setting is retained in the project for potential future use.
-- `WKExtendedRuntimeSession` is intentionally NOT started during blackouts. While it keeps the process alive, it also keeps the app in "foreground" state, routing notifications through `willPresent` (main thread, throttled when display dims). Without the session, watchOS suspends the app, and the end-signal notification fires at the system level with haptic. `WKBackgroundModes: mindfulness` build setting is retained in the project for potential future use.
+- **End-of-blackout signal (alarm session)**: `AlarmSessionManager.shared` uses `WKExtendedRuntimeSession` in **alarm mode** (`WKBackgroundModes: alarm` in build settings). When a blackout starts, `scheduleEndAlarm(at:)` calls `start(at:)` to schedule the session for the exact end time. At the scheduled time, watchOS launches/resumes the app and calls `notifyUser(hapticType: .notification, repeatHandler:)` — this is the ONLY API that delivers haptic when the wrist is down and display is off. The haptic repeats every 10 seconds until the user taps "Stop" in the system alarm UI. A local notification (`UNTimeIntervalNotificationTrigger`) acts as a backup end signal. Main-thread `Timer.scheduledTimer` with Date check catches up visually on wrist-raise. `TimelineView(.animation(minimumInterval: 1.0))` extends display-on time before dimming.
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` flag + `lastRemoteContextDate` (2s cooldown) prevent echo loops and debounce-timing bypasses.
 - Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, `HealthKitManager`, and `ProgressTracker` via target membership

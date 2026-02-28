@@ -7,7 +7,8 @@ All notable changes to Awareness reminder, from initial release to the current v
 ## v2.14
 
 ### watchOS: Blackout display & end-signal reliability
-- **Notification-based end signal** — schedules a local notification for the exact blackout end time; the OS delivers the haptic at the system level, regardless of display state or main RunLoop throttling
+- **Alarm session end signal** — uses `WKExtendedRuntimeSession` in alarm mode with `notifyUser(hapticType:repeatHandler:)` to deliver haptic feedback at the exact blackout end time, even when the wrist is down and display is off (the only API capable of this)
+- **Backup notification** — local notification scheduled as fallback end signal
 - **Extended display-on time** — breathing animation wrapped in `TimelineView(.animation)` to signal continuous rendering need to watchOS
 
 ### watchOS: 3-signal audio/haptic system

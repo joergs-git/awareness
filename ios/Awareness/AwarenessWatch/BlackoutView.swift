@@ -5,13 +5,14 @@ import UserNotifications
 /// Full-screen blackout view for Apple Watch.
 /// Shows plain black or text content with a gentle breathing animation.
 ///
-/// **Display dimming strategy:**
-/// WKExtendedRuntimeSession is intentionally NOT used. While it keeps the process alive,
-/// it also keeps the app in the "foreground" state — which means notifications are routed
-/// through willPresent (main thread, throttled when display dims) instead of being delivered
-/// by the system. Without the session, watchOS suspends the app when the display dims, and
-/// the end-signal notification fires at the system level with haptic feedback. The app
-/// resumes on wrist-raise and the Timer catches up instantly via Date check.
+/// **End signal strategy (alarm session):**
+/// Uses `WKExtendedRuntimeSession` in **alarm mode** with `start(at:)` to schedule
+/// the end-of-blackout signal at the exact end time. When the alarm fires, watchOS
+/// launches/resumes the app and calls `notifyUser(hapticType:repeatHandler:)` — the ONLY
+/// API that delivers haptic feedback when the wrist is down and display is off.
+/// The app is NOT kept alive during the blackout (alarm mode doesn't provide runtime
+/// until the scheduled time). A repeating Timer catches up via Date check on wrist-raise.
+/// A local notification serves as a backup end signal.
 struct BlackoutView: View {
 
     @ObservedObject var settings = SettingsManager.shared
@@ -104,7 +105,8 @@ struct BlackoutView: View {
             // Auto-dismiss using Date-based checking. When the app is suspended (display dims),
             // this timer is frozen. On wrist-raise the app resumes and the timer fires
             // immediately, catching up via the Date comparison.
-            targetEndDate = Date().addingTimeInterval(duration)
+            let endDate = Date().addingTimeInterval(duration)
+            targetEndDate = endDate
             dismissTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
                 guard let target = targetEndDate else { return }
                 if Date() >= target {
@@ -114,17 +116,20 @@ struct BlackoutView: View {
                 }
             }
 
-            // Schedule a local notification as the end-of-blackout signal.
-            // Without WKExtendedRuntimeSession, watchOS suspends the app when the display
-            // dims. The notification is then delivered by the SYSTEM (not willPresent) with
-            // full haptic feedback, regardless of app state. This is the only reliable way
-            // to deliver a timed signal on watchOS when the display is off.
+            // PRIMARY end signal: alarm session scheduled for the exact end time.
+            // Uses WKExtendedRuntimeSession in alarm mode — at the scheduled time, watchOS
+            // launches/resumes the app and calls notifyUser(hapticType:repeatHandler:) which
+            // delivers haptic feedback even when the wrist is down and display is off.
+            AlarmSessionManager.shared.scheduleEndAlarm(at: endDate)
+
+            // BACKUP end signal: local notification (in case the alarm session fails)
             scheduleEndSignalNotification(after: duration)
         }
         .onDisappear {
             dismissTimer?.invalidate()
             dismissTimer = nil
             targetEndDate = nil
+            AlarmSessionManager.shared.cancelAlarm()
             cancelEndSignalNotification()
             ChimePlayer.shared.stop()
         }
@@ -151,6 +156,7 @@ struct BlackoutView: View {
         dismissTimer?.invalidate()
         dismissTimer = nil
         targetEndDate = nil
+        AlarmSessionManager.shared.cancelAlarm()
         cancelEndSignalNotification()
 
         // Stop breathing animation
@@ -210,10 +216,9 @@ struct BlackoutView: View {
 
     // MARK: - End Signal Notification
 
-    /// Schedule a local notification that fires when the blackout should end.
-    /// Without WKExtendedRuntimeSession, the app is suspended when the display dims,
-    /// so this notification is delivered by the OS at the system level — with full
-    /// haptic feedback regardless of app state.
+    /// Schedule a local notification as a backup end signal.
+    /// The primary signal is the alarm session (AlarmSessionManager). This notification
+    /// acts as a fallback in case the alarm session fails to start or fire.
     private func scheduleEndSignalNotification(after interval: TimeInterval) {
         let content = UNMutableNotificationContent()
         content.body = String(localized: "Blackout complete")

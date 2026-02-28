@@ -14,12 +14,18 @@
 
 ## [2026-02-28] — WKInterfaceDevice.play() doesn't fire when display is dimmed
 - **Mistake:** Added a background DispatchSourceTimer that called `WKInterfaceDevice.current().play(.directionUp)` directly from a background queue, expecting haptics to fire when the display is dimmed.
-- **Root cause:** `WKInterfaceDevice.play()` also doesn't work when the display is dimmed — watchOS throttles all app-level APIs. Only system-level mechanisms (local notifications) can deliver haptic feedback in this state.
-- **Rule:** On watchOS, the ONLY reliable way to deliver haptic/sound when the display is dimmed is via local notifications (`UNNotificationRequest`). The OS delivers notification sound/haptic at the system level, independent of app RunLoop and display state.
+- **Root cause:** `WKInterfaceDevice.play()` also doesn't work when the display is dimmed — watchOS throttles all app-level APIs.
+- **Rule:** On watchOS, app-level haptic APIs (`WKInterfaceDevice.play()`) cannot fire when the display is dimmed, regardless of which queue you call them from.
 - **Applies to:** watchOS end-of-blackout signal, any watchOS time-critical haptic delivery
 
-## [2026-02-28] — WKExtendedRuntimeSession blocks system-level notification delivery
-- **Mistake:** Used `WKExtendedRuntimeSession` during blackouts AND scheduled a local notification for the end signal. The notification was supposed to deliver haptic at the system level, but it didn't — because the extended session kept the app in "foreground" state.
+## [2026-02-28] — WKExtendedRuntimeSession (mindfulness mode) blocks system-level notification delivery
+- **Mistake:** Used `WKExtendedRuntimeSession` with `start()` (mindfulness mode) during blackouts AND scheduled a local notification for the end signal. The notification was supposed to deliver haptic at the system level, but it didn't — because the extended session kept the app in "foreground" state.
 - **Root cause:** When the app is in the foreground, notifications are routed through `willPresent` (main thread). The main thread is throttled when the display dims. So the notification sound/haptic doesn't play until the delegate callback returns, which doesn't happen until wrist-raise.
-- **Rule:** If you need system-level notification delivery (haptic/sound when display is dimmed), do NOT use `WKExtendedRuntimeSession`. Let watchOS suspend the app so notifications bypass the app delegate entirely.
+- **Rule:** If you need system-level notification delivery (haptic/sound when display is dimmed), do NOT use `WKExtendedRuntimeSession` with `start()` (mindfulness mode). Either let watchOS suspend the app so notifications bypass the app delegate, or use `notifyUser(hapticType:repeatHandler:)` via alarm mode.
 - **Applies to:** watchOS blackout, any watchOS scenario needing reliable timed haptic/sound delivery
+
+## [2026-02-28] — notifyUser(hapticType:repeatHandler:) requires alarm background mode
+- **Mistake:** Assumed `notifyUser(hapticType:repeatHandler:)` could be used with any `WKExtendedRuntimeSession` type (e.g. mindfulness).
+- **Root cause:** Apple's header explicitly states: "This method can only be called on a WKExtendedRuntimeSession that was scheduled with `startAtDate:` and currently has a state of `.running`. If it is called outside that time, it will be ignored." And `startAtDate:` requires the alarm background mode.
+- **Rule:** `notifyUser(hapticType:repeatHandler:)` is the ONLY API that delivers haptic when the wrist is down and display is off. It requires: (1) `alarm` in `WKBackgroundModes`, (2) session created via `start(at:)` (not `start()`), (3) called when session state is `.running`.
+- **Applies to:** watchOS timed haptic delivery, any watchOS alarm/timer signal
