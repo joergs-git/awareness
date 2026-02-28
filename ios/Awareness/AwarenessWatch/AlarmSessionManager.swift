@@ -14,15 +14,20 @@ import WatchKit
 ///
 /// **Why alarm mode instead of mindfulness:**
 /// `notifyUser(hapticType:repeatHandler:)` is the ONLY API that delivers haptic feedback
-/// when the wrist is down and display is off. It requires the alarm background mode and
-/// a session scheduled with `start(at:)`. Mindfulness sessions (started with `start()`)
-/// cannot use this API — all other haptic methods (WKInterfaceDevice.play(), local
-/// notifications routed through willPresent) are throttled when the display dims.
+/// when the wrist is down and display is off. It requires the alarm background mode
+/// (`WKBackgroundModes: smart-alarm` in Info.plist) and a session scheduled with `start(at:)`.
+/// Mindfulness sessions (started with `start()`) cannot use this API — all other haptic
+/// methods (WKInterfaceDevice.play(), local notifications routed through willPresent) are
+/// throttled when the display dims.
 final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
 
     static let shared = AlarmSessionManager()
 
     private var session: WKExtendedRuntimeSession?
+
+    /// Debug status string — visible in BlackoutView when the blackout ends on wrist-raise,
+    /// helping diagnose whether the alarm session was properly scheduled and fired.
+    private(set) var debugStatus: String = "idle"
 
     private override init() {
         super.init()
@@ -39,21 +44,31 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
         session.delegate = self
         session.start(at: date)
         self.session = session
+
+        let delay = date.timeIntervalSinceNow
+        debugStatus = "scheduled (in \(Int(delay))s), state=\(stateString(session.state))"
+        print("AlarmSession: scheduled for \(date) (\(Int(delay))s from now), state=\(stateString(session.state))")
     }
 
     /// Cancel a scheduled or running alarm session.
     /// Called on early dismiss (tap-to-exit) or when the blackout ends via Timer catch-up.
     func cancelAlarm() {
         guard let session = session else { return }
+        let prevState = stateString(session.state)
         if session.state == .scheduled || session.state == .running {
             session.invalidate()
         }
         self.session = nil
+        debugStatus = "canceled (was \(prevState))"
+        print("AlarmSession: canceled (was \(prevState))")
     }
 
     // MARK: - WKExtendedRuntimeSessionDelegate
 
     func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        debugStatus = "FIRED — calling notifyUser"
+        print("AlarmSession: didStart — calling notifyUser(hapticType:repeatHandler:)")
+
         // The scheduled alarm time has arrived — play haptic to signal end of blackout.
         // If the app is not active (display off, wrist down), watchOS shows a system alarm
         // UI with the haptic. The haptic repeats until the user taps "Stop" or the session
@@ -77,6 +92,23 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
         didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
         error: Error?
     ) {
+        let reasonStr: String
+        switch reason {
+        case .none: reasonStr = "none (normal)"
+        case .sessionInProgress: reasonStr = "sessionInProgress"
+        case .expired: reasonStr = "expired"
+        case .resignedFrontmost: reasonStr = "resignedFrontmost"
+        case .suppressedBySystem: reasonStr = "suppressedBySystem"
+        case .error: reasonStr = "error"
+        @unknown default: reasonStr = "unknown(\(reason.rawValue))"
+        }
+
+        debugStatus = "invalidated: \(reasonStr)"
+        if let error = error {
+            debugStatus += " — \(error.localizedDescription)"
+        }
+        print("AlarmSession: invalidated reason=\(reasonStr) error=\(error?.localizedDescription ?? "nil")")
+
         self.session = nil
 
         // If the session ended normally (user tapped "Stop" in system alarm UI),
@@ -86,16 +118,27 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
                 NotificationCenter.default.post(name: .dismissBlackout, object: nil)
             }
         }
-
-        if let error = error {
-            print("AlarmSession: invalidated with error — \(error.localizedDescription)")
-        }
     }
 
     func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        debugStatus = "willExpire"
+        print("AlarmSession: willExpire")
+
         // Session is about to expire — ensure blackout gets dismissed
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: .dismissBlackout, object: nil)
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func stateString(_ state: WKExtendedRuntimeSessionState) -> String {
+        switch state {
+        case .notStarted: return "notStarted"
+        case .scheduled: return "scheduled"
+        case .running: return "running"
+        case .invalid: return "invalid"
+        @unknown default: return "unknown(\(state.rawValue))"
         }
     }
 }
