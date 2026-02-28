@@ -50,9 +50,11 @@ struct BlackoutView: View {
     /// The randomized duration for this blackout instance
     @State private var duration: Double = 0
     @State private var opacity: Double = 0
-    @State private var dismissTimer: Timer?
-    /// Target wall-clock time when the blackout should end (immune to timer throttling)
-    @State private var targetEndDate: Date?
+    /// Background-queue timer for reliable end-of-blackout firing.
+    /// Uses DispatchSourceTimer instead of Timer.scheduledTimer because the main RunLoop
+    /// gets throttled when watchOS dims the display — DispatchSource on a background queue
+    /// fires reliably regardless of display state.
+    @State private var dismissTimer: DispatchSourceTimer?
     /// Tracks when the blackout started for HealthKit logging
     @State private var sessionStart: Date?
     /// Extended runtime session to keep the app alive during blackout
@@ -71,44 +73,49 @@ struct BlackoutView: View {
     @State private var isDismissing = false
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
+        // TimelineView(.animation) signals to watchOS that this view needs continuous rendering.
+        // This extends the time before the display dims and keeps animations updating at ~1Hz
+        // even in Always-On Display state, improving the meditation experience.
+        TimelineView(.animation(minimumInterval: 1.0, paused: false)) { _ in
+            ZStack {
+                Color.black.ignoresSafeArea()
 
-            // Breathing content — keeps the display active and provides a meditation focus.
-            // The continuous animation signals to watchOS that the view is dynamic,
-            // which helps prevent aggressive display dimming on Always-On Display watches.
-            if settings.visualType == .text {
-                Text(settings.customText)
-                    .font(.system(size: 20, weight: .light))
-                    .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
-                    .scaleEffect(isBreathing ? 1.08 : 0.94)
-                    .animation(
-                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
-                        value: isBreathing
-                    )
-                    .multilineTextAlignment(.center)
-                    .padding(12)
-            } else {
-                // Plain black mode — subtle breathing circle as a minimal visual anchor
-                Circle()
-                    .fill(Color.white.opacity(isBreathing ? 0.10 : 0.02))
-                    .frame(width: isBreathing ? 12 : 8, height: isBreathing ? 12 : 8)
-                    .animation(
-                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
-                        value: isBreathing
-                    )
-            }
+                // Breathing content — keeps the display active and provides a meditation focus.
+                // The continuous animation signals to watchOS that the view is dynamic,
+                // which helps prevent aggressive display dimming on Always-On Display watches.
+                if settings.visualType == .text {
+                    Text(settings.customText)
+                        .font(.system(size: 20, weight: .light))
+                        .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
+                        .scaleEffect(isBreathing ? 1.08 : 0.94)
+                        .animation(
+                            .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                            value: isBreathing
+                        )
+                        .multilineTextAlignment(.center)
+                        .padding(12)
+                } else {
+                    // Plain black mode — subtle breathing circle as a minimal visual anchor
+                    Circle()
+                        .fill(Color.white.opacity(isBreathing ? 0.10 : 0.02))
+                        .frame(width: isBreathing ? 12 : 8, height: isBreathing ? 12 : 8)
+                        .animation(
+                            .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                            value: isBreathing
+                        )
+                }
 
-            // White flash layer — briefly visible at the end of a blackout
-            Color.white
-                .ignoresSafeArea()
-                .opacity(flashOpacity)
+                // White flash layer — briefly visible at the end of a blackout
+                Color.white
+                    .ignoresSafeArea()
+                    .opacity(flashOpacity)
 
-            // Namaste confirmation shown after blackout fades out
-            if showingNamaste {
-                Text("🙏")
-                    .font(.system(size: 48))
-                    .transition(.opacity)
+                // Namaste confirmation shown after blackout fades out
+                if showingNamaste {
+                    Text("🙏")
+                        .font(.system(size: 48))
+                        .transition(.opacity)
+                }
             }
         }
         .opacity(opacity)
@@ -119,8 +126,11 @@ struct BlackoutView: View {
             // Start extended runtime session to prevent suspension
             startExtendedSession()
 
-            // Double chime at start — always plays, respects system mute via .ambient session
-            ChimePlayer.shared.playStartChime()
+            // Double chime at start + near-silent keep-alive tone for the blackout duration.
+            // Keeping AVAudioEngine active signals to watchOS that the app has an active audio
+            // session, which gives the process better scheduling priority and reduces timer
+            // throttling when the display dims. Respects system mute via .ambient session.
+            ChimePlayer.shared.playStartChimeWithKeepAlive(duration: duration)
 
             // Fade in
             withAnimation(.easeIn(duration: 1.0)) {
@@ -132,23 +142,23 @@ struct BlackoutView: View {
                 isBreathing = true
             }
 
-            // Auto-dismiss using Date-based checking to avoid watchOS timer throttling.
-            // A repeating 1s timer checks against the wall-clock target, ensuring
-            // the blackout doesn't overshoot even if timers are delayed by display dimming.
-            targetEndDate = Date().addingTimeInterval(duration)
-            dismissTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-                guard let target = targetEndDate else { return }
-                if Date() >= target {
-                    timer.invalidate()
+            // One-shot timer on a background queue for reliable end-of-blackout firing.
+            // DispatchSourceTimer is immune to main RunLoop throttling that occurs when
+            // watchOS dims the display — it fires on time regardless of display state.
+            let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInteractive))
+            timer.schedule(deadline: .now() + duration)
+            timer.setEventHandler { [self] in
+                DispatchQueue.main.async {
                     completedFullDuration = true
                     dismissBlackout()
                 }
             }
+            timer.resume()
+            dismissTimer = timer
         }
         .onDisappear {
-            dismissTimer?.invalidate()
+            dismissTimer?.cancel()
             dismissTimer = nil
-            targetEndDate = nil
             ChimePlayer.shared.stop()
             stopExtendedSession()
         }
@@ -166,9 +176,8 @@ struct BlackoutView: View {
         guard !isDismissing else { return }
         isDismissing = true
 
-        dismissTimer?.invalidate()
+        dismissTimer?.cancel()
         dismissTimer = nil
-        targetEndDate = nil
 
         // Stop breathing animation
         isBreathing = false
