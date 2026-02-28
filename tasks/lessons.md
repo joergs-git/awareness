@@ -1,0 +1,13 @@
+# Lessons Learned
+
+## [2026-02-28] — watchOS DispatchSourceTimer + main.async breaks end signals
+- **Mistake:** Replaced repeating `Timer.scheduledTimer` (main RunLoop) with one-shot `DispatchSourceTimer` (background queue) that dispatched to `DispatchQueue.main.async` for dismiss. This made end haptics WORSE — they didn't fire until user physically tapped the app icon.
+- **Root cause:** `DispatchQueue.main.async` from a background queue does NOT execute when the main RunLoop is throttled (display dimmed on watchOS). The block just sits queued. A repeating Timer at least catches up on wrist-raise.
+- **Rule:** Never replace a repeating main-thread timer with a one-shot background-to-main dispatch on watchOS. If you need background-queue reliability, fire the critical action (haptics) directly from the background queue — don't dispatch back to main.
+- **Applies to:** watchOS BlackoutView timer, any watchOS background queue → main thread pattern
+
+## [2026-02-28] — Audio keep-alive with .ambient session counterproductive on watchOS
+- **Mistake:** Added a near-silent AVAudioEngine tone with `.ambient` audio session category to keep the audio engine active during blackout, hoping it would improve process scheduling priority.
+- **Root cause:** `.ambient` audio sessions get deactivated when watchOS dims the display. Keeping AVAudioEngine running with a session that gets yanked makes things worse, not better.
+- **Rule:** Don't use `.ambient` AVAudioEngine keep-alive for watchOS display dimming mitigation. If audio-based keep-alive is needed, it would require `.playback` category (but that ignores mute — bad for a mindfulness app).
+- **Applies to:** watchOS ChimePlayer, any watchOS audio session management during display dim

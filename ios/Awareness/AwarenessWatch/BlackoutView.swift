@@ -50,11 +50,16 @@ struct BlackoutView: View {
     /// The randomized duration for this blackout instance
     @State private var duration: Double = 0
     @State private var opacity: Double = 0
-    /// Background-queue timer for reliable end-of-blackout firing.
-    /// Uses DispatchSourceTimer instead of Timer.scheduledTimer because the main RunLoop
-    /// gets throttled when watchOS dims the display — DispatchSource on a background queue
-    /// fires reliably regardless of display state.
-    @State private var dismissTimer: DispatchSourceTimer?
+    /// Main-thread repeating timer that checks wall-clock time for dismiss.
+    /// When watchOS dims the display the main RunLoop is throttled, but this timer
+    /// catches up immediately on wrist-raise thanks to the Date check.
+    @State private var dismissTimer: Timer?
+    /// Target wall-clock time when the blackout should end (immune to timer throttling)
+    @State private var targetEndDate: Date?
+    /// Background-queue timer that fires end haptics directly without depending on the
+    /// main RunLoop. Haptics via WKInterfaceDevice.play() may work even when the display
+    /// is dimmed — this gives the best chance of on-time haptic delivery.
+    @State private var endSignalTimer: DispatchSourceTimer?
     /// Tracks when the blackout started for HealthKit logging
     @State private var sessionStart: Date?
     /// Extended runtime session to keep the app alive during blackout
@@ -126,11 +131,8 @@ struct BlackoutView: View {
             // Start extended runtime session to prevent suspension
             startExtendedSession()
 
-            // Double chime at start + near-silent keep-alive tone for the blackout duration.
-            // Keeping AVAudioEngine active signals to watchOS that the app has an active audio
-            // session, which gives the process better scheduling priority and reduces timer
-            // throttling when the display dims. Respects system mute via .ambient session.
-            ChimePlayer.shared.playStartChimeWithKeepAlive(duration: duration)
+            // Double chime at start — always plays, respects system mute via .ambient session
+            ChimePlayer.shared.playStartChime()
 
             // Fade in
             withAnimation(.easeIn(duration: 1.0)) {
@@ -142,23 +144,45 @@ struct BlackoutView: View {
                 isBreathing = true
             }
 
-            // One-shot timer on a background queue for reliable end-of-blackout firing.
-            // DispatchSourceTimer is immune to main RunLoop throttling that occurs when
-            // watchOS dims the display — it fires on time regardless of display state.
-            let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInteractive))
-            timer.schedule(deadline: .now() + duration)
-            timer.setEventHandler { [self] in
-                DispatchQueue.main.async {
+            // Auto-dismiss using Date-based checking to handle watchOS timer throttling.
+            // A repeating 1s timer checks against the wall-clock target, ensuring
+            // the blackout catches up immediately on wrist-raise without overshooting.
+            targetEndDate = Date().addingTimeInterval(duration)
+            dismissTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+                guard let target = targetEndDate else { return }
+                if Date() >= target {
+                    timer.invalidate()
                     completedFullDuration = true
                     dismissBlackout()
                 }
             }
-            timer.resume()
-            dismissTimer = timer
+
+            // Background signal timer — fires end haptics directly from a background queue,
+            // bypassing the throttled main RunLoop entirely. WKInterfaceDevice.play() can
+            // deliver haptics even when the display is dimmed, giving the user tactile feedback
+            // at the correct time rather than waiting for wrist-raise.
+            let hapticEnabled = settings.hapticEndEnabled
+            let signalTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInteractive))
+            signalTimer.schedule(deadline: .now() + duration)
+            signalTimer.setEventHandler {
+                if hapticEnabled {
+                    // Fire haptics directly on background queue — no main thread dependency.
+                    // 2× directionUp pulses matching HapticPlayer.playEnd() pattern.
+                    WKInterfaceDevice.current().play(.directionUp)
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 0.3) {
+                        WKInterfaceDevice.current().play(.directionUp)
+                    }
+                }
+            }
+            signalTimer.resume()
+            endSignalTimer = signalTimer
         }
         .onDisappear {
-            dismissTimer?.cancel()
+            dismissTimer?.invalidate()
             dismissTimer = nil
+            targetEndDate = nil
+            endSignalTimer?.cancel()
+            endSignalTimer = nil
             ChimePlayer.shared.stop()
             stopExtendedSession()
         }
@@ -176,8 +200,11 @@ struct BlackoutView: View {
         guard !isDismissing else { return }
         isDismissing = true
 
-        dismissTimer?.cancel()
+        dismissTimer?.invalidate()
         dismissTimer = nil
+        targetEndDate = nil
+        endSignalTimer?.cancel()
+        endSignalTimer = nil
 
         // Stop breathing animation
         isBreathing = false
@@ -187,7 +214,8 @@ struct BlackoutView: View {
             ProgressTracker.shared.recordCompleted()
         }
 
-        // Haptic at end
+        // Haptic at end (may double-fire with background timer — acceptable,
+        // double haptic is better than none when display was dimmed)
         if settings.hapticEndEnabled {
             HapticPlayer.playEnd()
         }

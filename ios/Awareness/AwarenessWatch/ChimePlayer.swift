@@ -39,16 +39,12 @@ final class ChimePlayer {
         var totalDuration: Double { delayBefore + toneDuration }
     }
 
-    /// Start chime tones — played at the beginning of a blackout
-    private let chimeTones: [Tone] = [
+    private let tones: [Tone] = [
         Tone(frequency: 440.0, toneDuration: 0.3, delayBefore: 0.0,
              attackTime: 0.005, decayTime: 1.5, volume: 0.5),
         Tone(frequency: 660.0, toneDuration: 0.4, delayBefore: 0.15,
              attackTime: 0.005, decayTime: 1.2, volume: 0.5)
     ]
-
-    /// The active tone sequence — either chime tones or chime + keep-alive
-    private var tones: [Tone] = []
 
     private init() {}
 
@@ -58,41 +54,6 @@ final class ChimePlayer {
     /// Respects watchOS silent mode via `.ambient` audio session category.
     func playStartChime() {
         stop()
-
-        tones = chimeTones
-        currentSegmentIndex = 0
-        sampleIndex = 0
-        phase = 0.0
-
-        configureAudioSession()
-        setupEngine()
-
-        isPlaying = true
-
-        do {
-            try engine.start()
-        } catch {
-            print("ChimePlayer: failed to start engine — \(error)")
-            isPlaying = false
-        }
-    }
-
-    /// Play the start chime followed by a near-silent sustained tone for the blackout duration.
-    /// Keeping the AVAudioEngine active signals to watchOS that the app has an active audio
-    /// session, which gives the process better scheduling priority and helps prevent aggressive
-    /// timer throttling when the display dims.
-    func playStartChimeWithKeepAlive(duration: TimeInterval) {
-        stop()
-
-        // Chime tones total ~0.85s. The keep-alive starts after, filling the remaining duration.
-        let chimeDuration = chimeTones.reduce(0.0) { $0 + $1.totalDuration }
-        let keepAliveDuration = max(1.0, duration - chimeDuration)
-
-        // Build tone sequence: start chime + near-silent keep-alive tone
-        tones = chimeTones + [
-            Tone(frequency: 1.0, toneDuration: keepAliveDuration, delayBefore: 0.0,
-                 attackTime: 0.01, decayTime: 0.0, volume: 0.001)
-        ]
 
         currentSegmentIndex = 0
         sampleIndex = 0
