@@ -156,7 +156,8 @@ struct BlackoutView: View {
         dismissTimer?.invalidate()
         dismissTimer = nil
         targetEndDate = nil
-        AlarmSessionManager.shared.cancelAlarm()
+        // Don't cancel alarm here — if notifyUser is delivering haptics, let it continue
+        // through the fade-out animation. The alarm is cleaned up in onDisappear.
         cancelEndSignalNotification()
 
         // Stop breathing animation

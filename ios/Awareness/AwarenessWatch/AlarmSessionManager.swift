@@ -15,7 +15,7 @@ import WatchKit
 /// **Why alarm mode instead of mindfulness:**
 /// `notifyUser(hapticType:repeatHandler:)` is the ONLY API that delivers haptic feedback
 /// when the wrist is down and display is off. It requires the alarm background mode
-/// (`WKBackgroundModes: smart-alarm` in Info.plist) and a session scheduled with `start(at:)`.
+/// (`WKBackgroundModes: alarm` in Info.plist) and a session scheduled with `start(at:)`.
 /// Mindfulness sessions (started with `start()`) cannot use this API — all other haptic
 /// methods (WKInterfaceDevice.play(), local notifications routed through willPresent) are
 /// throttled when the display dims.
@@ -73,17 +73,15 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
         // If the app is not active (display off, wrist down), watchOS shows a system alarm
         // UI with the haptic. The haptic repeats until the user taps "Stop" or the session
         // is invalidated by the app.
+        //
+        // IMPORTANT: Do NOT post .dismissBlackout or call cancelAlarm() here!
+        // Doing so would invalidate the session on the next run loop iteration,
+        // killing the notifyUser haptic before it plays even one pulse.
+        // The Timer in BlackoutView handles the visual dismiss on wrist-raise.
+        // The alarm's only job is delivering the haptic signal.
         extendedRuntimeSession.notifyUser(hapticType: .notification) { _ in
             // Repeat every 10 seconds — gentle nudge until user responds
             return 10.0
-        }
-
-        // Mark the blackout as complete and trigger dismiss.
-        // This dispatch may be delayed if the main RunLoop is throttled (display off),
-        // but that's fine — the haptic is already playing via notifyUser above.
-        // On wrist-raise, the main thread processes this and the blackout dismisses.
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .dismissBlackout, object: nil)
         }
     }
 
@@ -123,11 +121,9 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
     func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
         debugStatus = "willExpire"
         print("AlarmSession: willExpire")
-
-        // Session is about to expire — ensure blackout gets dismissed
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .dismissBlackout, object: nil)
-        }
+        // No action needed — the Timer in BlackoutView handles dismiss on wrist-raise.
+        // Don't invalidate the session here; let it expire naturally so notifyUser
+        // can continue delivering haptics until the very end.
     }
 
     // MARK: - Helpers

@@ -29,3 +29,9 @@
 - **Root cause:** Apple's header explicitly states: "This method can only be called on a WKExtendedRuntimeSession that was scheduled with `startAtDate:` and currently has a state of `.running`. If it is called outside that time, it will be ignored." And `startAtDate:` requires the alarm background mode.
 - **Rule:** `notifyUser(hapticType:repeatHandler:)` is the ONLY API that delivers haptic when the wrist is down and display is off. It requires: (1) `alarm` in `WKBackgroundModes`, (2) session created via `start(at:)` (not `start()`), (3) called when session state is `.running`.
 - **Applies to:** watchOS timed haptic delivery, any watchOS alarm/timer signal
+
+## [2026-02-28] — WKBackgroundModes plist values vs Xcode UI labels
+- **Mistake:** Used `smart-alarm` as the `WKBackgroundModes` plist value because the Xcode UI shows "Smart Alarm" as the capability label. This caused "Invalid Info.plist value" on device installation.
+- **Root cause:** Xcode UI labels don't match plist string values. The correct mapping: "Self Care" → `self-care`, "Mindfulness" → `mindfulness`, "Smart Alarm" → `alarm`, "Physical Therapy" → `physical-therapy`, "Workout processing" → `workout-processing`.
+- **Rule:** The correct `WKBackgroundModes` value for alarm sessions is `alarm`, NOT `smart-alarm`. Also: `INFOPLIST_KEY_WKBackgroundModes` build setting does NOT work for watchOS — it silently drops ALL values. Must use a physical `Info.plist` file with `INFOPLIST_FILE` build setting.
+- **Applies to:** watchOS background mode configuration, any watchOS extended runtime session setup
