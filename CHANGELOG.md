@@ -4,6 +4,16 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v2.14
+
+### watchOS: 3-signal audio/haptic system
+- **New reminder haptic** — 2× `.failure` pulses when a notification arrives, nudging the user to pay attention (opt-in via "Reminder haptic" toggle)
+- **Synthesized start chime** — double chime (440Hz → 660Hz) generated in real-time via `AVAudioEngine`; always plays, respects watchOS silent/mute mode (`.ambient` audio session)
+- **New end haptic** — 2× `.directionUp` pulses (changed from 4× `.notification`) for an uplifting "all done" signal
+- Settings migration: `hapticStartEnabled` auto-migrates to `reminderHapticEnabled`
+
+---
+
 ## v2.13
 
 ### Mindful terminology (all platforms)

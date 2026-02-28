@@ -104,7 +104,7 @@ Requires watchOS 10+, Xcode 15+.
 - **No third-party dependencies** — only Apple frameworks (SwiftUI, WatchKit, UserNotifications, WatchConnectivity, HealthKit, WidgetKit)
 - Uses **local notifications** (same 30-notification architecture as iOS) with default system sound
 - Blackout presented as `fullScreenCover` with `WKExtendedRuntimeSession` + `ExtendedSessionDelegate` + `WKBackgroundModes: mindfulness` to keep the app alive
-- Haptic feedback via `WKInterfaceDevice.current().play()` — gentle 3× `.success` pulses at begin, stronger 4× `.notification` pulses at end
+- **3-signal audio/haptic system**: reminder haptic (2× `.failure`) on notification arrival, synthesized double chime (440Hz → 660Hz via `AVAudioEngine`) at blackout start, end haptic (2× `.directionUp`) at blackout end
 - Settings stored in `UserDefaults`, synced bidirectionally with companion iPhone via `WCSession.updateApplicationContext()`
 - Shared source files via target membership: `BlackoutVisualType`, `TimeWindow`, `SettingsManager`, `HealthKitManager`, `UpdateChecker`, `ProgressTracker`
 - WidgetKit complication extension for watch face (accessoryCircular, accessoryRectangular, accessoryInline)
@@ -248,7 +248,8 @@ ios/Awareness/AwarenessWatch/
 ├── ContentView.swift                   # Status, next blackout, test, snooze, settings link
 ├── BlackoutView.swift                  # Full-screen blackout with WKExtendedRuntimeSession
 ├── SettingsView.swift                  # Compact Form: hours, intervals, duration, haptics, health
-├── HapticPlayer.swift                  # WKInterfaceDevice haptic wrapper (.success start / .notification end)
+├── HapticPlayer.swift                  # WKInterfaceDevice haptic wrapper (reminder .failure / end .directionUp)
+├── ChimePlayer.swift                   # AVAudioEngine synthesized double chime (440Hz → 660Hz) for blackout start
 ├── NotificationScheduler.swift         # 30 pre-scheduled notifications, no image attachment
 ├── ProgressView.swift                  # Compact progress display (donut, today stats, 7-day chart)
 ├── WatchConnectivityManager.swift      # watchOS-side WCSession delegate for iPhone sync
@@ -345,13 +346,15 @@ ios/Awareness/AwarenessWatch/
 | Blackout | `fullScreenCover` presenting `BlackoutView` with `WKExtendedRuntimeSession` + `ExtendedSessionDelegate` + `WKBackgroundModes: mindfulness` to prevent suspension |
 | Breathing animation | Text mode: pulsating scale (0.94↔1.08) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle; keeps display active on Always-On Display watches |
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
-| Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; records trigger for progress; user must tap to start blackout |
-| Background notification | User taps notification → `didReceive response:` → records trigger → posts `.showBlackout` notification → shows blackout |
+| Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; records trigger for progress; plays reminder haptic; user must tap to start blackout |
+| Background notification | User taps notification → `didReceive response:` → records trigger → plays reminder haptic → posts `.showBlackout` notification → shows blackout |
 | Coordinated scheduling | iOS is master scheduler; `applyCoordinatedSchedule()` uses iOS fire dates; falls back to random only when iOS dates unavailable or all in the past |
 | Progress sync | Same ProgressTracker sync methods via target membership |
 | Trigger tracking | Same architecture as iOS — `recordNotificationTriggered` + `countDeliveredNotifications` + dedup Set |
 | Namaste confirmation | namaste shown for 1.5s after blackout fade-out before dismissing |
-| Haptics | `WKInterfaceDevice.current().play(.success)` 3× at begin (gentle), `.play(.notification)` 4× at end (wake-up); opt-in via `hapticStartEnabled` / `hapticEndEnabled` |
+| Reminder haptic | `HapticPlayer.playReminder()` — 2× `.failure` pulses on notification arrival; opt-in via `reminderHapticEnabled` |
+| Start chime | `ChimePlayer.shared.playStartChime()` — synthesized 440Hz → 660Hz via `AVAudioEngine` + `AVAudioSourceNode`; `.ambient` audio session respects silent mode; always plays (no toggle) |
+| End haptic | `HapticPlayer.playEnd()` — 2× `.directionUp` pulses; opt-in via `hapticEndEnabled` |
 | Settings storage | `UserDefaults.standard` with `register(defaults:)` (same as iOS/macOS) |
 | Settings sync | `WCSession.updateApplicationContext()` — bidirectional, last-write-wins, `isApplyingRemoteContext` guard prevents sync loops |
 | Snooze | Removes all pending notifications; syncs snooze state to companion iPhone |
@@ -375,7 +378,8 @@ ios/Awareness/AwarenessWatch/
 - **Apple Health** (iOS/watchOS) — log each blackout as Mindful Minutes in Apple Health (default: off)
 - **Vibration** (iOS only) — haptic feedback at start (heavy impact) and end (success notification) of blackout (default: off)
 - **End flash** (iOS/watchOS) — 1-second white screen blink at end of blackout, visible through closed eyelids (default: on)
-- **Start haptic** (watchOS only) — Taptic Engine feedback when blackout begins (default: on)
+- **Reminder haptic** (watchOS only) — Taptic Engine nudge when a notification arrives (default: on)
+- **Start chime** (watchOS only) — synthesized double chime (440Hz → 660Hz) when blackout begins; always plays, respects system mute (no toggle)
 - **End haptic** (watchOS only) — Taptic Engine feedback when blackout ends (default: on)
 - **Mindful Moments** — view today's discipline donut, lifetime stats, and 14-day (macOS/iOS) or 7-day (watchOS) bar chart history; accessible from menu bar (macOS), navigation (iOS/watchOS), or tray menu (Windows)
 
@@ -438,7 +442,9 @@ ios/Awareness/AwarenessWatch/
 - `project.pbxproj` uses A3/B3/C3/D3/E3/F3/G3 hex IDs for watch target, A4/B4/C4/D4/E4/F4 for widget extension (iOS uses A1/B1, macOS uses A2/B2 — no collision)
 - Shared files via target membership: `BlackoutVisualType.swift`, `TimeWindow.swift`, `SettingsManager.swift`, `HealthKitManager.swift`, `UpdateChecker.swift`, `ProgressTracker.swift`
 - `SettingsManager.swift` uses `#if os(watchOS)` / `#if !os(watchOS)` guards for platform-specific settings (haptics on watch, gong/vibration/image/video on iOS; `endFlashEnabled` exists in both blocks)
-- Watch-specific settings: `hapticStartEnabled` (default: true), `hapticEndEnabled` (default: true)
+- Watch-specific settings: `reminderHapticEnabled` (default: true), `hapticEndEnabled` (default: true)
+- Settings migration: old `hapticStartEnabled` key auto-migrates to `reminderHapticEnabled` on first launch
+- `ChimePlayer.shared` uses `AVAudioEngine` + `AVAudioSourceNode` for real-time synthesis; `.ambient` audio session respects watchOS silent mode; `stop()` called in `onDisappear` to clean up
 - `WKExtendedRuntimeSession` with `ExtendedSessionDelegate` keeps the app alive during blackouts (up to 1 hour). Requires `WKBackgroundModes: mindfulness` in Info.plist (set via `INFOPLIST_KEY_WKBackgroundModes` build setting). The delegate detects session expiration and triggers dismiss so end haptics still fire. `sessionDidStart` flag prevents instant dismissal when the session fails to start (e.g. on simulator) — only fires `onExpiration` if the session was previously running.
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` flag + `lastRemoteContextDate` (2s cooldown) prevent echo loops and debounce-timing bypasses.
