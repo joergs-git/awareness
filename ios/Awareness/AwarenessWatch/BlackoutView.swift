@@ -2,47 +2,16 @@ import SwiftUI
 import WatchKit
 import UserNotifications
 
-/// Delegate for WKExtendedRuntimeSession lifecycle management.
-/// Detects session expiration so the blackout can end gracefully instead of
-/// silently stalling with no haptic feedback.
-class ExtendedSessionDelegate: NSObject, WKExtendedRuntimeSessionDelegate {
-
-    var onExpiration: (() -> Void)?
-
-    /// Tracks whether the session actually started running.
-    /// If the session fails to start (e.g. on simulator, or configuration issue),
-    /// didInvalidate fires immediately — we must NOT dismiss in that case.
-    private var sessionDidStart = false
-
-    func extendedRuntimeSessionDidStart(_ session: WKExtendedRuntimeSession) {
-        sessionDidStart = true
-    }
-
-    func extendedRuntimeSessionWillExpire(_ session: WKExtendedRuntimeSession) {
-        // Session about to expire — trigger dismiss so end haptics still fire
-        DispatchQueue.main.async { [weak self] in
-            self?.onExpiration?()
-        }
-    }
-
-    func extendedRuntimeSession(
-        _ session: WKExtendedRuntimeSession,
-        didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
-        error: Error?
-    ) {
-        // Only dismiss if the session was previously running — startup failures
-        // should not end the blackout (the timer handles dismissal regardless)
-        guard sessionDidStart else { return }
-        DispatchQueue.main.async { [weak self] in
-            self?.onExpiration?()
-        }
-    }
-}
-
 /// Full-screen blackout view for Apple Watch.
-/// Shows plain black or text content with a gentle breathing animation,
-/// uses haptic feedback instead of audio, and keeps the app alive with
-/// a WKExtendedRuntimeSession during the blackout.
+/// Shows plain black or text content with a gentle breathing animation.
+///
+/// **Display dimming strategy:**
+/// WKExtendedRuntimeSession is intentionally NOT used. While it keeps the process alive,
+/// it also keeps the app in the "foreground" state — which means notifications are routed
+/// through willPresent (main thread, throttled when display dims) instead of being delivered
+/// by the system. Without the session, watchOS suspends the app when the display dims, and
+/// the end-signal notification fires at the system level with haptic feedback. The app
+/// resumes on wrist-raise and the Timer catches up instantly via Date check.
 struct BlackoutView: View {
 
     @ObservedObject var settings = SettingsManager.shared
@@ -52,17 +21,13 @@ struct BlackoutView: View {
     @State private var duration: Double = 0
     @State private var opacity: Double = 0
     /// Main-thread repeating timer that checks wall-clock time for dismiss.
-    /// When watchOS dims the display the main RunLoop is throttled, but this timer
-    /// catches up immediately on wrist-raise thanks to the Date check.
+    /// When the app is suspended (display dimmed), this timer is frozen. On wrist-raise
+    /// the app resumes and the timer fires immediately, catching up via the Date check.
     @State private var dismissTimer: Timer?
     /// Target wall-clock time when the blackout should end (immune to timer throttling)
     @State private var targetEndDate: Date?
     /// Tracks when the blackout started for HealthKit logging
     @State private var sessionStart: Date?
-    /// Extended runtime session to keep the app alive during blackout
-    @State private var extendedSession: WKExtendedRuntimeSession?
-    /// Delegate for session lifecycle (must be retained alongside the session)
-    @State private var sessionDelegate: ExtendedSessionDelegate?
     /// Opacity of the white end-of-blackout flash layer
     @State private var flashOpacity: Double = 0
     /// Whether the blackout ran its full duration (not dismissed early)
@@ -83,8 +48,6 @@ struct BlackoutView: View {
                 Color.black.ignoresSafeArea()
 
                 // Breathing content — keeps the display active and provides a meditation focus.
-                // The continuous animation signals to watchOS that the view is dynamic,
-                // which helps prevent aggressive display dimming on Always-On Display watches.
                 if settings.visualType == .text {
                     Text(settings.customText)
                         .font(.system(size: 20, weight: .light))
@@ -125,9 +88,6 @@ struct BlackoutView: View {
             sessionStart = Date()
             duration = settings.randomBlackoutDuration()
 
-            // Start extended runtime session to prevent suspension
-            startExtendedSession()
-
             // Double chime at start — always plays, respects system mute via .ambient session
             ChimePlayer.shared.playStartChime()
 
@@ -141,9 +101,9 @@ struct BlackoutView: View {
                 isBreathing = true
             }
 
-            // Auto-dismiss using Date-based checking to handle watchOS timer throttling.
-            // A repeating 1s timer checks against the wall-clock target, ensuring
-            // the blackout catches up immediately on wrist-raise without overshooting.
+            // Auto-dismiss using Date-based checking. When the app is suspended (display dims),
+            // this timer is frozen. On wrist-raise the app resumes and the timer fires
+            // immediately, catching up via the Date comparison.
             targetEndDate = Date().addingTimeInterval(duration)
             dismissTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
                 guard let target = targetEndDate else { return }
@@ -155,9 +115,10 @@ struct BlackoutView: View {
             }
 
             // Schedule a local notification as the end-of-blackout signal.
-            // This is the ONLY reliable way to deliver haptic feedback when the display
-            // is dimmed — the OS delivers notification sound/haptic at the system level,
-            // completely independent of app RunLoop throttling or display state.
+            // Without WKExtendedRuntimeSession, watchOS suspends the app when the display
+            // dims. The notification is then delivered by the SYSTEM (not willPresent) with
+            // full haptic feedback, regardless of app state. This is the only reliable way
+            // to deliver a timed signal on watchOS when the display is off.
             scheduleEndSignalNotification(after: duration)
         }
         .onDisappear {
@@ -166,10 +127,9 @@ struct BlackoutView: View {
             targetEndDate = nil
             cancelEndSignalNotification()
             ChimePlayer.shared.stop()
-            stopExtendedSession()
         }
         // Handle end-of-blackout notification — posted by the notification delegate
-        // when the system delivers the end-signal notification
+        // when the system delivers the end-signal notification (if app is still in foreground)
         .onReceive(NotificationCenter.default.publisher(for: .dismissBlackout)) { _ in
             completedFullDuration = true
             dismissBlackout()
@@ -241,7 +201,6 @@ struct BlackoutView: View {
                         opacity = 0
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        stopExtendedSession()
                         isPresented = false
                     }
                 }
@@ -252,8 +211,9 @@ struct BlackoutView: View {
     // MARK: - End Signal Notification
 
     /// Schedule a local notification that fires when the blackout should end.
-    /// The OS delivers the sound/haptic at the system level — this is the only
-    /// mechanism on watchOS that reliably fires when the display is dimmed.
+    /// Without WKExtendedRuntimeSession, the app is suspended when the display dims,
+    /// so this notification is delivered by the OS at the system level — with full
+    /// haptic feedback regardless of app state.
     private func scheduleEndSignalNotification(after interval: TimeInterval) {
         let content = UNMutableNotificationContent()
         content.body = String(localized: "Blackout complete")
@@ -275,34 +235,5 @@ struct BlackoutView: View {
         UNUserNotificationCenter.current().removeDeliveredNotifications(
             withIdentifiers: [NotificationScheduler.endSignalIdentifier]
         )
-    }
-
-    // MARK: - Extended Runtime Session
-
-    /// Start a mindfulness extended runtime session to keep the app alive.
-    /// Sets a delegate to detect session expiration — without a delegate,
-    /// the session can silently expire and haptics won't fire at the end.
-    private func startExtendedSession() {
-        let delegate = ExtendedSessionDelegate()
-        delegate.onExpiration = { [self] in
-            // Session expired — trigger dismiss so end haptics still fire
-            if !isDismissing {
-                completedFullDuration = true
-                dismissBlackout()
-            }
-        }
-        sessionDelegate = delegate
-
-        let session = WKExtendedRuntimeSession()
-        session.delegate = delegate
-        session.start()
-        extendedSession = session
-    }
-
-    /// Stop the extended runtime session when the blackout ends
-    private func stopExtendedSession() {
-        extendedSession?.invalidate()
-        extendedSession = nil
-        sessionDelegate = nil
     }
 }
