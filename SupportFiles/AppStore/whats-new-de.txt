@@ -1,5 +1,5 @@
-Neu in Version 2.13:
+Neu in Version 2.14:
 
-- Achtsame Begriffe: „Fortschritt" umbenannt in „Achtsamkeitsmomente" und „Erfolgsquote" in „Disziplin" auf allen Plattformen
-- iOS-Header neu gestaltet: spirituelles Layout mit „Achtsamkeit im Tun" und „In der Stille ruht die Kraft"
-- HealthKit-Aufforderung erscheint jetzt nur noch einmal beim ersten Start
+- watchOS: 3-Signal Audio-/Haptik-System — Erinnerungs-Haptik bei Benachrichtigung, synthetisierter Doppelklang bei Blackout-Start, neue End-Haptik
+- Start-Klang (440Hz → 660Hz) wird in Echtzeit erzeugt; respektiert den Lautlos-Modus
+- Neuer „Erinnerungs-Haptik"-Schalter in den watchOS-Einstellungen
