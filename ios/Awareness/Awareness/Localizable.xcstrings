@@ -927,12 +927,12 @@
         }
       }
     },
-    "Start haptic" : {
+    "Reminder haptic" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start-Haptik"
+            "value" : "Erinnerungs-Haptik"
           }
         }
       }

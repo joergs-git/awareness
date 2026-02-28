@@ -76,7 +76,7 @@ struct SettingsView: View {
 
             // MARK: - Feedback
             Section(String(localized: "Feedback")) {
-                Toggle(String(localized: "Start haptic"), isOn: $settings.hapticStartEnabled)
+                Toggle(String(localized: "Reminder haptic"), isOn: $settings.reminderHapticEnabled)
                 Toggle(String(localized: "End haptic"), isOn: $settings.hapticEndEnabled)
                 Toggle(String(localized: "End flash"), isOn: $settings.endFlashEnabled)
             }

@@ -48,7 +48,8 @@ class WatchAppDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCente
 
     /// When a notification arrives while the app is in the foreground,
     /// show the banner so the user can actively tap to start a blackout.
-    /// Also records this notification as triggered for progress tracking.
+    /// Also records this notification as triggered for progress tracking
+    /// and plays a reminder haptic to nudge the user.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
@@ -56,6 +57,11 @@ class WatchAppDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCente
     ) {
         // Record as triggered — the notification arrived regardless of user response
         NotificationScheduler.shared.recordNotificationTriggered(notification.request.identifier)
+
+        // Reminder haptic — a firm nudge to pay attention
+        if SettingsManager.shared.reminderHapticEnabled {
+            HapticPlayer.playReminder()
+        }
 
         completionHandler([.banner, .sound])
         NotificationScheduler.shared.refreshOnForeground()
@@ -76,6 +82,11 @@ class WatchAppDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCente
         // Record as triggered — covers background notifications the user tapped
         // (foreground ones were already counted in willPresent, dedup prevents double-counting)
         NotificationScheduler.shared.recordNotificationTriggered(response.notification.request.identifier)
+
+        // Reminder haptic — a firm nudge when the user taps a notification
+        if SettingsManager.shared.reminderHapticEnabled {
+            HapticPlayer.playReminder()
+        }
 
         switch response.actionIdentifier {
         case NotificationScheduler.actionSnooze:

@@ -36,9 +36,11 @@ final class SettingsManager: ObservableObject {
         #endif
 
         #if os(watchOS)
-        static let hapticStartEnabled   = "hapticStartEnabled"
-        static let hapticEndEnabled     = "hapticEndEnabled"
-        static let endFlashEnabled      = "endFlashEnabled"
+        static let reminderHapticEnabled = "reminderHapticEnabled"
+        static let hapticEndEnabled      = "hapticEndEnabled"
+        static let endFlashEnabled       = "endFlashEnabled"
+        // Legacy key for migration from hapticStartEnabled → reminderHapticEnabled
+        static let hapticStartEnabled    = "hapticStartEnabled"
         #endif
     }
 
@@ -69,9 +71,9 @@ final class SettingsManager: ObservableObject {
         #endif
 
         #if os(watchOS)
-        values[Keys.hapticStartEnabled] = true
-        values[Keys.hapticEndEnabled]   = true
-        values[Keys.endFlashEnabled]    = true
+        values[Keys.reminderHapticEnabled] = true
+        values[Keys.hapticEndEnabled]      = true
+        values[Keys.endFlashEnabled]       = true
         #endif
 
         return values
@@ -196,9 +198,9 @@ final class SettingsManager: ObservableObject {
     // MARK: - Published Properties (watchOS only)
 
     #if os(watchOS)
-    /// Whether to play haptic at start of blackout
-    @Published var hapticStartEnabled: Bool {
-        didSet { defaults.set(hapticStartEnabled, forKey: Keys.hapticStartEnabled) }
+    /// Whether to play a haptic when a notification arrives (reminder nudge)
+    @Published var reminderHapticEnabled: Bool {
+        didSet { defaults.set(reminderHapticEnabled, forKey: Keys.reminderHapticEnabled) }
     }
 
     /// Whether to play haptic at end of blackout
@@ -331,9 +333,17 @@ final class SettingsManager: ObservableObject {
         #endif
 
         #if os(watchOS)
-        hapticStartEnabled  = defaults.bool(forKey: Keys.hapticStartEnabled)
-        hapticEndEnabled    = defaults.bool(forKey: Keys.hapticEndEnabled)
-        endFlashEnabled     = defaults.bool(forKey: Keys.endFlashEnabled)
+        // Migrate from old hapticStartEnabled → reminderHapticEnabled
+        if defaults.object(forKey: Keys.hapticStartEnabled) != nil
+            && defaults.object(forKey: Keys.reminderHapticEnabled) == nil {
+            let oldValue = defaults.bool(forKey: Keys.hapticStartEnabled)
+            defaults.set(oldValue, forKey: Keys.reminderHapticEnabled)
+            defaults.removeObject(forKey: Keys.hapticStartEnabled)
+        }
+
+        reminderHapticEnabled = defaults.bool(forKey: Keys.reminderHapticEnabled)
+        hapticEndEnabled      = defaults.bool(forKey: Keys.hapticEndEnabled)
+        endFlashEnabled       = defaults.bool(forKey: Keys.endFlashEnabled)
         #endif
     }
 }

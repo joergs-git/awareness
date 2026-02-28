@@ -119,10 +119,8 @@ struct BlackoutView: View {
             // Start extended runtime session to prevent suspension
             startExtendedSession()
 
-            // Haptic at start
-            if settings.hapticStartEnabled {
-                HapticPlayer.playStart()
-            }
+            // Double chime at start — always plays, respects system mute via .ambient session
+            ChimePlayer.shared.playStartChime()
 
             // Fade in
             withAnimation(.easeIn(duration: 1.0)) {
@@ -151,6 +149,7 @@ struct BlackoutView: View {
             dismissTimer?.invalidate()
             dismissTimer = nil
             targetEndDate = nil
+            ChimePlayer.shared.stop()
             stopExtendedSession()
         }
         // Allow tap to dismiss unless handcuffs mode is on

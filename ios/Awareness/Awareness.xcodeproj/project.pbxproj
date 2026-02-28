@@ -51,6 +51,7 @@
 		A10018 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10018 /* ProgressView.swift */; };
 		A30017 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
 		A30018 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30013 /* ProgressView.swift */; };
+		A30019 /* ChimePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30014 /* ChimePlayer.swift */; };
 		A40009 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
 		B1F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
 		B3F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
@@ -135,6 +136,7 @@
 		B10017 /* ProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTracker.swift; sourceTree = "<group>"; };
 		B10018 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		B30013 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		B30014 /* ChimePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChimePlayer.swift; sourceTree = "<group>"; };
 		A1F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -292,6 +294,7 @@
 				B30003 /* BlackoutView.swift */,
 				B30004 /* SettingsView.swift */,
 				B30005 /* HapticPlayer.swift */,
+				B30014 /* ChimePlayer.swift */,
 				B30006 /* NotificationScheduler.swift */,
 				B30007 /* WatchConnectivityManager.swift */,
 				B30013 /* ProgressView.swift */,
@@ -483,6 +486,7 @@
 				A30003 /* BlackoutView.swift in Sources */,
 				A30004 /* SettingsView.swift in Sources */,
 				A30005 /* HapticPlayer.swift in Sources */,
+				A30019 /* ChimePlayer.swift in Sources */,
 				A30006 /* NotificationScheduler.swift in Sources */,
 				A30007 /* WatchConnectivityManager.swift in Sources */,
 				A30008 /* BlackoutVisualType.swift in Sources */,
