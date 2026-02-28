@@ -12,6 +12,14 @@ All notable changes to Awareness reminder, from initial release to the current v
 - **New end haptic** — 2× `.directionUp` pulses (changed from 4× `.notification`) for an uplifting "all done" signal
 - Settings migration: `hapticStartEnabled` auto-migrates to `reminderHapticEnabled`
 
+### macOS: Startclick confirmation
+- Optional **"Ready to breathe?"** prompt before each blackout — decline to skip without affecting your statistics
+- New toggle in Settings → Behavior (default: off)
+
+### macOS: Auto-resume on wake
+- Returning from **sleep or screen lock** while snoozed now **auto-clears the snooze** and restarts the scheduler
+- No more manually clicking "Resume" after waking up your Mac
+
 ---
 
 ## v2.13

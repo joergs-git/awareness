@@ -135,8 +135,8 @@ Sources/Awareness/
 │   └── StatusBarController.swift       # NSStatusItem, menu, snooze, about
 ├── Blackout/
 │   ├── BlackoutScheduler.swift         # Random timer, active-window + media checks
-│   ├── BlackoutWindowController.swift  # Full-screen overlay per monitor, fade, keystroke suppression
-│   └── BlackoutContentView.swift       # SwiftUI view (black/text/image/video)
+│   ├── BlackoutWindowController.swift  # Full-screen overlay per monitor, fade, keystroke suppression, startclick confirmation
+│   └── BlackoutContentView.swift       # SwiftUI view (black/text/image/video) + startclick confirmation view
 ├── Detection/
 │   ├── MediaUsageDetector.swift        # AVCaptureDevice + CoreAudio queries
 │   └── SystemStateDetector.swift       # Sleep/wake, display, lock, screensaver detection
@@ -274,7 +274,9 @@ ios/Awareness/AwarenessWatch/
 | Mic detection | CoreAudio `kAudioDevicePropertyDeviceIsRunningSomewhere` on input devices |
 | Settings storage | `UserDefaults.standard` with `register(defaults:)` for initial values |
 | File access (sandbox) | Security-scoped bookmarks for user-selected images/videos; raw path fallback outside sandbox |
+| Startclick confirmation | Optional "Ready to breathe?" prompt before blackout; `BlackoutConfirmationView` in `BlackoutContentView.swift`; `BlackoutWindowController` shows confirmation phase, then transitions to actual blackout on accept; decline skips without affecting stats; `startclickConfirmation` setting (default: off) |
 | Snooze | `snoozeUntil: Date?` in UserDefaults; scheduler checks before firing; auto-resumes on expiry |
+| Auto-resume on wake | `SystemStateDetector.onSystemDidBecomeActive` clears snooze and restarts scheduler when returning from sleep/lock while snoozed |
 | Fade animation | `NSAnimationContext` with 2s duration and easing curves |
 | Launch at Login | `SMAppService.mainApp` (macOS 13+) |
 | Update checker | `URLSession` queries GitHub releases API once on startup; skipped in sandbox (App Store handles updates) |
@@ -374,6 +376,7 @@ ios/Awareness/AwarenessWatch/
 - **Start gong** — play a higher-pitched sound when blackout begins (default: on)
 - **End gong** — play a deeper sound when blackout ends (default: on)
 - **Handcuffs mode** — if on, user cannot dismiss blackout early (default: off)
+- **Startclick confirmation** (macOS only) — shows "Ready to breathe?" before each blackout; decline to skip without affecting statistics (default: off)
 - **Snooze** — pause for 10/20/30/60/120 minutes or indefinitely
 - **Apple Health** (iOS/watchOS) — log each blackout as Mindful Minutes in Apple Health (default: off)
 - **Vibration** (iOS only) — haptic feedback at start (heavy impact) and end (success notification) of blackout (default: off)
@@ -398,6 +401,8 @@ ios/Awareness/AwarenessWatch/
 - Xcode project uses A2/B2/C2/D2/E2/F2 hex IDs in `project.pbxproj` (iOS project uses A1/B1 series — no collision)
 - **Mindful Moments (progress tracking)**: `ProgressTracker.shared` persists daily stats (triggered/completed counts, keyed by `yyyy-MM-dd`) in `UserDefaults`. `ProgressView` renders a donut chart (labeled "Discipline"), today/lifetime stats, and a 14-day bar chart. Opened from the menu bar ("Mindful Moments...") via `ProgressWindowController`.
 - **Localization**: `Localizable.xcstrings` (string catalog) in `Resources/` with EN (development language) and DE translations. Uses `String(localized:)` throughout UI code.
+- **Startclick confirmation**: `startclickConfirmation` setting (Bool, default false). `BlackoutWindowController` enters a confirmation phase before the actual blackout — `BlackoutConfirmationView` shows "Ready to breathe?" with Yes/No buttons. Accepting transitions to the normal blackout; declining dismisses without counting as completed or triggered. Confirmation windows use the same multi-screen overlay approach as regular blackouts.
+- **Auto-resume on wake**: `SystemStateDetector.onSystemDidBecomeActive` callback in `AppDelegate` checks if snoozed or stopped — if so, clears snooze, restarts scheduler, and rebuilds menu. Otherwise just reschedules with a fresh random delay.
 
 ### Windows
 
