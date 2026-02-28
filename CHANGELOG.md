@@ -6,6 +6,11 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ## v2.14
 
+### watchOS: Blackout display & end-signal reliability
+- **Reliable end signals** — replaced main RunLoop `Timer` with `DispatchSourceTimer` on a background queue, so end haptics fire on time even when the display dims
+- **Extended display-on time** — breathing animation wrapped in `TimelineView(.animation)` to signal continuous rendering need to watchOS
+- **Audio keep-alive** — near-silent tone keeps `AVAudioEngine` active during blackout, giving the process better scheduling priority
+
 ### watchOS: 3-signal audio/haptic system
 - **New reminder haptic** — 2× `.failure` pulses when a notification arrives, nudging the user to pay attention (opt-in via "Reminder haptic" toggle)
 - **Synthesized start chime** — double chime (440Hz → 660Hz) generated in real-time via `AVAudioEngine`; always plays, respects watchOS silent/mute mode (`.ambient` audio session)
