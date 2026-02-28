@@ -1,5 +1,6 @@
 import SwiftUI
 import WatchKit
+import UserNotifications
 
 /// Delegate for WKExtendedRuntimeSession lifecycle management.
 /// Detects session expiration so the blackout can end gracefully instead of
@@ -56,10 +57,6 @@ struct BlackoutView: View {
     @State private var dismissTimer: Timer?
     /// Target wall-clock time when the blackout should end (immune to timer throttling)
     @State private var targetEndDate: Date?
-    /// Background-queue timer that fires end haptics directly without depending on the
-    /// main RunLoop. Haptics via WKInterfaceDevice.play() may work even when the display
-    /// is dimmed — this gives the best chance of on-time haptic delivery.
-    @State private var endSignalTimer: DispatchSourceTimer?
     /// Tracks when the blackout started for HealthKit logging
     @State private var sessionStart: Date?
     /// Extended runtime session to keep the app alive during blackout
@@ -74,7 +71,7 @@ struct BlackoutView: View {
     @State private var showingNamaste = false
     /// Controls the breathing animation — toggled on after fade-in to start pulsing
     @State private var isBreathing = false
-    /// Guards against double-dismiss from both timer and session expiration
+    /// Guards against double-dismiss from both timer and notification signal
     @State private var isDismissing = false
 
     var body: some View {
@@ -157,34 +154,25 @@ struct BlackoutView: View {
                 }
             }
 
-            // Background signal timer — fires end haptics directly from a background queue,
-            // bypassing the throttled main RunLoop entirely. WKInterfaceDevice.play() can
-            // deliver haptics even when the display is dimmed, giving the user tactile feedback
-            // at the correct time rather than waiting for wrist-raise.
-            let hapticEnabled = settings.hapticEndEnabled
-            let signalTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInteractive))
-            signalTimer.schedule(deadline: .now() + duration)
-            signalTimer.setEventHandler {
-                if hapticEnabled {
-                    // Fire haptics directly on background queue — no main thread dependency.
-                    // 2× directionUp pulses matching HapticPlayer.playEnd() pattern.
-                    WKInterfaceDevice.current().play(.directionUp)
-                    DispatchQueue.global().asyncAfter(deadline: .now() + 0.3) {
-                        WKInterfaceDevice.current().play(.directionUp)
-                    }
-                }
-            }
-            signalTimer.resume()
-            endSignalTimer = signalTimer
+            // Schedule a local notification as the end-of-blackout signal.
+            // This is the ONLY reliable way to deliver haptic feedback when the display
+            // is dimmed — the OS delivers notification sound/haptic at the system level,
+            // completely independent of app RunLoop throttling or display state.
+            scheduleEndSignalNotification(after: duration)
         }
         .onDisappear {
             dismissTimer?.invalidate()
             dismissTimer = nil
             targetEndDate = nil
-            endSignalTimer?.cancel()
-            endSignalTimer = nil
+            cancelEndSignalNotification()
             ChimePlayer.shared.stop()
             stopExtendedSession()
+        }
+        // Handle end-of-blackout notification — posted by the notification delegate
+        // when the system delivers the end-signal notification
+        .onReceive(NotificationCenter.default.publisher(for: .dismissBlackout)) { _ in
+            completedFullDuration = true
+            dismissBlackout()
         }
         // Allow tap to dismiss unless handcuffs mode is on
         .onTapGesture {
@@ -196,15 +184,14 @@ struct BlackoutView: View {
     // MARK: - Dismiss
 
     private func dismissBlackout() {
-        // Guard against double-dismiss (timer + session expiration can race)
+        // Guard against double-dismiss (timer + notification signal can race)
         guard !isDismissing else { return }
         isDismissing = true
 
         dismissTimer?.invalidate()
         dismissTimer = nil
         targetEndDate = nil
-        endSignalTimer?.cancel()
-        endSignalTimer = nil
+        cancelEndSignalNotification()
 
         // Stop breathing animation
         isBreathing = false
@@ -214,8 +201,7 @@ struct BlackoutView: View {
             ProgressTracker.shared.recordCompleted()
         }
 
-        // Haptic at end (may double-fire with background timer — acceptable,
-        // double haptic is better than none when display was dimmed)
+        // Haptic at end
         if settings.hapticEndEnabled {
             HapticPlayer.playEnd()
         }
@@ -261,6 +247,34 @@ struct BlackoutView: View {
                 }
             }
         }
+    }
+
+    // MARK: - End Signal Notification
+
+    /// Schedule a local notification that fires when the blackout should end.
+    /// The OS delivers the sound/haptic at the system level — this is the only
+    /// mechanism on watchOS that reliably fires when the display is dimmed.
+    private func scheduleEndSignalNotification(after interval: TimeInterval) {
+        let content = UNMutableNotificationContent()
+        content.body = String(localized: "Blackout complete")
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: NotificationScheduler.endSignalIdentifier,
+            content: content,
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    /// Cancel the end-signal notification (early dismiss or blackout already ended)
+    private func cancelEndSignalNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [NotificationScheduler.endSignalIdentifier]
+        )
+        UNUserNotificationCenter.current().removeDeliveredNotifications(
+            withIdentifiers: [NotificationScheduler.endSignalIdentifier]
+        )
     }
 
     // MARK: - Extended Runtime Session

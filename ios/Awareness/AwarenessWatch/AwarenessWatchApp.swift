@@ -55,6 +55,16 @@ class WatchAppDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCente
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
+        // End-of-blackout signal — the system delivers sound/haptic at the scheduled time
+        // even when the display is dimmed. Post dismiss to end the blackout visually.
+        if notification.request.identifier == NotificationScheduler.endSignalIdentifier {
+            completionHandler([.sound])
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .dismissBlackout, object: nil)
+            }
+            return
+        }
+
         // Record as triggered — the notification arrived regardless of user response
         NotificationScheduler.shared.recordNotificationTriggered(notification.request.identifier)
 
@@ -73,6 +83,15 @@ class WatchAppDelegate: NSObject, WKApplicationDelegate, UNUserNotificationCente
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
+        // End-of-blackout signal — user tapped the notification to dismiss
+        if response.notification.request.identifier == NotificationScheduler.endSignalIdentifier {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .dismissBlackout, object: nil)
+            }
+            completionHandler()
+            return
+        }
+
         let category = response.notification.request.content.categoryIdentifier
         guard category == NotificationScheduler.categoryIdentifier else {
             completionHandler()

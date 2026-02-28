@@ -15,6 +15,12 @@ class NotificationScheduler: ObservableObject {
     /// Category identifier for awareness notifications
     static let categoryIdentifier = "awareness.blackout"
 
+    /// Identifier for the end-of-blackout signal notification.
+    /// This notification is scheduled by BlackoutView when a blackout starts
+    /// and fires at the exact end time. The system delivers its sound/haptic
+    /// regardless of display state or main RunLoop throttling.
+    static let endSignalIdentifier = "awareness-watch-blackout-end"
+
     /// Action identifiers for notification buttons
     static let actionStart = "awareness.action.start"
     static let actionSnooze = "awareness.action.snooze"

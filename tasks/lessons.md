@@ -11,3 +11,9 @@
 - **Root cause:** `.ambient` audio sessions get deactivated when watchOS dims the display. Keeping AVAudioEngine running with a session that gets yanked makes things worse, not better.
 - **Rule:** Don't use `.ambient` AVAudioEngine keep-alive for watchOS display dimming mitigation. If audio-based keep-alive is needed, it would require `.playback` category (but that ignores mute — bad for a mindfulness app).
 - **Applies to:** watchOS ChimePlayer, any watchOS audio session management during display dim
+
+## [2026-02-28] — WKInterfaceDevice.play() doesn't fire when display is dimmed
+- **Mistake:** Added a background DispatchSourceTimer that called `WKInterfaceDevice.current().play(.directionUp)` directly from a background queue, expecting haptics to fire when the display is dimmed.
+- **Root cause:** `WKInterfaceDevice.play()` also doesn't work when the display is dimmed — watchOS throttles all app-level APIs. Only system-level mechanisms (local notifications) can deliver haptic feedback in this state.
+- **Rule:** On watchOS, the ONLY reliable way to deliver haptic/sound when the display is dimmed is via local notifications (`UNNotificationRequest`). The OS delivers notification sound/haptic at the system level, independent of app RunLoop and display state.
+- **Applies to:** watchOS end-of-blackout signal, any watchOS time-critical haptic delivery

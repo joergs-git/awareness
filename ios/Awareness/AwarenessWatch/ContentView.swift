@@ -144,4 +144,6 @@ struct ContentView: View {
 extension Notification.Name {
     /// Posted when the user taps a notification, triggering a blackout
     static let showBlackout = Notification.Name("showBlackout")
+    /// Posted when the end-of-blackout notification fires, triggering dismiss
+    static let dismissBlackout = Notification.Name("dismissBlackout")
 }
