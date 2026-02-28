@@ -49,9 +49,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        // When the user comes back, reschedule with a fresh random delay
+        // When the user comes back, auto-clear any snooze and restart scheduling.
+        // Without this, returning from sleep/lock while snoozed would leave the
+        // scheduler stopped until the user manually clicks "Resume".
         detector.onSystemDidBecomeActive = { [weak self] in
-            self?.scheduler?.rescheduleIfRunning()
+            guard let self = self else { return }
+            let settings = SettingsManager.shared
+
+            if settings.isSnoozed || !(self.scheduler?.isCurrentlyRunning ?? false) {
+                // Clear snooze and restart the scheduler
+                settings.snoozeUntil = nil
+                self.scheduler?.start()
+                self.statusBarController?.buildMenu()
+            } else {
+                // Already running — just reschedule with a fresh random delay
+                self.scheduler?.rescheduleIfRunning()
+            }
         }
     }
 

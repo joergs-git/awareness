@@ -20,6 +20,17 @@ class BlackoutWindowController {
     /// Power assertion ID to prevent screen saver / display sleep during blackout
     private var idleAssertionID: IOPMAssertionID = 0
 
+    // MARK: - Startclick Confirmation State
+
+    /// Whether we're currently showing the "Ready to breathe?" confirmation screen
+    private var isInConfirmationPhase = false
+    /// Stored blackout config for after the user confirms
+    private var pendingDuration: TimeInterval = 0
+    private var pendingVisualType: BlackoutVisualType = .plainBlack
+    private var pendingCustomText: String = ""
+    private var pendingImagePath: String = ""
+    private var pendingVideoPath: String = ""
+
     /// Fade animation duration in seconds
     private let fadeDuration: TimeInterval = 2.0
 
@@ -45,7 +56,8 @@ class BlackoutWindowController {
 
     // MARK: - Show / Dismiss
 
-    /// Cover all screens with the blackout overlay for a given duration
+    /// Cover all screens with the blackout overlay for a given duration.
+    /// When "Startclick confirmation" is enabled, shows a "Ready to breathe?" prompt first.
     func show(
         duration: TimeInterval,
         visualType: BlackoutVisualType = .plainBlack,
@@ -57,6 +69,126 @@ class BlackoutWindowController {
         guard !isActive else { return }
         self.completionHandler = completion
 
+        // If startclick confirmation is enabled, show the prompt first
+        if SettingsManager.shared.startclickConfirmation {
+            pendingDuration = duration
+            pendingVisualType = visualType
+            pendingCustomText = customText
+            pendingImagePath = imagePath
+            pendingVideoPath = videoPath
+            showConfirmation()
+        } else {
+            // Direct blackout — original behavior
+            showBlackout(
+                duration: duration,
+                visualType: visualType,
+                customText: customText,
+                imagePath: imagePath,
+                videoPath: videoPath
+            )
+        }
+    }
+
+    // MARK: - Startclick Confirmation
+
+    /// Show the "Ready to breathe?" confirmation screen on all displays
+    private func showConfirmation() {
+        isInConfirmationPhase = true
+
+        // Record that a blackout was triggered (whether user accepts or declines)
+        ProgressTracker.shared.recordTriggered()
+
+        // Create confirmation overlay windows on all screens
+        for screen in NSScreen.screens {
+            let window = makeOverlayWindow(for: screen, contentView: AnyView(
+                BlackoutConfirmationView(
+                    onConfirm: { [weak self] in self?.handleConfirmYes() },
+                    onDecline: { [weak self] in self?.handleConfirmNo() }
+                )
+            ))
+            window.alphaValue = 0
+            window.orderFrontRegardless()
+            windows.append(window)
+        }
+
+        NSApp.activate(ignoringOtherApps: true)
+        windows.first?.makeKeyAndOrderFront(nil)
+
+        // Fade in
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = fadeDuration
+            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            for window in windows {
+                window.animator().alphaValue = 1
+            }
+        }
+
+        // Only install keyboard monitor for ESC handling — no global tap, no mouse suppression,
+        // no IOPMAssertion (allow display sleep to naturally dismiss the confirmation)
+        installKeyboardMonitor()
+    }
+
+    /// User confirmed — transition from confirmation to actual blackout
+    private func handleConfirmYes() {
+        isInConfirmationPhase = false
+
+        // Replace window content with the actual blackout view
+        let contentView = BlackoutContentView(
+            visualType: pendingVisualType,
+            customText: pendingCustomText,
+            imagePath: pendingImagePath,
+            videoPath: pendingVideoPath
+        )
+        for window in windows {
+            window.contentView = NSHostingView(rootView: contentView)
+        }
+
+        // Now play start gong
+        GongPlayer.shared.playStartIfEnabled()
+
+        // Prevent display sleep during the breathing session
+        let assertionResult = IOPMAssertionCreateWithName(
+            kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
+            IOPMAssertionLevel(kIOPMAssertionLevelOn),
+            "Awareness blackout in progress" as CFString,
+            &idleAssertionID
+        )
+        if assertionResult != kIOReturnSuccess {
+            print("Awareness: failed to create idle display sleep assertion")
+        }
+
+        // Remove the lightweight keyboard monitor and install the full set
+        removeKeyboardMonitor()
+        installKeyboardMonitor()
+        installMouseClickMonitor()
+        installGlobalMouseMonitor()
+        installGlobalEventTap()
+
+        // Schedule automatic dismissal
+        let work = DispatchWorkItem { [weak self] in
+            ProgressTracker.shared.recordCompleted()
+            self?.dismiss()
+        }
+        dismissTimer = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + pendingDuration, execute: work)
+    }
+
+    /// User declined — dismiss silently without counting as completed
+    private func handleConfirmNo() {
+        isInConfirmationPhase = false
+        dismiss(silent: true)
+    }
+
+    // MARK: - Direct Blackout (original flow)
+
+    /// Show the blackout immediately without confirmation
+    private func showBlackout(
+        duration: TimeInterval,
+        visualType: BlackoutVisualType,
+        customText: String,
+        imagePath: String,
+        videoPath: String
+    ) {
         // Play start gong immediately (before fade begins)
         GongPlayer.shared.playStartIfEnabled()
 
@@ -197,15 +329,25 @@ class BlackoutWindowController {
         keyEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self, self.isActive else { return event }
 
-            // In handcuffs mode, swallow key events — user cannot escape
+            let isEscape = event.keyCode == 53
+            let isCmdQ = event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "q"
+
+            // During confirmation phase: ESC always counts as "No" — declining the
+            // invitation is not "escaping", so handcuffs mode doesn't apply here
+            if self.isInConfirmationPhase {
+                if isEscape || isCmdQ {
+                    self.handleConfirmNo()
+                    return nil
+                }
+                return nil  // swallow other keys
+            }
+
+            // During breathing phase: handcuffs mode prevents early dismissal
             if SettingsManager.shared.handcuffsMode {
                 return nil
             }
 
             // ESC or Cmd+Q dismisses the blackout early
-            let isEscape = event.keyCode == 53
-            let isCmdQ = event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "q"
-
             if isEscape || isCmdQ {
                 self.dismiss()
                 return nil
@@ -325,6 +467,7 @@ class BlackoutWindowController {
 
     // MARK: - Window Factory
 
+    /// Create an overlay window with the standard blackout content view
     private func makeOverlayWindow(
         for screen: NSScreen,
         visualType: BlackoutVisualType,
@@ -332,6 +475,17 @@ class BlackoutWindowController {
         imagePath: String = "",
         videoPath: String = ""
     ) -> NSWindow {
+        let contentView = BlackoutContentView(
+            visualType: visualType,
+            customText: customText,
+            imagePath: imagePath,
+            videoPath: videoPath
+        )
+        return makeOverlayWindow(for: screen, contentView: AnyView(contentView))
+    }
+
+    /// Create an overlay window with arbitrary SwiftUI content (used for confirmation view)
+    private func makeOverlayWindow(for screen: NSScreen, contentView: AnyView) -> NSWindow {
         let window = BlackoutWindow(
             contentRect: screen.frame,
             styleMask: .borderless,
@@ -349,13 +503,6 @@ class BlackoutWindowController {
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         window.acceptsKeyInput = true
 
-        // Host the SwiftUI content view
-        let contentView = BlackoutContentView(
-            visualType: visualType,
-            customText: customText,
-            imagePath: imagePath,
-            videoPath: videoPath
-        )
         window.contentView = NSHostingView(rootView: contentView)
 
         return window

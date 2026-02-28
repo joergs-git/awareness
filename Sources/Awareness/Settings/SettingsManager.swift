@@ -27,7 +27,8 @@ final class SettingsManager: ObservableObject {
         static let customVideoPath     = "customVideoPath"
         static let customImageBookmark = "customImageBookmark"
         static let customVideoBookmark = "customVideoBookmark"
-        static let snoozeUntil         = "snoozeUntil"
+        static let snoozeUntil              = "snoozeUntil"
+        static let startclickConfirmation   = "startclickConfirmation"
     }
 
     // MARK: - Default Values
@@ -45,7 +46,8 @@ final class SettingsManager: ObservableObject {
         Keys.visualType:       BlackoutVisualType.text.rawValue,
         Keys.customText:       "Breathe.",
         Keys.customImagePath:  "",
-        Keys.customVideoPath:  ""
+        Keys.customVideoPath:  "",
+        Keys.startclickConfirmation: false
     ]
 
     // MARK: - Published Properties
@@ -137,6 +139,11 @@ final class SettingsManager: ObservableObject {
     /// File path for custom video blackout
     @Published var customVideoPath: String {
         didSet { defaults.set(customVideoPath, forKey: Keys.customVideoPath) }
+    }
+
+    /// When on, a "Ready to breathe?" prompt appears before each blackout
+    @Published var startclickConfirmation: Bool {
+        didSet { defaults.set(startclickConfirmation, forKey: Keys.startclickConfirmation) }
     }
 
     /// Date until which the app is snoozed (nil = not snoozed)
@@ -266,6 +273,7 @@ final class SettingsManager: ObservableObject {
         customText       = defaults.string(forKey: Keys.customText) ?? "Breathe."
         customImagePath  = defaults.string(forKey: Keys.customImagePath) ?? ""
         customVideoPath  = defaults.string(forKey: Keys.customVideoPath) ?? ""
+        startclickConfirmation = defaults.bool(forKey: Keys.startclickConfirmation)
         snoozeUntil      = defaults.object(forKey: Keys.snoozeUntil) as? Date
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue

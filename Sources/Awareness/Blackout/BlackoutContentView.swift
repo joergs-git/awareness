@@ -117,6 +117,57 @@ struct BlackoutContentView: View {
     }
 }
 
+// MARK: - Startclick Confirmation View
+
+/// Shown before the actual blackout when "Startclick confirmation" is enabled.
+/// Lets the user accept ("Yes") or decline ("No") the breathing session.
+/// Declining skips the blackout without counting it as completed.
+struct BlackoutConfirmationView: View {
+
+    /// Called when the user confirms they want to start the blackout
+    var onConfirm: () -> Void
+    /// Called when the user declines — blackout is skipped
+    var onDecline: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack(spacing: 32) {
+                Text(String(localized: "Ready to breathe?"))
+                    .font(.system(size: 28, weight: .light))
+                    .foregroundColor(.white.opacity(0.8))
+
+                HStack(spacing: 24) {
+                    // "Yes" button — starts the actual blackout
+                    Button(action: onConfirm) {
+                        Text(String(localized: "Yes"))
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.white.opacity(0.9))
+                            .frame(width: 100, height: 44)
+                            .background(Color.white.opacity(0.15))
+                            .cornerRadius(10)
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+
+                    // "No" button — dismisses without counting as completed
+                    Button(action: onDecline) {
+                        Text(String(localized: "No"))
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.white.opacity(0.5))
+                            .frame(width: 100, height: 44)
+                            .background(Color.white.opacity(0.08))
+                            .cornerRadius(10)
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Looping Video Player (AppKit-backed)
 
 /// NSViewRepresentable that plays a video in a loop using AVPlayerLooper
