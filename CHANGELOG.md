@@ -9,8 +9,8 @@ All notable changes to Awareness reminder, from initial release to the current v
 ### All platforms: "Breathe now" button rename
 - **"Test Blackout" → "Breathe now"** — the manual breathing button is not a test, it's a real mindful moment. Renamed across macOS, iOS, watchOS, and Windows (DE: "Jetzt atmen")
 
-### All platforms: Image breathing animation
-- **Images now breathe** — custom images and the default image pulse gently during blackout (scale 0.95↔1.06, opacity 0.6↔1.0, 3s cycle), matching the text mode animation. Windows also gains the text breathing animation it was previously missing.
+### macOS, iOS/iPadOS, Windows: Image breathing animation
+- **Images now breathe** — custom images and the default image pulse gently during blackout (scale 0.95↔1.06, opacity 0.6↔1.0, 3s cycle), matching the text mode animation. Windows also gains the text breathing animation it was previously missing. (watchOS does not support image mode.)
 
 ### watchOS: Namaste after alarm dismiss
 - **Namaste now visible after alarm dismiss** — when the alarm end-signal fires with the wrist down, watchOS shows a system alarm UI that covers the app. Previously the 🙏 namaste rendered behind it and was invisible. Now the namaste is shown in ContentView after the user taps "Stop", ensuring they always see the closing gesture
