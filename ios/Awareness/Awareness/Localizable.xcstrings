@@ -317,6 +317,16 @@
         }
       }
     },
+    "Breathe now" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt atmen"
+          }
+        }
+      }
+    },
     "Breathe." : {
       "localizations" : {
         "de" : {
@@ -813,10 +823,8 @@
         }
       }
     },
-    "Notifications are disabled. Awareness reminder needs notifications to remind you to pause." : {
-      "extractionState" : "stale"
-    },
     "Notifications disabled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1043,16 +1051,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tippe, um einen achtsamen Moment zu beginnen. Schließe deine Augen, spüre deinen Atem und kehre in die Gegenwart zurück."
-          }
-        }
-      }
-    },
-    "Breathe now" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jetzt atmen"
           }
         }
       }
