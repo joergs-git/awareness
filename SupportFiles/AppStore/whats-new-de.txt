@@ -1,5 +1,6 @@
-Neu in Version 2.14:
+Neu in Version 2.16:
 
-- watchOS: 3-Signal Audio-/Haptik-System — Erinnerungs-Haptik bei Benachrichtigung, synthetisierter Doppelklang bei Blackout-Start, neue End-Haptik
-- Start-Klang (440Hz → 660Hz) wird in Echtzeit erzeugt; respektiert den Lautlos-Modus
-- Neuer „Erinnerungs-Haptik"-Schalter in den watchOS-Einstellungen
+- Die App funktioniert jetzt ohne Benachrichtigungserlaubnis — ein Vordergrund-Timer löst achtsame Pausen automatisch aus, solange die App geöffnet ist
+- Benachrichtigungen sind optional, nur für Erinnerungen im Hintergrund
+- Sanfter Hinweis erklärt, wie Benachrichtigungen für volle Funktionalität aktiviert werden
+- Export-Compliance-Erklärung hinzugefügt (keine Verschlüsselung verwendet)

@@ -1,5 +1,6 @@
-What's New in v2.14:
+What's New in v2.16:
 
-- watchOS: 3-signal audio/haptic system — reminder haptic on notification, synthesized double chime at blackout start, new end haptic
-- Start chime (440Hz → 660Hz) generated in real-time; respects silent mode
-- New "Reminder haptic" toggle in watchOS settings
+- The app now works without notification permission — a foreground timer triggers mindful pauses automatically while the app is open
+- Notifications are optional, used only for background reminders
+- Soft info message explains how to enable notifications for full functionality
+- Export compliance declaration added (no encryption used)
