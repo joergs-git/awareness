@@ -14,11 +14,11 @@ struct AwarenessWatchApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .onChange(of: scenePhase, perform: { phase in
-                    if phase == .active {
+                .onChange(of: scenePhase) {
+                    if scenePhase == .active {
                         NotificationScheduler.shared.refreshOnForeground()
                     }
-                })
+                }
         }
     }
 }
