@@ -89,6 +89,17 @@ struct ContentView: View {
                         Label(String(localized: "Settings"), systemImage: "gear")
                     }
                 }
+
+                // MARK: - Alarm Debug (temporary diagnostic)
+                if !AlarmSessionManager.debugLog().isEmpty {
+                    Section("Alarm Debug") {
+                        ForEach(AlarmSessionManager.debugLog(), id: \.self) { entry in
+                            Text(entry)
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
             }
             .navigationTitle(String(localized: "Awareness reminder"))
             .fullScreenCover(isPresented: $showingBlackout) {
