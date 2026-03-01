@@ -6,6 +6,7 @@ struct ContentView: View {
 
     @ObservedObject var settings = SettingsManager.shared
     @ObservedObject var scheduler = NotificationScheduler.shared
+    @ObservedObject var foregroundScheduler = ForegroundScheduler.shared
 
     @State private var showingBlackout = false
     @State private var showingSettings = false
@@ -50,7 +51,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    if let nextDate = scheduler.nextNotificationDate, !settings.isSnoozed {
+                    if let nextDate = nextScheduledDate, !settings.isSnoozed {
                         HStack {
                             Label(String(localized: "Next"), systemImage: "clock")
                             Spacer()
@@ -100,13 +101,13 @@ struct ContentView: View {
                     Text(String(localized: "Snooze"))
                 }
 
-                // MARK: - Notification Warning
+                // MARK: - Notification Info
                 if !notificationsAuthorized {
                     Section {
                         HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                            Text(String(localized: "Notifications are disabled. Awareness reminder needs notifications to remind you to pause."))
+                            Image(systemName: "info.circle.fill")
+                                .foregroundColor(.blue)
+                            Text(String(localized: "Enable notifications for background reminders. Without them, awareness pauses only work while the app is open."))
                                 .font(.callout)
                         }
                         Button(String(localized: "Open Settings")) {
@@ -124,10 +125,12 @@ struct ContentView: View {
                     } label: {
                         Label(String(localized: "Breathe now"), systemImage: "play.circle")
                     }
-                    Button {
-                        scheduler.scheduleTestNotification()
-                    } label: {
-                        Label(String(localized: "Test Notification (3s)"), systemImage: "bell.badge")
+                    if notificationsAuthorized {
+                        Button {
+                            scheduler.scheduleTestNotification()
+                        } label: {
+                            Label(String(localized: "Test Notification (3s)"), systemImage: "bell.badge")
+                        }
                     }
                     if settings.healthKitEnabled && HealthKitManager.shared.isAuthorized() {
                         HStack {
@@ -145,7 +148,7 @@ struct ContentView: View {
                 // MARK: - How It Works
                 Section {
                     Label {
-                        Text(String(localized: "At random intervals, you receive a gentle notification reminding you to pause"))
+                        Text(String(localized: "At random intervals, you receive a gentle reminder to pause"))
                     } icon: {
                         Image(systemName: "bell")
                             .foregroundColor(.accentColor)
@@ -153,7 +156,7 @@ struct ContentView: View {
                     .font(.callout)
 
                     Label {
-                        Text(String(localized: "Tap the notification to open a full-screen blackout with a gong sound"))
+                        Text(String(localized: "A full-screen blackout appears with a gong sound"))
                     } icon: {
                         Image(systemName: "rectangle.inset.filled")
                             .foregroundColor(.accentColor)
@@ -285,7 +288,6 @@ struct ContentView: View {
 
     private var statusColor: Color {
         if settings.isSnoozed { return .orange }
-        if !notificationsAuthorized { return .red }
         return .green
     }
 
@@ -296,8 +298,16 @@ struct ContentView: View {
             }
             return String(localized: "Snoozed indefinitely")
         }
-        if !notificationsAuthorized { return String(localized: "Notifications disabled") }
+        if !notificationsAuthorized {
+            return String(localized: "Active (foreground only)")
+        }
         return String(localized: "Active")
+    }
+
+    /// The earliest scheduled date from either the foreground timer or pending notifications
+    private var nextScheduledDate: Date? {
+        let dates = [scheduler.nextNotificationDate, foregroundScheduler.nextBlackoutDate].compactMap { $0 }
+        return dates.min()
     }
 
     // MARK: - Helpers

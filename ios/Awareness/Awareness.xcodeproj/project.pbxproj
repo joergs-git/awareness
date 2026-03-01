@@ -47,6 +47,7 @@
 		A40006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30008 /* Assets.xcassets */; };
 		A40007 /* AwarenessWatchComplication.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B40099 /* AwarenessWatchComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A40008 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* HealthKitManager.swift */; };
+		A10019 /* ForegroundScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10019 /* ForegroundScheduler.swift */; };
 		A10017 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
 		A10018 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10018 /* ProgressView.swift */; };
 		A30017 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
@@ -134,6 +135,7 @@
 		B30016 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		B30099 /* AwarenessWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AwarenessWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B40099 /* AwarenessWatchComplication.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AwarenessWatchComplication.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10019 /* ForegroundScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForegroundScheduler.swift; sourceTree = "<group>"; };
 		B10017 /* ProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTracker.swift; sourceTree = "<group>"; };
 		B10018 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		B30013 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 			isa = PBXGroup;
 			children = (
 				B10008 /* BlackoutView.swift */,
+				B10019 /* ForegroundScheduler.swift */,
 			);
 			path = Blackout;
 			sourceTree = "<group>";
@@ -471,6 +474,7 @@
 				A10006 /* SettingsView.swift in Sources */,
 				A10007 /* GongPlayer.swift in Sources */,
 				A10008 /* BlackoutView.swift in Sources */,
+				A10019 /* ForegroundScheduler.swift in Sources */,
 				A10009 /* NotificationScheduler.swift in Sources */,
 				A10010 /* UpdateChecker.swift in Sources */,
 				A10015 /* HealthKitManager.swift in Sources */,
@@ -668,7 +672,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 2.15;
+				MARKETING_VERSION = 2.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -698,7 +702,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 2.15;
+				MARKETING_VERSION = 2.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -724,7 +728,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 2.15;
+				MARKETING_VERSION = 2.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -752,7 +756,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 2.15;
+				MARKETING_VERSION = 2.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -774,7 +778,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder Complication";
-				MARKETING_VERSION = 2.15;
+				MARKETING_VERSION = 2.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -796,7 +800,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder Complication";
-				MARKETING_VERSION = 2.15;
+				MARKETING_VERSION = 2.16;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;

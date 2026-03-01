@@ -13,8 +13,14 @@ struct AwarenessApp: App {
         WindowGroup {
             ContentView()
                 .onChange(of: scenePhase, perform: { phase in
-                    if phase == .active {
+                    switch phase {
+                    case .active:
                         NotificationScheduler.shared.refreshOnForeground()
+                        ForegroundScheduler.shared.start()
+                    case .background, .inactive:
+                        ForegroundScheduler.shared.stop()
+                    @unknown default:
+                        break
                     }
                 })
         }
@@ -61,7 +67,14 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // Record as triggered — the notification arrived regardless of user response
         NotificationScheduler.shared.recordNotificationTriggered(notification.request.identifier)
 
-        completionHandler([.banner, .sound])
+        // Dedup: if the foreground scheduler just triggered a blackout within 30s,
+        // suppress the notification banner to avoid double-triggering
+        if let lastTrigger = ForegroundScheduler.shared.lastTriggerDate,
+           abs(lastTrigger.timeIntervalSinceNow) < 30 {
+            completionHandler([])
+        } else {
+            completionHandler([.banner, .sound])
+        }
         NotificationScheduler.shared.refreshOnForeground()
     }
 

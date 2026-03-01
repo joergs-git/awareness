@@ -4,6 +4,16 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v2.16
+
+### iOS: Foreground scheduler (Apple Guideline 4.5.4 compliance)
+- **App now works without notification permission** — a new in-app foreground timer triggers blackouts automatically while the app is open, so the core experience is fully functional even if the user denies notifications
+- **Notifications become optional** — soft blue info message explains notifications are only needed for background reminders; status shows "Active (foreground only)" when notifications are denied
+- **Dedup logic** — foreground timer and notification system coexist without double-triggering (60s lookahead for notifications, 30s lookback for foreground triggers)
+- **"How It Works" text updated** — steps now describe the general experience instead of referencing notifications specifically
+
+---
+
 ## v2.15
 
 ### All platforms: "Breathe now" button rename

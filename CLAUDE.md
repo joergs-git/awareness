@@ -91,9 +91,9 @@ Requires watchOS 10+, Xcode 15+.
 
 - **SwiftUI** app with `@main` entry point (no UIKit storyboards)
 - **No third-party dependencies** — only Apple frameworks (SwiftUI, AVFoundation, UserNotifications, PhotosUI, HealthKit)
-- Uses **local notifications** instead of background timers (iOS does not allow persistent background execution)
+- **Dual scheduling**: `ForegroundScheduler` (in-app timer, works without notification permission) + `NotificationScheduler` (local notifications for background reminders). Dedup logic prevents double-triggering.
 - Pre-schedules 30 `UNNotificationRequest` at random intervals; tops up when app returns to foreground
-- Blackout presented as `fullScreenCover` when user taps notification or app is in foreground
+- Blackout presented as `fullScreenCover` when foreground timer fires, user taps notification, or via manual "Breathe now" button
 - Settings stored in `UserDefaults` (same as macOS)
 - Single target for both iPhone and iPad (`TARGETED_DEVICE_FAMILY = "1,2"`)
 - WatchConnectivity: `Connectivity/WatchConnectivityManager.swift` syncs settings bidirectionally with the companion Apple Watch
@@ -222,7 +222,8 @@ ios/Awareness/
     ├── Audio/
     │   └── GongPlayer.swift           # AVAudioPlayer + AVAudioSession for silent mode
     ├── Blackout/
-    │   └── BlackoutView.swift         # Full-screen blackout (UIImage, tap dismiss, video loop)
+    │   ├── BlackoutView.swift         # Full-screen blackout (UIImage, tap dismiss, video loop)
+    │   └── ForegroundScheduler.swift  # In-app timer for foreground blackouts (no notification permission needed)
     ├── Notifications/
     │   └── NotificationScheduler.swift # UNUserNotificationCenter scheduling
     ├── Health/
@@ -316,7 +317,8 @@ ios/Awareness/AwarenessWatch/
 |---|---|
 | App lifecycle | SwiftUI `@main` with `UIApplicationDelegateAdaptor` for notification handling |
 | Home header | Title ("Awareness reminder") above logo (72×72), then "Mindfulness in Action" (`.headline`) and "In stillness rests the strength" (`.subheadline`, secondary) |
-| Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled `UNCalendarNotificationTrigger` requests |
+| Scheduling (notifications) | `UNUserNotificationCenter` with 30 pre-scheduled `UNCalendarNotificationTrigger` requests |
+| Scheduling (foreground) | `ForegroundScheduler.shared` — `Timer.scheduledTimer` on main RunLoop; fires `.showBlackout` notification; dedup with notifications (60s lookahead / 30s lookback); starts/stops on scene phase changes |
 | Blackout | `fullScreenCover` presenting `BlackoutView` with `.statusBarHidden()` and `.persistentSystemOverlays(.hidden)` |
 | Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; image mode: pulsating scale (0.95↔1.06) + opacity (0.6↔1.0) on 3s cycle; plain black: subtle breathing circle; keeps display active |
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
@@ -440,6 +442,7 @@ ios/Awareness/AwarenessWatch/
 - **Progress sync**: `ProgressTracker.connectivityContext()` and `applyFromConnectivityContext()` handle cross-device stats merge using max() strategy.
 - **Mindful Moments (progress tracking)**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart (labeled "Discipline"), today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation ("Mindful Moments"). `ProgressTracker.swift` is shared with watchOS via target membership. Triggered count is recorded on notification delivery (`willPresent`, `didReceive`, and delivered-check on foreground return), not in BlackoutView — so ignored notifications are counted accurately. `countedTriggerIDs` Set in `NotificationScheduler` prevents double-counting.
 - **Localization**: `Localizable.xcstrings` (string catalog) at `Awareness/Localizable.xcstrings` with EN and DE translations. Uses `String(localized:)` throughout UI code.
+- **Foreground scheduler (v2.16)**: `ForegroundScheduler.shared` uses `Timer.scheduledTimer` on the main RunLoop to trigger blackouts while the app is in the foreground. Starts on `.active` scene phase, stops on `.background`/`.inactive`. Posts `.showBlackout` (same as notifications). Dedup: skips if `NotificationScheduler.nextNotificationDate` is within 60s; `willPresent` suppresses banner if `ForegroundScheduler.lastTriggerDate` is within 30s. Ensures the app functions without notification permission (Apple Guideline 4.5.4).
 
 ### watchOS
 
