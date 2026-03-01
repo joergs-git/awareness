@@ -190,11 +190,23 @@ struct BlackoutView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .opacity(isBreathing ? 1.0 : 0.6)
+                .scaleEffect(isBreathing ? 1.06 : 0.95)
+                .animation(
+                    .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                    value: isBreathing
+                )
         } else if let defaultImage = loadBundledDefaultImage() {
             Image(uiImage: defaultImage)
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .opacity(isBreathing ? 1.0 : 0.6)
+                .scaleEffect(isBreathing ? 1.06 : 0.95)
+                .animation(
+                    .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                    value: isBreathing
+                )
         } else {
             Text(String(localized: "Breathe."))
                 .font(.system(size: 36, weight: .light))

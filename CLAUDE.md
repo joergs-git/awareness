@@ -269,7 +269,7 @@ ios/Awareness/AwarenessWatch/
 | Menu bar icon | SF Symbol `"yinyang"` (macOS 14+) with Unicode `"☯"` fallback |
 | Overlay windows | One borderless `NSWindow` per `NSScreen.screens`, level `.screenSaver`, `canJoinAllSpaces + fullScreenAuxiliary` |
 | Input capture | `BlackoutWindow` subclass (`canBecomeKey/Main = true`) + `NSApp.activate(ignoringOtherApps:)` + `CGEvent.tapCreate` to suppress global keystrokes (ESC passes through when handcuffs off); local + global mouse monitors for click-to-dismiss |
-| Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle |
+| Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; image mode: pulsating scale (0.95↔1.06) + opacity (0.6↔1.0) on 3s cycle; plain black: subtle breathing circle |
 | Scheduling | `DispatchSourceTimer` with random delay; auto-reschedules on settings change via Combine |
 | Camera detection | `AVCaptureDevice.isInUseByAnotherApplication` (no TCC prompt) |
 | Mic detection | CoreAudio `kAudioDevicePropertyDeviceIsRunningSomewhere` on input devices |
@@ -318,7 +318,7 @@ ios/Awareness/AwarenessWatch/
 | Home header | Title ("Awareness reminder") above logo (72×72), then "Mindfulness in Action" (`.headline`) and "In stillness rests the strength" (`.subheadline`, secondary) |
 | Scheduling | `UNUserNotificationCenter` with 30 pre-scheduled `UNCalendarNotificationTrigger` requests |
 | Blackout | `fullScreenCover` presenting `BlackoutView` with `.statusBarHidden()` and `.persistentSystemOverlays(.hidden)` |
-| Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; plain black: subtle breathing circle; keeps display active |
+| Breathing animation | Text mode: pulsating scale (0.95↔1.06) + opacity (0.25↔0.8) on 3s cycle; image mode: pulsating scale (0.95↔1.06) + opacity (0.6↔1.0) on 3s cycle; plain black: subtle breathing circle; keeps display active |
 | Active touch | `willPresent` shows banner+sound; user must tap to start blackout |
 | Foreground notification | `userNotificationCenter(_:willPresent:)` shows banner+sound; records trigger for progress; user must tap to start blackout |
 | Background notification | User taps notification → `didReceive response:` → records trigger → posts `.showBlackout` notification → shows blackout |
@@ -354,7 +354,7 @@ ios/Awareness/AwarenessWatch/
 | Coordinated scheduling | iOS is master scheduler; `applyCoordinatedSchedule()` uses iOS fire dates; falls back to random only when iOS dates unavailable or all in the past |
 | Progress sync | Same ProgressTracker sync methods via target membership |
 | Trigger tracking | Same architecture as iOS — `recordNotificationTriggered` + `countDeliveredNotifications` + dedup Set |
-| Namaste confirmation | namaste shown for 1.5s after blackout fade-out before dismissing |
+| Namaste confirmation | Namaste 🙏 shown for 1.5s after blackout fade-out; when alarm session fired (`hasFired` flag), BlackoutView skips namaste and ContentView shows it instead (system alarm UI covers the app during alarm dismiss) |
 | Reminder haptic | `HapticPlayer.playReminder()` — 2× `.failure` pulses on notification arrival; opt-in via `reminderHapticEnabled` |
 | Start chime | `ChimePlayer.shared.playStartChime()` — synthesized 440Hz → 660Hz via `AVAudioEngine` + `AVAudioSourceNode`; `.ambient` audio session respects silent mode; always plays (no toggle) |
 | End haptic | `HapticPlayer.playEnd()` — 2× `.directionUp` pulses; opt-in via `hapticEndEnabled` |
@@ -452,6 +452,7 @@ ios/Awareness/AwarenessWatch/
 - Settings migration: old `hapticStartEnabled` key auto-migrates to `reminderHapticEnabled` on first launch
 - `ChimePlayer.shared` uses `AVAudioEngine` + `AVAudioSourceNode` for real-time synthesis; `.ambient` audio session respects watchOS silent mode; `stop()` called in `onDisappear` to clean up
 - **End-of-blackout signal (alarm session)**: `AlarmSessionManager.shared` uses `WKExtendedRuntimeSession` in **alarm mode** (`WKBackgroundModes: alarm` in build settings). When a blackout starts, `scheduleEndAlarm(at:)` calls `start(at:)` to schedule the session for the exact end time. At the scheduled time, watchOS launches/resumes the app and calls `notifyUser(hapticType: .notification, repeatHandler:)` — this is the ONLY API that delivers haptic when the wrist is down and display is off. The haptic repeats every 10 seconds until the user taps "Stop" in the system alarm UI. A local notification (`UNTimeIntervalNotificationTrigger`) acts as a backup end signal. Main-thread `Timer.scheduledTimer` with Date check catches up visually on wrist-raise. `TimelineView(.animation(minimumInterval: 1.0))` extends display-on time before dimming.
+- **Namaste after alarm dismiss**: `AlarmSessionManager.hasFired` flag is set `true` when the alarm fires. `BlackoutView.dismissBlackout()` checks this flag — if true, skips the in-view namaste (invisible behind system alarm UI) and sets `isPresented = false` immediately. `ContentView.onChange(of: showingBlackout)` detects the dismiss + `hasFired` and shows a 2s namaste overlay on top of ContentView instead. `resetHasFired()` clears the flag after use.
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` flag + `lastRemoteContextDate` (2s cooldown) prevent echo loops and debounce-timing bypasses.
 - Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, `HealthKitManager`, and `ProgressTracker` via target membership

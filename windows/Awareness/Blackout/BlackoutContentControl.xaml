@@ -7,7 +7,7 @@
     <Grid x:Name="ContentGrid">
         <!-- Plain black: just the black background, nothing else -->
 
-        <!-- Text mode: centered white text -->
+        <!-- Text mode: centered white text with breathing animation -->
         <TextBlock x:Name="TextContent"
                    Visibility="Collapsed"
                    Text="{x:Static res:Strings.Breathe}"
@@ -18,14 +18,24 @@
                    VerticalAlignment="Center"
                    TextAlignment="Center"
                    TextWrapping="Wrap"
-                   Margin="40" />
+                   Margin="40"
+                   RenderTransformOrigin="0.5,0.5">
+            <TextBlock.RenderTransform>
+                <ScaleTransform x:Name="TextScale" ScaleX="1" ScaleY="1" />
+            </TextBlock.RenderTransform>
+        </TextBlock>
 
-        <!-- Image mode: centered scaled image -->
+        <!-- Image mode: centered scaled image with breathing animation -->
         <Image x:Name="ImageContent"
                Visibility="Collapsed"
                Stretch="Uniform"
                HorizontalAlignment="Center"
-               VerticalAlignment="Center" />
+               VerticalAlignment="Center"
+               RenderTransformOrigin="0.5,0.5">
+            <Image.RenderTransform>
+                <ScaleTransform x:Name="ImageScale" ScaleX="1" ScaleY="1" />
+            </Image.RenderTransform>
+        </Image>
 
         <!-- Video mode: looping video -->
         <MediaElement x:Name="VideoContent"

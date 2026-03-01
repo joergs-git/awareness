@@ -3,7 +3,7 @@ import AVKit
 
 /// SwiftUI view rendered inside the blackout overlay window.
 /// Displays different content based on the configured visual type.
-/// Text and plain-black modes include a gentle breathing animation.
+/// Text, image, and plain-black modes include a gentle breathing animation.
 struct BlackoutContentView: View {
 
     let visualType: BlackoutVisualType
@@ -79,12 +79,24 @@ struct BlackoutContentView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .opacity(isBreathing ? 1.0 : 0.6)
+                .scaleEffect(isBreathing ? 1.06 : 0.95)
+                .animation(
+                    .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                    value: isBreathing
+                )
         } else if let defaultImage = loadBundledDefaultImage() {
             // Bundled default image
             Image(nsImage: defaultImage)
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .opacity(isBreathing ? 1.0 : 0.6)
+                .scaleEffect(isBreathing ? 1.06 : 0.95)
+                .animation(
+                    .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                    value: isBreathing
+                )
         } else {
             // Last resort fallback
             Text(String(localized: "Breathe."))
