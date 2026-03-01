@@ -34,6 +34,12 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
     /// Visible on ContentView to help diagnose alarm session behavior.
     private(set) var debugStatus: String = "idle"
 
+    /// Whether the alarm session has fired (notifyUser was called).
+    /// Used by BlackoutView/ContentView to decide where to show the namaste:
+    /// when the alarm fires, the system alarm UI covers the app, so namaste
+    /// should be shown in ContentView after the user taps "Stop".
+    private(set) var hasFired = false
+
     /// Key for persisting the debug log to UserDefaults
     private static let debugLogKey = "alarmDebugLog"
 
@@ -49,6 +55,8 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
         cancelAlarm()
         clearDebugLog()
 
+        hasFired = false
+
         let session = WKExtendedRuntimeSession()
         session.delegate = self
         session.start(at: date)
@@ -56,6 +64,11 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
 
         let delay = date.timeIntervalSinceNow
         log("scheduled (in \(Int(delay))s), state=\(stateString(session.state))")
+    }
+
+    /// Reset the hasFired flag after ContentView has shown the namaste
+    func resetHasFired() {
+        hasFired = false
     }
 
     /// Cancel a scheduled or running alarm session.
@@ -101,6 +114,7 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
     // MARK: - WKExtendedRuntimeSessionDelegate
 
     func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        hasFired = true
         log("FIRED — calling notifyUser")
 
         // The scheduled alarm time has arrived — play a single gentle haptic to signal

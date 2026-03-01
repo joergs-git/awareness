@@ -149,7 +149,7 @@ Or open `ios/Awareness/Awareness.xcodeproj` in Xcode, select the `AwarenessWatch
 After launching, a ☯ icon appears in the menu bar. Click it to:
 
 - **See when the next blackout is scheduled**
-- **Test Blackout** — trigger an immediate blackout with your current settings
+- **Breathe now** — trigger an immediate blackout with your current settings
 - **Snooze** — pause for 10 min, 20 min, 30 min, 1 hour, 2 hours, or indefinitely
 - **Settings...** — open the configuration window
 - **About Awareness reminder...** — version info and credits

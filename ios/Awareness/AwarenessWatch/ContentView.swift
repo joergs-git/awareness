@@ -8,6 +8,10 @@ struct ContentView: View {
     @ObservedObject var scheduler = NotificationScheduler.shared
 
     @State private var showingBlackout = false
+    /// Whether to show the namaste overlay after an alarm-dismissed blackout
+    @State private var showingNamaste = false
+    /// Opacity for the namaste overlay fade in/out
+    @State private var namasteOpacity: Double = 0
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 30, 60, 0]
@@ -77,7 +81,7 @@ struct ContentView: View {
                     Button {
                         showingBlackout = true
                     } label: {
-                        Label(String(localized: "Test Blackout"), systemImage: "play.circle")
+                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
                     }
                 }
 
@@ -107,6 +111,37 @@ struct ContentView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
+            }
+            .onChange(of: showingBlackout) { _, isShowing in
+                // When the blackout dismisses after an alarm fired, show namaste here
+                // because the system alarm UI covered the BlackoutView's namaste
+                if !isShowing && AlarmSessionManager.shared.hasFired {
+                    AlarmSessionManager.shared.resetHasFired()
+                    showingNamaste = true
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        namasteOpacity = 1.0
+                    }
+                    // Hold for 1.5s then fade out
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            namasteOpacity = 0
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            showingNamaste = false
+                        }
+                    }
+                }
+            }
+            .overlay {
+                // Namaste overlay shown after alarm-dismissed blackout
+                if showingNamaste {
+                    ZStack {
+                        Color.black.ignoresSafeArea()
+                        Text("🙏")
+                            .font(.system(size: 48))
+                    }
+                    .opacity(namasteOpacity)
+                }
             }
         }
     }

@@ -450,7 +450,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Test Blackout.
+        ///   Looks up a localized string similar to Breathe now.
         /// </summary>
         public static string TestBlackout {
             get {

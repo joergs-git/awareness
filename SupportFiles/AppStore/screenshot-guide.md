@@ -46,7 +46,7 @@ Capture these in order of importance:
 
 ### 1. Blackout Screen (text mode)
 - Shows the core experience: full black screen with "Breathe." text
-- **How:** Open app → tap "Test Blackout" → screenshot during blackout
+- **How:** Open app → tap "Breathe now" → screenshot during blackout
 
 ### 2. Home Screen / Status
 - Shows the main ContentView with ☯ icon, status, next blackout countdown

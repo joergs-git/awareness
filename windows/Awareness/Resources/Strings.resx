@@ -42,7 +42,7 @@
   <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Awareness reminder — Snoozed indefinitely</value></data>
   <data name="NextBlackoutIn" xml:space="preserve"><value>Next blackout in {0}</value></data>
   <data name="Scheduling" xml:space="preserve"><value>Scheduling...</value></data>
-  <data name="TestBlackout" xml:space="preserve"><value>Test Blackout</value></data>
+  <data name="TestBlackout" xml:space="preserve"><value>Breathe now</value></data>
   <data name="Resume" xml:space="preserve"><value>Resume</value></data>
   <data name="Snooze" xml:space="preserve"><value>Snooze</value></data>
   <data name="UntilIResume" xml:space="preserve"><value>Until I resume</value></data>

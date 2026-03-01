@@ -4,6 +4,16 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v2.15
+
+### All platforms: "Breathe now" button rename
+- **"Test Blackout" → "Breathe now"** — the manual breathing button is not a test, it's a real mindful moment. Renamed across macOS, iOS, watchOS, and Windows (DE: "Jetzt atmen")
+
+### watchOS: Namaste after alarm dismiss
+- **Namaste now visible after alarm dismiss** — when the alarm end-signal fires with the wrist down, watchOS shows a system alarm UI that covers the app. Previously the 🙏 namaste rendered behind it and was invisible. Now the namaste is shown in ContentView after the user taps "Stop", ensuring they always see the closing gesture
+
+---
+
 ## v2.14
 
 ### watchOS: Blackout display & end-signal reliability

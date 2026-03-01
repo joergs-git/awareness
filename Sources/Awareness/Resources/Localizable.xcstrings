@@ -568,12 +568,12 @@
         }
       }
     },
-    "Test Blackout" : {
+    "Breathe now" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Test-Blackout"
+            "value" : "Jetzt atmen"
           }
         }
       }

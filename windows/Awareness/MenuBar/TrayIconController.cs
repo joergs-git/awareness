@@ -190,7 +190,7 @@ public class TrayIconController : IDisposable
 
         menu.Items.Add(new Separator());
 
-        // Test Blackout
+        // Breathe now — manual blackout trigger
         var testItem = new MenuItem { Header = Strings.TestBlackout };
         testItem.Click += (_, _) => TestBlackout();
         menu.Items.Add(testItem);

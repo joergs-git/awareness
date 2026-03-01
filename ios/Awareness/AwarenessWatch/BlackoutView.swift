@@ -193,22 +193,32 @@ struct BlackoutView: View {
 
         // Delay fade-out when flash is active so the flash completes first
         let fadeDelay = settings.endFlashEnabled ? 1.3 : 0.0
+        // When the alarm fired, the system alarm UI covers our view — namaste
+        // would be invisible here. Skip it and let ContentView show it instead.
+        let alarmFired = AlarmSessionManager.shared.hasFired
         DispatchQueue.main.asyncAfter(deadline: .now() + fadeDelay) {
             withAnimation(.easeOut(duration: 1.0)) {
                 opacity = 0
             }
-            // After fade-out, show namaste confirmation briefly before dismissing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                withAnimation(.easeIn(duration: 0.3)) {
-                    opacity = 1.0
-                    showingNamaste = true
+            if alarmFired {
+                // Quick dismiss — ContentView will show the namaste
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    isPresented = false
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        opacity = 0
+            } else {
+                // Normal flow — show namaste here before dismissing
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        opacity = 1.0
+                        showingNamaste = true
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        isPresented = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            opacity = 0
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            isPresented = false
+                        }
                     }
                 }
             }

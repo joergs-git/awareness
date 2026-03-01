@@ -175,8 +175,8 @@ class StatusBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
-        // Test Blackout
-        let testItem = NSMenuItem(title: String(localized: "Test Blackout"), action: #selector(testBlackout), keyEquivalent: "t")
+        // Breathe now — manual blackout trigger
+        let testItem = NSMenuItem(title: String(localized: "Breathe now"), action: #selector(testBlackout), keyEquivalent: "t")
         testItem.target = self
         menu.addItem(testItem)
 

@@ -122,7 +122,7 @@ struct ContentView: View {
                     Button {
                         showingBlackout = true
                     } label: {
-                        Label(String(localized: "Test Blackout"), systemImage: "play.circle")
+                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
                     }
                     Button {
                         scheduler.scheduleTestNotification()
