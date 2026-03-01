@@ -116,8 +116,8 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
         // killing the notifyUser haptic before it plays even one pulse.
         // The Timer in BlackoutView handles the visual dismiss on wrist-raise.
         // The alarm's only job is delivering the haptic signal.
-        extendedRuntimeSession.notifyUser(hapticType: .directionUp) { _ in
-            // Return 0 = play once and stop. No repeating alarm — just a calm nudge.
+        extendedRuntimeSession.notifyUser(hapticType: .notification) { _ in
+            // Return 0 = play once and stop. No repeating alarm.
             return 0
         }
 
