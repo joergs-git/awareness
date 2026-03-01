@@ -22,6 +22,9 @@
     <string>public.app-category.healthcare-fitness</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright 2025 joergsflow. All rights reserved.</string>
+    <!-- No encryption used — skip App Store export compliance dialog -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <!-- Hide from Dock — menu bar only app -->
     <key>LSUIElement</key>
     <true/>

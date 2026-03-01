@@ -663,6 +663,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Awareness reads your mindful session data to verify logging.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
@@ -693,6 +694,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Awareness reads your mindful session data to verify logging.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
@@ -724,6 +726,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Awareness reads your mindful session data to verify logging.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -752,6 +755,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Awareness reads your mindful session data to verify logging.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
