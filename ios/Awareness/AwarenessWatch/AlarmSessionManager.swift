@@ -103,19 +103,22 @@ final class AlarmSessionManager: NSObject, WKExtendedRuntimeSessionDelegate {
     func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
         log("FIRED — calling notifyUser")
 
-        // The scheduled alarm time has arrived — play haptic to signal end of blackout.
-        // If the app is not active (display off, wrist down), watchOS shows a system alarm
-        // UI with the haptic. The haptic repeats until the user taps "Stop" or the session
-        // is invalidated by the app.
+        // The scheduled alarm time has arrived — play a single gentle haptic to signal
+        // end of blackout. If the app is not active (display off, wrist down), watchOS
+        // shows a system alarm UI. We use .directionUp for a soft, uplifting feel and
+        // return 0 to play just once (no repeating alarm — keeps it calm).
+        //
+        // The system alarm UI appearance is controlled by watchOS and cannot be customized.
+        // It's the unavoidable cost of the only API that delivers haptics wrist-down.
         //
         // IMPORTANT: Do NOT post .dismissBlackout or call cancelAlarm() here!
         // Doing so would invalidate the session on the next run loop iteration,
         // killing the notifyUser haptic before it plays even one pulse.
         // The Timer in BlackoutView handles the visual dismiss on wrist-raise.
         // The alarm's only job is delivering the haptic signal.
-        extendedRuntimeSession.notifyUser(hapticType: .notification) { _ in
-            // Repeat every 10 seconds — gentle nudge until user responds
-            return 10.0
+        extendedRuntimeSession.notifyUser(hapticType: .directionUp) { _ in
+            // Return 0 = play once and stop. No repeating alarm — just a calm nudge.
+            return 0
         }
 
         log("notifyUser called, session state=\(stateString(extendedRuntimeSession.state))")
