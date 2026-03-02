@@ -110,12 +110,25 @@ struct ProgressView: View {
                     .stroke(donutColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     .rotationEffect(.degrees(-90))
 
-                // Brush overlay for ink texture
+                // Brush overlays for ink texture
                 Circle()
                     .trim(from: 0, to: rate)
-                    .stroke(donutColor.opacity(0.25), style: StrokeStyle(lineWidth: lineWidth * 0.6, lineCap: .round))
+                    .stroke(donutColor.opacity(0.5), style: StrokeStyle(lineWidth: lineWidth * 0.85, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                    .offset(x: 0.3, y: -0.2)
+                    .offset(x: 0.8, y: -0.6)
+
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor.opacity(0.3), style: StrokeStyle(lineWidth: lineWidth * 0.6, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .offset(x: -0.6, y: 0.9)
+
+                // Third overlay with dashed stroke for subtle texture breaks
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor.opacity(0.2), style: StrokeStyle(lineWidth: lineWidth * 0.4, lineCap: .round, dash: [8, 2]))
+                    .rotationEffect(.degrees(-90))
+                    .offset(x: 0.4, y: 0.5)
             }
 
             // Center text

@@ -56,7 +56,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                 }
 
                 // MARK: - Self-Report Counters
@@ -91,11 +91,19 @@ struct ContentView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 2)
                         .listRowBackground(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(card.color)
+                            WatchCardBackground(color: card.color)
                         )
+                    }
+                }
+
+                // MARK: - Breathe Now
+                Section {
+                    Button {
+                        showingBlackout = true
+                    } label: {
+                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
                     }
                 }
 
@@ -133,15 +141,6 @@ struct ContentView: View {
                     }
                 }
 
-                // MARK: - Actions
-                Section {
-                    Button {
-                        showingBlackout = true
-                    } label: {
-                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
-                    }
-                }
-
                 // MARK: - Settings
                 Section {
                     NavigationLink {
@@ -151,16 +150,6 @@ struct ContentView: View {
                     }
                 }
 
-                // MARK: - Alarm Debug (temporary diagnostic)
-                if !AlarmSessionManager.debugLog().isEmpty {
-                    Section("Alarm Debug") {
-                        ForEach(AlarmSessionManager.debugLog(), id: \.self) { entry in
-                            Text(entry)
-                                .font(.system(size: 10, design: .monospaced))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
             }
             .navigationTitle(String(localized: "Awareness reminder"))
             .fullScreenCover(isPresented: $showingBlackout) {
@@ -220,9 +209,9 @@ struct ContentView: View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Image(systemName: icon)
-                    .font(.system(size: 14))
+                    .font(.system(size: 18))
                 Text("\(count)")
-                    .font(.system(size: 10).monospacedDigit())
+                    .font(.system(size: 12).monospacedDigit())
             }
             .foregroundColor(.white.opacity(0.85))
         }
@@ -267,6 +256,38 @@ struct ContentView: View {
         #if os(watchOS)
         WKInterfaceDevice.current().play(.click)
         #endif
+    }
+}
+
+// MARK: - Watch Card Background (aquarelle style)
+
+/// Compact watercolor-style background for the practice card section on watchOS.
+struct WatchCardBackground: View {
+    let color: Color
+
+    var body: some View {
+        ZStack {
+            color
+
+            Ellipse()
+                .fill(color.opacity(0.6))
+                .frame(width: 120, height: 60)
+                .offset(x: -30, y: -10)
+                .blur(radius: 18)
+
+            Circle()
+                .fill(.white.opacity(0.15))
+                .frame(width: 70, height: 70)
+                .offset(x: 50, y: 5)
+                .blur(radius: 15)
+
+            Ellipse()
+                .fill(color.opacity(0.8))
+                .frame(width: 100, height: 50)
+                .offset(x: 10, y: 15)
+                .blur(radius: 12)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 

@@ -67,18 +67,19 @@ struct ContentView: View {
                     }
                 }
 
-                // MARK: - Micro-Task Card
-                if let task = currentTask, settings.microTaskShownToday {
-                    Section {
-                        Button {
-                            showingTaskDetail = true
-                        } label: {
-                            microTaskBanner(task: task)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 0))
-                        .listRowBackground(Color.clear)
+                // MARK: - Breathe Now (prominent, no scrolling needed)
+                Section {
+                    Button {
+                        showingBlackout = true
+                    } label: {
+                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color(red: 0.35, green: 0.45, blue: 0.62))
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
                 }
 
                 // MARK: - Status Section
@@ -160,11 +161,6 @@ struct ContentView: View {
 
                 // MARK: - Actions
                 Section {
-                    Button {
-                        showingBlackout = true
-                    } label: {
-                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
-                    }
                     if notificationsAuthorized {
                         Button {
                             scheduler.scheduleTestNotification()
@@ -357,7 +353,7 @@ struct ContentView: View {
     private func practiceCardBanner(card: PracticeCard) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(card.localizedShortTitle)
+                Text(card.localizedTitle)
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(.white)
 
@@ -370,7 +366,7 @@ struct ContentView: View {
             }
 
             if let task = currentTask, settings.microTaskShownToday {
-                Text(String(localized: "Your next task:"))
+                Text(String(localized: "Inspirational idea for you to explore"))
                     .font(.caption.smallCaps())
                     .foregroundColor(.white.opacity(0.7))
                 Text(task.localizedText)
@@ -381,8 +377,7 @@ struct ContentView: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(card.color)
+            CardBackground(color: card.color)
         )
         .padding(.horizontal, 16)
     }
@@ -391,19 +386,20 @@ struct ContentView: View {
 
     @ViewBuilder
     private func selfReportCounters(report: DailySelfReport) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12) {
             // Succeeded (checkmark)
             Button {
                 incrementSelfReport(\.succeeded)
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
-                HStack(spacing: 2) {
+                HStack(spacing: 3) {
                     Image(systemName: "checkmark.circle")
-                        .font(.caption2)
+                        .font(.body)
                     Text("\(report.succeeded)")
-                        .font(.caption2.monospacedDigit())
+                        .font(.footnote.monospacedDigit())
                 }
                 .foregroundColor(.white.opacity(0.85))
+                .frame(minWidth: 44, minHeight: 44)
             }
             .buttonStyle(.plain)
 
@@ -412,13 +408,14 @@ struct ContentView: View {
                 incrementSelfReport(\.noticed)
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
-                HStack(spacing: 2) {
+                HStack(spacing: 3) {
                     Image(systemName: "eye.circle")
-                        .font(.caption2)
+                        .font(.body)
                     Text("\(report.noticed)")
-                        .font(.caption2.monospacedDigit())
+                        .font(.footnote.monospacedDigit())
                 }
                 .foregroundColor(.white.opacity(0.85))
+                .frame(minWidth: 44, minHeight: 44)
             }
             .buttonStyle(.plain)
 
@@ -427,46 +424,17 @@ struct ContentView: View {
                 incrementSelfReport(\.forgot)
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
-                HStack(spacing: 2) {
+                HStack(spacing: 3) {
                     Image(systemName: "circle")
-                        .font(.caption2)
+                        .font(.body)
                     Text("\(report.forgot)")
-                        .font(.caption2.monospacedDigit())
+                        .font(.footnote.monospacedDigit())
                 }
                 .foregroundColor(.white.opacity(0.85))
+                .frame(minWidth: 44, minHeight: 44)
             }
             .buttonStyle(.plain)
         }
-    }
-
-    // MARK: - Micro-Task Banner
-
-    @ViewBuilder
-    private func microTaskBanner(task: MicroTask) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(String(localized: "Your next task:"))
-                    .font(.caption.smallCaps())
-                    .foregroundColor(.secondary)
-                Spacer()
-                if let card = todaysCard {
-                    Text(card.localizedTitle)
-                        .font(.system(size: 9))
-                        .foregroundColor(card.color)
-                }
-            }
-            Text(task.localizedText)
-                .font(.callout)
-                .foregroundColor(.primary)
-                .lineLimit(3)
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(.systemBackground))
-                .shadow(color: .primary.opacity(0.08), radius: 4, y: 2)
-        )
-        .padding(.horizontal, 16)
     }
 
     // MARK: - Post-Blackout Micro-Task Overlay
@@ -479,7 +447,7 @@ struct ContentView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 16) {
-                Text(String(localized: "Your next task:"))
+                Text(String(localized: "Inspirational idea for you to explore"))
                     .font(.subheadline.smallCaps())
                     .foregroundColor(.white.opacity(0.7))
 
@@ -601,6 +569,39 @@ extension Notification.Name {
     static let showBlackout = Notification.Name("showBlackout")
 }
 
+// MARK: - Card Background (aquarelle style)
+
+/// Organic watercolor-style background for practice card banners.
+/// Layers blurred shapes with hue variations of the card's color.
+struct CardBackground: View {
+    let color: Color
+
+    var body: some View {
+        ZStack {
+            color
+
+            Ellipse()
+                .fill(color.opacity(0.6))
+                .frame(width: 200, height: 100)
+                .offset(x: -60, y: -20)
+                .blur(radius: 30)
+
+            Circle()
+                .fill(.white.opacity(0.15))
+                .frame(width: 120, height: 120)
+                .offset(x: 80, y: 10)
+                .blur(radius: 25)
+
+            Ellipse()
+                .fill(color.opacity(0.8))
+                .frame(width: 180, height: 80)
+                .offset(x: 20, y: 30)
+                .blur(radius: 20)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
 // MARK: - Aquarelle Background
 
 /// Soft watercolor-style background using layered blurred shapes.
@@ -700,7 +701,7 @@ struct MicroTaskDetailView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                Text(String(localized: "Your next task"))
+                Text(String(localized: "Inspirational idea for you to explore"))
                     .font(.subheadline.smallCaps())
                     .foregroundColor(.white.opacity(0.6))
 

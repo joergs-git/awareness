@@ -78,7 +78,7 @@ final class SettingsManager: ObservableObject {
             Keys.customText:          "Breathe.",
             Keys.healthKitEnabled:    false,
             Keys.healthKitPromptShown: false,
-            Keys.smartGuruEnabled:    false,
+            Keys.smartGuruEnabled:    true,
             Keys.practiceCardNotificationHour: 7
         ]
 
@@ -505,6 +505,13 @@ final class SettingsManager: ObservableObject {
             context["guruAdaptiveState"] = stateData
         }
 
+        // Sync today's practice card so both devices show the same card (iOS is leader)
+        if let cardID = defaults.string(forKey: Keys.todaysPracticeCardID),
+           let cardDate = defaults.string(forKey: Keys.practiceCardDate) {
+            context["todaysPracticeCardID"] = cardID
+            context["practiceCardDate"] = cardDate
+        }
+
         return context
     }
 
@@ -532,6 +539,18 @@ final class SettingsManager: ObservableObject {
         if let v = context["smartGuruEnabled"] as? Bool { smartGuruEnabled = v }
         if let v = context["guruAdaptiveState"] as? Data {
             defaults.set(v, forKey: Keys.guruAdaptiveState)
+        }
+
+        // Apply synced practice card (iOS is leader — watchOS adopts the card)
+        if let cardID = context["todaysPracticeCardID"] as? String,
+           let cardDate = context["practiceCardDate"] as? String {
+            let localCardID = defaults.string(forKey: Keys.todaysPracticeCardID)
+            let localDate = defaults.string(forKey: Keys.practiceCardDate)
+            if cardID != localCardID || cardDate != localDate {
+                defaults.set(cardID, forKey: Keys.todaysPracticeCardID)
+                defaults.set(cardDate, forKey: Keys.practiceCardDate)
+                objectWillChange.send()
+            }
         }
     }
 
