@@ -185,6 +185,8 @@ struct PracticeEntry: TimelineEntry {
 
 /// Timeline provider for the practice card complication.
 /// Shows today's practice card title and current micro-task suggestion.
+/// Uses storedPracticeCard() (read-only) to avoid assigning a different random card
+/// than what iOS synced — iOS is the leader for card assignment.
 struct PracticeTimelineProvider: TimelineProvider {
 
     func placeholder(in context: Context) -> PracticeEntry {
@@ -197,7 +199,7 @@ struct PracticeTimelineProvider: TimelineProvider {
 
     func getSnapshot(in context: Context, completion: @escaping (PracticeEntry) -> Void) {
         let settings = SettingsManager.shared
-        let card = settings.todaysPracticeCard()
+        let card = settings.storedPracticeCard()
         let task = settings.currentMicroTask()
         completion(PracticeEntry(
             date: Date(),
@@ -208,7 +210,7 @@ struct PracticeTimelineProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PracticeEntry>) -> Void) {
         let settings = SettingsManager.shared
-        let card = settings.todaysPracticeCard()
+        let card = settings.storedPracticeCard()
         let task = settings.currentMicroTask()
         let now = Date()
 
@@ -218,7 +220,7 @@ struct PracticeTimelineProvider: TimelineProvider {
             microTaskText: task?.localizedText
         )
 
-        // Refresh every 30 minutes (card changes daily, task changes after blackouts)
+        // Refresh every 30 minutes (card changes daily, task syncs from iOS after blackout)
         let refreshDate = Calendar.current.date(byAdding: .minute, value: 30, to: now)!
         let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
         completion(timeline)

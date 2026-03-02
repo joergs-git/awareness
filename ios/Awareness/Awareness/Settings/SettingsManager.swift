@@ -272,6 +272,18 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Practice Card & Micro-Task State
 
+    /// Read-only: return today's stored practice card without assigning a new one.
+    /// Used by the widget extension to avoid racing with the main app or iOS sync.
+    func storedPracticeCard() -> PracticeCard? {
+        let today = todayString()
+        let storedDate = defaults.string(forKey: Keys.practiceCardDate)
+        guard storedDate == today,
+              let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) else {
+            return nil
+        }
+        return PracticeCard.card(withID: cardID)
+    }
+
     /// Get today's practice card, assigning a new one if needed
     func todaysPracticeCard() -> PracticeCard? {
         let today = todayString()
@@ -512,6 +524,13 @@ final class SettingsManager: ObservableObject {
             context["practiceCardDate"] = cardDate
         }
 
+        // Sync micro-task so the watch complication can display it
+        if let taskID = defaults.string(forKey: Keys.currentMicroTaskID),
+           let taskDate = defaults.string(forKey: Keys.microTaskDate) {
+            context["currentMicroTaskID"] = taskID
+            context["microTaskDate"] = taskDate
+        }
+
         return context
     }
 
@@ -551,6 +570,13 @@ final class SettingsManager: ObservableObject {
                 defaults.set(cardDate, forKey: Keys.practiceCardDate)
                 objectWillChange.send()
             }
+        }
+
+        // Apply synced micro-task (iOS assigns after first blackout, watch reads it)
+        if let taskID = context["currentMicroTaskID"] as? String,
+           let taskDate = context["microTaskDate"] as? String {
+            defaults.set(taskID, forKey: Keys.currentMicroTaskID)
+            defaults.set(taskDate, forKey: Keys.microTaskDate)
         }
     }
 
