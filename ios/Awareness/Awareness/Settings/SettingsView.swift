@@ -30,48 +30,86 @@ struct SettingsView: View {
                     Label(String(localized: "Active Hours"), systemImage: "clock")
                 }
 
-                // MARK: - Interval Range
+                // MARK: - Smart Guru
                 Section {
-                    VStack(alignment: .leading, spacing: 4) {
+                    Toggle(String(localized: "Smart Guru"), isOn: $settings.smartGuruEnabled)
+
+                    if settings.smartGuruEnabled {
+                        // Show adaptive status info instead of sliders
                         HStack {
-                            Text(String(localized: "Min: \(Int(settings.minInterval)) min"))
-                                .monospacedDigit()
+                            Text(String(localized: "Status"))
                             Spacer()
+                            Text(SmartGuru.shared.statusDescription(state: settings.guruAdaptiveState))
+                                .foregroundColor(.secondary)
+                                .font(.caption)
                         }
-                        Slider(value: $settings.minInterval, in: 1...120, step: 1)
-                    }
-                    VStack(alignment: .leading, spacing: 4) {
+
                         HStack {
-                            Text(String(localized: "Max: \(Int(settings.maxInterval)) min"))
-                                .monospacedDigit()
+                            Text(String(localized: "Interval"))
                             Spacer()
+                            Text(String(localized: "\(Int(settings.effectiveMinInterval))–\(Int(settings.effectiveMaxInterval)) min"))
+                                .foregroundColor(.secondary)
+                                .monospacedDigit()
                         }
-                        Slider(value: $settings.maxInterval, in: 1...120, step: 1)
+
+                        HStack {
+                            Text(String(localized: "Duration"))
+                            Spacer()
+                            Text(String(localized: "\(Int(settings.effectiveMinDuration))–\(Int(settings.effectiveMaxDuration))s"))
+                                .foregroundColor(.secondary)
+                                .monospacedDigit()
+                        }
                     }
                 } header: {
-                    Label(String(localized: "Interval Between Blackouts"), systemImage: "timer")
+                    Label(String(localized: "Adaptive Scheduling"), systemImage: "brain.head.profile")
+                } footer: {
+                    Text(String(localized: "When enabled, the guru learns your rhythm and adjusts intervals and duration automatically."))
                 }
 
-                // MARK: - Blackout Duration
-                Section {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(String(localized: "Min: \(Int(settings.minBlackoutDuration))s"))
-                                .monospacedDigit()
-                            Spacer()
+                // MARK: - Interval Range (hidden when guru is active)
+                if !settings.smartGuruEnabled {
+                    Section {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(String(localized: "Min: \(Int(settings.minInterval)) min"))
+                                    .monospacedDigit()
+                                Spacer()
+                            }
+                            Slider(value: $settings.minInterval, in: 1...120, step: 1)
                         }
-                        Slider(value: $settings.minBlackoutDuration, in: 3...120, step: 1)
-                    }
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(String(localized: "Max: \(Int(settings.maxBlackoutDuration))s"))
-                                .monospacedDigit()
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(String(localized: "Max: \(Int(settings.maxInterval)) min"))
+                                    .monospacedDigit()
+                                Spacer()
+                            }
+                            Slider(value: $settings.maxInterval, in: 1...120, step: 1)
                         }
-                        Slider(value: $settings.maxBlackoutDuration, in: 3...120, step: 1)
+                    } header: {
+                        Label(String(localized: "Interval Between Blackouts"), systemImage: "timer")
                     }
-                } header: {
-                    Label(String(localized: "Blackout Duration"), systemImage: "eye.slash")
+
+                    // MARK: - Blackout Duration
+                    Section {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(String(localized: "Min: \(Int(settings.minBlackoutDuration))s"))
+                                    .monospacedDigit()
+                                Spacer()
+                            }
+                            Slider(value: $settings.minBlackoutDuration, in: 3...120, step: 1)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(String(localized: "Max: \(Int(settings.maxBlackoutDuration))s"))
+                                    .monospacedDigit()
+                                Spacer()
+                            }
+                            Slider(value: $settings.maxBlackoutDuration, in: 3...120, step: 1)
+                        }
+                    } header: {
+                        Label(String(localized: "Blackout Duration"), systemImage: "eye.slash")
+                    }
                 }
 
                 // MARK: - Visual Type

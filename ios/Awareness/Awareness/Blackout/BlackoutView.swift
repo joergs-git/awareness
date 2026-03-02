@@ -24,6 +24,8 @@ struct BlackoutView: View {
     @State private var showingNamaste = false
     /// Controls the breathing animation — toggled on after fade-in to start pulsing
     @State private var isBreathing = false
+    /// The offered duration for event logging (captured at start)
+    @State private var offeredDuration: Double = 0
 
     var body: some View {
         ZStack {
@@ -85,7 +87,9 @@ struct BlackoutView: View {
             UIApplication.shared.isIdleTimerDisabled = true
 
             sessionStart = Date()
-            duration = settings.randomBlackoutDuration()
+            // Use guru-adapted duration when Smart Guru is enabled
+            duration = settings.effectiveRandomBlackoutDuration()
+            offeredDuration = duration
             GongPlayer.shared.playStartIfEnabled()
 
             // Haptic feedback at start
@@ -128,6 +132,21 @@ struct BlackoutView: View {
         if completedFullDuration {
             ProgressTracker.shared.recordCompleted()
         }
+
+        // Record event for Smart Guru analysis
+        let actualDuration = sessionStart.map { Date().timeIntervalSince($0) }
+        let intervalFromPrev = EventStore.shared.lastEventTimestamp
+            .map { Date().timeIntervalSince1970 - $0 }
+        let event = MindfulEvent.create(
+            outcome: completedFullDuration ? .completed : .dismissed,
+            durationOffered: offeredDuration,
+            durationActual: actualDuration,
+            intervalFromPrevious: intervalFromPrev
+        )
+        EventStore.shared.record(event: event)
+
+        // Let Smart Guru evaluate and potentially adjust scheduling
+        SmartGuru.shared.evaluateAfterEvent(event)
 
         GongPlayer.shared.playEndIfEnabled()
 

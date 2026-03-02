@@ -142,10 +142,10 @@ class ForegroundScheduler: ObservableObject {
 
     // MARK: - Helpers
 
-    /// Returns a random delay (in seconds) between the configured min and max intervals
+    /// Returns a random delay (in seconds) using effective (guru-adapted or manual) intervals
     private func randomDelay() -> TimeInterval {
-        let minSeconds = settings.minInterval * 60.0
-        let maxSeconds = settings.maxInterval * 60.0
+        let minSeconds = settings.effectiveMinInterval * 60.0
+        let maxSeconds = settings.effectiveMaxInterval * 60.0
         guard maxSeconds > minSeconds else { return minSeconds }
         return TimeInterval.random(in: minSeconds...maxSeconds)
     }

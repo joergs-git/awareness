@@ -58,6 +58,19 @@
 		B1F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
 		B3F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
 		B4F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
+		A10020 /* PracticeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10020 /* PracticeCard.swift */; };
+		A10021 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021 /* MicroTask.swift */; };
+		A10022 /* MindfulEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10022 /* MindfulEvent.swift */; };
+		A10023 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* EventStore.swift */; };
+		A10024 /* SmartGuru.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024 /* SmartGuru.swift */; };
+		A30021 /* PracticeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10020 /* PracticeCard.swift */; };
+		A30022 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021 /* MicroTask.swift */; };
+		A30023 /* MindfulEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10022 /* MindfulEvent.swift */; };
+		A30024 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* EventStore.swift */; };
+		A40010 /* PracticeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10020 /* PracticeCard.swift */; };
+		A40011 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021 /* MicroTask.swift */; };
+		A40012 /* MindfulEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10022 /* MindfulEvent.swift */; };
+		A40013 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* EventStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -142,6 +155,11 @@
 		B30014 /* ChimePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChimePlayer.swift; sourceTree = "<group>"; };
 		B30015 /* AlarmSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSessionManager.swift; sourceTree = "<group>"; };
 		A1F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		B10020 /* PracticeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeCard.swift; sourceTree = "<group>"; };
+		B10021 /* MicroTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroTask.swift; sourceTree = "<group>"; };
+		B10022 /* MindfulEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MindfulEvent.swift; sourceTree = "<group>"; };
+		B10023 /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
+		B10024 /* SmartGuru.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartGuru.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +225,11 @@
 			children = (
 				B10003 /* BlackoutVisualType.swift */,
 				B10004 /* TimeWindow.swift */,
+				B10020 /* PracticeCard.swift */,
+				B10021 /* MicroTask.swift */,
+				B10022 /* MindfulEvent.swift */,
+				B10023 /* EventStore.swift */,
+				B10024 /* SmartGuru.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -481,6 +504,11 @@
 				A30014 /* WatchConnectivityManager.swift in Sources */,
 				A10017 /* ProgressTracker.swift in Sources */,
 				A10018 /* ProgressView.swift in Sources */,
+				A10020 /* PracticeCard.swift in Sources */,
+				A10021 /* MicroTask.swift in Sources */,
+				A10022 /* MindfulEvent.swift in Sources */,
+				A10023 /* EventStore.swift in Sources */,
+				A10024 /* SmartGuru.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -504,6 +532,10 @@
 				A30015 /* UpdateChecker.swift in Sources */,
 				A30017 /* ProgressTracker.swift in Sources */,
 				A30018 /* ProgressView.swift in Sources */,
+				A30021 /* PracticeCard.swift in Sources */,
+				A30022 /* MicroTask.swift in Sources */,
+				A30023 /* MindfulEvent.swift in Sources */,
+				A30024 /* EventStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -518,6 +550,10 @@
 				A40005 /* NotificationScheduler.swift in Sources */,
 				A40008 /* HealthKitManager.swift in Sources */,
 				A40009 /* ProgressTracker.swift in Sources */,
+				A40010 /* PracticeCard.swift in Sources */,
+				A40011 /* MicroTask.swift in Sources */,
+				A40012 /* MindfulEvent.swift in Sources */,
+				A40013 /* EventStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

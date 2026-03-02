@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Home screen for the iOS Awareness app.
-/// Shows status, snooze controls, test blackout, and settings access.
+/// Shows status, practice card, micro-task, snooze controls, and settings access.
 struct ContentView: View {
 
     @ObservedObject var settings = SettingsManager.shared
@@ -13,6 +13,18 @@ struct ContentView: View {
     @State private var notificationStatus: String = "Checking..."
     @State private var notificationsAuthorized = true
     @State private var showHealthKitPrompt = false
+
+    // Practice card & micro-task state
+    @State private var todaysCard: PracticeCard?
+    @State private var currentTask: MicroTask?
+    @State private var selfReport: DailySelfReport?
+    @State private var showingCardDetail = false
+    @State private var showingTaskDetail = false
+
+    // After-blackout micro-task reveal
+    @State private var showingPostBlackoutTask = false
+    @State private var postBlackoutTask: MicroTask?
+    @State private var postBlackoutOpacity: Double = 0
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
@@ -39,6 +51,34 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .listRowBackground(Color.clear)
+                }
+
+                // MARK: - Practice Card Banner
+                if let card = todaysCard {
+                    Section {
+                        Button {
+                            showingCardDetail = true
+                        } label: {
+                            practiceCardBanner(card: card)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowBackground(Color.clear)
+                    }
+                }
+
+                // MARK: - Micro-Task Card
+                if let task = currentTask, settings.microTaskShownToday {
+                    Section {
+                        Button {
+                            showingTaskDetail = true
+                        } label: {
+                            microTaskBanner(task: task)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 0))
+                        .listRowBackground(Color.clear)
+                    }
                 }
 
                 // MARK: - Status Section
@@ -249,13 +289,30 @@ struct ContentView: View {
             }) {
                 SettingsView(settings: settings)
             }
-            .fullScreenCover(isPresented: $showingBlackout) {
+            .sheet(isPresented: $showingCardDetail) {
+                if let card = todaysCard {
+                    PracticeCardDetailView(card: card)
+                }
+            }
+            .sheet(isPresented: $showingTaskDetail) {
+                if let task = currentTask, let card = todaysCard {
+                    MicroTaskDetailView(task: task, card: card)
+                }
+            }
+            .fullScreenCover(isPresented: $showingBlackout, onDismiss: {
+                handlePostBlackout()
+            }) {
                 BlackoutView(isPresented: $showingBlackout)
             }
             .task {
                 // Small delay to let the permission dialog finish if it's showing
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await checkNotificationStatus()
+
+                // Load today's practice card and micro-task
+                todaysCard = settings.todaysPracticeCard()
+                currentTask = settings.currentMicroTask()
+                selfReport = settings.currentSelfReportData()
 
                 // Show HealthKit encouragement once if available and not yet enabled
                 if HealthKitManager.shared.isAvailable && !settings.healthKitEnabled && !settings.healthKitPromptShown {
@@ -265,6 +322,10 @@ struct ContentView: View {
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Re-check whenever app becomes active (e.g. returning from system Settings)
                 Task { await checkNotificationStatus() }
+                // Refresh card/task state on foreground return
+                todaysCard = settings.todaysPracticeCard()
+                currentTask = settings.currentMicroTask()
+                selfReport = settings.currentSelfReportData()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
@@ -280,6 +341,176 @@ struct ContentView: View {
                 }
             } message: {
                 Text(String(localized: "Awareness can log each mindful pause to Apple Health so you can track your practice over time."))
+            }
+            // Post-blackout micro-task overlay
+            .overlay {
+                if showingPostBlackoutTask, let task = postBlackoutTask {
+                    postBlackoutOverlay(task: task)
+                }
+            }
+        }
+    }
+
+    // MARK: - Practice Card Banner
+
+    @ViewBuilder
+    private func practiceCardBanner(card: PracticeCard) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(card.localizedShortTitle)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.white)
+
+                Spacer()
+
+                // Self-report counters
+                if let report = selfReport {
+                    selfReportCounters(report: report)
+                }
+            }
+
+            if let task = currentTask, settings.microTaskShownToday {
+                Text(String(localized: "Your next task:"))
+                    .font(.caption.smallCaps())
+                    .foregroundColor(.white.opacity(0.7))
+                Text(task.localizedText)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(2)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(card.color)
+        )
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Self-Report Counters
+
+    @ViewBuilder
+    private func selfReportCounters(report: DailySelfReport) -> some View {
+        HStack(spacing: 8) {
+            // Succeeded (checkmark)
+            Button {
+                incrementSelfReport(\.succeeded)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                HStack(spacing: 2) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.caption2)
+                    Text("\(report.succeeded)")
+                        .font(.caption2.monospacedDigit())
+                }
+                .foregroundColor(.white.opacity(0.85))
+            }
+            .buttonStyle(.plain)
+
+            // Noticed (eye)
+            Button {
+                incrementSelfReport(\.noticed)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                HStack(spacing: 2) {
+                    Image(systemName: "eye.circle")
+                        .font(.caption2)
+                    Text("\(report.noticed)")
+                        .font(.caption2.monospacedDigit())
+                }
+                .foregroundColor(.white.opacity(0.85))
+            }
+            .buttonStyle(.plain)
+
+            // Forgot (circle)
+            Button {
+                incrementSelfReport(\.forgot)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                HStack(spacing: 2) {
+                    Image(systemName: "circle")
+                        .font(.caption2)
+                    Text("\(report.forgot)")
+                        .font(.caption2.monospacedDigit())
+                }
+                .foregroundColor(.white.opacity(0.85))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Micro-Task Banner
+
+    @ViewBuilder
+    private func microTaskBanner(task: MicroTask) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(String(localized: "Your next task:"))
+                    .font(.caption.smallCaps())
+                    .foregroundColor(.secondary)
+                Spacer()
+                if let card = todaysCard {
+                    Text(card.localizedTitle)
+                        .font(.system(size: 9))
+                        .foregroundColor(card.color)
+                }
+            }
+            Text(task.localizedText)
+                .font(.callout)
+                .foregroundColor(.primary)
+                .lineLimit(3)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(.systemBackground))
+                .shadow(color: .primary.opacity(0.08), radius: 4, y: 2)
+        )
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Post-Blackout Micro-Task Overlay
+
+    @ViewBuilder
+    private func postBlackoutOverlay(task: MicroTask) -> some View {
+        ZStack {
+            // Aquarelle-style background
+            AquarelleBackground()
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Text(String(localized: "Your next task:"))
+                    .font(.subheadline.smallCaps())
+                    .foregroundColor(.white.opacity(0.7))
+
+                Text(task.localizedText)
+                    .font(.title3)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                if let card = todaysCard {
+                    Text(card.localizedTitle)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.5))
+                }
+            }
+        }
+        .opacity(postBlackoutOpacity)
+        .onAppear {
+            // Fade in over 2 seconds
+            withAnimation(.easeIn(duration: 2.0)) {
+                postBlackoutOpacity = 1.0
+            }
+            // Auto-dismiss after 5 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                withAnimation(.easeOut(duration: 1.0)) {
+                    postBlackoutOpacity = 0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    showingPostBlackoutTask = false
+                    postBlackoutTask = nil
+                }
             }
         }
     }
@@ -336,6 +567,31 @@ struct ContentView: View {
         let status = await scheduler.checkAuthorizationStatus()
         notificationsAuthorized = (status == .authorized || status == .provisional)
     }
+
+    /// Increment a self-report counter by keypath
+    private func incrementSelfReport(_ keyPath: WritableKeyPath<DailySelfReport, Int>) {
+        var report = settings.currentSelfReportData()
+        report[keyPath: keyPath] += 1
+        settings.updateSelfReport(report)
+        selfReport = report
+    }
+
+    /// Handle post-blackout logic: assign micro-task if first blackout of the day
+    private func handlePostBlackout() {
+        // Assign a micro-task after the first blackout of the day
+        if !settings.microTaskShownToday {
+            if let task = settings.assignMicroTask() {
+                currentTask = task
+                postBlackoutTask = task
+                postBlackoutOpacity = 0
+                showingPostBlackoutTask = true
+            }
+        }
+
+        // Refresh card state
+        todaysCard = settings.todaysPracticeCard()
+        selfReport = settings.currentSelfReportData()
+    }
 }
 
 // MARK: - Notification Name
@@ -343,4 +599,144 @@ struct ContentView: View {
 extension Notification.Name {
     /// Posted when the user taps a notification, triggering a blackout in the foreground
     static let showBlackout = Notification.Name("showBlackout")
+}
+
+// MARK: - Aquarelle Background
+
+/// Soft watercolor-style background using layered blurred shapes.
+/// Creates an organic, contemplative feel without external images.
+struct AquarelleBackground: View {
+    var body: some View {
+        ZStack {
+            Color.black
+
+            // Warm earth-toned watercolor blobs
+            Ellipse()
+                .fill(Color(red: 0.55, green: 0.42, blue: 0.32).opacity(0.4))
+                .frame(width: 300, height: 200)
+                .offset(x: -50, y: -100)
+                .blur(radius: 70)
+
+            Circle()
+                .fill(Color(red: 0.48, green: 0.62, blue: 0.49).opacity(0.3))
+                .frame(width: 250, height: 250)
+                .offset(x: 80, y: 50)
+                .blur(radius: 80)
+
+            Ellipse()
+                .fill(Color(red: 0.69, green: 0.49, blue: 0.56).opacity(0.25))
+                .frame(width: 200, height: 300)
+                .offset(x: -30, y: 120)
+                .blur(radius: 65)
+
+            Circle()
+                .fill(Color(red: 0.36, green: 0.48, blue: 0.65).opacity(0.2))
+                .frame(width: 180, height: 180)
+                .offset(x: 60, y: -150)
+                .blur(radius: 60)
+        }
+    }
+}
+
+// MARK: - Practice Card Detail View
+
+/// Full-screen card view showing the practice card's theme, description, and color.
+struct PracticeCardDetailView: View {
+    let card: PracticeCard
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            card.color.ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Spacer()
+
+                Text(card.localizedTitle)
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+
+                Text(card.localizedDescription)
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                Spacer()
+
+                Button {
+                    dismiss()
+                } label: {
+                    Text(String(localized: "Close"))
+                        .font(.headline)
+                        .foregroundColor(card.color)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(Color.white.opacity(0.9))
+                        )
+                }
+                .padding(.bottom, 40)
+            }
+        }
+    }
+}
+
+// MARK: - Micro-Task Detail View
+
+/// Full-screen task view with aquarelle background and card connection.
+struct MicroTaskDetailView: View {
+    let task: MicroTask
+    let card: PracticeCard
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            AquarelleBackground()
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Spacer()
+
+                Text(String(localized: "Your next task"))
+                    .font(.subheadline.smallCaps())
+                    .foregroundColor(.white.opacity(0.6))
+
+                Text(task.localizedText)
+                    .font(.title3)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                // Card connection badge
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(card.color)
+                        .frame(width: 8, height: 8)
+                    Text(card.localizedTitle)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.5))
+                }
+
+                Spacer()
+
+                Button {
+                    dismiss()
+                } label: {
+                    Text(String(localized: "Close"))
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(Color.white.opacity(0.9))
+                        )
+                }
+                .padding(.bottom, 40)
+            }
+        }
+    }
 }

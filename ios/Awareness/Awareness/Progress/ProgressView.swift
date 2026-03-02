@@ -1,23 +1,66 @@
 import SwiftUI
 
-/// Progress statistics view for iOS showing a donut chart, today/lifetime counters,
-/// and a 14-day bar chart of triggered vs completed blackouts.
+/// Progress statistics view for iOS showing two donut charts (today + overall),
+/// a philosophical slogan, today/lifetime counters, and a 14-day bar chart.
 struct ProgressView: View {
 
     @ObservedObject var tracker = ProgressTracker.shared
 
+    /// Earthy indigo-slate color used for the donut arcs (contemplative, non-technical)
+    private let donutColor = Color(red: 0.35, green: 0.45, blue: 0.62)
+
     var body: some View {
         List {
-            // MARK: - Donut Chart
+            // MARK: - Twin Donut Charts
             Section {
-                HStack {
+                HStack(spacing: 20) {
                     Spacer()
-                    donutChart
-                        .frame(width: 140, height: 140)
+
+                    // Today donut
+                    VStack(spacing: 4) {
+                        brushDonut(
+                            rate: todayRate,
+                            hasData: tracker.todayTriggered > 0,
+                            size: 110,
+                            lineWidth: 16
+                        )
+                        .frame(width: 110, height: 110)
+
+                        Text(String(localized: "Today"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    // Overall donut
+                    VStack(spacing: 4) {
+                        brushDonut(
+                            rate: tracker.successRate,
+                            hasData: tracker.lifetimeTriggered > 0,
+                            size: 110,
+                            lineWidth: 16
+                        )
+                        .frame(width: 110, height: 110)
+
+                        Text(String(localized: "Overall"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
                     Spacer()
                 }
                 .listRowBackground(Color.clear)
                 .padding(.vertical, 8)
+            }
+
+            // MARK: - Philosophical Slogan
+            Section {
+                Text(currentSlogan)
+                    .font(.callout.italic())
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
+                    .listRowBackground(Color.clear)
             }
 
             // MARK: - Stats
@@ -46,32 +89,44 @@ struct ProgressView: View {
         .navigationTitle(String(localized: "Mindful Moments"))
     }
 
-    // MARK: - Donut Chart
+    // MARK: - Brush-Style Donut
 
+    /// A donut chart with a brush-stroke effect: multiple overlapping arcs at slight offsets
+    /// create the impression of ink brush irregularity.
     @ViewBuilder
-    private var donutChart: some View {
-        let rate = tracker.successRate
-        let hasData = tracker.lifetimeTriggered > 0
-
+    private func brushDonut(rate: Double, hasData: Bool, size: CGFloat, lineWidth: CGFloat) -> some View {
         ZStack {
-            // Background ring (gray)
+            // Background ring
             Circle()
-                .stroke(Color.gray.opacity(0.2), lineWidth: 18)
+                .stroke(Color.gray.opacity(0.15), lineWidth: lineWidth)
 
-            // Completed arc (green)
             if hasData && rate > 0 {
+                // Primary arc
                 Circle()
                     .trim(from: 0, to: rate)
-                    .stroke(Color.green, style: StrokeStyle(lineWidth: 18, lineCap: .round))
+                    .stroke(donutColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     .rotationEffect(.degrees(-90))
+
+                // Brush overlays — thin semi-transparent arcs at tiny offsets simulate ink texture
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor.opacity(0.3), style: StrokeStyle(lineWidth: lineWidth * 0.7, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .offset(x: 0.4, y: -0.3)
+
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor.opacity(0.15), style: StrokeStyle(lineWidth: lineWidth * 0.5, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .offset(x: -0.3, y: 0.5)
             }
 
             // Center text
-            VStack(spacing: 2) {
+            VStack(spacing: 1) {
                 Text(hasData ? "\(Int(rate * 100))%" : "—")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: size * 0.2, weight: .bold))
                 Text(String(localized: "Discipline"))
-                    .font(.caption2)
+                    .font(.system(size: size * 0.08))
                     .foregroundColor(.secondary)
             }
         }
@@ -89,14 +144,14 @@ struct ProgressView: View {
                 ForEach(days) { day in
                     VStack(spacing: 2) {
                         HStack(alignment: .bottom, spacing: 1) {
-                            // Triggered bar (gray)
+                            // Triggered bar
                             RoundedRectangle(cornerRadius: 1)
                                 .fill(Color.gray.opacity(0.4))
                                 .frame(width: 7, height: barHeight(day.triggered, max: maxVal))
 
-                            // Completed bar (green)
+                            // Completed bar (same earthy color as donuts)
                             RoundedRectangle(cornerRadius: 1)
-                                .fill(Color.green)
+                                .fill(donutColor)
                                 .frame(width: 7, height: barHeight(day.completed, max: maxVal))
                         }
                         .frame(height: 80, alignment: .bottom)
@@ -122,7 +177,7 @@ struct ProgressView: View {
                 }
                 HStack(spacing: 4) {
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(Color.green)
+                        .fill(donutColor)
                         .frame(width: 8, height: 8)
                     Text(String(localized: "completed"))
                         .font(.caption2)
@@ -132,6 +187,79 @@ struct ProgressView: View {
             .padding(.top, 4)
         }
     }
+
+    // MARK: - Slogans
+
+    /// Philosophical slogan based on today's performance relative to lifetime
+    private var currentSlogan: String {
+        let lifetime = tracker.successRate
+        let today = todayRate
+        let hasToday = tracker.todayTriggered > 0
+        let hasLifetime = tracker.lifetimeTriggered > 0
+
+        // No data today
+        guard hasToday else {
+            return noDataSlogans.randomStable()
+        }
+
+        guard hasLifetime else {
+            return steadySlogans.randomStable()
+        }
+
+        let diff = today - lifetime
+
+        if diff > 0.15 {
+            return deepKoanSlogans.randomStable()
+        } else if diff > 0.10 {
+            return thrivingSlogans.randomStable()
+        } else if diff < -0.10 {
+            return strugglingSlogans.randomStable()
+        } else {
+            return steadySlogans.randomStable()
+        }
+    }
+
+    /// Today's success rate
+    private var todayRate: Double {
+        guard tracker.todayTriggered > 0 else { return 0 }
+        return Double(tracker.todayCompleted) / Double(tracker.todayTriggered)
+    }
+
+    // Slogan collections — EN only in code, localized via Localizable.xcstrings
+    private let deepKoanSlogans = [
+        String(localized: "Now dissolve even the one who observes"),
+        String(localized: "The gateless gate has been open all along"),
+        String(localized: "Awareness without an observer — sit with that"),
+    ]
+
+    private let thrivingSlogans = [
+        String(localized: "What was your face before your parents were born?"),
+        String(localized: "The finger pointing at the moon is not the moon"),
+        String(localized: "You have crossed the river. Why carry the raft?"),
+        String(localized: "The eye cannot see itself — who is it that is aware?"),
+        String(localized: "If you meet the Buddha on the road, keep walking"),
+    ]
+
+    private let steadySlogans = [
+        String(localized: "The river flows as it always has"),
+        String(localized: "Consistency is the quiet form of mastery"),
+        String(localized: "Each breath a stone on the path"),
+        String(localized: "The wheel turns. You are the axle."),
+    ]
+
+    private let strugglingSlogans = [
+        String(localized: "Even Siddhartha had bad days under the tree"),
+        String(localized: "The monkey mind wins today's round — tomorrow is yours"),
+        String(localized: "Plato's cave has excellent Wi-Fi, but the exit is still there"),
+        String(localized: "A scattered mind is just awareness with too many tabs open"),
+        String(localized: "The candle doesn't apologize for flickering"),
+    ]
+
+    private let noDataSlogans = [
+        String(localized: "In stillness rests the strength"),
+        String(localized: "The journey of awareness has no finish line"),
+        String(localized: "Before the first breath, everything is possible"),
+    ]
 
     // MARK: - Helpers
 
@@ -160,5 +288,37 @@ struct ProgressView: View {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         let todayString = formatter.string(from: Date())
         return dateString == todayString
+    }
+}
+
+// MARK: - Stable Random Selection
+
+/// Extension to pick a random element deterministically per day (so the slogan
+/// doesn't change every time the view re-renders).
+private extension Array where Element == String {
+    func randomStable() -> String {
+        guard !isEmpty else { return "" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let seed = formatter.string(from: Date()).hashValue
+        var rng = SeededRandomNumberGenerator(seed: UInt64(bitPattern: Int64(seed)))
+        return self.randomElement(using: &rng) ?? self[0]
+    }
+}
+
+/// Simple seeded RNG for deterministic per-day random selection
+private struct SeededRandomNumberGenerator: RandomNumberGenerator {
+    var state: UInt64
+
+    init(seed: UInt64) {
+        state = seed
+    }
+
+    mutating func next() -> UInt64 {
+        state &+= 0x9e3779b97f4a7c15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xbf58476d1ce4e5b9
+        z = (z ^ (z >> 27)) &* 0x94d049bb133111eb
+        return z ^ (z >> 31)
     }
 }
