@@ -201,7 +201,7 @@ struct PracticeTimelineProvider: TimelineProvider {
         let task = settings.currentMicroTask()
         completion(PracticeEntry(
             date: Date(),
-            cardTitle: card?.localizedTitle,
+            cardTitle: card?.localizedShortTitle,
             microTaskText: task?.localizedText
         ))
     }
@@ -214,7 +214,7 @@ struct PracticeTimelineProvider: TimelineProvider {
 
         let entry = PracticeEntry(
             date: now,
-            cardTitle: card?.localizedTitle,
+            cardTitle: card?.localizedShortTitle,
             microTaskText: task?.localizedText
         )
 

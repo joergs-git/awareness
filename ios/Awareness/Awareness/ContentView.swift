@@ -357,7 +357,7 @@ struct ContentView: View {
     private func practiceCardBanner(card: PracticeCard) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(card.localizedTitle)
+                Text(card.localizedShortTitle)
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(.white)
 

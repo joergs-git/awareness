@@ -63,8 +63,8 @@ struct ContentView: View {
                 if let card = todaysCard {
                     Section {
                         VStack(spacing: 6) {
-                            // Card title
-                            Text(card.localizedTitle)
+                            // Short card title (compact for watch)
+                            Text(card.localizedShortTitle)
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(.white)
                                 .lineLimit(1)

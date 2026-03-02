@@ -9,15 +9,22 @@ struct PracticeCard: Identifiable {
     let id: String                 // e.g. "letting-go"
     let titleDE: String            // "Übung des Loslassens"
     let titleEN: String            // "Exercise of Letting Go"
+    let shortTitleDE: String       // "Loslassen" — compact form for watchOS / complications
+    let shortTitleEN: String       // "Letting Go"
     let descriptionDE: String      // Full philosophical background / instructions
     let descriptionEN: String
     let promptDE: String           // Short assignment for notifications
     let promptEN: String
     let color: Color               // Distinct card color
 
-    /// Localized title based on current locale
+    /// Localized full title based on current locale
     var localizedTitle: String {
         Locale.current.language.languageCode?.identifier == "de" ? titleDE : titleEN
+    }
+
+    /// Localized short title for compact spaces (watchOS, complications)
+    var localizedShortTitle: String {
+        Locale.current.language.languageCode?.identifier == "de" ? shortTitleDE : shortTitleEN
     }
 
     /// Localized description based on current locale
@@ -40,6 +47,8 @@ extension PracticeCard {
             id: "letting-go",
             titleDE: "Übung des Loslassens",
             titleEN: "Exercise of Letting Go",
+            shortTitleDE: "Loslassen",
+            shortTitleEN: "Letting Go",
             descriptionDE: """
                 Loslassen bedeutet nicht Gleichgültigkeit. Es bedeutet, die Dinge zu halten \
                 wie Wasser in offenen Händen — präsent, aber ohne zu klammern. Heute übe, \
@@ -62,6 +71,8 @@ extension PracticeCard {
             id: "non-intervention",
             titleDE: "Übung des Nicht-eingreifens",
             titleEN: "Exercise of Non-Intervention",
+            shortTitleDE: "Nicht-eingreifen",
+            shortTitleEN: "Non-Intervention",
             descriptionDE: """
                 Nicht-eingreifen heißt nicht Untätigkeit. Es heißt, den Impuls zu bemerken, \
                 etwas korrigieren oder reparieren zu wollen — und dann zu beobachten, was \
@@ -84,6 +95,8 @@ extension PracticeCard {
             id: "undivided-perception",
             titleDE: "Übung der ungeteilten Wahrnehmung",
             titleEN: "Exercise of Undivided Perception",
+            shortTitleDE: "Ungeteilte Wahrnehmung",
+            shortTitleEN: "Undivided Perception",
             descriptionDE: """
                 Ungeteilte Wahrnehmung bedeutet, einer Sache die volle Aufmerksamkeit zu \
                 schenken — ohne gleichzeitig zu planen, zu bewerten oder abzuschweifen. \
@@ -106,6 +119,8 @@ extension PracticeCard {
             id: "unhurried-response",
             titleDE: "Übung der Antwort ohne Eile",
             titleEN: "Exercise of Unhurried Response",
+            shortTitleDE: "Antwort ohne Eile",
+            shortTitleEN: "Unhurried Response",
             descriptionDE: """
                 Zwischen Reiz und Reaktion liegt ein Raum. In diesem Raum liegt unsere \
                 Freiheit. Heute übe, diesen Raum zu finden — den Moment zwischen dem \
@@ -127,6 +142,8 @@ extension PracticeCard {
             id: "intentionlessness",
             titleDE: "Übung der Absichtslosigkeit",
             titleEN: "Exercise of Intentionlessness",
+            shortTitleDE: "Absichtslosigkeit",
+            shortTitleEN: "Intentionlessness",
             descriptionDE: """
                 Absichtslosigkeit bedeutet, etwas zu tun, ohne ein Ziel damit zu verfolgen. \
                 Nicht gehen, um irgendwo anzukommen. Nicht atmen, um sich zu beruhigen. \
@@ -148,6 +165,8 @@ extension PracticeCard {
             id: "presence-daily-life",
             titleDE: "Übung der Präsenz im Alltag",
             titleEN: "Exercise of Presence in Daily Life",
+            shortTitleDE: "Präsenz im Alltag",
+            shortTitleEN: "Daily Presence",
             descriptionDE: """
                 Präsenz braucht keine besondere Umgebung. Jeder Moment ist ein Tor zur \
                 Achtsamkeit — das Öffnen einer Tür, das Treppensteigen, das Anfassen \
@@ -170,6 +189,8 @@ extension PracticeCard {
             id: "silence",
             titleDE: "Übung der Stille",
             titleEN: "Exercise of Silence",
+            shortTitleDE: "Stille",
+            shortTitleEN: "Silence",
             descriptionDE: """
                 Stille ist nicht die Abwesenheit von Geräuschen — sie ist die Anwesenheit \
                 von Aufmerksamkeit. Heute übe, Stille zu finden: in Gesprächen, in Pausen, \
