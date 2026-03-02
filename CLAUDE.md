@@ -442,6 +442,7 @@ ios/Awareness/AwarenessWatch/
 - **Progress sync**: `ProgressTracker.connectivityContext()` and `applyFromConnectivityContext()` handle cross-device stats merge using max() strategy.
 - **Mindful Moments (progress tracking)**: `ProgressTracker.shared` persists daily stats in `UserDefaults`. `ProgressView` renders a donut chart (labeled "Discipline"), today/lifetime stats, and a 14-day bar chart. Accessible from the main ContentView navigation ("Mindful Moments"). `ProgressTracker.swift` is shared with watchOS via target membership. Triggered count is recorded on notification delivery (`willPresent`, `didReceive`, and delivered-check on foreground return), not in BlackoutView — so ignored notifications are counted accurately. `countedTriggerIDs` Set in `NotificationScheduler` prevents double-counting.
 - **Localization**: `Localizable.xcstrings` (string catalog) at `Awareness/Localizable.xcstrings` with EN and DE translations. Uses `String(localized:)` throughout UI code.
+- **Chinese sunrise color scheme (v3.0)**: iOS ContentView uses warm cream-to-sand vertical `LinearGradient` with `.scrollContentBackground(.hidden)`. Donut charts use earthy `(0.72, 0.50, 0.38)`. Breathe now button uses `.title3` + `.controlSize(.large)` with warm amber-terracotta tint. `AquarelleBackground` uses amber/peach/dusty rose/warm gold blobs. Inspiration micro-task text shown below card banner in separate section (not inside card).
 - **Foreground scheduler (v2.16)**: `ForegroundScheduler.shared` uses `Timer.scheduledTimer` on the main RunLoop to trigger blackouts while the app is in the foreground. Starts on `.active` scene phase, stops on `.background`/`.inactive`. Posts `.showBlackout` (same as notifications). Dedup: skips if `NotificationScheduler.nextNotificationDate` is within 60s; `willPresent` suppresses banner if `ForegroundScheduler.lastTriggerDate` is within 30s. Ensures the app functions without notification permission (Apple Guideline 4.5.4).
 
 ### watchOS
@@ -459,6 +460,7 @@ ios/Awareness/AwarenessWatch/
 - Notifications use default system sound (no custom .aiff) and no image attachment (no UIKit on watchOS)
 - WatchConnectivity sync: `objectWillChange` + 500ms debounce → `updateApplicationContext()`. `isApplyingRemoteContext` flag + `lastRemoteContextDate` (2s cooldown) prevent echo loops and debounce-timing bypasses.
 - Complication widget extension shares `SettingsManager`, `BlackoutVisualType`, `TimeWindow`, `NotificationScheduler`, `HealthKitManager`, and `ProgressTracker` via target membership
+- **Complication sync**: `WidgetCenter.shared.reloadAllTimelines()` called after WatchConnectivity sync, on ContentView `.task`, and after blackout dismiss — keeps practice card complication in sync with app (without this, complication refreshes only every ~30 min)
 - Bundle IDs: `com.joergsflow.awareness.ios.watch` (watch app), `com.joergsflow.awareness.ios.watch.widget` (widget extension)
 - `WKCompanionAppBundleIdentifier`: `com.joergsflow.awareness.ios`
 - Entitlements: `AwarenessWatch/AwarenessWatch.entitlements` with `com.apple.developer.healthkit`
