@@ -26,6 +26,25 @@ final class SettingsManager: ObservableObject {
         static let healthKitEnabled     = "healthKitEnabled"
         static let healthKitPromptShown = "healthKitPromptShown"
 
+        // Smart Guru
+        static let smartGuruEnabled     = "smartGuruEnabled"
+        static let manualMinInterval    = "manualMinInterval"
+        static let manualMaxInterval    = "manualMaxInterval"
+        static let manualMinDuration    = "manualMinDuration"
+        static let manualMaxDuration    = "manualMaxDuration"
+        static let guruAdaptiveState    = "guruAdaptiveState"
+
+        // Practice Cards & Micro-Tasks
+        static let todaysPracticeCardID  = "todaysPracticeCardID"
+        static let practiceCardDate      = "practiceCardDate"
+        static let yesterdaysCardID      = "yesterdaysCardID"
+        static let currentMicroTaskID    = "currentMicroTaskID"
+        static let microTaskDate         = "microTaskDate"
+        static let lastMicroTaskIDs      = "lastMicroTaskIDs"
+        static let microTaskShownToday   = "microTaskShownToday"
+        static let currentSelfReport     = "currentSelfReport"
+        static let practiceCardNotificationHour = "practiceCardNotificationHour"
+
         #if !os(watchOS)
         static let startGongEnabled     = "startGongEnabled"
         static let endGongEnabled       = "endGongEnabled"
@@ -58,7 +77,9 @@ final class SettingsManager: ObservableObject {
             Keys.visualType:          BlackoutVisualType.text.rawValue,
             Keys.customText:          "Breathe.",
             Keys.healthKitEnabled:    false,
-            Keys.healthKitPromptShown: false
+            Keys.healthKitPromptShown: false,
+            Keys.smartGuruEnabled:    false,
+            Keys.practiceCardNotificationHour: 7
         ]
 
         #if !os(watchOS)
@@ -159,6 +180,206 @@ final class SettingsManager: ObservableObject {
     /// Whether the HealthKit encouragement prompt has been shown (only ask once)
     @Published var healthKitPromptShown: Bool {
         didSet { defaults.set(healthKitPromptShown, forKey: Keys.healthKitPromptShown) }
+    }
+
+    // MARK: - Smart Guru Properties
+
+    /// Whether the adaptive scheduling guru is enabled
+    @Published var smartGuruEnabled: Bool {
+        didSet {
+            defaults.set(smartGuruEnabled, forKey: Keys.smartGuruEnabled)
+            if smartGuruEnabled && guruAdaptiveState == nil {
+                // Save current manual settings when guru activates
+                defaults.set(minInterval, forKey: Keys.manualMinInterval)
+                defaults.set(maxInterval, forKey: Keys.manualMaxInterval)
+                defaults.set(minBlackoutDuration, forKey: Keys.manualMinDuration)
+                defaults.set(maxBlackoutDuration, forKey: Keys.manualMaxDuration)
+            }
+            if !smartGuruEnabled {
+                // Restore manual settings when guru deactivates
+                let savedMin = defaults.double(forKey: Keys.manualMinInterval)
+                let savedMax = defaults.double(forKey: Keys.manualMaxInterval)
+                let savedMinDur = defaults.double(forKey: Keys.manualMinDuration)
+                let savedMaxDur = defaults.double(forKey: Keys.manualMaxDuration)
+                if savedMin > 0 { minInterval = savedMin }
+                if savedMax > 0 { maxInterval = savedMax }
+                if savedMinDur > 0 { minBlackoutDuration = savedMinDur }
+                if savedMaxDur > 0 { maxBlackoutDuration = savedMaxDur }
+            }
+        }
+    }
+
+    /// The current adaptive state persisted as JSON in UserDefaults
+    var guruAdaptiveState: AdaptiveState? {
+        get {
+            guard let data = defaults.data(forKey: Keys.guruAdaptiveState) else { return nil }
+            return try? JSONDecoder().decode(AdaptiveState.self, from: data)
+        }
+        set {
+            if let newValue = newValue, let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: Keys.guruAdaptiveState)
+            } else {
+                defaults.removeObject(forKey: Keys.guruAdaptiveState)
+            }
+            objectWillChange.send()
+        }
+    }
+
+    /// Effective min interval — uses guru-adapted value when enabled, otherwise user setting
+    var effectiveMinInterval: Double {
+        guard smartGuruEnabled, let state = guruAdaptiveState, state.phase == .adapting else {
+            return minInterval
+        }
+        return state.currentMinInterval
+    }
+
+    /// Effective max interval — uses guru-adapted value when enabled, otherwise user setting
+    var effectiveMaxInterval: Double {
+        guard smartGuruEnabled, let state = guruAdaptiveState, state.phase == .adapting else {
+            return maxInterval
+        }
+        return state.currentMaxInterval
+    }
+
+    /// Effective min blackout duration — uses guru-adapted value when enabled
+    var effectiveMinDuration: Double {
+        guard smartGuruEnabled, let state = guruAdaptiveState, state.phase == .adapting else {
+            return minBlackoutDuration
+        }
+        return state.currentMinDuration
+    }
+
+    /// Effective max blackout duration — uses guru-adapted value when enabled
+    var effectiveMaxDuration: Double {
+        guard smartGuruEnabled, let state = guruAdaptiveState, state.phase == .adapting else {
+            return maxBlackoutDuration
+        }
+        return state.currentMaxDuration
+    }
+
+    /// Returns a random blackout duration using effective (guru-adapted or manual) values
+    func effectiveRandomBlackoutDuration() -> Double {
+        let min = effectiveMinDuration
+        let max = effectiveMaxDuration
+        guard max > min else { return min }
+        return Double.random(in: min...max)
+    }
+
+    /// Hour to send the daily practice card notification (0-23, default 7)
+    @Published var practiceCardNotificationHour: Int {
+        didSet { defaults.set(practiceCardNotificationHour, forKey: Keys.practiceCardNotificationHour) }
+    }
+
+    // MARK: - Practice Card & Micro-Task State
+
+    /// Get today's practice card, assigning a new one if needed
+    func todaysPracticeCard() -> PracticeCard? {
+        let today = todayString()
+        let storedDate = defaults.string(forKey: Keys.practiceCardDate)
+
+        if storedDate == today, let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) {
+            return PracticeCard.card(withID: cardID)
+        }
+
+        // New day — assign a random card (avoid yesterday's)
+        let yesterdayID = defaults.string(forKey: Keys.todaysPracticeCardID)
+        defaults.set(yesterdayID, forKey: Keys.yesterdaysCardID)
+
+        let candidates = PracticeCard.allCards.filter { $0.id != yesterdayID }
+        guard let newCard = candidates.randomElement() else { return nil }
+
+        defaults.set(newCard.id, forKey: Keys.todaysPracticeCardID)
+        defaults.set(today, forKey: Keys.practiceCardDate)
+
+        // Archive yesterday's self-report on day change
+        archiveYesterdaysSelfReport()
+
+        // Reset micro-task state for new day
+        defaults.removeObject(forKey: Keys.currentMicroTaskID)
+        defaults.set(false, forKey: Keys.microTaskShownToday)
+
+        return newCard
+    }
+
+    /// Get the current micro-task (or assign one from today's card's pool)
+    func currentMicroTask() -> MicroTask? {
+        let today = todayString()
+        let storedDate = defaults.string(forKey: Keys.microTaskDate)
+
+        // If we already have a task for today, return it
+        if storedDate == today, let taskID = defaults.string(forKey: Keys.currentMicroTaskID) {
+            return MicroTask.allTasks.first { $0.id == taskID }
+        }
+
+        return nil
+    }
+
+    /// Assign a new micro-task from today's card's pool (called after first blackout of day)
+    func assignMicroTask() -> MicroTask? {
+        guard let card = todaysPracticeCard() else { return nil }
+
+        let today = todayString()
+        let lastIDs = defaults.stringArray(forKey: Keys.lastMicroTaskIDs) ?? []
+        let pool = MicroTask.tasks(forCardID: card.id).filter { !lastIDs.contains($0.id) }
+
+        guard let task = pool.randomElement() ?? MicroTask.tasks(forCardID: card.id).randomElement() else {
+            return nil
+        }
+
+        defaults.set(task.id, forKey: Keys.currentMicroTaskID)
+        defaults.set(today, forKey: Keys.microTaskDate)
+        defaults.set(true, forKey: Keys.microTaskShownToday)
+
+        // Track last 3 micro-task IDs to avoid immediate repeats
+        var updated = lastIDs
+        updated.append(task.id)
+        if updated.count > 3 { updated.removeFirst() }
+        defaults.set(updated, forKey: Keys.lastMicroTaskIDs)
+
+        return task
+    }
+
+    /// Whether a micro-task has been shown today (first blackout already happened)
+    var microTaskShownToday: Bool {
+        defaults.bool(forKey: Keys.microTaskShownToday)
+    }
+
+    // MARK: - Self-Report
+
+    /// Get or create today's self-report
+    func currentSelfReportData() -> DailySelfReport {
+        if let data = defaults.data(forKey: Keys.currentSelfReport),
+           let report = try? JSONDecoder().decode(DailySelfReport.self, from: data),
+           report.date == todayString() {
+            return report
+        }
+        let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) ?? ""
+        return DailySelfReport(date: todayString(), cardID: cardID, succeeded: 0, noticed: 0, forgot: 0)
+    }
+
+    /// Update today's self-report
+    func updateSelfReport(_ report: DailySelfReport) {
+        if let data = try? JSONEncoder().encode(report) {
+            defaults.set(data, forKey: Keys.currentSelfReport)
+        }
+        objectWillChange.send()
+    }
+
+    /// Archive yesterday's self-report to EventStore when the day changes
+    private func archiveYesterdaysSelfReport() {
+        if let data = defaults.data(forKey: Keys.currentSelfReport),
+           let report = try? JSONDecoder().decode(DailySelfReport.self, from: data),
+           report.date != todayString() {
+            EventStore.shared.archiveSelfReport(report)
+        }
+        // Reset for new day
+        defaults.removeObject(forKey: Keys.currentSelfReport)
+    }
+
+    private func todayString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
     }
 
     // MARK: - Published Properties (iOS only)
@@ -278,6 +499,12 @@ final class SettingsManager: ObservableObject {
             context["snoozeUntil"] = 0.0
         }
 
+        // Include Smart Guru state
+        context["smartGuruEnabled"] = smartGuruEnabled
+        if let stateData = defaults.data(forKey: Keys.guruAdaptiveState) {
+            context["guruAdaptiveState"] = stateData
+        }
+
         return context
     }
 
@@ -300,6 +527,12 @@ final class SettingsManager: ObservableObject {
         if let v = context["snoozeUntil"] as? Double {
             snoozeUntil = v > 0 ? Date(timeIntervalSince1970: v) : nil
         }
+
+        // Smart Guru sync — watch receives state but doesn't run the algorithm
+        if let v = context["smartGuruEnabled"] as? Bool { smartGuruEnabled = v }
+        if let v = context["guruAdaptiveState"] as? Data {
+            defaults.set(v, forKey: Keys.guruAdaptiveState)
+        }
     }
 
     // MARK: - Init
@@ -319,6 +552,8 @@ final class SettingsManager: ObservableObject {
         snoozeUntil         = defaults.object(forKey: Keys.snoozeUntil) as? Date
         healthKitEnabled    = defaults.bool(forKey: Keys.healthKitEnabled)
         healthKitPromptShown = defaults.bool(forKey: Keys.healthKitPromptShown)
+        smartGuruEnabled    = defaults.bool(forKey: Keys.smartGuruEnabled)
+        practiceCardNotificationHour = defaults.integer(forKey: Keys.practiceCardNotificationHour)
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue
         visualType = BlackoutVisualType(rawValue: typeRaw) ?? .text

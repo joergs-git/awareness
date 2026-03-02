@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Home screen for the watchOS Awareness app.
-/// Shows status, next blackout time, test button, snooze controls, and settings link.
+/// Compact layout: status dot + next time at top, practice card, self-report,
+/// progress link, snooze, actions, settings.
 struct ContentView: View {
 
     @ObservedObject var settings = SettingsManager.shared
@@ -13,29 +14,88 @@ struct ContentView: View {
     /// Opacity for the namaste overlay fade in/out
     @State private var namasteOpacity: Double = 0
 
+    /// Today's practice card (assigned from iOS or locally)
+    @State private var todaysCard: PracticeCard?
+    /// Self-report counters for today
+    @State private var selfReport: DailySelfReport?
+
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 30, 60, 0]
 
     var body: some View {
         NavigationStack {
             List {
-                // MARK: - Status
+                // MARK: - Compact Status Bar (dot + next time)
                 Section {
-                    HStack {
+                    HStack(spacing: 6) {
                         Circle()
                             .fill(statusColor)
-                            .frame(width: 10, height: 10)
-                        Text(statusText)
-                            .font(.footnote)
-                    }
+                            .frame(width: 8, height: 8)
 
-                    if let nextDate = scheduler.nextNotificationDate, !settings.isSnoozed {
-                        HStack {
-                            Image(systemName: "clock")
-                                .font(.footnote)
-                            Text(String(localized: "Next: \(formatTime(nextDate))"))
-                                .font(.footnote)
+                        if settings.isSnoozed {
+                            if let until = settings.snoozeUntil, until < Date.distantFuture {
+                                Text(formatTime(until))
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.orange)
+                            } else {
+                                Text(String(localized: "Paused"))
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.orange)
+                            }
+                        } else if let nextDate = scheduler.nextNotificationDate {
+                            Text(formatTime(nextDate))
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
                         }
+
+                        Spacer()
+
+                        // Today's progress counter
+                        Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
+                            .font(.system(size: 11).monospacedDigit())
+                            .foregroundColor(.secondary)
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                }
+
+                // MARK: - Self-Report Counters
+                if let card = todaysCard {
+                    Section {
+                        VStack(spacing: 6) {
+                            // Card title
+                            Text(card.localizedTitle)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+
+                            // Three counter buttons in a row
+                            if let report = selfReport {
+                                HStack(spacing: 12) {
+                                    selfReportButton(
+                                        icon: "checkmark.circle",
+                                        count: report.succeeded,
+                                        action: { incrementSelfReport(\.succeeded) }
+                                    )
+                                    selfReportButton(
+                                        icon: "eye.circle",
+                                        count: report.noticed,
+                                        action: { incrementSelfReport(\.noticed) }
+                                    )
+                                    selfReportButton(
+                                        icon: "circle",
+                                        count: report.forgot,
+                                        action: { incrementSelfReport(\.forgot) }
+                                    )
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(card.color)
+                        )
                     }
                 }
 
@@ -48,9 +108,6 @@ struct ContentView: View {
                             Label(String(localized: "Mindful Moments"), systemImage: "chart.pie")
                                 .font(.footnote)
                             Spacer()
-                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -109,6 +166,10 @@ struct ContentView: View {
             .fullScreenCover(isPresented: $showingBlackout) {
                 BlackoutView(isPresented: $showingBlackout)
             }
+            .task {
+                todaysCard = settings.todaysPracticeCard()
+                selfReport = settings.currentSelfReportData()
+            }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
             }
@@ -131,6 +192,12 @@ struct ContentView: View {
                         }
                     }
                 }
+
+                // Refresh self-report after blackout
+                if !isShowing {
+                    selfReport = settings.currentSelfReportData()
+                    todaysCard = settings.todaysPracticeCard()
+                }
             }
             .overlay {
                 // Namaste overlay shown after alarm-dismissed blackout
@@ -146,20 +213,26 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Self-Report Button
+
+    @ViewBuilder
+    private func selfReportButton(icon: String, count: Int, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                Text("\(count)")
+                    .font(.system(size: 10).monospacedDigit())
+            }
+            .foregroundColor(.white.opacity(0.85))
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Computed
 
     private var statusColor: Color {
         settings.isSnoozed ? .orange : .green
-    }
-
-    private var statusText: String {
-        if settings.isSnoozed {
-            if let until = settings.snoozeUntil, until < Date.distantFuture {
-                return String(localized: "Snoozed until \(formatTime(until))")
-            }
-            return String(localized: "Snoozed")
-        }
-        return String(localized: "Active")
     }
 
     // MARK: - Helpers
@@ -182,6 +255,18 @@ struct ContentView: View {
         } else {
             scheduler.handleSnooze(until: Date().addingTimeInterval(Double(minutes) * 60))
         }
+    }
+
+    /// Increment a self-report counter by keypath
+    private func incrementSelfReport(_ keyPath: WritableKeyPath<DailySelfReport, Int>) {
+        var report = settings.currentSelfReportData()
+        report[keyPath: keyPath] += 1
+        settings.updateSelfReport(report)
+        selfReport = report
+        // Light haptic on watch
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.click)
+        #endif
     }
 }
 

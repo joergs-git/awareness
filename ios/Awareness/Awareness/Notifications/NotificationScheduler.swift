@@ -136,6 +136,9 @@ class NotificationScheduler: ObservableObject {
         nextNotificationDate = firstDate
         scheduledFireDates = fireDates
 
+        // Schedule the daily morning practice card notification
+        schedulePracticeCardNotification()
+
         // Push fire dates to the companion watch for coordinated scheduling
         WatchConnectivityManager.shared.pushScheduleToWatch(fireDates)
     }
@@ -243,6 +246,45 @@ class NotificationScheduler: ObservableObject {
             .store(in: &cancellables)
     }
 
+    // MARK: - Practice Card Notification
+
+    /// Identifier for the daily practice card notification
+    private static let practiceCardIdentifier = "awareness-practice-card"
+
+    /// Schedule a morning notification delivering today's practice card assignment.
+    /// Fires daily at the user's configured hour (default: 07:00).
+    func schedulePracticeCardNotification() {
+        // Remove any existing practice card notification
+        center.removePendingNotificationRequests(withIdentifiers: [NotificationScheduler.practiceCardIdentifier])
+
+        // Ensure we have a card for today
+        guard let card = settings.todaysPracticeCard() else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Today's Practice ☯")
+        content.subtitle = card.localizedTitle
+        content.body = card.localizedPrompt
+        content.sound = .default
+
+        // Attach the app icon as a thumbnail
+        if let attachment = createIconAttachment() {
+            content.attachments = [attachment]
+        }
+
+        // Schedule for the configured hour, repeating daily
+        var dateComponents = DateComponents()
+        dateComponents.hour = settings.practiceCardNotificationHour
+        dateComponents.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(
+            identifier: NotificationScheduler.practiceCardIdentifier,
+            content: content,
+            trigger: trigger
+        )
+        center.add(request)
+    }
+
     // MARK: - Helpers
 
     /// Build the notification content with title, subtitle, sound, category, and image attachment
@@ -295,10 +337,10 @@ class NotificationScheduler: ObservableObject {
         center.add(request)
     }
 
-    /// Returns a random interval in minutes between the configured min and max
+    /// Returns a random interval in minutes using effective (guru-adapted or manual) values
     private func randomInterval() -> Double {
-        let minMin = settings.minInterval
-        let maxMin = settings.maxInterval
+        let minMin = settings.effectiveMinInterval
+        let maxMin = settings.effectiveMaxInterval
         guard maxMin > minMin else { return minMin }
         return Double.random(in: minMin...maxMin)
     }
@@ -363,6 +405,7 @@ class NotificationScheduler: ObservableObject {
     /// Count any delivered awareness notifications as triggered and clear them.
     /// Catches notifications the user ignored (never tapped) — they sit in the
     /// notification center until the app returns to foreground.
+    /// Also records ignored events for the Smart Guru algorithm.
     func countDeliveredNotifications() {
         center.getDeliveredNotifications { [weak self] notifications in
             guard let self = self else { return }
@@ -370,7 +413,22 @@ class NotificationScheduler: ObservableObject {
                 $0.request.content.categoryIdentifier == NotificationScheduler.categoryIdentifier
             }
             for n in awareness {
-                self.recordNotificationTriggered(n.request.identifier)
+                let wasNew = self.countedTriggerIDs.insert(n.request.identifier).inserted
+                if wasNew {
+                    ProgressTracker.shared.recordTriggered()
+
+                    // Record as ignored event for Smart Guru
+                    let intervalFromPrev = EventStore.shared.lastEventTimestamp
+                        .map { Date().timeIntervalSince1970 - $0 }
+                    let event = MindfulEvent.create(
+                        outcome: .ignored,
+                        durationOffered: self.settings.effectiveRandomBlackoutDuration(),
+                        durationActual: nil,
+                        intervalFromPrevious: intervalFromPrev
+                    )
+                    EventStore.shared.record(event: event)
+                    SmartGuru.shared.evaluateAfterEvent(event)
+                }
             }
             if !awareness.isEmpty {
                 let ids = awareness.map { $0.request.identifier }
