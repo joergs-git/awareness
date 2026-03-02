@@ -4,6 +4,43 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.0
+
+### All platforms: Smart Guru — Adaptive Mindfulness Scheduling
+- **Smart Guru algorithm** — rule-based adaptive system that learns your rhythm over a 3-day baseline, then adjusts intervals (±10%) and blackout duration based on your behavior. Thriving users get more frequent, longer pauses; struggling users get gentler pacing
+- **Duration adaptation** — automatically shortens blackout duration by 5s after 3+ consecutive dismissals; gradually increases by ~1s/day when you're consistently completing (85%+ rate over 7 days)
+- **Toggle in Settings** — enable/disable Smart Guru; when active, manual interval and duration sliders are replaced with read-only adaptive info
+
+### iOS/iPadOS + watchOS: Practice Cards & Micro-Tasks
+- **7 daily practice cards** — each day you receive a mindfulness assignment from a card deck (Letting Go, Non-Intervention, Undivided Perception, Unhurried Response, Intentionlessness, Daily Presence, Silence), each with its own color and philosophical background
+- **Short titles** — compact card names for watchOS and banner displays (e.g. "Loslassen" instead of "Übung des Loslassens")
+- **66 micro-tasks** — concrete everyday situations linked to each card where you can practice the day's principle (e.g. "Notice the urge to check for a reply. Don't check. Just notice the urge.")
+- **Morning notification** — daily practice card delivered at a configurable hour (default: 07:00)
+- **Self-report counters** — three tap-to-increment icons on the card banner: succeeded (✓), noticed (◐), forgot (○) — track your practice throughout the day
+- **Aquarelle backgrounds** — organic watercolor-style visuals for card and task presentation (layered blurred gradients in warm earth tones)
+
+### iOS/iPadOS + watchOS: Progress View Redesign
+- **Two donuts side by side** — "Today" (midnight-to-midnight) and "Overall" (lifetime) discipline charts
+- **Brush-stroke style** — earthy indigo-slate color with overlapping semi-transparent arcs simulating ink brush texture
+- **Philosophical slogans** — 19 contemplative quotes that adapt to your performance: deep koans when thriving, ironic-philosophical wit when struggling, neutral wisdom when no data
+
+### iOS/iPadOS: Event-Level Logging
+- **MindfulEvent tracking** — every blackout outcome (completed, dismissed, ignored) is recorded with timestamp, duration, and context
+- **90-day rolling window** — EventStore with hourly and weekday profile tracking for long-term pattern analysis
+- **DailySelfReport archiving** — practice card feedback preserved for future analysis
+
+### watchOS: Enhanced Complications & UI
+- **Progress counter on circular complication** — yin-yang icon shows today's progress (e.g. "2/5") as an overlay
+- **New practice card complication** — rectangular complication showing today's card title and current micro-task
+- **WidgetBundle** — two complication types available: status (circular/rectangular/inline) and practice card (rectangular)
+- **Compact status bar** — green/orange dot + next time + progress counter on a single line, replacing verbose status text
+- **Self-report on watch** — tap counters directly on the practice card section with haptic feedback
+
+### Localization
+- All new strings localized in English and German (slogans, card titles, descriptions, prompts, micro-tasks, settings labels, guru status messages)
+
+---
+
 ## v2.16
 
 ### iOS: Foreground scheduler (Apple Guideline 4.5.4 compliance)

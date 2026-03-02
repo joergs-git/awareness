@@ -1,6 +1,12 @@
-Neu in Version 2.16:
+Neu in Version 3.0:
 
-- Die App funktioniert jetzt ohne Benachrichtigungserlaubnis — ein Vordergrund-Timer löst achtsame Pausen automatisch aus, solange die App geöffnet ist
-- Benachrichtigungen sind optional, nur für Erinnerungen im Hintergrund
-- Sanfter Hinweis erklärt, wie Benachrichtigungen für volle Funktionalität aktiviert werden
-- Export-Compliance-Erklärung hinzugefügt (keine Verschlüsselung verwendet)
+- Smart Guru: adaptiver Algorithmus lernt deinen Rhythmus und passt Intervall und Dauer automatisch an
+- 7 tägliche Übungskarten mit Achtsamkeitsaufgaben (Loslassen, Stille, Präsenz und mehr)
+- 66 Mikro-Aufgaben: konkrete alltägliche Achtsamkeitsübungen zu jeder Karte
+- Selbstbericht: tippe um erfolgreiche, bemerkte oder vergessene Momente den Tag über zu zählen
+- Zwei Disziplin-Donuts nebeneinander (Heute + Gesamt) im Pinselstrich-Stil
+- 19 philosophische Sprüche, die sich deiner Leistung anpassen — Koans bei Erfolg, Witz bei Schwierigkeiten
+- watchOS: Fortschrittszähler auf Komplikation, neue Übungskarten-Komplikation, kompakte Statusleiste
+- Morgendliche Übungskarten-Benachrichtigung zur einstellbaren Uhrzeit
+- Ereignisprotokollierung mit 90-Tage-Fenster für Musteranalyse
+- Alle neuen Inhalte auf Englisch und Deutsch lokalisiert
