@@ -67,17 +67,35 @@ struct ContentView: View {
                     }
                 }
 
+                // MARK: - Inspiration (below card, visually separated)
+                if let task = currentTask, settings.microTaskShownToday {
+                    Section {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(String(localized: "Inspirational idea for you to explore"))
+                                .font(.caption.smallCaps())
+                                .foregroundColor(.secondary)
+                            Text(task.localizedText)
+                                .font(.callout.italic())
+                                .foregroundColor(.primary.opacity(0.8))
+                                .lineLimit(3)
+                        }
+                        .padding(.vertical, 4)
+                        .onTapGesture { showingTaskDetail = true }
+                    }
+                }
+
                 // MARK: - Breathe Now (prominent, no scrolling needed)
                 Section {
                     Button {
                         showingBlackout = true
                     } label: {
                         Label(String(localized: "Breathe now"), systemImage: "play.circle")
-                            .font(.headline)
+                            .font(.title3)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(Color(red: 0.35, green: 0.45, blue: 0.62))
+                    .controlSize(.large)
+                    .tint(Color(red: 0.72, green: 0.50, blue: 0.38))
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
                 }
@@ -270,6 +288,18 @@ struct ContentView: View {
                     Text(String(localized: "About"))
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.98, green: 0.92, blue: 0.84),
+                        Color(red: 0.93, green: 0.85, blue: 0.78)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            )
             .navigationTitle(String(localized: "Awareness reminder"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -365,15 +395,6 @@ struct ContentView: View {
                 }
             }
 
-            if let task = currentTask, settings.microTaskShownToday {
-                Text(String(localized: "Inspirational idea for you to explore"))
-                    .font(.caption.smallCaps())
-                    .foregroundColor(.white.opacity(0.7))
-                Text(task.localizedText)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.9))
-                    .lineLimit(2)
-            }
         }
         .padding(12)
         .background(
@@ -587,7 +608,7 @@ struct CardBackground: View {
                 .blur(radius: 30)
 
             Circle()
-                .fill(.white.opacity(0.15))
+                .fill(Color(red: 1.0, green: 0.97, blue: 0.92).opacity(0.2))
                 .frame(width: 120, height: 120)
                 .offset(x: 80, y: 10)
                 .blur(radius: 25)
@@ -605,33 +626,33 @@ struct CardBackground: View {
 // MARK: - Aquarelle Background
 
 /// Soft watercolor-style background using layered blurred shapes.
-/// Creates an organic, contemplative feel without external images.
+/// Creates an organic, contemplative feel with warm Chinese sunrise tones.
 struct AquarelleBackground: View {
     var body: some View {
         ZStack {
             Color.black
 
-            // Warm earth-toned watercolor blobs
+            // Warm sunrise watercolor blobs — amber, peach, dusty rose, warm gold
             Ellipse()
-                .fill(Color(red: 0.55, green: 0.42, blue: 0.32).opacity(0.4))
+                .fill(Color(red: 0.76, green: 0.52, blue: 0.32).opacity(0.4))
                 .frame(width: 300, height: 200)
                 .offset(x: -50, y: -100)
                 .blur(radius: 70)
 
             Circle()
-                .fill(Color(red: 0.48, green: 0.62, blue: 0.49).opacity(0.3))
+                .fill(Color(red: 0.85, green: 0.62, blue: 0.45).opacity(0.3))
                 .frame(width: 250, height: 250)
                 .offset(x: 80, y: 50)
                 .blur(radius: 80)
 
             Ellipse()
-                .fill(Color(red: 0.69, green: 0.49, blue: 0.56).opacity(0.25))
+                .fill(Color(red: 0.72, green: 0.48, blue: 0.52).opacity(0.25))
                 .frame(width: 200, height: 300)
                 .offset(x: -30, y: 120)
                 .blur(radius: 65)
 
             Circle()
-                .fill(Color(red: 0.36, green: 0.48, blue: 0.65).opacity(0.2))
+                .fill(Color(red: 0.82, green: 0.68, blue: 0.42).opacity(0.2))
                 .frame(width: 180, height: 180)
                 .offset(x: 60, y: -150)
                 .blur(radius: 60)

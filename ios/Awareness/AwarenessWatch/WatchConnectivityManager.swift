@@ -1,5 +1,6 @@
 import WatchConnectivity
 import Combine
+import WidgetKit
 
 /// watchOS-side WatchConnectivity manager.
 /// Receives settings from the companion iPhone app via applicationContext
@@ -118,6 +119,9 @@ extension WatchConnectivityManager: WCSessionDelegate {
                 // No fire dates from iOS — schedule independently as fallback
                 NotificationScheduler.shared.rescheduleAll()
             }
+
+            // Refresh complication so it shows the same practice card as the app
+            WidgetCenter.shared.reloadAllTimelines()
 
             // Clear flags AFTER scheduling to prevent the debounced observer
             // from triggering a redundant reschedule or push back to the phone

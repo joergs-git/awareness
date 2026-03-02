@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// Home screen for the watchOS Awareness app.
 /// Compact layout: status dot + next time at top, practice card, self-report,
@@ -69,9 +70,9 @@ struct ContentView: View {
                                 .foregroundColor(.white)
                                 .lineLimit(1)
 
-                            // Three counter buttons in a row
+                            // Three counter buttons in a row (wider spacing for easier tapping)
                             if let report = selfReport {
-                                HStack(spacing: 12) {
+                                HStack(spacing: 20) {
                                     selfReportButton(
                                         icon: "checkmark.circle",
                                         count: report.succeeded,
@@ -158,6 +159,8 @@ struct ContentView: View {
             .task {
                 todaysCard = settings.todaysPracticeCard()
                 selfReport = settings.currentSelfReportData()
+                // Ensure complication shows the same card as the app
+                WidgetCenter.shared.reloadAllTimelines()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
@@ -186,6 +189,8 @@ struct ContentView: View {
                 if !isShowing {
                     selfReport = settings.currentSelfReportData()
                     todaysCard = settings.todaysPracticeCard()
+                    // Refresh complication after blackout (card may have changed)
+                    WidgetCenter.shared.reloadAllTimelines()
                 }
             }
             .overlay {
