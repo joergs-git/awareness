@@ -72,7 +72,8 @@ struct ContentView: View {
                                     .fill(card.color.opacity(0.4))
                                     .frame(width: 2, height: 8)
 
-                                // Task box with matching border
+                                // Task box with matching border (extra top padding so caption
+                                // isn't clipped under the card's rounded bottom edge)
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(String(localized: "Inspirational idea for you to explore"))
                                         .font(.caption.smallCaps())
@@ -82,7 +83,9 @@ struct ContentView: View {
                                         .foregroundColor(.primary.opacity(0.8))
                                         .lineLimit(3)
                                 }
-                                .padding(12)
+                                .padding(.horizontal, 12)
+                                .padding(.top, 16)
+                                .padding(.bottom, 12)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
@@ -102,13 +105,17 @@ struct ContentView: View {
                     Button {
                         showingBlackout = true
                     } label: {
-                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
+                        Text(String(localized: "Breathe now"))
                             .font(.title3)
+                            .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                            )
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .tint(Color(red: 0.72, green: 0.50, blue: 0.38))
+                    .buttonStyle(.plain)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
                 }
@@ -401,6 +408,7 @@ struct ContentView: View {
         .background(
             CardBackground(color: card.color)
         )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal, 16)
     }
 
