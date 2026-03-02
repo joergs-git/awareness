@@ -199,25 +199,31 @@ struct PracticeTimelineProvider: TimelineProvider {
 
     func getSnapshot(in context: Context, completion: @escaping (PracticeEntry) -> Void) {
         let settings = SettingsManager.shared
-        let card = settings.storedPracticeCard()
+        // Prefer storedPracticeCard (read-only, respects iOS sync) with
+        // todaysPracticeCard fallback so a card is always shown even before
+        // the watch app has been opened today
+        let card = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
         let task = settings.currentMicroTask()
+        // When no micro-task yet (before first blackout), show card prompt as fallback
+        let subtitle = task?.localizedText ?? card?.localizedPrompt
         completion(PracticeEntry(
             date: Date(),
             cardTitle: card?.localizedShortTitle,
-            microTaskText: task?.localizedText
+            microTaskText: subtitle
         ))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PracticeEntry>) -> Void) {
         let settings = SettingsManager.shared
-        let card = settings.storedPracticeCard()
+        let card = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
         let task = settings.currentMicroTask()
+        let subtitle = task?.localizedText ?? card?.localizedPrompt
         let now = Date()
 
         let entry = PracticeEntry(
             date: now,
             cardTitle: card?.localizedShortTitle,
-            microTaskText: task?.localizedText
+            microTaskText: subtitle
         )
 
         // Refresh every 30 minutes (card changes daily, task syncs from iOS after blackout)

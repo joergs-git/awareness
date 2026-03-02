@@ -53,34 +53,47 @@ struct ContentView: View {
                     .listRowBackground(Color.clear)
                 }
 
-                // MARK: - Practice Card Banner
+                // MARK: - Practice Card Banner + Micro-Task
                 if let card = todaysCard {
                     Section {
-                        Button {
-                            showingCardDetail = true
-                        } label: {
-                            practiceCardBanner(card: card)
+                        VStack(spacing: 0) {
+                            // Card banner (tap for detail)
+                            Button {
+                                showingCardDetail = true
+                            } label: {
+                                practiceCardBanner(card: card)
+                            }
+                            .buttonStyle(.plain)
+
+                            // Micro-task connected below the card with thin colored bridge
+                            if let task = currentTask, settings.microTaskShownToday {
+                                // Thin color connector between card and task
+                                Rectangle()
+                                    .fill(card.color.opacity(0.4))
+                                    .frame(width: 2, height: 8)
+
+                                // Task box with matching border
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(String(localized: "Inspirational idea for you to explore"))
+                                        .font(.caption.smallCaps())
+                                        .foregroundColor(.secondary)
+                                    Text(task.localizedText)
+                                        .font(.callout.italic())
+                                        .foregroundColor(.primary.opacity(0.8))
+                                        .lineLimit(3)
+                                }
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(card.color.opacity(0.3), lineWidth: 1)
+                                )
+                                .padding(.horizontal, 16)
+                                .onTapGesture { showingTaskDetail = true }
+                            }
                         }
-                        .buttonStyle(.plain)
                         .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                         .listRowBackground(Color.clear)
-                    }
-                }
-
-                // MARK: - Inspiration (below card, visually separated)
-                if let task = currentTask, settings.microTaskShownToday {
-                    Section {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(String(localized: "Inspirational idea for you to explore"))
-                                .font(.caption.smallCaps())
-                                .foregroundColor(.secondary)
-                            Text(task.localizedText)
-                                .font(.callout.italic())
-                                .foregroundColor(.primary.opacity(0.8))
-                                .lineLimit(3)
-                        }
-                        .padding(.vertical, 4)
-                        .onTapGesture { showingTaskDetail = true }
                     }
                 }
 
@@ -288,18 +301,6 @@ struct ContentView: View {
                     Text(String(localized: "About"))
                 }
             }
-            .scrollContentBackground(.hidden)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.98, green: 0.92, blue: 0.84),
-                        Color(red: 0.93, green: 0.85, blue: 0.78)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-            )
             .navigationTitle(String(localized: "Awareness reminder"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

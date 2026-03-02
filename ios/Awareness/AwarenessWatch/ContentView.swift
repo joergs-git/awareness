@@ -19,6 +19,8 @@ struct ContentView: View {
     @State private var todaysCard: PracticeCard?
     /// Self-report counters for today
     @State private var selfReport: DailySelfReport?
+    /// Whether to show the practice card detail sheet
+    @State private var showingCardDetail = false
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 30, 60, 0]
@@ -64,11 +66,17 @@ struct ContentView: View {
                 if let card = todaysCard {
                     Section {
                         VStack(spacing: 6) {
-                            // Short card title (compact for watch)
-                            Text(card.localizedShortTitle)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.white)
-                                .lineLimit(1)
+                            // Tap card title to open detail sheet
+                            Button {
+                                showingCardDetail = true
+                            } label: {
+                                Text(card.localizedShortTitle)
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.plain)
 
                             // Three counter buttons in a row (wider spacing for easier tapping)
                             if let report = selfReport {
@@ -96,6 +104,9 @@ struct ContentView: View {
                         .listRowBackground(
                             WatchCardBackground(color: card.color)
                         )
+                    }
+                    .sheet(isPresented: $showingCardDetail) {
+                        WatchCardDetailView(card: card)
                     }
                 }
 
@@ -293,6 +304,48 @@ struct WatchCardBackground: View {
                 .blur(radius: 12)
         }
         .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+// MARK: - Watch Card Detail View
+
+/// Compact detail view for the practice card on watchOS.
+/// Shows the full title, description, and current micro-task on the card's color background.
+struct WatchCardDetailView: View {
+    let card: PracticeCard
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                Text(card.localizedTitle)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+
+                Text(card.localizedDescription)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+
+                // Show current micro-task if assigned
+                if let task = SettingsManager.shared.currentMicroTask() {
+                    Divider()
+                        .background(Color.white.opacity(0.3))
+                    Text(task.localizedText)
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .italic()
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 12)
+        }
+        .background(
+            WatchCardBackground(color: card.color)
+                .ignoresSafeArea()
+        )
     }
 }
 
