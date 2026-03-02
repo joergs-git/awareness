@@ -200,8 +200,7 @@ struct PracticeTimelineProvider: TimelineProvider {
     func getSnapshot(in context: Context, completion: @escaping (PracticeEntry) -> Void) {
         let settings = SettingsManager.shared
         // Prefer storedPracticeCard (read-only, respects iOS sync) with
-        // todaysPracticeCard fallback so a card is always shown even before
-        // the watch app has been opened today
+        // todaysPracticeCard fallback so a card is always shown
         let card = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
         let task = settings.currentMicroTask()
         // When no micro-task yet (before first blackout), show card prompt as fallback

@@ -168,10 +168,19 @@ struct ContentView: View {
                 BlackoutView(isPresented: $showingBlackout)
             }
             .task {
-                todaysCard = settings.todaysPracticeCard()
+                // Prefer iOS-synced card (storedPracticeCard) over local random assignment
+                // to ensure the watch shows the same card as the phone
+                todaysCard = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
                 selfReport = settings.currentSelfReportData()
                 // Ensure complication shows the same card as the app
                 WidgetCenter.shared.reloadAllTimelines()
+            }
+            .onReceive(settings.objectWillChange) { _ in
+                // Refresh card when iOS sync updates the stored card ID
+                let synced = settings.storedPracticeCard()
+                if synced?.id != todaysCard?.id, let newCard = synced {
+                    todaysCard = newCard
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
@@ -199,7 +208,7 @@ struct ContentView: View {
                 // Refresh self-report after blackout
                 if !isShowing {
                     selfReport = settings.currentSelfReportData()
-                    todaysCard = settings.todaysPracticeCard()
+                    todaysCard = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
                     // Refresh complication after blackout (card may have changed)
                     WidgetCenter.shared.reloadAllTimelines()
                 }

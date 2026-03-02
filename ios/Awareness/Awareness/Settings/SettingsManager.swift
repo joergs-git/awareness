@@ -8,7 +8,15 @@ final class SettingsManager: ObservableObject {
 
     static let shared = SettingsManager()
 
+    /// On watchOS, use App Group shared defaults so the widget extension can access
+    /// the same data as the watch app. On iOS, use standard defaults.
+    #if os(watchOS)
+    private let defaults: UserDefaults
+    /// App Group identifier shared between the watch app and its widget extension
+    static let appGroupID = "group.com.joergsflow.awareness.watch"
+    #else
     private let defaults = UserDefaults.standard
+    #endif
 
     // MARK: - UserDefaults Keys
 
@@ -583,6 +591,32 @@ final class SettingsManager: ObservableObject {
     // MARK: - Init
 
     private init() {
+        #if os(watchOS)
+        // Use App Group shared UserDefaults so the widget extension sees the same data
+        let shared = UserDefaults(suiteName: SettingsManager.appGroupID) ?? .standard
+        // One-time migration from standard defaults to shared suite
+        if !shared.bool(forKey: "migratedToSharedSuite") {
+            let standard = UserDefaults.standard
+            for (key, _) in SettingsManager.defaultValues {
+                if let value = standard.object(forKey: key) {
+                    shared.set(value, forKey: key)
+                }
+            }
+            // Migrate practice card and micro-task keys
+            for key in [Keys.todaysPracticeCardID, Keys.practiceCardDate,
+                        Keys.yesterdaysCardID, Keys.currentMicroTaskID,
+                        Keys.microTaskDate, Keys.lastMicroTaskIDs,
+                        Keys.microTaskShownToday, Keys.currentSelfReport,
+                        Keys.guruAdaptiveState] {
+                if let value = standard.object(forKey: key) {
+                    shared.set(value, forKey: key)
+                }
+            }
+            shared.set(true, forKey: "migratedToSharedSuite")
+        }
+        defaults = shared
+        #endif
+
         defaults.register(defaults: SettingsManager.defaultValues)
 
         // Load persisted (or default) values into published properties
