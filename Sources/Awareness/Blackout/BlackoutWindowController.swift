@@ -5,7 +5,13 @@ import SwiftUI
 
 /// Creates and manages full-screen blackout overlay windows — one per connected display.
 /// The overlay sits at screenSaver window level so it covers everything.
-/// During a blackout, a global event tap suppresses keyboard input to background apps.
+///
+/// **Input suppression:** A CGEvent tap suppresses global keystrokes (ESC passes through
+/// when handcuffs mode is off). Requires Accessibility permission — degrades gracefully
+/// if not granted. `NSApp.activate(ignoringOtherApps:)` ensures overlay captures focus.
+///
+/// **Click-to-dismiss:** Local key/mouse monitors handle clicks when overlay has focus;
+/// a global mouse monitor provides fallback when another app steals focus.
 class BlackoutWindowController {
 
     private var windows: [NSWindow] = []

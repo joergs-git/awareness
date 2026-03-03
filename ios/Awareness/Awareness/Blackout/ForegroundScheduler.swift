@@ -8,8 +8,9 @@ import Combine
 /// Uses the same `.showBlackout` notification mechanism as `NotificationScheduler`,
 /// so the receiving side (ContentView) needs zero changes.
 ///
-/// Dedup logic prevents double-triggering when both foreground timer and
-/// notifications are active simultaneously.
+/// **Dedup thresholds:** Skips if `NotificationScheduler.nextNotificationDate` is within
+/// 60s (lookahead). `willPresent` suppresses notification banner if foreground triggered
+/// within 30s (lookback). Prevents double-triggering when both systems are active.
 class ForegroundScheduler: ObservableObject {
 
     static let shared = ForegroundScheduler()

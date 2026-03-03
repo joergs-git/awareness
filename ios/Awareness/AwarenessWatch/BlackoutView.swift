@@ -13,6 +13,10 @@ import UserNotifications
 /// The app is NOT kept alive during the blackout (alarm mode doesn't provide runtime
 /// until the scheduled time). A repeating Timer catches up via Date check on wrist-raise.
 /// A local notification serves as a backup end signal.
+///
+/// **Namaste after alarm dismiss:** When `AlarmSessionManager.hasFired` is true, the system
+/// alarm UI covers this view — so we skip the in-view namaste and dismiss immediately.
+/// ContentView detects the dismiss + hasFired flag and shows the namaste overlay there instead.
 struct BlackoutView: View {
 
     @ObservedObject var settings = SettingsManager.shared
