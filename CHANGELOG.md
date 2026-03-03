@@ -4,6 +4,19 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.06
+
+### iOS: UI Polish & Practice Tracking Chart
+- **Compact header** — motto text moved above yin-yang icon, tighter vertical spacing throughout
+- **Breathing pulse on "Breathe now" button** — gentle 3s scale + opacity animation to encourage tapping
+- **Merged status & progress section** — status dot + next time and Mindful Moments in one headerless section; single donut with counter inside, 🙏 monochrome icon
+- **Card banner redesign** — title centered with full width (2 lines), self-report counters moved below; double-tap to decrement (undo accidental taps)
+- **Micro-task tinted background** — light fill matching card color instead of plain border
+- **Practice tracking bar chart** — new 14-day "Situations" chart in Mindful Moments showing succeeded/noticed/forgot counters alongside the existing "Breathings" chart
+- **Compact list section spacing** — `.listSectionSpacing(.compact)` on iOS 17+ for tighter layout
+
+---
+
 ## v3.05
 
 ### iOS: Lock Screen Widgets

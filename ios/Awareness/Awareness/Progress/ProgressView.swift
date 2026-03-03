@@ -17,7 +17,7 @@ struct ProgressView: View {
                     Spacer()
 
                     // Today donut
-                    VStack(spacing: 4) {
+                    VStack(spacing: 8) {
                         brushDonut(
                             rate: todayRate,
                             hasData: tracker.todayTriggered > 0,
@@ -32,7 +32,7 @@ struct ProgressView: View {
                     }
 
                     // Overall donut
-                    VStack(spacing: 4) {
+                    VStack(spacing: 8) {
                         brushDonut(
                             rate: tracker.successRate,
                             hasData: tracker.lifetimeTriggered > 0,
@@ -49,7 +49,8 @@ struct ProgressView: View {
                     Spacer()
                 }
                 .listRowBackground(Color.clear)
-                .padding(.vertical, 8)
+                .padding(.top, 8)
+                .padding(.bottom, 0)
             }
 
             // MARK: - Philosophical Slogan
@@ -59,7 +60,7 @@ struct ProgressView: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, -4)
                     .listRowBackground(Color.clear)
             }
 
@@ -84,6 +85,16 @@ struct ProgressView: View {
             Section {
                 barChart
                     .padding(.vertical, 8)
+            } header: {
+                Text(String(localized: "Breathings"))
+            }
+
+            // MARK: - 14-Day Self-Report Chart
+            Section {
+                selfReportChart
+                    .padding(.vertical, 8)
+            } header: {
+                Text(String(localized: "Situations"))
             }
         }
         .navigationTitle(String(localized: "Mindful Moments"))
@@ -193,6 +204,116 @@ struct ProgressView: View {
             }
             .padding(.top, 4)
         }
+    }
+
+    // MARK: - Self-Report Bar Chart
+
+    /// Colors for the three self-report categories
+    private let succeededColor = Color(red: 0.45, green: 0.65, blue: 0.45)
+    private let noticedColor = Color(red: 0.55, green: 0.55, blue: 0.70)
+    private let forgotColor = Color(red: 0.70, green: 0.50, blue: 0.45)
+
+    /// Self-report data for the last 14 days (archived + today)
+    private var last14DaysSelfReports: [(date: String, succeeded: Int, noticed: Int, forgot: Int)] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        // Build lookup from archived reports
+        var lookup: [String: DailySelfReport] = [:]
+        for report in EventStore.shared.selfReports {
+            lookup[report.date] = report
+        }
+
+        // Add today's live data
+        let todayReport = SettingsManager.shared.currentSelfReportData()
+        lookup[todayReport.date] = todayReport
+
+        var result: [(date: String, succeeded: Int, noticed: Int, forgot: Int)] = []
+        for offset in (0..<14).reversed() {
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { continue }
+            let key = formatter.string(from: date)
+            if let report = lookup[key] {
+                result.append((key, report.succeeded, report.noticed, report.forgot))
+            } else {
+                result.append((key, 0, 0, 0))
+            }
+        }
+        return result
+    }
+
+    @ViewBuilder
+    private var selfReportChart: some View {
+        let days = last14DaysSelfReports
+        let maxVal = max(days.map { max($0.succeeded, max($0.noticed, $0.forgot)) }.max() ?? 1, 1)
+
+        VStack(spacing: 4) {
+            HStack(alignment: .bottom, spacing: 3) {
+                ForEach(Array(days.enumerated()), id: \.offset) { _, day in
+                    VStack(spacing: 2) {
+                        HStack(alignment: .bottom, spacing: 1) {
+                            // Succeeded bar
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(succeededColor)
+                                .frame(width: 5, height: selfReportBarHeight(day.succeeded, max: maxVal))
+
+                            // Noticed bar
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(noticedColor)
+                                .frame(width: 5, height: selfReportBarHeight(day.noticed, max: maxVal))
+
+                            // Forgot bar
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(forgotColor)
+                                .frame(width: 5, height: selfReportBarHeight(day.forgot, max: maxVal))
+                        }
+                        .frame(height: 60, alignment: .bottom)
+
+                        // Weekday label
+                        Text(weekdayLabel(for: day.date))
+                            .font(.system(size: 9))
+                            .foregroundColor(isToday(day.date) ? .primary : .secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+
+            // Legend
+            HStack(spacing: 10) {
+                HStack(spacing: 3) {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(succeededColor)
+                        .frame(width: 8, height: 8)
+                    Text(String(localized: "succeeded"))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                HStack(spacing: 3) {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(noticedColor)
+                        .frame(width: 8, height: 8)
+                    Text(String(localized: "noticed"))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                HStack(spacing: 3) {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(forgotColor)
+                        .frame(width: 8, height: 8)
+                    Text(String(localized: "forgot"))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    /// Bar height for self-report chart (minimum 2pt for non-zero)
+    private func selfReportBarHeight(_ value: Int, max: Int) -> CGFloat {
+        guard value > 0 else { return 0 }
+        return Swift.max(CGFloat(value) / CGFloat(max) * 60, 2)
     }
 
     // MARK: - Slogans

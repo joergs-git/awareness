@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var selfReport: DailySelfReport?
     @State private var showingCardDetail = false
     @State private var showingTaskDetail = false
+    @State private var breathePulsing = false
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
@@ -29,22 +30,24 @@ struct ContentView: View {
             List {
                 // MARK: - Header
                 Section {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 4) {
                         Text(String(localized: "Mindfulness in Action"))
                             .font(.title2.weight(.semibold))
                             .multilineTextAlignment(.center)
+                        Text(String(localized: "In stillness rests the strength"))
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                         Image("Logo")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
-                        Text(String(localized: "In stillness rests the strength"))
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .padding(.top, 4)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.top, 8)
+                    .padding(.bottom, 0)
                     .listRowBackground(Color.clear)
                 }
 
@@ -84,7 +87,11 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(card.color.opacity(0.3), lineWidth: 1)
+                                        .fill(card.color.opacity(0.08))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(card.color.opacity(0.2), lineWidth: 0.5)
                                 )
                                 .padding(.horizontal, 16)
                                 .onTapGesture { showingTaskDetail = true }
@@ -95,7 +102,7 @@ struct ContentView: View {
                     }
                 }
 
-                // MARK: - Breathe Now (prominent, no scrolling needed)
+                // MARK: - Breathe Now (prominent, gentle breathing pulse)
                 Section {
                     Button {
                         showingBlackout = true
@@ -105,48 +112,65 @@ struct ContentView: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
+                            .scaleEffect(breathePulsing ? 1.03 : 0.97)
+                            .opacity(breathePulsing ? 1.0 : 0.7)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                                    .stroke(Color.primary.opacity(breathePulsing ? 0.4 : 0.15), lineWidth: 1)
+                            )
+                            .animation(
+                                .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                                value: breathePulsing
                             )
                     }
                     .buttonStyle(.plain)
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                    .onAppear { breathePulsing = true }
                 }
 
-                // MARK: - Status Section
+                // MARK: - Status & Progress (merged, no header)
                 Section {
+                    // Status + next time row
                     HStack {
-                        Label(String(localized: "Status"), systemImage: "circle.fill")
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 8))
                             .foregroundColor(statusColor)
-                        Spacer()
                         Text(statusText)
                             .foregroundColor(.secondary)
-                    }
-
-                    if let nextDate = nextScheduledDate, !settings.isSnoozed {
-                        HStack {
-                            Label(String(localized: "Next"), systemImage: "clock")
-                            Spacer()
-                            Text(formatTime(nextDate))
-                                .foregroundColor(.secondary)
+                        Spacer()
+                        if let nextDate = nextScheduledDate, !settings.isSnoozed {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock")
+                                    .font(.caption)
+                                Text(String(localized: "Next"))
+                                Text(formatTime(nextDate))
+                            }
+                            .foregroundColor(.secondary)
                         }
                     }
-                } header: {
-                    Text(String(localized: "Schedule"))
-                }
 
-                // MARK: - Progress
-                Section {
+                    // Mindful Moments with namaste icon and donut
                     NavigationLink {
                         ProgressView()
                     } label: {
-                        HStack {
-                            Label(String(localized: "Mindful Moments"), systemImage: "chart.pie")
+                        HStack(spacing: 8) {
+                            // Namaste hands in monochrome grey
+                            Text("🙏")
+                                .font(.body)
+                                .grayscale(1.0)
+                                .opacity(0.6)
+
+                            Text(String(localized: "Mindful Moments"))
+
                             Spacer()
-                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
-                                .foregroundColor(.secondary)
+
+                            // Single mini donut with counter inside
+                            miniDonut(
+                                rate: todayRate,
+                                hasData: ProgressTracker.shared.todayTriggered > 0,
+                                label: "\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)"
+                            )
                         }
                     }
                 }
@@ -304,6 +328,7 @@ struct ContentView: View {
                     Text(String(localized: "About"))
                 }
             }
+            .modifier(CompactSectionSpacingModifier())
             .navigationTitle(String(localized: "Awareness reminder"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -384,20 +409,18 @@ struct ContentView: View {
 
     @ViewBuilder
     private func practiceCardBanner(card: PracticeCard) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(card.localizedTitle)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.white)
+        VStack(spacing: 8) {
+            // Card title — full width, centered, up to 2 lines
+            Text(card.localizedTitle)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
 
-                Spacer()
-
-                // Self-report counters
-                if let report = selfReport {
-                    selfReportCounters(report: report)
-                }
+            // Self-report counters below the title
+            if let report = selfReport {
+                selfReportCounters(report: report)
             }
-
         }
         .padding(12)
         .background(
@@ -411,55 +434,85 @@ struct ContentView: View {
 
     @ViewBuilder
     private func selfReportCounters(report: DailySelfReport) -> some View {
+        // Centered row — single tap increments, double tap decrements
         HStack(spacing: 12) {
+            Spacer()
+
             // Succeeded (checkmark)
-            Button {
-                incrementSelfReport(\.succeeded)
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            } label: {
-                HStack(spacing: 3) {
-                    Image(systemName: "checkmark.circle")
-                        .font(.body)
-                    Text("\(report.succeeded)")
-                        .font(.footnote.monospacedDigit())
-                }
-                .foregroundColor(.white.opacity(0.85))
-                .frame(minWidth: 44, minHeight: 44)
-            }
-            .buttonStyle(.plain)
+            selfReportIcon(
+                systemName: "checkmark.circle",
+                count: report.succeeded,
+                keyPath: \.succeeded
+            )
 
             // Noticed (eye)
-            Button {
-                incrementSelfReport(\.noticed)
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            } label: {
-                HStack(spacing: 3) {
-                    Image(systemName: "eye.circle")
-                        .font(.body)
-                    Text("\(report.noticed)")
-                        .font(.footnote.monospacedDigit())
-                }
-                .foregroundColor(.white.opacity(0.85))
-                .frame(minWidth: 44, minHeight: 44)
-            }
-            .buttonStyle(.plain)
+            selfReportIcon(
+                systemName: "eye.circle",
+                count: report.noticed,
+                keyPath: \.noticed
+            )
 
             // Forgot (circle)
-            Button {
-                incrementSelfReport(\.forgot)
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            } label: {
-                HStack(spacing: 3) {
-                    Image(systemName: "circle")
-                        .font(.body)
-                    Text("\(report.forgot)")
-                        .font(.footnote.monospacedDigit())
-                }
-                .foregroundColor(.white.opacity(0.85))
-                .frame(minWidth: 44, minHeight: 44)
-            }
-            .buttonStyle(.plain)
+            selfReportIcon(
+                systemName: "circle",
+                count: report.forgot,
+                keyPath: \.forgot
+            )
+
+            Spacer()
         }
+    }
+
+    /// Single self-report counter icon. Tap to increment, double-tap to decrement.
+    @ViewBuilder
+    private func selfReportIcon(systemName: String, count: Int, keyPath: WritableKeyPath<DailySelfReport, Int>) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: systemName)
+                .font(.body)
+            Text("\(count)")
+                .font(.footnote.monospacedDigit())
+        }
+        .foregroundColor(.white.opacity(0.85))
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            decrementSelfReport(keyPath)
+            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        }
+        .onTapGesture(count: 1) {
+            incrementSelfReport(keyPath)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
+    }
+
+    // MARK: - Mini Donut (inline progress indicator)
+
+    /// Warm earthy color matching the full ProgressView donuts
+    private let donutColor = Color(red: 0.72, green: 0.50, blue: 0.38)
+
+    /// Today's success rate for the mini donut
+    private var todayRate: Double {
+        guard ProgressTracker.shared.todayTriggered > 0 else { return 0 }
+        return Double(ProgressTracker.shared.todayCompleted) / Double(ProgressTracker.shared.todayTriggered)
+    }
+
+    /// Inline donut chart with counter text inside for the Mindful Moments row
+    @ViewBuilder
+    private func miniDonut(rate: Double, hasData: Bool, label: String) -> some View {
+        ZStack {
+            Circle()
+                .stroke(Color.gray.opacity(0.15), lineWidth: 3)
+            if hasData && rate > 0 {
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+            }
+            Text(label)
+                .font(.system(size: 9, weight: .medium).monospacedDigit())
+                .foregroundColor(.secondary)
+        }
+        .frame(width: 34, height: 34)
     }
 
     // MARK: - Computed Properties
@@ -525,6 +578,15 @@ struct ContentView: View {
         selfReport = report
     }
 
+    /// Decrement a self-report counter (double-tap to undo accidental increment), floor at 0
+    private func decrementSelfReport(_ keyPath: WritableKeyPath<DailySelfReport, Int>) {
+        var report = settings.currentSelfReportData()
+        guard report[keyPath: keyPath] > 0 else { return }
+        report[keyPath: keyPath] -= 1
+        settings.updateSelfReport(report)
+        selfReport = report
+    }
+
     /// Handle post-blackout logic: refresh card/task/report state and update widget.
     /// Rotates the micro-task to a new random one after each blackout.
     private func handlePostBlackout() {
@@ -575,6 +637,19 @@ struct CardBackground: View {
                 .blur(radius: 20)
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - Compact Section Spacing (iOS 17+)
+
+/// Reduces the default List inter-section gap on iOS 17+; no-op on iOS 16.
+private struct CompactSectionSpacingModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.listSectionSpacing(.compact)
+        } else {
+            content
+        }
     }
 }
 
