@@ -4,6 +4,13 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.04
+
+### iOS: Widget Styling
+- **Seamless widget background** — sunrise gradient now fills the entire widget rounded rect via `containerBackground` (iOS 17+), eliminating the visible box-within-a-box appearance. Content uses full available space.
+
+---
+
 ## v3.03
 
 ### macOS: Practice Cards & Micro-Tasks

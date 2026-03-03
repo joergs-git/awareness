@@ -125,17 +125,46 @@ struct AwarenessHomeWidget: Widget {
 
 // MARK: - Widget Views
 
-/// Main widget view that switches between small and medium layouts
+/// Main widget view that switches between small and medium layouts.
+/// Applies the warm sunrise gradient as the widget container background (iOS 17+)
+/// so it fills the entire rounded rect instead of appearing as a box-within-a-box.
 struct AwarenessWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     let entry: AwarenessWidgetEntry
 
     var body: some View {
-        switch family {
-        case .systemMedium:
-            MediumWidgetView(entry: entry)
-        default:
-            SmallWidgetView(entry: entry)
+        Group {
+            switch family {
+            case .systemMedium:
+                MediumWidgetView(entry: entry)
+            default:
+                SmallWidgetView(entry: entry)
+            }
+        }
+        .awarenessWidgetBackground()
+    }
+}
+
+// MARK: - Widget Background Helper
+
+extension View {
+    /// Apply the warm sunrise gradient as the widget background.
+    /// iOS 17+: uses containerBackground so the gradient fills the entire rounded rect.
+    /// iOS 16: falls back to a plain background behind the content.
+    @ViewBuilder
+    func awarenessWidgetBackground() -> some View {
+        let gradient = LinearGradient(
+            colors: [
+                Color(red: 0.98, green: 0.92, blue: 0.84),
+                Color(red: 0.93, green: 0.85, blue: 0.78)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        if #available(iOSApplicationExtension 17.0, *) {
+            self.containerBackground(for: .widget) { gradient }
+        } else {
+            self.background(gradient)
         }
     }
 }
@@ -154,106 +183,90 @@ struct MediumWidgetView: View {
     let entry: AwarenessWidgetEntry
 
     var body: some View {
-        ZStack {
-            // Warm sunrise background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.98, green: 0.92, blue: 0.84),
-                    Color(red: 0.93, green: 0.85, blue: 0.78)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+        HStack(spacing: 0) {
+            // Left color strip from card
+            RoundedRectangle(cornerRadius: 3)
+                .fill(entry.cardColor)
+                .frame(width: 4)
 
-            HStack(spacing: 0) {
-                // Left color strip from card
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(entry.cardColor)
-                    .frame(width: 4)
-                    .padding(.vertical, 8)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    // Top: card title (wraps to 2 lines) + compact donut
-                    HStack(alignment: .top, spacing: 6) {
-                        Text(entry.cardTitle)
-                            .font(.caption.weight(.semibold))
-                            .foregroundColor(.primary)
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        Spacer(minLength: 4)
-
-                        // Compact donut + counter
-                        VStack(spacing: 2) {
-                            WidgetDonut(
-                                completed: entry.todayCompleted,
-                                triggered: entry.todayTriggered,
-                                color: entry.cardColor,
-                                size: 18
-                            )
-                            Text("\(entry.todayCompleted)/\(entry.todayTriggered)")
-                                .font(.caption2.monospacedDigit().weight(.medium))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-
-                    // Middle: micro-task text (full, multi-line)
-                    Text(entry.microTaskText)
-                        .font(.caption2.italic())
-                        .foregroundColor(.primary.opacity(0.7))
-                        .lineLimit(3)
+            VStack(alignment: .leading, spacing: 4) {
+                // Top: card title (wraps to 2 lines) + compact donut
+                HStack(alignment: .top, spacing: 6) {
+                    Text(entry.cardTitle)
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Spacer(minLength: 0)
+                    Spacer(minLength: 4)
 
-                    // Bottom: next time left, breathe button right
-                    HStack {
-                        // Next blackout time or snoozed
-                        if let nextDate = entry.nextBlackoutDate, !entry.isSnoozed {
-                            HStack(spacing: 3) {
-                                Text("Next:")
-                                    .font(.caption2)
-                                Image(systemName: "clock")
-                                    .font(.caption2)
-                                Text(formatTime(nextDate))
-                                    .font(.caption)
-                            }
+                    // Compact donut + counter
+                    VStack(spacing: 2) {
+                        WidgetDonut(
+                            completed: entry.todayCompleted,
+                            triggered: entry.todayTriggered,
+                            color: entry.cardColor,
+                            size: 18
+                        )
+                        Text("\(entry.todayCompleted)/\(entry.todayTriggered)")
+                            .font(.caption2.monospacedDigit().weight(.medium))
                             .foregroundColor(.secondary)
-                        } else if entry.isSnoozed {
-                            HStack(spacing: 3) {
-                                Image(systemName: "moon.fill")
-                                    .font(.caption2)
-                                Text("Snoozed")
-                                    .font(.caption)
-                            }
-                            .foregroundColor(.orange)
-                        }
-
-                        Spacer()
-
-                        // Breathe now button (deep link)
-                        Link(destination: URL(string: "awareness://breathe")!) {
-                            HStack(spacing: 4) {
-                                Text("☯")
-                                    .font(.caption)
-                                Text("Breathe")
-                                    .font(.caption.weight(.medium))
-                            }
-                            .foregroundColor(entry.cardColor)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(entry.cardColor, lineWidth: 1)
-                            )
-                        }
                     }
                 }
-                .padding(.leading, 10)
-                .padding(.trailing, 12)
-                .padding(.vertical, 10)
+
+                // Middle: micro-task text (full, multi-line)
+                Text(entry.microTaskText)
+                    .font(.caption2.italic())
+                    .foregroundColor(.primary.opacity(0.7))
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer(minLength: 0)
+
+                // Bottom: next time left, breathe button right
+                HStack {
+                    // Next blackout time or snoozed
+                    if let nextDate = entry.nextBlackoutDate, !entry.isSnoozed {
+                        HStack(spacing: 3) {
+                            Text("Next:")
+                                .font(.caption2)
+                            Image(systemName: "clock")
+                                .font(.caption2)
+                            Text(formatTime(nextDate))
+                                .font(.caption)
+                        }
+                        .foregroundColor(.secondary)
+                    } else if entry.isSnoozed {
+                        HStack(spacing: 3) {
+                            Image(systemName: "moon.fill")
+                                .font(.caption2)
+                            Text("Snoozed")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.orange)
+                    }
+
+                    Spacer()
+
+                    // Breathe now button (deep link)
+                    Link(destination: URL(string: "awareness://breathe")!) {
+                        HStack(spacing: 4) {
+                            Text("☯")
+                                .font(.caption)
+                            Text("Breathe")
+                                .font(.caption.weight(.medium))
+                        }
+                        .foregroundColor(entry.cardColor)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(entry.cardColor, lineWidth: 1)
+                        )
+                    }
+                }
             }
-            .padding(.leading, 8)
+            .padding(.leading, 10)
         }
         // Tapping anywhere except the Breathe button just opens the app
         .widgetURL(URL(string: "awareness://open"))
@@ -281,66 +294,52 @@ struct SmallWidgetView: View {
     let entry: AwarenessWidgetEntry
 
     var body: some View {
-        ZStack {
-            // Warm sunrise background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.98, green: 0.92, blue: 0.84),
-                    Color(red: 0.93, green: 0.85, blue: 0.78)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
+        VStack(spacing: 6) {
+            Spacer(minLength: 2)
+
+            // Yin-yang symbol
+            Text("☯")
+                .font(.title2)
+
+            // Progress donut
+            WidgetDonut(
+                completed: entry.todayCompleted,
+                triggered: entry.todayTriggered,
+                color: entry.cardColor,
+                size: 36
             )
 
-            VStack(spacing: 6) {
-                Spacer(minLength: 4)
+            // Counter text
+            Text("\(entry.todayCompleted)/\(entry.todayTriggered)")
+                .font(.caption.monospacedDigit().weight(.medium))
+                .foregroundColor(.secondary)
 
-                // Yin-yang symbol
-                Text("☯")
-                    .font(.title2)
-
-                // Progress donut
-                WidgetDonut(
-                    completed: entry.todayCompleted,
-                    triggered: entry.todayTriggered,
-                    color: entry.cardColor,
-                    size: 36
-                )
-
-                // Counter text
-                Text("\(entry.todayCompleted)/\(entry.todayTriggered)")
-                    .font(.caption.monospacedDigit().weight(.medium))
-                    .foregroundColor(.secondary)
-
-                // Next time or snoozed
-                if let nextDate = entry.nextBlackoutDate, !entry.isSnoozed {
-                    HStack(spacing: 3) {
-                        Image(systemName: "clock")
-                            .font(.caption2)
-                        Text(formatTime(nextDate))
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
-                } else if entry.isSnoozed {
-                    HStack(spacing: 3) {
-                        Image(systemName: "moon.fill")
-                            .font(.caption2)
-                        Text("Snoozed")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.orange)
+            // Next time or snoozed
+            if let nextDate = entry.nextBlackoutDate, !entry.isSnoozed {
+                HStack(spacing: 3) {
+                    Image(systemName: "clock")
+                        .font(.caption2)
+                    Text(formatTime(nextDate))
+                        .font(.caption)
                 }
-
-                Spacer(minLength: 2)
-
-                // Card color accent bar at bottom
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(entry.cardColor)
-                    .frame(height: 4)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 4)
+                .foregroundColor(.secondary)
+            } else if entry.isSnoozed {
+                HStack(spacing: 3) {
+                    Image(systemName: "moon.fill")
+                        .font(.caption2)
+                    Text("Snoozed")
+                        .font(.caption)
+                }
+                .foregroundColor(.orange)
             }
-            .padding(.vertical, 8)
+
+            Spacer(minLength: 2)
+
+            // Card color accent bar at bottom
+            RoundedRectangle(cornerRadius: 2)
+                .fill(entry.cardColor)
+                .frame(height: 4)
+                .padding(.horizontal, 12)
         }
         // Small widget: tap opens app (systemSmall doesn't support Link)
         .widgetURL(URL(string: "awareness://open"))
