@@ -21,11 +21,6 @@ struct ContentView: View {
     @State private var showingCardDetail = false
     @State private var showingTaskDetail = false
 
-    // After-blackout micro-task reveal
-    @State private var showingPostBlackoutTask = false
-    @State private var postBlackoutTask: MicroTask?
-    @State private var postBlackoutOpacity: Double = 0
-
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
 
@@ -66,7 +61,7 @@ struct ContentView: View {
                             .buttonStyle(.plain)
 
                             // Micro-task connected below the card with thin colored bridge
-                            if let task = currentTask, settings.microTaskShownToday {
+                            if let task = currentTask {
                                 // Thin color connector between card and task
                                 Rectangle()
                                     .fill(card.color.opacity(0.4))
@@ -161,6 +156,7 @@ struct ContentView: View {
                     if settings.isSnoozed {
                         Button {
                             scheduler.handleResume()
+                            WidgetDataBridge.shared.updateWidget()
                         } label: {
                             Label(String(localized: "Resume"), systemImage: "play.fill")
                                 .foregroundColor(.green)
@@ -352,6 +348,9 @@ struct ContentView: View {
                 if HealthKitManager.shared.isAvailable && !settings.healthKitEnabled && !settings.healthKitPromptShown {
                     showHealthKitPrompt = true
                 }
+
+                // Update home screen widget with initial state
+                WidgetDataBridge.shared.updateWidget()
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Re-check whenever app becomes active (e.g. returning from system Settings)
@@ -360,6 +359,8 @@ struct ContentView: View {
                 todaysCard = settings.todaysPracticeCard()
                 currentTask = settings.currentMicroTask()
                 selfReport = settings.currentSelfReportData()
+                // Keep widget up to date
+                WidgetDataBridge.shared.updateWidget()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
@@ -375,12 +376,6 @@ struct ContentView: View {
                 }
             } message: {
                 Text(String(localized: "Awareness can log each mindful pause to Apple Health so you can track your practice over time."))
-            }
-            // Post-blackout micro-task overlay
-            .overlay {
-                if showingPostBlackoutTask, let task = postBlackoutTask {
-                    postBlackoutOverlay(task: task)
-                }
             }
         }
     }
@@ -467,52 +462,6 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Post-Blackout Micro-Task Overlay
-
-    @ViewBuilder
-    private func postBlackoutOverlay(task: MicroTask) -> some View {
-        ZStack {
-            // Aquarelle-style background
-            AquarelleBackground()
-                .ignoresSafeArea()
-
-            VStack(spacing: 16) {
-                Text(String(localized: "Inspirational idea for you to explore"))
-                    .font(.subheadline.smallCaps())
-                    .foregroundColor(.white.opacity(0.7))
-
-                Text(task.localizedText)
-                    .font(.title3)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-
-                if let card = todaysCard {
-                    Text(card.localizedTitle)
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
-                }
-            }
-        }
-        .opacity(postBlackoutOpacity)
-        .onAppear {
-            // Fade in over 2 seconds
-            withAnimation(.easeIn(duration: 2.0)) {
-                postBlackoutOpacity = 1.0
-            }
-            // Auto-dismiss after 5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                withAnimation(.easeOut(duration: 1.0)) {
-                    postBlackoutOpacity = 0
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    showingPostBlackoutTask = false
-                    postBlackoutTask = nil
-                }
-            }
-        }
-    }
-
     // MARK: - Computed Properties
 
     private var statusColor: Color {
@@ -559,6 +508,8 @@ struct ContentView: View {
         } else {
             scheduler.handleSnooze(until: Date().addingTimeInterval(Double(minutes) * 60))
         }
+        // Update widget to reflect snoozed state
+        WidgetDataBridge.shared.updateWidget()
     }
 
     private func checkNotificationStatus() async {
@@ -574,21 +525,14 @@ struct ContentView: View {
         selfReport = report
     }
 
-    /// Handle post-blackout logic: assign micro-task if first blackout of the day
+    /// Handle post-blackout logic: refresh card/task/report state and update widget
     private func handlePostBlackout() {
-        // Assign a micro-task after the first blackout of the day
-        if !settings.microTaskShownToday {
-            if let task = settings.assignMicroTask() {
-                currentTask = task
-                postBlackoutTask = task
-                postBlackoutOpacity = 0
-                showingPostBlackoutTask = true
-            }
-        }
-
-        // Refresh card state
+        // Refresh card, micro-task, and self-report state
         todaysCard = settings.todaysPracticeCard()
+        currentTask = settings.currentMicroTask()
         selfReport = settings.currentSelfReportData()
+        // Update home screen widget with latest progress
+        WidgetDataBridge.shared.updateWidget()
     }
 }
 

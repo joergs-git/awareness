@@ -71,6 +71,11 @@
 		A40011 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021 /* MicroTask.swift */; };
 		A40012 /* MindfulEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10022 /* MindfulEvent.swift */; };
 		A40013 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* EventStore.swift */; };
+		A50001 /* AwarenessWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50001 /* AwarenessWidgetBundle.swift */; };
+		A50002 /* AwarenessWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50002 /* AwarenessWidgetProvider.swift */; };
+		A50003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B50003 /* Assets.xcassets */; };
+		A50004 /* WidgetDataBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50006 /* WidgetDataBridge.swift */; };
+		A50005 /* AwarenessWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B50099 /* AwarenessWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +92,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = E40099;
 			remoteInfo = AwarenessWatchComplication;
+		};
+		G50001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10099 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E50099;
+			remoteInfo = AwarenessWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -109,6 +121,17 @@
 			dstSubfolderSpec = 13;
 			files = (
 				A40007 /* AwarenessWatchComplication.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E50004 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A50005 /* AwarenessWidget.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -161,6 +184,14 @@
 		B10022 /* MindfulEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MindfulEvent.swift; sourceTree = "<group>"; };
 		B10023 /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
 		B10024 /* SmartGuru.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartGuru.swift; sourceTree = "<group>"; };
+		B50001 /* AwarenessWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessWidgetBundle.swift; sourceTree = "<group>"; };
+		B50002 /* AwarenessWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessWidgetProvider.swift; sourceTree = "<group>"; };
+		B50003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B50004 /* AwarenessWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AwarenessWidget.entitlements; sourceTree = "<group>"; };
+		B50005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B50006 /* WidgetDataBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataBridge.swift; sourceTree = "<group>"; };
+		B50099 /* AwarenessWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AwarenessWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10025 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +218,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C50001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -195,6 +233,7 @@
 			children = (
 				D10002 /* Awareness */,
 				D30001 /* AwarenessWatch */,
+				D50001 /* AwarenessWidget */,
 				D10010 /* Frameworks */,
 				D10099 /* Products */,
 			);
@@ -206,6 +245,7 @@
 				B10001 /* AwarenessApp.swift */,
 				B10002 /* ContentView.swift */,
 				B10010 /* UpdateChecker.swift */,
+				B50006 /* WidgetDataBridge.swift */,
 				D10003 /* Models */,
 				D10004 /* Settings */,
 				D10005 /* Audio */,
@@ -217,6 +257,7 @@
 				D10008 /* Resources */,
 				B10011 /* Assets.xcassets */,
 				A1F00001 /* Localizable.xcstrings */,
+				B10025 /* Info.plist */,
 			);
 			path = Awareness;
 			sourceTree = "<group>";
@@ -311,6 +352,7 @@
 				B10099 /* Awareness.app */,
 				B30099 /* AwarenessWatch.app */,
 				B40099 /* AwarenessWatchComplication.appex */,
+				B50099 /* AwarenessWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -353,6 +395,18 @@
 			path = Connectivity;
 			sourceTree = "<group>";
 		};
+		D50001 /* AwarenessWidget */ = {
+			isa = PBXGroup;
+			children = (
+				B50001 /* AwarenessWidgetBundle.swift */,
+				B50002 /* AwarenessWidgetProvider.swift */,
+				B50004 /* AwarenessWidget.entitlements */,
+				B50005 /* Info.plist */,
+				B50003 /* Assets.xcassets */,
+			);
+			path = AwarenessWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -364,11 +418,13 @@
 				C10001 /* Frameworks */,
 				E10003 /* Resources */,
 				E30004 /* Embed Watch Content */,
+				E50004 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				G30002 /* PBXTargetDependency */,
+				G50002 /* PBXTargetDependency */,
 			);
 			name = Awareness;
 			productName = Awareness;
@@ -411,6 +467,23 @@
 			productReference = B40099 /* AwarenessWatchComplication.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		E50099 /* AwarenessWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F50003 /* Build configuration list for PBXNativeTarget "AwarenessWidget" */;
+			buildPhases = (
+				E50001 /* Sources */,
+				C50001 /* Frameworks */,
+				E50003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AwarenessWidget;
+			productName = AwarenessWidget;
+			productReference = B50099 /* AwarenessWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -428,6 +501,9 @@
 						CreatedOnToolsVersion = 15.4;
 					};
 					E40099 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					E50099 = {
 						CreatedOnToolsVersion = 15.4;
 					};
 				};
@@ -449,6 +525,7 @@
 				E10001 /* Awareness */,
 				E30099 /* AwarenessWatch */,
 				E40099 /* AwarenessWatchComplication */,
+				E50099 /* AwarenessWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -484,6 +561,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E50003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A50003 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -511,6 +596,7 @@
 				A10022 /* MindfulEvent.swift in Sources */,
 				A10023 /* EventStore.swift in Sources */,
 				A10024 /* SmartGuru.swift in Sources */,
+				A50004 /* WidgetDataBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -559,6 +645,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E50001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A50001 /* AwarenessWidgetBundle.swift in Sources */,
+				A50002 /* AwarenessWidgetProvider.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -571,6 +666,11 @@
 			isa = PBXTargetDependency;
 			target = E40099 /* AwarenessWatchComplication */;
 			targetProxy = G40001 /* PBXContainerItemProxy */;
+		};
+		G50002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E50099 /* AwarenessWidget */;
+			targetProxy = G50001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -700,6 +800,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Awareness/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
@@ -711,7 +812,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 3.01;
+				MARKETING_VERSION = 3.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -731,6 +832,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Awareness/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
@@ -742,7 +844,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 3.01;
+				MARKETING_VERSION = 3.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -769,7 +871,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 3.01;
+				MARKETING_VERSION = 3.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -798,7 +900,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Awareness logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 3.01;
+				MARKETING_VERSION = 3.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -821,7 +923,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder Complication";
-				MARKETING_VERSION = 3.01;
+				MARKETING_VERSION = 3.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -844,7 +946,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Awareness reminder Complication";
-				MARKETING_VERSION = 3.01;
+				MARKETING_VERSION = 3.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -854,6 +956,48 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		F50021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AwarenessWidget/AwarenessWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AwarenessWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Awareness Widget";
+				MARKETING_VERSION = 3.02;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F50022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AwarenessWidget/AwarenessWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AwarenessWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Awareness Widget";
+				MARKETING_VERSION = 3.02;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -892,6 +1036,15 @@
 			buildConfigurations = (
 				F40021 /* Debug */,
 				F40022 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F50003 /* Build configuration list for PBXNativeTarget "AwarenessWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F50021 /* Debug */,
+				F50022 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

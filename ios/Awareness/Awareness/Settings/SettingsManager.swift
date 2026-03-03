@@ -321,7 +321,8 @@ final class SettingsManager: ObservableObject {
         return newCard
     }
 
-    /// Get the current micro-task (or assign one from today's card's pool)
+    /// Get the current micro-task, auto-assigning one from today's card pool if none exists yet.
+    /// This ensures a micro-task is visible from app launch, not just after the first blackout.
     func currentMicroTask() -> MicroTask? {
         let today = todayString()
         let storedDate = defaults.string(forKey: Keys.microTaskDate)
@@ -331,7 +332,8 @@ final class SettingsManager: ObservableObject {
             return MicroTask.allTasks.first { $0.id == taskID }
         }
 
-        return nil
+        // Auto-assign from today's card pool so the task is available immediately
+        return assignMicroTask()
     }
 
     /// Assign a new micro-task from today's card's pool (called after first blackout of day)

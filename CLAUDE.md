@@ -212,7 +212,9 @@ ios/Awareness/
     ├── AwarenessApp.swift              # @main entry point, notification delegate
     ├── ContentView.swift               # Home screen (header, status, snooze, test, settings)
     ├── UpdateChecker.swift             # GitHub release update checker (singleton)
-    ├── Awareness.entitlements          # HealthKit entitlement
+    ├── Awareness.entitlements          # HealthKit + App Group entitlements
+    ├── Info.plist                     # URL scheme registration (awareness://)
+    ├── WidgetDataBridge.swift         # Writes snapshot to App Group shared UserDefaults for widget
     ├── Models/
     │   ├── BlackoutVisualType.swift    # Enum: plainBlack/text/image/video
     │   └── TimeWindow.swift           # Active hours model
@@ -259,6 +261,17 @@ ios/Awareness/AwarenessWatch/
 ├── Assets.xcassets/                    # Watch app icon (1024x1024), accent color
 └── Complications/
     └── ComplicationProvider.swift      # WidgetKit TimelineProvider + circular/rectangular/inline views
+```
+
+### iOS Home Screen Widget (`ios/Awareness/AwarenessWidget/`)
+
+```
+ios/Awareness/AwarenessWidget/
+├── AwarenessWidgetBundle.swift       # @main WidgetBundle entry point
+├── AwarenessWidgetProvider.swift     # TimelineProvider + systemSmall/Medium views + WidgetSnapshotData
+├── AwarenessWidget.entitlements      # App Group entitlement
+├── Info.plist                        # NSExtension = com.apple.widgetkit-extension
+└── Assets.xcassets/                  # AccentColor + AppIcon (minimal)
 ```
 
 ## Key Technical Decisions
@@ -444,6 +457,8 @@ ios/Awareness/AwarenessWatch/
 - **Localization**: `Localizable.xcstrings` (string catalog) at `Awareness/Localizable.xcstrings` with EN and DE translations. Uses `String(localized:)` throughout UI code.
 - **Chinese sunrise color scheme (v3.0)**: iOS ContentView uses warm cream-to-sand vertical `LinearGradient` with `.scrollContentBackground(.hidden)`. Donut charts use earthy `(0.72, 0.50, 0.38)`. Breathe now button uses `.title3` + `.controlSize(.large)` with warm amber-terracotta tint. `AquarelleBackground` uses amber/peach/dusty rose/warm gold blobs. Inspiration micro-task text shown below card banner in separate section (not inside card).
 - **Foreground scheduler (v2.16)**: `ForegroundScheduler.shared` uses `Timer.scheduledTimer` on the main RunLoop to trigger blackouts while the app is in the foreground. Starts on `.active` scene phase, stops on `.background`/`.inactive`. Posts `.showBlackout` (same as notifications). Dedup: skips if `NotificationScheduler.nextNotificationDate` is within 60s; `willPresent` suppresses banner if `ForegroundScheduler.lastTriggerDate` is within 30s. Ensures the app functions without notification permission (Apple Guideline 4.5.4).
+- **Micro-task auto-assign (v3.02)**: `currentMicroTask()` now auto-assigns from today's card pool if no task exists for today. No longer requires the first blackout to trigger assignment. The `microTaskShownToday` gate was removed from ContentView.
+- **Home screen widget (v3.02)**: `AwarenessWidget` extension (target E50099) with systemSmall and systemMedium families. `WidgetDataBridge` writes a `WidgetSnapshot` to App Group shared `UserDefaults(suiteName: "group.com.joergsflow.awareness.ios")`. Widget reads independently via `WidgetSnapshotData`. Deep link: `widgetURL("awareness://breathe")` opens app and triggers blackout via `.onOpenURL`. `pbxproj` uses A5/B5/C5/D5/E5/F5 hex IDs. Bundle ID: `com.joergsflow.awareness.ios.widget`.
 
 ### watchOS
 
@@ -481,5 +496,5 @@ When bumping the version, update **all four files** (no hardcoded version string
 |---|---|---|
 | `SupportFiles/Info.plist` | `CFBundleVersion` + `CFBundleShortVersionString` | `X.Y` |
 | `Awareness.xcodeproj/project.pbxproj` | `MARKETING_VERSION` (2 targets: Debug + Release) | `X.Y` |
-| `ios/Awareness/Awareness.xcodeproj/project.pbxproj` | `MARKETING_VERSION` (6 targets: iOS Debug/Release, watchOS Debug/Release, widget Debug/Release) | `X.Y` |
+| `ios/Awareness/Awareness.xcodeproj/project.pbxproj` | `MARKETING_VERSION` (8 targets: iOS Debug/Release, watchOS Debug/Release, watchOS widget Debug/Release, iOS widget Debug/Release) | `X.Y` |
 | `windows/Awareness/Awareness.csproj` | `<Version>` | `X.Y.0` |

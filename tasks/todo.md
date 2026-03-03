@@ -1,50 +1,46 @@
-# Smart Guru — Implementation Todo
+# v3.02 — Fix Micro-Task Display + iOS Home Screen Widget
 
-## Phase 1: Today Donut + Slogans + Practice Cards + Micro-Tasks
+## Task A: Fix iOS Micro-Task Display
 
-- [x] 1.1 Create `PracticeCard.swift` model (7 cards with colors, titles, descriptions, prompts)
-- [x] 1.2 Create `MicroTask.swift` model (~66 tasks linked to cards)
-- [x] 1.3 Create `DailySelfReport` model (in EventStore.swift)
-- [x] 1.4 Redesign `ProgressView.swift` (iOS): two donuts, brush stroke, earthy color, slogans
-- [x] 1.5 Redesign `ProgressView.swift` (watchOS): two donuts, earthy color, slogans
-- [x] 1.6 Update `ContentView.swift` (iOS): practice card banner, micro-task card, self-report counters
-- [x] 1.7 Update `ContentView.swift` (watchOS): compact status bar, self-report on card
-- [x] 1.8 Update `BlackoutView.swift` (iOS): event recording, guru-adapted durations
-- [x] 1.9 Add morning practice card notification to NotificationScheduler
-- [x] 1.10 Create card/task full-screen views with aquarelle backgrounds
+- [x] A.1 Change `currentMicroTask()` to auto-assign if no task exists for today
+- [x] A.2 Remove `microTaskShownToday` gate from ContentView line 69
+- [x] A.3 Remove post-blackout overlay state vars, modifier, and function
+- [x] A.4 Simplify `handlePostBlackout()` — remove micro-task reveal logic
 
-## Phase 2: Event-Level Logging
+## Task B: iOS Home Screen Widget
 
-- [x] 2.1 Create `MindfulEvent.swift` model (+ AdaptiveState, GuruPhase)
-- [x] 2.2 Create `EventStore.swift` singleton (90-day rolling window, hour/weekday profiles)
-- [x] 2.3 Record events in BlackoutView (.completed / .dismissed)
-- [x] 2.4 Record events in NotificationScheduler (.ignored)
-- [x] 2.5 Integrate ForegroundScheduler with effective intervals
+- [x] B.1 Create WidgetDataBridge.swift (iOS app target)
+- [x] B.2 Add App Group entitlement to iOS app
+- [x] B.3 Create AwarenessWidget directory + all files (bundle, provider, Info.plist, assets)
+- [x] B.4 Create widget extension entitlements
+- [x] B.5 Add widget target to pbxproj (E50099, A5/B5/C5/D5/E5/F5 IDs)
+- [x] B.6 Add WidgetDataBridge.swift to iOS Sources phase
+- [x] B.7 Create Info.plist for URL scheme (awareness://)
+- [x] B.8 Add INFOPLIST_FILE to iOS build configs
+- [x] B.9 Add .onOpenURL handler in AwarenessApp.swift
+- [x] B.10 Add updateWidget() calls in ContentView + AwarenessApp
 
-## Phase 3: Smart Guru Algorithm + Toggle
+## Version Bump
 
-- [x] 3.1 Create `SmartGuru.swift` algorithm (iOS only, with duration adaptation)
-- [x] 3.2 Add `smartGuruEnabled` + adaptive state to SettingsManager
-- [x] 3.3 Update SettingsView: guru toggle, adaptive info display
-- [x] 3.4 Integrate with NotificationScheduler + ForegroundScheduler
-- [x] 3.5 Guru state synced via connectivityContext
+- [x] C.1 SupportFiles/Info.plist → 3.02
+- [x] C.2 Awareness.xcodeproj/project.pbxproj → 3.02 (2 configs)
+- [x] C.3 ios/Awareness/.../project.pbxproj → 3.02 (all configs)
+- [x] C.4 windows/Awareness/Awareness.csproj → 3.02.0
+- [x] C.5 CHANGELOG.md — add v3.02 entry
 
-## Cross-cutting
+## Documentation
 
-- [x] 4.1 Add all new files to pbxproj (iOS + watchOS + widget targets)
-- [x] 4.2 Add all EN/DE translations to Localizable.xcstrings
-- [ ] 4.3 Commit and push
+- [x] D.1 Update CLAUDE.md (project structure, technical decisions, version bump table)
+- [x] D.2 Update memory/MEMORY.md
 
-## Additional Requests
+## Verification
 
-- [x] 5.1 Duration adaptation: decrease by 5s on 3+ dismissals, increase 1s/day at 85%+ rate
-- [x] 5.2 watchOS complication: progress counter (2/5) on circular yin-yang icon
-- [x] 5.3 watchOS ContentView: compact status (dot + time + counter), self-report tracking
-- [x] 5.4 Practice card rectangular complication (card title + micro-task)
+- [x] E.1 Build iOS target — BUILD SUCCEEDED (all targets: iOS + watchOS + widget)
 
 ## Results
 
-All phases implemented. Both iOS and watchOS targets build successfully.
-New files: PracticeCard.swift, MicroTask.swift, MindfulEvent.swift, EventStore.swift, SmartGuru.swift
-Modified: SettingsManager, SettingsView, ContentView (iOS+watchOS), ProgressView (iOS+watchOS),
-BlackoutView, ForegroundScheduler, NotificationScheduler, ComplicationProvider, Localizable.xcstrings, project.pbxproj
+All tasks completed. iOS and widget extension build successfully.
+New files: WidgetDataBridge.swift, AwarenessWidgetBundle.swift, AwarenessWidgetProvider.swift,
+AwarenessWidget.entitlements, AwarenessWidget/Info.plist, Awareness/Info.plist
+Modified: SettingsManager.swift, ContentView.swift, AwarenessApp.swift, Awareness.entitlements,
+project.pbxproj (iOS), project.pbxproj (macOS), Info.plist (macOS), Awareness.csproj, CHANGELOG.md, CLAUDE.md

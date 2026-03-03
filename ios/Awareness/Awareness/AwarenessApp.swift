@@ -2,7 +2,7 @@ import SwiftUI
 import UserNotifications
 
 /// Main entry point for the iOS Awareness app.
-/// Handles notification delegation, foreground refresh, and blackout presentation.
+/// Handles notification delegation, foreground refresh, widget updates, and deep link handling.
 @main
 struct AwarenessApp: App {
 
@@ -17,12 +17,20 @@ struct AwarenessApp: App {
                     case .active:
                         NotificationScheduler.shared.refreshOnForeground()
                         ForegroundScheduler.shared.start()
+                        // Update the home screen widget with latest state
+                        WidgetDataBridge.shared.updateWidget()
                     case .background, .inactive:
                         ForegroundScheduler.shared.stop()
                     @unknown default:
                         break
                     }
                 })
+                // Handle deep links from widget tap (awareness://breathe)
+                .onOpenURL { url in
+                    if url.scheme == "awareness", url.host == "breathe" {
+                        NotificationCenter.default.post(name: .showBlackout, object: nil)
+                    }
+                }
         }
     }
 }
@@ -52,6 +60,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         // Check for updates
         UpdateChecker.shared.check()
+
+        // Initial widget update on launch
+        WidgetDataBridge.shared.updateWidget()
 
         return true
     }

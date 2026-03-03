@@ -7,9 +7,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.joergsflow.awareness</string>
     <key>CFBundleVersion</key>
-    <string>3.01</string>
+    <string>3.02</string>
     <key>CFBundleShortVersionString</key>
-    <string>3.01</string>
+    <string>3.02</string>
     <key>CFBundleExecutable</key>
     <string>Awareness</string>
     <key>CFBundleIconFile</key>

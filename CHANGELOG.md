@@ -4,6 +4,21 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.02
+
+### iOS: Micro-Task Auto-Assign
+- **Micro-task visible from launch** — today's micro-task now appears immediately when the app opens, not just after the first blackout. Auto-assigns from today's card pool on first access.
+- **Removed post-blackout overlay** — micro-task reveal animation after blackout removed; the task is always visible in the main list instead.
+
+### iOS: Home Screen Widget
+- **New systemSmall + systemMedium home screen widgets** — glance at today's practice card, micro-task, progress donut, and next blackout time without opening the app
+- **Widget deep link** — tap the widget to open the app and trigger a blackout (`awareness://breathe` URL scheme)
+- **WidgetDataBridge** — lightweight data bridge pattern writes a Codable snapshot to App Group shared UserDefaults; widget reads it independently without sharing SettingsManager
+- **Auto-refresh** — widget updates on app launch, foreground return, blackout completion, snooze, and resume
+- **App Group** `group.com.joergsflow.awareness.ios` shared between iOS app and widget extension
+
+---
+
 ## v3.0
 
 ### All platforms: Smart Guru — Adaptive Mindfulness Scheduling
