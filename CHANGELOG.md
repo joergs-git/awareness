@@ -4,6 +4,14 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.05
+
+### iOS: Lock Screen Widgets
+- **Three lock screen widget families** — circular (donut progress ring with ☯ + counter), rectangular (card title + next time + counter), and inline (text-only: "☯ 3/5 · Letting Go")
+- Lock screen widgets use system-tinted monochrome rendering (no custom colors)
+
+---
+
 ## v3.04
 
 ### iOS: Widget Styling

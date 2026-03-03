@@ -109,7 +109,7 @@ struct AwarenessWidgetProvider: TimelineProvider {
 
 // MARK: - Widget Definition
 
-/// iOS home screen widget showing practice card, micro-task, and progress
+/// iOS home screen + lock screen widget showing practice card, micro-task, and progress
 struct AwarenessHomeWidget: Widget {
     let kind: String = "AwarenessHomeWidget"
 
@@ -119,29 +119,39 @@ struct AwarenessHomeWidget: Widget {
         }
         .configurationDisplayName("Awareness")
         .description("Today's practice card, micro-task, and mindful moments progress.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([
+            .systemSmall, .systemMedium,
+            .accessoryCircular, .accessoryRectangular, .accessoryInline
+        ])
     }
 }
 
 // MARK: - Widget Views
 
-/// Main widget view that switches between small and medium layouts.
-/// Applies the warm sunrise gradient as the widget container background (iOS 17+)
-/// so it fills the entire rounded rect instead of appearing as a box-within-a-box.
+/// Main widget view that routes to the appropriate layout for each widget family.
+/// Home screen: warm sunrise gradient background. Lock screen: system-tinted monochrome.
 struct AwarenessWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     let entry: AwarenessWidgetEntry
 
     var body: some View {
-        Group {
-            switch family {
-            case .systemMedium:
-                MediumWidgetView(entry: entry)
-            default:
-                SmallWidgetView(entry: entry)
-            }
+        switch family {
+        case .systemMedium:
+            MediumWidgetView(entry: entry)
+                .awarenessWidgetBackground()
+        case .systemSmall:
+            SmallWidgetView(entry: entry)
+                .awarenessWidgetBackground()
+        case .accessoryCircular:
+            AccessoryCircularView(entry: entry)
+        case .accessoryRectangular:
+            AccessoryRectangularView(entry: entry)
+        case .accessoryInline:
+            AccessoryInlineView(entry: entry)
+        default:
+            SmallWidgetView(entry: entry)
+                .awarenessWidgetBackground()
         }
-        .awarenessWidgetBackground()
     }
 }
 
@@ -349,6 +359,116 @@ struct SmallWidgetView: View {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+}
+
+// MARK: - Lock Screen: Circular (donut with counter)
+
+/// Compact circular widget for the lock screen showing today's progress donut.
+/// ┌─────┐
+/// │ ◉   │
+/// │ 3/5 │
+/// └─────┘
+struct AccessoryCircularView: View {
+    let entry: AwarenessWidgetEntry
+
+    private var ratio: Double {
+        guard entry.todayTriggered > 0 else { return 0 }
+        return min(Double(entry.todayCompleted) / Double(entry.todayTriggered), 1.0)
+    }
+
+    var body: some View {
+        ZStack {
+            // Background ring
+            AccessoryWidgetBackground()
+
+            // Progress arc
+            Circle()
+                .trim(from: 0, to: ratio)
+                .stroke(style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .padding(3)
+                .widgetAccentable()
+
+            // Center counter
+            VStack(spacing: 0) {
+                Text("☯")
+                    .font(.caption2)
+                Text("\(entry.todayCompleted)/\(entry.todayTriggered)")
+                    .font(.caption2.monospacedDigit().weight(.semibold))
+            }
+        }
+    }
+}
+
+// MARK: - Lock Screen: Rectangular (card title + next time)
+
+/// Rectangular widget for the lock screen showing card short title and next blackout time.
+/// ┌────────────────────────────┐
+/// │ ☯ Letting Go               │
+/// │ Next: 14:32 · 3/5          │
+/// └────────────────────────────┘
+struct AccessoryRectangularView: View {
+    let entry: AwarenessWidgetEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 3) {
+                Text("☯")
+                    .font(.caption2)
+                Text(entry.cardTitle)
+                    .font(.caption)
+                    .lineLimit(2)
+                    .widgetAccentable()
+            }
+
+            HStack(spacing: 4) {
+                if let nextDate = entry.nextBlackoutDate, !entry.isSnoozed {
+                    HStack(spacing: 2) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 9))
+                        Text(formatTime(nextDate))
+                            .font(.caption2)
+                    }
+                } else if entry.isSnoozed {
+                    HStack(spacing: 2) {
+                        Image(systemName: "moon.fill")
+                            .font(.system(size: 9))
+                        Text("Snoozed")
+                            .font(.caption2)
+                    }
+                }
+
+                Text("·")
+                    .font(.system(size: 9))
+
+                Text("\(entry.todayCompleted)/\(entry.todayTriggered)")
+                    .font(.caption2.monospacedDigit())
+            }
+            .foregroundColor(.secondary)
+        }
+    }
+
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - Lock Screen: Inline (text only)
+
+/// Single-line inline widget for the lock screen.
+/// Displays: "☯ 3/5 · Letting Go" or "☯ Snoozed"
+struct AccessoryInlineView: View {
+    let entry: AwarenessWidgetEntry
+
+    var body: some View {
+        if entry.isSnoozed {
+            Text("☯ Snoozed")
+        } else {
+            Text("☯ \(entry.todayCompleted)/\(entry.todayTriggered) · \(entry.cardShortTitle)")
+        }
     }
 }
 
