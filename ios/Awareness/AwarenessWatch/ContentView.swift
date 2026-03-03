@@ -17,6 +17,8 @@ struct ContentView: View {
 
     /// Today's practice card (assigned from iOS or locally)
     @State private var todaysCard: PracticeCard?
+    /// Current micro-task for today
+    @State private var currentTask: MicroTask?
     /// Self-report counters for today
     @State private var selfReport: DailySelfReport?
     /// Whether to show the practice card detail sheet
@@ -28,85 +30,150 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
-                // MARK: - Compact Status Bar (dot + next time)
-                Section {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(statusColor)
-                            .frame(width: 8, height: 8)
-
-                        if settings.isSnoozed {
-                            if let until = settings.snoozeUntil, until < Date.distantFuture {
-                                Text(formatTime(until))
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.orange)
-                            } else {
-                                Text(String(localized: "Paused"))
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.orange)
-                            }
-                        } else if let nextDate = scheduler.nextNotificationDate {
-                            Text(formatTime(nextDate))
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
-
-                        Spacer()
-
-                        // Today's progress counter
-                        Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
-                            .font(.system(size: 11).monospacedDigit())
-                            .foregroundColor(.secondary)
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-                }
-
-                // MARK: - Self-Report Counters
+                // MARK: - Status + Card + Micro-Task (single row, zero gap)
                 if let card = todaysCard {
                     Section {
-                        VStack(spacing: 6) {
-                            // Tap card title to open detail sheet
-                            Button {
-                                showingCardDetail = true
-                            } label: {
-                                Text(card.localizedShortTitle)
+                        VStack(spacing: 2) {
+                            // Status bar
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(statusColor)
+                                    .frame(width: 8, height: 8)
+
+                                if settings.isSnoozed {
+                                    if let until = settings.snoozeUntil, until < Date.distantFuture {
+                                        Text(formatTime(until))
+                                            .font(.system(size: 11))
+                                            .foregroundColor(.orange)
+                                    } else {
+                                        Text(String(localized: "Paused"))
+                                            .font(.system(size: 11))
+                                            .foregroundColor(.orange)
+                                    }
+                                } else if let nextDate = scheduler.nextNotificationDate {
+                                    Text(formatTime(nextDate))
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
+                                    .font(.system(size: 11).monospacedDigit())
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 4)
+
+                            // Card + counters + micro-task
+                            // Card banner with title + counters
+                            // Tap anywhere on card opens detail (counters have own gestures)
+                            VStack(spacing: 4) {
+                                Text(card.localizedTitle)
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.white)
-                                    .lineLimit(1)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.center)
                                     .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.plain)
 
-                            // Three counter buttons in a row (wider spacing for easier tapping)
-                            if let report = selfReport {
-                                HStack(spacing: 20) {
-                                    selfReportButton(
-                                        icon: "checkmark.circle",
-                                        count: report.succeeded,
-                                        action: { incrementSelfReport(\.succeeded) }
-                                    )
-                                    selfReportButton(
-                                        icon: "eye.circle",
-                                        count: report.noticed,
-                                        action: { incrementSelfReport(\.noticed) }
-                                    )
-                                    selfReportButton(
-                                        icon: "circle",
-                                        count: report.forgot,
-                                        action: { incrementSelfReport(\.forgot) }
-                                    )
+                                // Counter buttons + breathe trigger below title
+                                if let report = selfReport {
+                                    HStack(spacing: 0) {
+                                        HStack(spacing: 20) {
+                                            selfReportButton(
+                                                icon: "checkmark.circle",
+                                                count: report.succeeded,
+                                                keyPath: \.succeeded
+                                            )
+                                            selfReportButton(
+                                                icon: "eye.circle",
+                                                count: report.noticed,
+                                                keyPath: \.noticed
+                                            )
+                                            selfReportButton(
+                                                icon: "circle",
+                                                count: report.forgot,
+                                                keyPath: \.forgot
+                                            )
+                                        }
+
+                                        Spacer()
+
+                                        // Breathe now shortcut
+                                        Button {
+                                            showingBlackout = true
+                                        } label: {
+                                            Text("☯")
+                                                .font(.system(size: 36))
+                                                .grayscale(1.0)
+                                                .opacity(0.7)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .padding(.leading, 12)
+                                    }
                                 }
                             }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 4)
+                            .contentShape(Rectangle())
+                            .onTapGesture { showingCardDetail = true }
+                            .background(
+                                WatchCardBackground(color: card.color)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                            // Micro-task below card (iOS-style tinted box with connector)
+                            if let task = currentTask {
+                                Rectangle()
+                                    .fill(card.color.opacity(0.4))
+                                    .frame(width: 2, height: 4)
+
+                                Text(task.localizedText)
+                                    .font(.system(size: 10).italic())
+                                    .foregroundColor(.primary.opacity(0.8))
+                                    .multilineTextAlignment(.center)
+                                    .lineLimit(3)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 6)
+                                    .frame(maxWidth: .infinity)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(card.color.opacity(0.1))
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(card.color.opacity(0.2), lineWidth: 0.5)
+                                    )
+                            }
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 2)
-                        .listRowBackground(
-                            WatchCardBackground(color: card.color)
-                        )
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
                     }
                     .sheet(isPresented: $showingCardDetail) {
                         WatchCardDetailView(card: card)
+                    }
+                } else {
+                    // Fallback: status bar only when no card assigned
+                    Section {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(statusColor)
+                                .frame(width: 8, height: 8)
+                            if settings.isSnoozed {
+                                if let until = settings.snoozeUntil, until < Date.distantFuture {
+                                    Text(formatTime(until)).font(.system(size: 11)).foregroundColor(.orange)
+                                } else {
+                                    Text(String(localized: "Paused")).font(.system(size: 11)).foregroundColor(.orange)
+                                }
+                            } else if let nextDate = scheduler.nextNotificationDate {
+                                Text(formatTime(nextDate)).font(.system(size: 11)).foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
+                                .font(.system(size: 11).monospacedDigit()).foregroundColor(.secondary)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
                     }
                 }
 
@@ -171,6 +238,7 @@ struct ContentView: View {
                 // Prefer iOS-synced card (storedPracticeCard) over local random assignment
                 // to ensure the watch shows the same card as the phone
                 todaysCard = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
+                currentTask = settings.currentMicroTask()
                 selfReport = settings.currentSelfReportData()
                 // Ensure complication shows the same card as the app
                 WidgetCenter.shared.reloadAllTimelines()
@@ -210,7 +278,7 @@ struct ContentView: View {
                     selfReport = settings.currentSelfReportData()
                     todaysCard = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
                     // Rotate micro-task to a new random one after each blackout
-                    _ = settings.rotateMicroTask()
+                    currentTask = settings.rotateMicroTask()
                     // Refresh complication after blackout (card/task may have changed)
                     WidgetCenter.shared.reloadAllTimelines()
                 }
@@ -231,18 +299,26 @@ struct ContentView: View {
 
     // MARK: - Self-Report Button
 
+    /// Single self-report counter icon. Tap to increment, double-tap to decrement.
     @ViewBuilder
-    private func selfReportButton(icon: String, count: Int, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 2) {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                Text("\(count)")
-                    .font(.system(size: 12).monospacedDigit())
-            }
-            .foregroundColor(.white.opacity(0.85))
+    private func selfReportButton(icon: String, count: Int, keyPath: WritableKeyPath<DailySelfReport, Int>) -> some View {
+        VStack(spacing: 2) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+            Text("\(count)")
+                .font(.system(size: 12).monospacedDigit())
         }
-        .buttonStyle(.plain)
+        .foregroundColor(.white.opacity(0.85))
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            decrementSelfReport(keyPath)
+            #if os(watchOS)
+            WKInterfaceDevice.current().play(.directionDown)
+            #endif
+        }
+        .onTapGesture(count: 1) {
+            incrementSelfReport(keyPath)
+        }
     }
 
     // MARK: - Computed
@@ -279,10 +355,18 @@ struct ContentView: View {
         report[keyPath: keyPath] += 1
         settings.updateSelfReport(report)
         selfReport = report
-        // Light haptic on watch
         #if os(watchOS)
         WKInterfaceDevice.current().play(.click)
         #endif
+    }
+
+    /// Decrement a self-report counter (double-tap to undo accidental increment), floor at 0
+    private func decrementSelfReport(_ keyPath: WritableKeyPath<DailySelfReport, Int>) {
+        var report = settings.currentSelfReportData()
+        guard report[keyPath: keyPath] > 0 else { return }
+        report[keyPath: keyPath] -= 1
+        settings.updateSelfReport(report)
+        selfReport = report
     }
 }
 
@@ -339,15 +423,20 @@ struct WatchCardDetailView: View {
                     .foregroundColor(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
 
-                // Show current micro-task if assigned
+                // Show current micro-task if assigned (tinted background)
                 if let task = SettingsManager.shared.currentMicroTask() {
-                    Divider()
-                        .background(Color.white.opacity(0.3))
                     Text(task.localizedText)
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.white.opacity(0.85))
                         .multilineTextAlignment(.center)
                         .italic()
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.white.opacity(0.12))
+                        )
                 }
             }
             .padding(.horizontal, 8)

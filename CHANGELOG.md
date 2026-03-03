@@ -4,6 +4,20 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.07
+
+### watchOS: UI Overhaul & Feature Parity
+- **Compact layout** — status bar and practice card merged into a single row with zero gap; "Breathe now" visible without scrolling on 49mm Ultra
+- **Full card title** — shows `localizedTitle` (up to 2 lines, centered) instead of short title
+- **Inline micro-task** — tinted rounded box below the card with colored connector, matching iOS style
+- **☯ breathe shortcut** — large monochrome yin-yang icon on the card row triggers a blackout directly
+- **Tap card to open detail** — tapping anywhere on the card background (not just the title) opens the full-screen detail sheet
+- **Double-tap to decrement** — self-report counters support double-tap to undo accidental increments
+- **Toned micro-task in detail** — card detail sheet shows micro-task with tinted rounded background
+- **Practice tracking stats** — ProgressView shows today's succeeded/noticed/forgot counters in a "Situations" section
+
+---
+
 ## v3.06
 
 ### iOS: UI Polish & Practice Tracking Chart

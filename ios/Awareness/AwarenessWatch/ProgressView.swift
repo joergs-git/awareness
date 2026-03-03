@@ -9,6 +9,11 @@ struct ProgressView: View {
     /// Warm earthy color for donut arcs (Chinese sunrise palette)
     private let donutColor = Color(red: 0.72, green: 0.50, blue: 0.38)
 
+    /// Self-report category colors
+    private let succeededColor = Color(red: 0.45, green: 0.65, blue: 0.45)
+    private let noticedColor = Color(red: 0.55, green: 0.55, blue: 0.70)
+    private let forgotColor = Color(red: 0.70, green: 0.50, blue: 0.45)
+
     var body: some View {
         List {
             // MARK: - Twin Donut Charts
@@ -89,6 +94,45 @@ struct ProgressView: View {
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
+            }
+
+            // MARK: - Today's Practice Tracking
+            Section {
+                let report = SettingsManager.shared.currentSelfReportData()
+                HStack(spacing: 12) {
+                    Spacer()
+                    // Succeeded
+                    VStack(spacing: 2) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 14))
+                            .foregroundColor(succeededColor)
+                        Text("\(report.succeeded)")
+                            .font(.system(size: 11).monospacedDigit())
+                            .foregroundColor(.secondary)
+                    }
+                    // Noticed
+                    VStack(spacing: 2) {
+                        Image(systemName: "eye.circle")
+                            .font(.system(size: 14))
+                            .foregroundColor(noticedColor)
+                        Text("\(report.noticed)")
+                            .font(.system(size: 11).monospacedDigit())
+                            .foregroundColor(.secondary)
+                    }
+                    // Forgot
+                    VStack(spacing: 2) {
+                        Image(systemName: "circle")
+                            .font(.system(size: 14))
+                            .foregroundColor(forgotColor)
+                        Text("\(report.forgot)")
+                            .font(.system(size: 11).monospacedDigit())
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
+            } header: {
+                Text(String(localized: "Situations"))
             }
         }
         .navigationTitle(String(localized: "Mindful Moments"))
