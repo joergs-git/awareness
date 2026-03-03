@@ -29,6 +29,14 @@ final class SettingsManager: ObservableObject {
         static let customVideoBookmark = "customVideoBookmark"
         static let snoozeUntil              = "snoozeUntil"
         static let startclickConfirmation   = "startclickConfirmation"
+
+        // Practice Cards & Micro-Tasks
+        static let todaysPracticeCardID  = "todaysPracticeCardID"
+        static let practiceCardDate      = "practiceCardDate"
+        static let yesterdaysCardID      = "yesterdaysCardID"
+        static let currentMicroTaskID    = "currentMicroTaskID"
+        static let microTaskDate         = "microTaskDate"
+        static let lastMicroTaskIDs      = "lastMicroTaskIDs"
     }
 
     // MARK: - Default Values
@@ -228,6 +236,71 @@ final class SettingsManager: ObservableObject {
         let url = URL(fileURLWithPath: customVideoPath)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         return url
+    }
+
+    // MARK: - Practice Card & Micro-Task
+
+    /// Get today's practice card, assigning a new one if the day changed.
+    /// Avoids repeating yesterday's card.
+    func todaysPracticeCard() -> PracticeCard? {
+        let today = todayString()
+        let storedDate = defaults.string(forKey: Keys.practiceCardDate)
+
+        // Same day — return stored card
+        if storedDate == today, let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) {
+            return PracticeCard.card(withID: cardID)
+        }
+
+        // New day — assign a random card (avoid yesterday's)
+        let yesterdayID = defaults.string(forKey: Keys.todaysPracticeCardID)
+        defaults.set(yesterdayID, forKey: Keys.yesterdaysCardID)
+
+        let candidates = PracticeCard.allCards.filter { $0.id != yesterdayID }
+        guard let newCard = candidates.randomElement() else { return nil }
+
+        defaults.set(newCard.id, forKey: Keys.todaysPracticeCardID)
+        defaults.set(today, forKey: Keys.practiceCardDate)
+
+        // Reset micro-task state for new day
+        defaults.removeObject(forKey: Keys.currentMicroTaskID)
+        defaults.removeObject(forKey: Keys.microTaskDate)
+
+        return newCard
+    }
+
+    /// Pick a new random micro-task from today's card pool.
+    /// Tracks last 3 IDs to avoid immediate repeats.
+    /// Called after each blackout completion to rotate the displayed task.
+    func randomMicroTask() -> MicroTask? {
+        guard let card = todaysPracticeCard() else { return nil }
+
+        let lastIDs = defaults.stringArray(forKey: Keys.lastMicroTaskIDs) ?? []
+        let pool = MicroTask.tasks(forCardID: card.id).filter { !lastIDs.contains($0.id) }
+
+        // Fallback to full pool if all tasks recently used
+        guard let task = pool.randomElement() ?? MicroTask.tasks(forCardID: card.id).randomElement() else {
+            return nil
+        }
+
+        let today = todayString()
+        defaults.set(task.id, forKey: Keys.currentMicroTaskID)
+        defaults.set(today, forKey: Keys.microTaskDate)
+
+        // Track last 3 micro-task IDs to avoid immediate repeats
+        var updated = lastIDs
+        updated.append(task.id)
+        if updated.count > 3 { updated.removeFirst() }
+        defaults.set(updated, forKey: Keys.lastMicroTaskIDs)
+
+        return task
+    }
+
+    /// Helper: today's date as "yyyy-MM-dd"
+    private func todayString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: Date())
     }
 
     // MARK: - Init

@@ -525,12 +525,14 @@ struct ContentView: View {
         selfReport = report
     }
 
-    /// Handle post-blackout logic: refresh card/task/report state and update widget
+    /// Handle post-blackout logic: refresh card/task/report state and update widget.
+    /// Rotates the micro-task to a new random one after each blackout.
     private func handlePostBlackout() {
-        // Refresh card, micro-task, and self-report state
+        // Refresh card and self-report state
         todaysCard = settings.todaysPracticeCard()
-        currentTask = settings.currentMicroTask()
         selfReport = settings.currentSelfReportData()
+        // Rotate micro-task to a new random one after each blackout
+        currentTask = settings.rotateMicroTask()
         // Update home screen widget with latest progress
         WidgetDataBridge.shared.updateWidget()
     }

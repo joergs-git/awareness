@@ -129,6 +129,83 @@ struct BlackoutContentView: View {
     }
 }
 
+// MARK: - Post-Blackout View (Namaste → Card + Micro-Task)
+
+/// Shown after the breathing session ends: first a namaste 🙏 (1.5s fade),
+/// then the day's practice card title and a random micro-task.
+/// Stays on screen until the user clicks anywhere to dismiss.
+struct PostBlackoutView: View {
+
+    @ObservedObject var state: BlackoutPhaseState
+
+    /// Opacity for namaste fade-in/fade-out
+    @State private var namasteOpacity: Double = 0
+    /// Opacity for card content fade-in
+    @State private var cardOpacity: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            switch state.phase {
+            case .breathing:
+                EmptyView()
+
+            case .namaste:
+                Text("🙏")
+                    .font(.system(size: 72))
+                    .opacity(namasteOpacity)
+                    .onAppear {
+                        withAnimation(.easeIn(duration: 0.4)) {
+                            namasteOpacity = 1.0
+                        }
+                    }
+
+            case .practiceCard:
+                VStack(spacing: 20) {
+                    if let card = state.practiceCard {
+                        Text(card.localizedTitle)
+                            .font(.system(size: 28, weight: .light))
+                            .foregroundColor(card.color)
+                            .multilineTextAlignment(.center)
+
+                        // Divider line in card color
+                        Rectangle()
+                            .fill(card.color.opacity(0.4))
+                            .frame(width: 120, height: 1)
+                    }
+
+                    if let task = state.microTask {
+                        Text(task.localizedText)
+                            .font(.system(size: 18, weight: .light).italic())
+                            .foregroundColor(.white.opacity(0.75))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 60)
+                    }
+
+                    Spacer().frame(height: 40)
+
+                    Text(String(localized: "click anywhere to continue"))
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.25))
+                }
+                .opacity(cardOpacity)
+                .onAppear {
+                    withAnimation(.easeIn(duration: 0.5)) {
+                        cardOpacity = 1.0
+                    }
+                }
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if state.phase == .practiceCard {
+                state.onDismissRequest?()
+            }
+        }
+    }
+}
+
 // MARK: - Startclick Confirmation View
 
 /// Shown before the actual blackout when "Startclick confirmation" is enabled.

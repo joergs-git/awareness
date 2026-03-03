@@ -205,11 +205,13 @@ struct ContentView: View {
                     }
                 }
 
-                // Refresh self-report after blackout
+                // Refresh state after blackout
                 if !isShowing {
                     selfReport = settings.currentSelfReportData()
                     todaysCard = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
-                    // Refresh complication after blackout (card may have changed)
+                    // Rotate micro-task to a new random one after each blackout
+                    _ = settings.rotateMicroTask()
+                    // Refresh complication after blackout (card/task may have changed)
                     WidgetCenter.shared.reloadAllTimelines()
                 }
             }

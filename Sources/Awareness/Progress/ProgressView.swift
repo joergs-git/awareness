@@ -1,17 +1,49 @@
 import SwiftUI
 
-/// Progress statistics view showing a donut chart, today/lifetime counters,
-/// and a 14-day bar chart of triggered vs completed blackouts.
+/// Progress statistics view showing twin donut charts (today + all-time),
+/// today/lifetime counters, and a 14-day bar chart of triggered vs completed blackouts.
 struct ProgressView: View {
 
     @ObservedObject var tracker = ProgressTracker.shared
 
+    /// Warm earthy color for donut arcs (Chinese sunrise palette)
+    private let donutColor = Color(red: 0.72, green: 0.50, blue: 0.38)
+
     var body: some View {
         VStack(spacing: 16) {
-            // MARK: - Donut Chart
-            donutChart
-                .frame(width: 120, height: 120)
-                .padding(.top, 8)
+            // MARK: - Twin Donut Charts
+            HStack(spacing: 24) {
+                // Today donut
+                VStack(spacing: 4) {
+                    brushDonut(
+                        rate: todayRate,
+                        hasData: tracker.todayTriggered > 0,
+                        size: 100,
+                        lineWidth: 14
+                    )
+                    .frame(width: 100, height: 100)
+
+                    Text(String(localized: "Today"))
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+
+                // All-time donut
+                VStack(spacing: 4) {
+                    brushDonut(
+                        rate: tracker.successRate,
+                        hasData: tracker.lifetimeTriggered > 0,
+                        size: 100,
+                        lineWidth: 14
+                    )
+                    .frame(width: 100, height: 100)
+
+                    Text(String(localized: "Overall"))
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.top, 8)
 
             // MARK: - Stats
             VStack(spacing: 6) {
@@ -45,35 +77,60 @@ struct ProgressView: View {
         .frame(width: 300)
     }
 
-    // MARK: - Donut Chart
+    // MARK: - Brush-Style Donut
 
+    /// A donut chart with a brush-stroke effect: multiple overlapping arcs at slight offsets
+    /// create the impression of ink brush irregularity (matching iOS Chinese sunrise style).
     @ViewBuilder
-    private var donutChart: some View {
-        let rate = tracker.successRate
-        let hasData = tracker.lifetimeTriggered > 0
-
+    private func brushDonut(rate: Double, hasData: Bool, size: CGFloat, lineWidth: CGFloat) -> some View {
         ZStack {
-            // Background ring (gray)
+            // Background ring
             Circle()
-                .stroke(Color.gray.opacity(0.2), lineWidth: 16)
+                .stroke(Color.gray.opacity(0.15), lineWidth: lineWidth)
 
-            // Completed arc (green)
             if hasData && rate > 0 {
+                // Primary arc
                 Circle()
                     .trim(from: 0, to: rate)
-                    .stroke(Color.green, style: StrokeStyle(lineWidth: 16, lineCap: .round))
+                    .stroke(donutColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     .rotationEffect(.degrees(-90))
+
+                // Brush overlays — semi-transparent arcs at offsets simulate ink brush texture
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor.opacity(0.5), style: StrokeStyle(lineWidth: lineWidth * 0.85, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .offset(x: 1.0, y: -0.8)
+
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor.opacity(0.3), style: StrokeStyle(lineWidth: lineWidth * 0.6, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .offset(x: -0.8, y: 1.2)
+
+                // Third overlay with dashed stroke for subtle texture breaks
+                Circle()
+                    .trim(from: 0, to: rate)
+                    .stroke(donutColor.opacity(0.2), style: StrokeStyle(lineWidth: lineWidth * 0.4, lineCap: .round, dash: [10, 2]))
+                    .rotationEffect(.degrees(-90))
+                    .offset(x: 0.5, y: 0.8)
             }
 
             // Center text
-            VStack(spacing: 2) {
+            VStack(spacing: 1) {
                 Text(hasData ? "\(Int(rate * 100))%" : "—")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.system(size: size * 0.2, weight: .bold))
                 Text(String(localized: "Discipline"))
-                    .font(.system(size: 9))
+                    .font(.system(size: size * 0.08))
                     .foregroundColor(.secondary)
             }
         }
+    }
+
+    /// Today's success rate (0.0 to 1.0)
+    private var todayRate: Double {
+        guard tracker.todayTriggered > 0 else { return 0 }
+        return Double(tracker.todayCompleted) / Double(tracker.todayTriggered)
     }
 
     // MARK: - 14-Day Bar Chart
@@ -93,9 +150,9 @@ struct ProgressView: View {
                                 .fill(Color.gray.opacity(0.4))
                                 .frame(width: 6, height: barHeight(day.triggered, max: maxVal))
 
-                            // Completed bar (green)
+                            // Completed bar (earthy color matching donuts)
                             RoundedRectangle(cornerRadius: 1)
-                                .fill(Color.green)
+                                .fill(donutColor)
                                 .frame(width: 6, height: barHeight(day.completed, max: maxVal))
                         }
                         .frame(height: 60, alignment: .bottom)
@@ -121,7 +178,7 @@ struct ProgressView: View {
                 }
                 HStack(spacing: 4) {
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(Color.green)
+                        .fill(donutColor)
                         .frame(width: 8, height: 8)
                     Text(String(localized: "completed"))
                         .font(.system(size: 9))

@@ -4,6 +4,21 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.03
+
+### macOS: Practice Cards & Micro-Tasks
+- **Daily practice cards** — each day a random mindfulness card (from the same 7-card deck as iOS) is assigned. Card title and micro-task are shown after each breathing session.
+- **Post-blackout flow** — after the breathing timer ends: namaste 🙏 (1.5s) → card title + random micro-task on the black screen → click anywhere to dismiss. Early dismiss during breathing skips the card phase entirely.
+- **Micro-task rotation** — each completed blackout picks a fresh random micro-task from today's card pool (avoids last 3 for variety).
+
+### macOS: Twin Donut Charts
+- **Two donuts side by side** — "Today" and "Overall" discipline charts in the Mindful Moments window, matching the iOS brush-stroke style with warm earthy color.
+
+### All Platforms: Micro-Task Rotation
+- **New task after every blackout** — iOS, watchOS, and macOS all rotate to a new random micro-task after each completed blackout session (instead of showing the same task all day).
+
+---
+
 ## v3.02
 
 ### iOS: Micro-Task Auto-Assign

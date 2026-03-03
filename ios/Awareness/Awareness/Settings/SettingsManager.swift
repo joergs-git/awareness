@@ -361,6 +361,12 @@ final class SettingsManager: ObservableObject {
         return task
     }
 
+    /// Pick a new random micro-task from today's card pool.
+    /// Called after each blackout to rotate the displayed task.
+    func rotateMicroTask() -> MicroTask? {
+        return assignMicroTask()
+    }
+
     /// Whether a micro-task has been shown today (first blackout already happened)
     var microTaskShownToday: Bool {
         defaults.bool(forKey: Keys.microTaskShownToday)

@@ -1,46 +1,64 @@
-# v3.02 — Fix Micro-Task Display + iOS Home Screen Widget
+# v3.03 — Practice Cards + Micro-Tasks + Twin Donuts for macOS + Micro-Task Rotation
 
-## Task A: Fix iOS Micro-Task Display
+## Task A: Copy Model Files to macOS
 
-- [x] A.1 Change `currentMicroTask()` to auto-assign if no task exists for today
-- [x] A.2 Remove `microTaskShownToday` gate from ContentView line 69
-- [x] A.3 Remove post-blackout overlay state vars, modifier, and function
-- [x] A.4 Simplify `handlePostBlackout()` — remove micro-task reveal logic
+- [x] A.1 Copy PracticeCard.swift from iOS to Sources/Awareness/Models/
+- [x] A.2 Copy MicroTask.swift from iOS to Sources/Awareness/Models/
 
-## Task B: iOS Home Screen Widget
+## Task B: Extend macOS SettingsManager
 
-- [x] B.1 Create WidgetDataBridge.swift (iOS app target)
-- [x] B.2 Add App Group entitlement to iOS app
-- [x] B.3 Create AwarenessWidget directory + all files (bundle, provider, Info.plist, assets)
-- [x] B.4 Create widget extension entitlements
-- [x] B.5 Add widget target to pbxproj (E50099, A5/B5/C5/D5/E5/F5 IDs)
-- [x] B.6 Add WidgetDataBridge.swift to iOS Sources phase
-- [x] B.7 Create Info.plist for URL scheme (awareness://)
-- [x] B.8 Add INFOPLIST_FILE to iOS build configs
-- [x] B.9 Add .onOpenURL handler in AwarenessApp.swift
-- [x] B.10 Add updateWidget() calls in ContentView + AwarenessApp
+- [x] B.1 Add practice card & micro-task UserDefaults keys
+- [x] B.2 Add todaysPracticeCard() — daily random, avoids yesterday
+- [x] B.3 Add randomMicroTask() — fresh random each call, avoids last 3
+- [x] B.4 Add todayString() helper
 
-## Version Bump
+## Task C: Post-Blackout Phase (macOS)
 
-- [x] C.1 SupportFiles/Info.plist → 3.02
-- [x] C.2 Awareness.xcodeproj/project.pbxproj → 3.02 (2 configs)
-- [x] C.3 ios/Awareness/.../project.pbxproj → 3.02 (all configs)
-- [x] C.4 windows/Awareness/Awareness.csproj → 3.02.0
-- [x] C.5 CHANGELOG.md — add v3.02 entry
+- [x] C.1 Create BlackoutPhaseState.swift (phase enum + observable state)
+- [x] C.2 Add PostBlackoutView to BlackoutContentView.swift (namaste + card + micro-task)
+- [x] C.3 Add beginPostBlackoutPhase() to BlackoutWindowController
+- [x] C.4 Modify dismiss timer to transition to post-blackout instead of immediate dismiss
+- [x] C.5 Add post-blackout keyboard/mouse monitors (any click/key dismisses during card phase)
+- [x] C.6 Update global mouse monitor for post-blackout phase handling
 
-## Documentation
+## Task D: Twin Donuts (macOS ProgressView)
 
-- [x] D.1 Update CLAUDE.md (project structure, technical decisions, version bump table)
-- [x] D.2 Update memory/MEMORY.md
+- [x] D.1 Replace single donut with twin donuts (Today + Overall)
+- [x] D.2 Port brush-stroke effect from iOS (4-layer overlapping arcs)
+- [x] D.3 Use warm earthy donut color matching iOS Chinese sunrise palette
+- [x] D.4 Update bar chart to use donut color instead of green
+
+## Task E: macOS Xcode Project (pbxproj)
+
+- [x] E.1 Add PracticeCard.swift (B20019/A20019)
+- [x] E.2 Add MicroTask.swift (B20020/A20020)
+- [x] E.3 Add BlackoutPhaseState.swift (B20021/A20021)
+- [x] E.4 Add to Models and Blackout groups
+- [x] E.5 Add to Sources build phase
+
+## Task F: iOS/watchOS Micro-Task Rotation
+
+- [x] F.1 Add rotateMicroTask() to iOS SettingsManager
+- [x] F.2 Call rotateMicroTask() in iOS handlePostBlackout()
+- [x] F.3 Call rotateMicroTask() in watchOS post-blackout onChange
+
+## Task G: Version Bump + Docs
+
+- [x] G.1 SupportFiles/Info.plist → 3.03
+- [x] G.2 Awareness.xcodeproj/project.pbxproj → 3.03 (2 configs)
+- [x] G.3 ios/Awareness/.../project.pbxproj → 3.03 (8 configs)
+- [x] G.4 windows/Awareness/Awareness.csproj → 3.03.0
+- [x] G.5 CHANGELOG.md — add v3.03 entry
 
 ## Verification
 
-- [x] E.1 Build iOS target — BUILD SUCCEEDED (all targets: iOS + watchOS + widget)
+- [x] H.1 macOS SPM build — BUILD SUCCEEDED
+- [x] H.2 iOS build (all targets: iOS + watchOS + widget) — BUILD SUCCEEDED
 
 ## Results
 
-All tasks completed. iOS and widget extension build successfully.
-New files: WidgetDataBridge.swift, AwarenessWidgetBundle.swift, AwarenessWidgetProvider.swift,
-AwarenessWidget.entitlements, AwarenessWidget/Info.plist, Awareness/Info.plist
-Modified: SettingsManager.swift, ContentView.swift, AwarenessApp.swift, Awareness.entitlements,
-project.pbxproj (iOS), project.pbxproj (macOS), Info.plist (macOS), Awareness.csproj, CHANGELOG.md, CLAUDE.md
+All tasks completed. New files: PracticeCard.swift, MicroTask.swift, BlackoutPhaseState.swift (macOS).
+Modified: SettingsManager.swift (macOS + iOS), BlackoutContentView.swift (macOS),
+BlackoutWindowController.swift (macOS), ProgressView.swift (macOS),
+project.pbxproj (macOS + iOS), ContentView.swift (iOS + watchOS),
+Info.plist, Awareness.csproj, CHANGELOG.md.

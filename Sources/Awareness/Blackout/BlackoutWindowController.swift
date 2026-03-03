@@ -26,6 +26,11 @@ class BlackoutWindowController {
     /// Power assertion ID to prevent screen saver / display sleep during blackout
     private var idleAssertionID: IOPMAssertionID = 0
 
+    /// State for post-blackout namaste → card+task flow
+    private var phaseState: BlackoutPhaseState?
+    /// Whether the blackout is in a post-breathing phase (namaste or card)
+    private var isInPostBlackoutPhase = false
+
     // MARK: - Startclick Confirmation State
 
     /// Whether we're currently showing the "Ready to breathe?" confirmation screen
@@ -170,10 +175,10 @@ class BlackoutWindowController {
         installGlobalMouseMonitor()
         installGlobalEventTap()
 
-        // Schedule automatic dismissal
+        // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
-            self?.dismiss()
+            self?.beginPostBlackoutPhase()
         }
         dismissTimer = work
         DispatchQueue.main.asyncAfter(deadline: .now() + pendingDuration, execute: work)
@@ -249,13 +254,92 @@ class BlackoutWindowController {
         // Record that a blackout was triggered
         ProgressTracker.shared.recordTriggered()
 
-        // Schedule automatic dismissal after the configured duration
+        // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
-            self?.dismiss()
+            self?.beginPostBlackoutPhase()
         }
         dismissTimer = work
         DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: work)
+    }
+
+    // MARK: - Post-Blackout Phase (Namaste → Card + Micro-Task)
+
+    /// After breathing completes, transition to namaste → card+task flow.
+    /// Play end gong, swap window content to PostBlackoutView, then animate through phases.
+    private func beginPostBlackoutPhase() {
+        isInPostBlackoutPhase = true
+
+        // Play end gong at the breathing → namaste transition
+        GongPlayer.shared.playEndIfEnabled()
+
+        // Get today's card and a fresh random micro-task
+        let card = SettingsManager.shared.todaysPracticeCard()
+        let task = SettingsManager.shared.randomMicroTask()
+
+        // Create shared phase state
+        let state = BlackoutPhaseState()
+        state.practiceCard = card
+        state.microTask = task
+        state.onDismissRequest = { [weak self] in
+            self?.dismiss(silent: true)  // silent: end gong already played
+        }
+        self.phaseState = state
+
+        // Swap all window contents to PostBlackoutView
+        let postView = PostBlackoutView(state: state)
+        for window in windows {
+            window.contentView = NSHostingView(rootView: postView)
+        }
+
+        // Remove breathing-phase monitors and reinstall for post-blackout
+        removeKeyboardMonitor()
+        removeMouseClickMonitor()
+        removeGlobalMouseMonitor()
+        installPostBlackoutKeyboardMonitor()
+        installPostBlackoutMouseMonitor()
+        // Keep global event tap active to prevent background typing
+
+        // Phase 1: Show namaste 🙏
+        state.phase = .namaste
+
+        // Phase 2: After 1.5s, transition to practice card
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return }
+            state.phase = .practiceCard
+        }
+    }
+
+    /// Keyboard monitor during post-blackout: any key dismisses (no handcuffs check)
+    private func installPostBlackoutKeyboardMonitor() {
+        keyEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return event }
+
+            // During namaste, ignore keys (brief 1.5s phase)
+            if self.phaseState?.phase == .namaste {
+                return nil
+            }
+
+            // During card phase, any key dismisses
+            self.dismiss(silent: true)
+            return nil
+        }
+    }
+
+    /// Mouse monitor during post-blackout: click anywhere dismisses (no handcuffs check)
+    private func installPostBlackoutMouseMonitor() {
+        mouseEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+            guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return event }
+
+            // During namaste, ignore clicks
+            if self.phaseState?.phase == .namaste {
+                return nil
+            }
+
+            // During card phase, click anywhere dismisses
+            self.dismiss(silent: true)
+            return nil
+        }
     }
 
     /// Fade out and close all overlay windows, optionally playing the end gong.
@@ -264,6 +348,8 @@ class BlackoutWindowController {
     func dismiss(silent: Bool = false) {
         dismissTimer?.cancel()
         dismissTimer = nil
+        isInPostBlackoutPhase = false
+        phaseState = nil
         removeKeyboardMonitor()
         removeMouseClickMonitor()
         removeGlobalMouseMonitor()
@@ -403,6 +489,16 @@ class BlackoutWindowController {
     private func installGlobalMouseMonitor() {
         globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
             guard let self = self, self.isActive else { return }
+
+            // During post-blackout card phase: click anywhere dismisses (no handcuffs check)
+            if self.isInPostBlackoutPhase {
+                if self.phaseState?.phase == .practiceCard {
+                    NSApp.activate(ignoringOtherApps: true)
+                    self.dismiss(silent: true)
+                }
+                return
+            }
+
             guard !SettingsManager.shared.handcuffsMode else { return }
 
             // Re-activate our app and dismiss — the click already went to the other app,
