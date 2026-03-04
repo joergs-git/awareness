@@ -4,6 +4,15 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.10
+
+### All Platforms: Localized Breathing Phrases
+- **Language-aware rotation** — rotating breathing phrases now follow device language instead of being multilingual
+- English: "Breathe.", "You are here.", "Nothing to do.", "Just breathe.", "This moment."
+- German: "Atme.", "Du bist hier.", "Nichts zu tun.", "Nur atmen.", "Dieser Moment."
+
+---
+
 ## v3.09
 
 ### All Platforms: Rotating Breathing Phrases

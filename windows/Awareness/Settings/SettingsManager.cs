@@ -190,14 +190,15 @@ public class SettingsManager : INotifyPropertyChanged
     /// <summary>
     /// Default breathing phrases that rotate randomly to prevent habituation.
     /// Shown only when the user hasn't customized the text (i.e. still set to "Breathe.").
+    /// Localized per system language via Strings.resx resources.
     /// </summary>
-    private static readonly string[] BreathingPhrases =
+    private static string[] BreathingPhrases =>
     [
-        "Breathe.",
-        "You are here.",
-        "Nichts zu tun.",
-        "Nur atmen.",
-        "This moment."
+        Resources.Strings.BreathingPhrase1,
+        Resources.Strings.BreathingPhrase2,
+        Resources.Strings.BreathingPhrase3,
+        Resources.Strings.BreathingPhrase4,
+        Resources.Strings.BreathingPhrase5
     ];
 
     /// <summary>

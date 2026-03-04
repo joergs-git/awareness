@@ -129,6 +129,12 @@ Klicke OK zum Schließen oder Abbrechen, um GitHub zu öffnen.</value></data>
   <data name="PhilosophyText" xml:space="preserve"><value>Das Ziel dieser App ist, dass Du sie nicht mehr brauchst.
 Bis dahin: Atme.</value></data>
 
+  <data name="BreathingPhrase1" xml:space="preserve"><value>Atme.</value></data>
+  <data name="BreathingPhrase2" xml:space="preserve"><value>Du bist hier.</value></data>
+  <data name="BreathingPhrase3" xml:space="preserve"><value>Nichts zu tun.</value></data>
+  <data name="BreathingPhrase4" xml:space="preserve"><value>Nur atmen.</value></data>
+  <data name="BreathingPhrase5" xml:space="preserve"><value>Dieser Moment.</value></data>
+
   <data name="WelcomeText" xml:space="preserve"><value>Awareness reminder läuft jetzt im Infobereich.
 
 Suche das ☯ Symbol unten rechts auf deinem Bildschirm. Klicke es mit der rechten Maustaste an, um Einstellungen, Schlummern oder Beenden aufzurufen.

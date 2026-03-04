@@ -487,13 +487,13 @@ final class SettingsManager: ObservableObject {
 
     /// Default breathing phrases that rotate randomly to prevent habituation.
     /// Shown only when the user hasn't customized the text (i.e. still set to "Breathe.").
-    /// Mix of English and German — intentionally multilingual for a mindful, universal feel.
-    static let breathingPhrases = [
-        "Breathe.",
-        "You are here.",
-        "Nichts zu tun.",
-        "Nur atmen.",
-        "This moment."
+    /// Localized per device language via String(localized:).
+    static let breathingPhrases: [String] = [
+        String(localized: "Breathe."),
+        String(localized: "You are here."),
+        String(localized: "Nothing to do."),
+        String(localized: "Just breathe."),
+        String(localized: "This moment.")
     ]
 
     /// Returns the text to display during a text-mode breathing break.
