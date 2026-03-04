@@ -4,6 +4,34 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.08
+
+### All Platforms: Unified Warm Background
+- **Adaptive warm gradient** — cream-to-tan in light mode, warm charcoal in dark mode; applied to all main views (ContentView, Settings, Progress) on iOS, watchOS, and macOS
+- **Windows dark mode support** — settings and progress windows detect `AppsUseLightTheme` registry key and switch gradient accordingly
+- **iOS widget adaptive** — home screen widget background now respects dark mode instead of forcing light scheme
+
+### All Platforms: Rename "Blackout" → "Breathing break" / "Atempause"
+- All user-visible strings renamed from "Blackout" to "Break" (EN) / "Atempause" (DE) across iOS, watchOS, macOS, and Windows localization files
+- Code identifiers unchanged — only UI-facing text updated
+
+### iOS: App Store Rating Prompt
+- **Milestone-based review requests** — `SKStoreReviewController.requestReview(in:)` triggers at 30, 50, and 100 completed breaks
+- Each milestone fires once; Apple's built-in rate-limiting applies on top
+
+### macOS: App Store Rating Prompt
+- Same milestone logic (30/50/100); only triggers in sandboxed (App Store) builds
+
+### iOS: First-Launch Onboarding
+- **Single-screen onboarding** — warm gradient, ☯ symbol, brief instruction text, "Start" / "Los geht's" button
+- Shown once via `hasLaunchedBefore` flag in SettingsManager
+
+### All Platforms: Visual Polish
+- **Stronger "Breathe now" pulse** — scale range increased from 6% to 12% for more noticeable animation
+- **Monochrome namaste 🙏** — `.grayscale(1.0).opacity(0.7)` applied to end-of-breathing emoji on macOS, iOS, and watchOS
+
+---
+
 ## v3.07
 
 ### watchOS: UI Overhaul & Feature Parity

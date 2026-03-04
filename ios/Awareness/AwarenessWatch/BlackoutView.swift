@@ -84,6 +84,8 @@ struct BlackoutView: View {
                 if showingNamaste {
                     Text("🙏")
                         .font(.system(size: 48))
+                        .grayscale(1.0)
+                        .opacity(0.7)
                         .transition(.opacity)
                 }
             }
@@ -236,7 +238,7 @@ struct BlackoutView: View {
     /// acts as a fallback in case the alarm session fails to start or fire.
     private func scheduleEndSignalNotification(after interval: TimeInterval) {
         let content = UNMutableNotificationContent()
-        content.body = String(localized: "Blackout complete")
+        content.body = String(localized: "Break complete")
         content.sound = .default
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
         let request = UNNotificationRequest(

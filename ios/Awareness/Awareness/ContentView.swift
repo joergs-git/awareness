@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var showingCardDetail = false
     @State private var showingTaskDetail = false
     @State private var breathePulsing = false
+    @State private var showingOnboarding = false
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
@@ -112,7 +113,7 @@ struct ContentView: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .scaleEffect(breathePulsing ? 1.03 : 0.97)
+                            .scaleEffect(breathePulsing ? 1.06 : 0.94)
                             .opacity(breathePulsing ? 1.0 : 0.7)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
@@ -250,7 +251,7 @@ struct ContentView: View {
                     .font(.callout)
 
                     Label {
-                        Text(String(localized: "A full-screen blackout appears with a gong sound"))
+                        Text(String(localized: "A full-screen breathing break appears with a gong sound"))
                     } icon: {
                         Image(systemName: "rectangle.inset.filled")
                             .foregroundColor(.accentColor)
@@ -329,6 +330,8 @@ struct ContentView: View {
                 }
             }
             .modifier(CompactSectionSpacingModifier())
+            .scrollContentBackground(.hidden)
+            .background(WarmBackground())
             .navigationTitle(String(localized: "Awareness reminder"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -359,7 +362,15 @@ struct ContentView: View {
             }) {
                 BlackoutView(isPresented: $showingBlackout)
             }
+            .fullScreenCover(isPresented: $showingOnboarding) {
+                OnboardingView()
+            }
             .task {
+                // Show onboarding on first launch
+                if !settings.hasLaunchedBefore {
+                    showingOnboarding = true
+                }
+
                 // Small delay to let the permission dialog finish if it's showing
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await checkNotificationStatus()
@@ -597,6 +608,8 @@ struct ContentView: View {
         currentTask = settings.rotateMicroTask()
         // Update home screen widget with latest progress
         WidgetDataBridge.shared.updateWidget()
+        // Prompt for App Store review at milestone completions (30, 50, 100)
+        ReviewHelper.requestReviewIfEligible()
     }
 }
 

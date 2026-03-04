@@ -158,28 +158,36 @@ struct AwarenessWidgetEntryView: View {
 // MARK: - Widget Background Helper
 
 extension View {
-    /// Apply the warm sunrise gradient as the widget background.
-    /// Forces light color scheme so semantic colors (.primary, .secondary) remain dark
-    /// against the fixed cream gradient — prevents white-on-cream in dark mode.
+    /// Apply the warm gradient as the widget background, adaptive for light/dark mode.
     /// iOS 17+: uses containerBackground so the gradient fills the entire rounded rect.
     /// iOS 16: falls back to a plain background behind the content.
     @ViewBuilder
     func awarenessWidgetBackground() -> some View {
-        let gradient = LinearGradient(
-            colors: [
-                Color(red: 0.98, green: 0.92, blue: 0.84),
-                Color(red: 0.93, green: 0.85, blue: 0.78)
-            ],
+        if #available(iOSApplicationExtension 17.0, *) {
+            self.containerBackground(for: .widget) {
+                WidgetWarmBackground()
+            }
+        } else {
+            self.background(WidgetWarmBackground())
+        }
+    }
+}
+
+/// Warm gradient background for widgets, adaptive to light/dark mode.
+/// Separate from WarmBackground since the widget extension can't share iOS app code.
+private struct WidgetWarmBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        LinearGradient(
+            colors: colorScheme == .dark
+                ? [Color(red: 0.14, green: 0.12, blue: 0.11),
+                   Color(red: 0.10, green: 0.09, blue: 0.08)]
+                : [Color(red: 0.98, green: 0.92, blue: 0.84),
+                   Color(red: 0.93, green: 0.85, blue: 0.78)],
             startPoint: .top,
             endPoint: .bottom
         )
-        if #available(iOSApplicationExtension 17.0, *) {
-            self.environment(\.colorScheme, .light)
-                .containerBackground(for: .widget) { gradient }
-        } else {
-            self.environment(\.colorScheme, .light)
-                .background(gradient)
-        }
     }
 }
 

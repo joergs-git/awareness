@@ -230,6 +230,9 @@ struct ContentView: View {
                 }
 
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(WarmBackground())
             .navigationTitle(String(localized: "Awareness reminder"))
             .fullScreenCover(isPresented: $showingBlackout) {
                 BlackoutView(isPresented: $showingBlackout)
@@ -290,6 +293,8 @@ struct ContentView: View {
                         Color.black.ignoresSafeArea()
                         Text("🙏")
                             .font(.system(size: 48))
+                            .grayscale(1.0)
+                            .opacity(0.7)
                     }
                     .opacity(namasteOpacity)
                 }

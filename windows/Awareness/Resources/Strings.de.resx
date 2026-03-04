@@ -40,7 +40,7 @@
   <data name="NextIn" xml:space="preserve"><value>Awareness reminder — Nächster in {0}</value></data>
   <data name="TooltipSnoozedUntil" xml:space="preserve"><value>Awareness reminder — Pausiert bis {0}</value></data>
   <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Awareness reminder — Auf unbestimmte Zeit pausiert</value></data>
-  <data name="NextBlackoutIn" xml:space="preserve"><value>Nächster Blackout in {0}</value></data>
+  <data name="NextBlackoutIn" xml:space="preserve"><value>Nächste Atempause in {0}</value></data>
   <data name="Scheduling" xml:space="preserve"><value>Plane...</value></data>
   <data name="TestBlackout" xml:space="preserve"><value>Jetzt atmen</value></data>
   <data name="Resume" xml:space="preserve"><value>Fortsetzen</value></data>
@@ -60,15 +60,15 @@
 
 So funktioniert's:
 • In zufälligen Abständen wird dein Bildschirm für einige Sekunden schwarz
-• Ein Gong ertönt zu Beginn und am Ende jedes Blackouts
+• Ein Gong ertönt zu Beginn und am Ende jeder Atempause
 • Nutze diese Pause zum Atmen, schließe deine Augen und komme zur Ruhe
 
 Steuerung:
-• ESC — Blackout vorzeitig beenden (außer im Handschellen-Modus)
+• ESC — Atempause vorzeitig beenden (außer im Handschellen-Modus)
 • Schlummern — vorübergehend pausieren über den Infobereich
 • Einstellungen — Timing, Darstellung und Klänge anpassen
 
-Die App erkennt aktive Kamera-/Mikrofonnutzung und überspringt Blackouts während Videoanrufen.</value></data>
+Die App erkennt aktive Kamera-/Mikrofonnutzung und überspringt Atempausen während Videoanrufen.</value></data>
   <data name="AboutTitle" xml:space="preserve"><value>Awareness reminder</value></data>
   <data name="AboutText" xml:space="preserve"><value>Ein Achtsamkeits-Timer für deinen PC.
 Pausiert zufällig deinen Bildschirm, um dir beim Atmen zu helfen.
@@ -90,9 +90,9 @@ Klicke OK zum Schließen oder Abbrechen, um GitHub zu öffnen.</value></data>
   <data name="ActiveHours" xml:space="preserve"><value>Aktive Stunden</value></data>
   <data name="From" xml:space="preserve"><value>Von</value></data>
   <data name="Until" xml:space="preserve"><value>Bis</value></data>
-  <data name="IntervalBetweenBlackouts" xml:space="preserve"><value>Intervall zwischen Blackouts</value></data>
-  <data name="BlackoutDuration" xml:space="preserve"><value>Blackout-Dauer</value></data>
-  <data name="BlackoutVisual" xml:space="preserve"><value>Blackout-Darstellung</value></data>
+  <data name="IntervalBetweenBlackouts" xml:space="preserve"><value>Intervall zwischen Atempausen</value></data>
+  <data name="BlackoutDuration" xml:space="preserve"><value>Dauer der Atempause</value></data>
+  <data name="BlackoutVisual" xml:space="preserve"><value>Darstellung der Atempause</value></data>
   <data name="PlainBlack" xml:space="preserve"><value>Schwarz</value></data>
   <data name="CustomText" xml:space="preserve"><value>Eigener Text</value></data>
   <data name="Image" xml:space="preserve"><value>Bild</value></data>
@@ -104,11 +104,11 @@ Klicke OK zum Schließen oder Abbrechen, um GitHub zu öffnen.</value></data>
   <data name="VideoLabel" xml:space="preserve"><value>Video:</value></data>
   <data name="NoneLabel" xml:space="preserve"><value>Keins</value></data>
   <data name="Sound" xml:space="preserve"><value>Klang</value></data>
-  <data name="StartGong" xml:space="preserve"><value>Start-Gong (Beginn des Blackouts)</value></data>
-  <data name="EndGong" xml:space="preserve"><value>End-Gong (Ende des Blackouts)</value></data>
+  <data name="StartGong" xml:space="preserve"><value>Start-Gong (Beginn der Atempause)</value></data>
+  <data name="EndGong" xml:space="preserve"><value>End-Gong (Ende der Atempause)</value></data>
   <data name="Behavior" xml:space="preserve"><value>Verhalten</value></data>
   <data name="HandcuffsMode" xml:space="preserve"><value>Handschellen-Modus</value></data>
-  <data name="HandcuffsDescription" xml:space="preserve"><value>Wenn aktiv, kann ESC den Blackout nicht vorzeitig beenden.</value></data>
+  <data name="HandcuffsDescription" xml:space="preserve"><value>Wenn aktiv, kann ESC die Atempause nicht vorzeitig beenden.</value></data>
 
   <!-- BlackoutContentControl.xaml strings -->
   <data name="Breathe" xml:space="preserve"><value>Atme.</value></data>

@@ -154,6 +154,8 @@ struct PostBlackoutView: View {
             case .namaste:
                 Text("🙏")
                     .font(.system(size: 72))
+                    .grayscale(1.0)
+                    .opacity(0.7)
                     .opacity(namasteOpacity)
                     .onAppear {
                         withAnimation(.easeIn(duration: 0.4)) {

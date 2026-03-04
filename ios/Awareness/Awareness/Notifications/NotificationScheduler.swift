@@ -48,7 +48,7 @@ class NotificationScheduler: ObservableObject {
     private func registerCategory() {
         let startAction = UNNotificationAction(
             identifier: NotificationScheduler.actionStart,
-            title: String(localized: "Start Blackout"),
+            title: String(localized: "Start Break"),
             options: [.foreground]
         )
         let snoozeAction = UNNotificationAction(

@@ -71,6 +71,8 @@ struct BlackoutView: View {
             if showingNamaste {
                 Text("🙏")
                     .font(.system(size: 64))
+                    .grayscale(1.0)
+                    .opacity(0.7)
                     .transition(.opacity)
             }
         }

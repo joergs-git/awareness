@@ -40,7 +40,7 @@
   <data name="NextIn" xml:space="preserve"><value>Awareness reminder — Next in {0}</value></data>
   <data name="TooltipSnoozedUntil" xml:space="preserve"><value>Awareness reminder — Snoozed until {0}</value></data>
   <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Awareness reminder — Snoozed indefinitely</value></data>
-  <data name="NextBlackoutIn" xml:space="preserve"><value>Next blackout in {0}</value></data>
+  <data name="NextBlackoutIn" xml:space="preserve"><value>Next break in {0}</value></data>
   <data name="Scheduling" xml:space="preserve"><value>Scheduling...</value></data>
   <data name="TestBlackout" xml:space="preserve"><value>Breathe now</value></data>
   <data name="Resume" xml:space="preserve"><value>Resume</value></data>
@@ -60,15 +60,15 @@
 
 How it works:
 • At random intervals, your screen fades to black for a few seconds
-• A gong sounds at the start and end of each blackout
+• A gong sounds at the start and end of each break
 • Use this pause to breathe, close your eyes, and reset
 
 Controls:
-• ESC — dismiss a blackout early (unless Handcuffs mode is on)
+• ESC — dismiss a break early (unless Handcuffs mode is on)
 • Snooze — temporarily pause from the system tray
 • Settings — configure timing, visuals, and sounds
 
-The app detects active camera/microphone usage and will skip blackouts during video calls.</value></data>
+The app detects active camera/microphone usage and will skip breaks during video calls.</value></data>
   <data name="AboutTitle" xml:space="preserve"><value>Awareness reminder</value></data>
   <data name="AboutText" xml:space="preserve"><value>A mindfulness timer for your PC.
 Randomly pauses your screen to help you breathe.
@@ -90,9 +90,9 @@ Click OK to close, or Cancel to open GitHub.</value></data>
   <data name="ActiveHours" xml:space="preserve"><value>Active Hours</value></data>
   <data name="From" xml:space="preserve"><value>From</value></data>
   <data name="Until" xml:space="preserve"><value>Until</value></data>
-  <data name="IntervalBetweenBlackouts" xml:space="preserve"><value>Interval Between Blackouts</value></data>
-  <data name="BlackoutDuration" xml:space="preserve"><value>Blackout Duration</value></data>
-  <data name="BlackoutVisual" xml:space="preserve"><value>Blackout Visual</value></data>
+  <data name="IntervalBetweenBlackouts" xml:space="preserve"><value>Interval Between Breaks</value></data>
+  <data name="BlackoutDuration" xml:space="preserve"><value>Break Duration</value></data>
+  <data name="BlackoutVisual" xml:space="preserve"><value>Break Visual</value></data>
   <data name="PlainBlack" xml:space="preserve"><value>Plain Black</value></data>
   <data name="CustomText" xml:space="preserve"><value>Custom Text</value></data>
   <data name="Image" xml:space="preserve"><value>Image</value></data>
@@ -104,11 +104,11 @@ Click OK to close, or Cancel to open GitHub.</value></data>
   <data name="VideoLabel" xml:space="preserve"><value>Video:</value></data>
   <data name="NoneLabel" xml:space="preserve"><value>None</value></data>
   <data name="Sound" xml:space="preserve"><value>Sound</value></data>
-  <data name="StartGong" xml:space="preserve"><value>Start gong (begin of blackout)</value></data>
-  <data name="EndGong" xml:space="preserve"><value>End gong (end of blackout)</value></data>
+  <data name="StartGong" xml:space="preserve"><value>Start gong (begin of break)</value></data>
+  <data name="EndGong" xml:space="preserve"><value>End gong (end of break)</value></data>
   <data name="Behavior" xml:space="preserve"><value>Behavior</value></data>
   <data name="HandcuffsMode" xml:space="preserve"><value>Handcuffs mode</value></data>
-  <data name="HandcuffsDescription" xml:space="preserve"><value>When on, ESC cannot dismiss the blackout early.</value></data>
+  <data name="HandcuffsDescription" xml:space="preserve"><value>When on, ESC cannot dismiss the break early.</value></data>
 
   <!-- BlackoutContentControl.xaml strings -->
   <data name="Breathe" xml:space="preserve"><value>Breathe.</value></data>

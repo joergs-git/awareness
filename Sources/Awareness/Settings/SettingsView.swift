@@ -83,7 +83,7 @@ struct SettingsView: View {
                         )
                     }
                 } header: {
-                    Label(String(localized: "Interval Between Blackouts"), systemImage: "timer")
+                    Label(String(localized: "Interval Between Breaks"), systemImage: "timer")
                 }
 
                 // MARK: - Blackout Duration
@@ -111,7 +111,7 @@ struct SettingsView: View {
                         )
                     }
                 } header: {
-                    Label(String(localized: "Blackout Duration"), systemImage: "eye.slash")
+                    Label(String(localized: "Break Duration"), systemImage: "eye.slash")
                 }
 
                 // MARK: - Visual Type
@@ -148,13 +148,13 @@ struct SettingsView: View {
                         EmptyView()
                     }
                 } header: {
-                    Label(String(localized: "Blackout Visual"), systemImage: "paintbrush")
+                    Label(String(localized: "Break Visual"), systemImage: "paintbrush")
                 }
 
                 // MARK: - Sound
                 Section {
-                    Toggle(String(localized: "Start gong (begin of blackout)"), isOn: $settings.startGongEnabled)
-                    Toggle(String(localized: "End gong (end of blackout)"), isOn: $settings.endGongEnabled)
+                    Toggle(String(localized: "Start gong (begin of break)"), isOn: $settings.startGongEnabled)
+                    Toggle(String(localized: "End gong (end of break)"), isOn: $settings.endGongEnabled)
                 } header: {
                     Label(String(localized: "Sound"), systemImage: "bell")
                 }
@@ -162,14 +162,14 @@ struct SettingsView: View {
                 // MARK: - Behavior
                 Section {
                     Toggle(String(localized: "Handcuffs mode"), isOn: $settings.handcuffsMode)
-                    Text(String(localized: "When on, ESC and Cmd+Q cannot dismiss the blackout early."))
+                    Text(String(localized: "When on, ESC and Cmd+Q cannot dismiss the break early."))
                         .font(.caption)
                         .foregroundColor(.secondary)
 
                     Divider()
 
                     Toggle(String(localized: "Startclick confirmation"), isOn: $settings.startclickConfirmation)
-                    Text(String(localized: "Shows \"Ready to breathe?\" before each blackout. Decline to skip without affecting your statistics."))
+                    Text(String(localized: "Shows \"Ready to breathe?\" before each break. Decline to skip without affecting your statistics."))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } header: {
@@ -177,7 +177,9 @@ struct SettingsView: View {
                 }
             }
             .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
         }
+        .background(WarmBackground())
         .frame(width: 460, height: 620)
     }
 

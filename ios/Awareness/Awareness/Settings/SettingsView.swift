@@ -86,7 +86,7 @@ struct SettingsView: View {
                             Slider(value: $settings.maxInterval, in: 1...120, step: 1)
                         }
                     } header: {
-                        Label(String(localized: "Interval Between Blackouts"), systemImage: "timer")
+                        Label(String(localized: "Interval Between Breaks"), systemImage: "timer")
                     }
 
                     // MARK: - Blackout Duration
@@ -108,7 +108,7 @@ struct SettingsView: View {
                             Slider(value: $settings.maxBlackoutDuration, in: 3...120, step: 1)
                         }
                     } header: {
-                        Label(String(localized: "Blackout Duration"), systemImage: "eye.slash")
+                        Label(String(localized: "Break Duration"), systemImage: "eye.slash")
                     }
                 }
 
@@ -189,13 +189,13 @@ struct SettingsView: View {
                         EmptyView()
                     }
                 } header: {
-                    Label(String(localized: "Blackout Visual"), systemImage: "paintbrush")
+                    Label(String(localized: "Break Visual"), systemImage: "paintbrush")
                 }
 
                 // MARK: - Feedback
                 Section {
-                    Toggle(String(localized: "Start gong (begin of blackout)"), isOn: $settings.startGongEnabled)
-                    Toggle(String(localized: "End gong (end of blackout)"), isOn: $settings.endGongEnabled)
+                    Toggle(String(localized: "Start gong (begin of break)"), isOn: $settings.startGongEnabled)
+                    Toggle(String(localized: "End gong (end of break)"), isOn: $settings.endGongEnabled)
                     Toggle(String(localized: "Vibration (start and end)"), isOn: $settings.vibrationEnabled)
                     Toggle(String(localized: "End flash (visible through closed eyes)"), isOn: $settings.endFlashEnabled)
                 } header: {
@@ -210,7 +210,7 @@ struct SettingsView: View {
                 } header: {
                     Label(String(localized: "Behavior"), systemImage: "lock")
                 } footer: {
-                    Text(String(localized: "When on, tap cannot dismiss the blackout early."))
+                    Text(String(localized: "When on, tap cannot dismiss the break early."))
                 }
 
                 // MARK: - Health
@@ -227,6 +227,8 @@ struct SettingsView: View {
                     Text(String(localized: "Records each mindful pause as Mindful Minutes in Apple Health."))
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(WarmBackground())
             .navigationTitle(String(localized: "Settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

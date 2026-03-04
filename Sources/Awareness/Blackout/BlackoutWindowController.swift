@@ -1,6 +1,7 @@
 import AppKit
 import IOKit
 import IOKit.pwr_mgt
+import StoreKit
 import SwiftUI
 
 /// Creates and manages full-screen blackout overlay windows — one per connected display.
@@ -178,6 +179,11 @@ class BlackoutWindowController {
         // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
+            // Prompt for App Store review at milestone completions (sandbox/App Store builds only)
+            if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil,
+               ProgressTracker.shared.shouldRequestReview() {
+                SKStoreReviewController.requestReview()
+            }
             self?.beginPostBlackoutPhase()
         }
         dismissTimer = work
@@ -257,6 +263,11 @@ class BlackoutWindowController {
         // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
+            // Prompt for App Store review at milestone completions (sandbox/App Store builds only)
+            if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil,
+               ProgressTracker.shared.shouldRequestReview() {
+                SKStoreReviewController.requestReview()
+            }
             self?.beginPostBlackoutPhase()
         }
         dismissTimer = work

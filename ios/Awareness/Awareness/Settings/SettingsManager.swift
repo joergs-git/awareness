@@ -52,6 +52,7 @@ final class SettingsManager: ObservableObject {
         static let microTaskShownToday   = "microTaskShownToday"
         static let currentSelfReport     = "currentSelfReport"
         static let practiceCardNotificationHour = "practiceCardNotificationHour"
+        static let hasLaunchedBefore = "hasLaunchedBefore"
 
         #if !os(watchOS)
         static let startGongEnabled     = "startGongEnabled"
@@ -462,6 +463,14 @@ final class SettingsManager: ObservableObject {
         didSet { defaults.set(endFlashEnabled, forKey: Keys.endFlashEnabled) }
     }
     #endif
+
+    // MARK: - First Launch
+
+    /// Whether the app has been launched before (used for onboarding, iOS only)
+    var hasLaunchedBefore: Bool {
+        get { defaults.bool(forKey: Keys.hasLaunchedBefore) }
+        set { defaults.set(newValue, forKey: Keys.hasLaunchedBefore) }
+    }
 
     // MARK: - Computed Helpers
 

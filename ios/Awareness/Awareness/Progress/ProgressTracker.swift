@@ -86,6 +86,27 @@ final class ProgressTracker: ObservableObject {
         save()
     }
 
+    // MARK: - Review Prompt
+
+    /// Milestones at which to prompt for App Store review
+    private static let reviewMilestones = [30, 50, 100]
+    private let reviewMilestonesShownKey = "progressReviewMilestonesShown"
+
+    /// Check if a new review milestone was just reached.
+    /// Returns true once per milestone (30, 50, 100 completed breaks).
+    func shouldRequestReview() -> Bool {
+        let shown = Set(defaults.array(forKey: reviewMilestonesShownKey) as? [Int] ?? [])
+        for milestone in Self.reviewMilestones {
+            if lifetimeCompleted >= milestone && !shown.contains(milestone) {
+                var updated = shown
+                updated.insert(milestone)
+                defaults.set(Array(updated), forKey: reviewMilestonesShownKey)
+                return true
+            }
+        }
+        return false
+    }
+
     // MARK: - WatchConnectivity Sync
 
     /// Export progress data as a dictionary for WatchConnectivity applicationContext

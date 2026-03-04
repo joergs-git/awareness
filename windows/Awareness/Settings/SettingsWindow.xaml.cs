@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Awareness.Models;
 using Awareness.Resources;
 using Microsoft.Win32;
@@ -21,9 +22,31 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         _settings = SettingsManager.Shared;
+        ApplyWarmBackground();
         SetLocalizedHeaders();
         LoadSettingsIntoUI();
         _isLoading = false;
+    }
+
+    /// <summary>
+    /// Detect Windows dark/light mode and set the warm gradient background accordingly.
+    /// </summary>
+    private void ApplyWarmBackground()
+    {
+        bool isDark = false;
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            if (key?.GetValue("AppsUseLightTheme") is int value)
+                isDark = value == 0;
+        }
+        catch { /* Default to light */ }
+
+        if (isDark)
+        {
+            TopGradientStop.Color = Color.FromRgb(36, 31, 28);    // (0.14, 0.12, 0.11)
+            BottomGradientStop.Color = Color.FromRgb(26, 23, 20); // (0.10, 0.09, 0.08)
+        }
     }
 
     /// <summary>

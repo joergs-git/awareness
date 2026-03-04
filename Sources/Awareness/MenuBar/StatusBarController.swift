@@ -126,7 +126,7 @@ class StatusBarController: NSObject {
                 statusText = String(localized: "Snoozed indefinitely")
             }
         } else if let nextDate = scheduler.nextBlackoutDate {
-            statusText = String(localized: "Next blackout in \(formatRemainingTime(until: nextDate))")
+            statusText = String(localized: "Next break in \(formatRemainingTime(until: nextDate))")
         } else {
             statusText = String(localized: "Scheduling...")
         }
@@ -298,7 +298,7 @@ class StatusBarController: NSObject {
     @objc private func showHelp() {
         let alert = NSAlert()
         alert.messageText = String(localized: "How to Use Awareness reminder")
-        alert.informativeText = String(localized: "Awareness reminder runs quietly in your menu bar (☯ icon).\n\nHow it works:\n• At random intervals, your screen fades to black for a few seconds\n• A gong sounds at the start and end of each blackout\n• Use this pause to breathe, close your eyes, and reset\n\nControls:\n• ESC or Cmd+Q — dismiss a blackout early (unless Handcuffs mode is on)\n• Snooze — temporarily pause from the menu bar\n• Settings — configure timing, visuals, and sounds\n\nThe app detects active camera/microphone usage and will skip blackouts during video calls.")
+        alert.informativeText = String(localized: "Awareness reminder runs quietly in your menu bar (☯ icon).\n\nHow it works:\n• At random intervals, your screen fades to black for a few seconds\n• A gong sounds at the start and end of each break\n• Use this pause to breathe, close your eyes, and reset\n\nControls:\n• ESC or Cmd+Q — dismiss a break early (unless Handcuffs mode is on)\n• Snooze — temporarily pause from the menu bar\n• Settings — configure timing, visuals, and sounds\n\nThe app detects active camera/microphone usage and will skip breaks during video calls.")
         alert.alertStyle = .informational
         alert.addButton(withTitle: String(localized: "OK"))
 

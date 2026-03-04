@@ -85,10 +85,12 @@ struct SettingsView: View {
             Section {
                 Toggle(String(localized: "Handcuffs"), isOn: $settings.handcuffsMode)
             } footer: {
-                Text(String(localized: "Prevents dismissing blackout early."))
+                Text(String(localized: "Prevents dismissing break early."))
             }
 
         }
+        .scrollContentBackground(.hidden)
+        .background(WarmBackground())
         .navigationTitle(String(localized: "Settings"))
     }
 

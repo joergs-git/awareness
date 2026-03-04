@@ -135,6 +135,8 @@ struct ProgressView: View {
                 Text(String(localized: "Situations"))
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(WarmBackground())
         .navigationTitle(String(localized: "Mindful Moments"))
     }
 

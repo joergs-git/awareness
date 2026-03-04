@@ -6,6 +6,14 @@
         Width="340" Height="460"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
+
+    <Window.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop x:Name="TopGradientStop" Color="#FFF9EBD7" Offset="0" />
+            <GradientStop x:Name="BottomGradientStop" Color="#FFEDD9C7" Offset="1" />
+        </LinearGradientBrush>
+    </Window.Background>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="16">
 
