@@ -159,6 +159,8 @@ struct AwarenessWidgetEntryView: View {
 
 extension View {
     /// Apply the warm sunrise gradient as the widget background.
+    /// Forces light color scheme so semantic colors (.primary, .secondary) remain dark
+    /// against the fixed cream gradient — prevents white-on-cream in dark mode.
     /// iOS 17+: uses containerBackground so the gradient fills the entire rounded rect.
     /// iOS 16: falls back to a plain background behind the content.
     @ViewBuilder
@@ -172,9 +174,11 @@ extension View {
             endPoint: .bottom
         )
         if #available(iOSApplicationExtension 17.0, *) {
-            self.containerBackground(for: .widget) { gradient }
+            self.environment(\.colorScheme, .light)
+                .containerBackground(for: .widget) { gradient }
         } else {
-            self.background(gradient)
+            self.environment(\.colorScheme, .light)
+                .background(gradient)
         }
     }
 }

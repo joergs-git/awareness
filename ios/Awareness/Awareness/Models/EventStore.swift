@@ -160,6 +160,43 @@ class EventStore: ObservableObject {
         return total
     }
 
+    // MARK: - WatchConnectivity Sync
+
+    /// Export archived self-reports for cross-device sync via applicationContext
+    func selfReportConnectivityContext() -> [String: Any] {
+        guard let data = try? JSONEncoder().encode(selfReports),
+              let json = String(data: data, encoding: .utf8) else { return [:] }
+        return ["archivedSelfReports": json]
+    }
+
+    /// Merge remote archived self-reports using max per field per date.
+    /// Prevents double-counting when the same blackout is counted on both devices.
+    func applyFromSelfReportContext(_ context: [String: Any]) {
+        guard let json = context["archivedSelfReports"] as? String,
+              let data = json.data(using: .utf8),
+              let remote = try? JSONDecoder().decode([DailySelfReport].self, from: data) else { return }
+
+        var lookup: [String: DailySelfReport] = [:]
+        for r in selfReports { lookup[r.date] = r }
+
+        for r in remote {
+            if let existing = lookup[r.date] {
+                lookup[r.date] = DailySelfReport(
+                    date: r.date,
+                    cardID: existing.cardID.isEmpty ? r.cardID : existing.cardID,
+                    succeeded: max(existing.succeeded, r.succeeded),
+                    noticed: max(existing.noticed, r.noticed),
+                    forgot: max(existing.forgot, r.forgot)
+                )
+            } else {
+                lookup[r.date] = r
+            }
+        }
+
+        selfReports = lookup.values.sorted { $0.date < $1.date }
+        saveSelfReports()
+    }
+
     // MARK: - Persistence
 
     private func pruneAndSave() {

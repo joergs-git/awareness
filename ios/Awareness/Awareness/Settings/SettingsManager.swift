@@ -547,6 +547,11 @@ final class SettingsManager: ObservableObject {
             context["microTaskDate"] = taskDate
         }
 
+        // Sync today's self-report counters so both devices merge taps
+        if let reportData = defaults.data(forKey: Keys.currentSelfReport) {
+            context["currentSelfReport"] = reportData
+        }
+
         return context
     }
 
@@ -593,6 +598,21 @@ final class SettingsManager: ObservableObject {
            let taskDate = context["microTaskDate"] as? String {
             defaults.set(taskID, forKey: Keys.currentMicroTaskID)
             defaults.set(taskDate, forKey: Keys.microTaskDate)
+        }
+
+        // Merge today's self-report counters (max per field prevents double-counting)
+        if let reportData = context["currentSelfReport"] as? Data,
+           let remote = try? JSONDecoder().decode(DailySelfReport.self, from: reportData),
+           remote.date == todayString() {
+            let local = currentSelfReportData()
+            let merged = DailySelfReport(
+                date: remote.date,
+                cardID: local.cardID.isEmpty ? remote.cardID : local.cardID,
+                succeeded: max(local.succeeded, remote.succeeded),
+                noticed: max(local.noticed, remote.noticed),
+                forgot: max(local.forgot, remote.forgot)
+            )
+            updateSelfReport(merged)
         }
     }
 
