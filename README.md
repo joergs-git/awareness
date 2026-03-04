@@ -14,6 +14,8 @@ This is not a break timer or a productivity tool. It is a practice aid. If you a
 
 The Satipatthana Sutta teaches: *"A monk lives contemplating the body in the body, ardent, clearly comprehending, and mindful, having put away covetousness and grief for the world."* Awareness brings a tiny echo of that instruction into the digital workspace.
 
+Have also a look into the wiki section of this project: https://github.com/joergs-git/awareness/wiki/Home-%E2%80%90-Awareness-Reminder
+
 ## Features
 
 - **Menu bar / system tray app** — runs quietly with a ☯ icon, no Dock or Taskbar clutter
