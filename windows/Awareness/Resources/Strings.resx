@@ -126,6 +126,9 @@ Click OK to close, or Cancel to open GitHub.</value></data>
   <data name="Completed" xml:space="preserve"><value>completed</value></data>
   <data name="SuccessRate" xml:space="preserve"><value>Discipline</value></data>
 
+  <data name="PhilosophyText" xml:space="preserve"><value>The goal of this app is to not need it anymore.
+Until then: Breathe.</value></data>
+
   <data name="WelcomeText" xml:space="preserve"><value>Awareness reminder is now running in your system tray.
 
 Look for the ☯ icon in the bottom-right of your screen. Right-click it to access settings, snooze, or quit.

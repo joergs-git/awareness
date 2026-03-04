@@ -188,6 +188,31 @@ public class SettingsManager : INotifyPropertyChanged
     public bool IsSnoozed => SnoozeUntil.HasValue && DateTime.Now < SnoozeUntil.Value;
 
     /// <summary>
+    /// Default breathing phrases that rotate randomly to prevent habituation.
+    /// Shown only when the user hasn't customized the text (i.e. still set to "Breathe.").
+    /// </summary>
+    private static readonly string[] BreathingPhrases =
+    [
+        "Breathe.",
+        "You are here.",
+        "Nichts zu tun.",
+        "Nur atmen.",
+        "This moment."
+    ];
+
+    /// <summary>
+    /// Returns the text to display during a text-mode breathing break.
+    /// If the user has the default "Breathe." text, randomly picks from the rotation pool.
+    /// If they've customized the text, returns their custom text as-is.
+    /// </summary>
+    public string ResolvedBreathingText()
+    {
+        if (string.IsNullOrEmpty(_customText) || _customText == "Breathe.")
+            return BreathingPhrases[Random.Shared.Next(BreathingPhrases.Length)];
+        return _customText;
+    }
+
+    /// <summary>
     /// Returns a random blackout duration between min and max (seconds).
     /// If both values are equal, returns the fixed duration.
     /// </summary>

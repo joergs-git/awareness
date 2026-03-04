@@ -144,6 +144,8 @@ struct ContentView: View {
                                         RoundedRectangle(cornerRadius: 6)
                                             .stroke(card.color.opacity(0.2), lineWidth: 0.5)
                                     )
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { showingCardDetail = true }
                             }
                         }
                         .listRowBackground(Color.clear)

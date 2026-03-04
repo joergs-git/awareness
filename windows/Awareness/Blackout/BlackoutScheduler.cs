@@ -160,7 +160,7 @@ public class BlackoutScheduler
         _blackoutController.Show(
             duration: _settings.RandomBlackoutDuration(),
             visualType: _settings.VisualType,
-            customText: _settings.CustomText,
+            customText: _settings.ResolvedBreathingText(),
             imagePath: _settings.CustomImagePath,
             videoPath: _settings.CustomVideoPath,
             completion: () => ScheduleNext()

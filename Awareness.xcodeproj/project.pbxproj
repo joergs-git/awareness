@@ -421,7 +421,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = SupportFiles/Info.plist;
-				MARKETING_VERSION = 3.08;
+				MARKETING_VERSION = 3.09;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -436,7 +436,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = SupportFiles/Info.plist;
-				MARKETING_VERSION = 3.08;
+				MARKETING_VERSION = 3.09;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

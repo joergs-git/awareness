@@ -126,6 +126,9 @@ Klicke OK zum Schließen oder Abbrechen, um GitHub zu öffnen.</value></data>
   <data name="Completed" xml:space="preserve"><value>abgeschlossen</value></data>
   <data name="SuccessRate" xml:space="preserve"><value>Disziplin</value></data>
 
+  <data name="PhilosophyText" xml:space="preserve"><value>Das Ziel dieser App ist, dass Du sie nicht mehr brauchst.
+Bis dahin: Atme.</value></data>
+
   <data name="WelcomeText" xml:space="preserve"><value>Awareness reminder läuft jetzt im Infobereich.
 
 Suche das ☯ Symbol unten rechts auf deinem Bildschirm. Klicke es mit der rechten Maustaste an, um Einstellungen, Schlummern oder Beenden aufzurufen.

@@ -281,7 +281,7 @@ class StatusBarController: NSObject {
         blackoutController.show(
             duration: settings.randomBlackoutDuration(),
             visualType: settings.visualType,
-            customText: settings.customText,
+            customText: settings.resolvedBreathingText(),
             imagePath: settings.customImagePath,
             videoPath: settings.customVideoPath
         )

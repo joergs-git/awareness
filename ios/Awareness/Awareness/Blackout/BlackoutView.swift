@@ -26,6 +26,8 @@ struct BlackoutView: View {
     @State private var isBreathing = false
     /// The offered duration for event logging (captured at start)
     @State private var offeredDuration: Double = 0
+    /// Resolved breathing text (picked once at start to avoid mid-session changes)
+    @State private var displayText: String = ""
 
     var body: some View {
         ZStack {
@@ -44,7 +46,7 @@ struct BlackoutView: View {
                     )
 
             case .text:
-                Text(settings.customText)
+                Text(displayText)
                     .font(.system(size: 36, weight: .light))
                     .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
                     .scaleEffect(isBreathing ? 1.06 : 0.95)
@@ -89,6 +91,8 @@ struct BlackoutView: View {
             UIApplication.shared.isIdleTimerDisabled = true
 
             sessionStart = Date()
+            // Resolve breathing text once (random rotation for default, custom text otherwise)
+            displayText = settings.resolvedBreathingText()
             // Use guru-adapted duration when Smart Guru is enabled
             duration = settings.effectiveRandomBlackoutDuration()
             offeredDuration = duration

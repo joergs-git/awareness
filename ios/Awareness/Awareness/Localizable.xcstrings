@@ -1516,6 +1516,16 @@
         }
       }
     },
+    "The goal of this app is to not need it anymore.\nUntil then: Breathe." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel dieser App ist, dass Du sie nicht mehr brauchst.\nBis dahin: Atme."
+          }
+        }
+      }
+    },
     "Time to pause and breathe" : {
       "localizations" : {
         "de" : {

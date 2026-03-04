@@ -4,6 +4,25 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.09
+
+### All Platforms: Rotating Breathing Phrases
+- **Random text rotation** — default text-mode breaks now cycle through 5 phrases ("Breathe.", "You are here.", "Nichts zu tun.", "Nur atmen.", "This moment.") to prevent habituation
+- Custom text is unaffected — rotation only applies when using the default "Breathe." setting
+
+### iOS: UI Polish
+- **Yin-yang logo pulse** — home screen logo now breathes in sync with the "Breathe now" button
+- **Logo tap to breathe** — tapping the yin-yang icon triggers a breathing break
+- **Vibration default ON** — fresh installs now default to vibration enabled
+
+### watchOS: Tap Target Fix
+- **Micro-task tap** — tapping the micro-task box below the practice card now opens the card detail sheet
+
+### All Platforms: Settings Philosophy Footer
+- **Closing thought** — settings screen ends with "The goal of this app is to not need it anymore. Until then: Breathe." (EN/DE)
+
+---
+
 ## v3.08
 
 ### All Platforms: Unified Warm Background

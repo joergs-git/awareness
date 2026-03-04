@@ -305,7 +305,7 @@ public class TrayIconController : IDisposable
         _blackoutController.Show(
             duration: settings.RandomBlackoutDuration(),
             visualType: settings.VisualType,
-            customText: settings.CustomText,
+            customText: settings.ResolvedBreathingText(),
             imagePath: settings.CustomImagePath,
             videoPath: settings.CustomVideoPath);
     }

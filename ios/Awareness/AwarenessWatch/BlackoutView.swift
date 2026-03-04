@@ -43,6 +43,8 @@ struct BlackoutView: View {
     @State private var isBreathing = false
     /// Guards against double-dismiss from both timer and notification signal
     @State private var isDismissing = false
+    /// Resolved breathing text (picked once at start to avoid mid-session changes)
+    @State private var displayText: String = ""
 
     var body: some View {
         // TimelineView(.animation) signals to watchOS that this view needs continuous rendering.
@@ -54,7 +56,7 @@ struct BlackoutView: View {
 
                 // Breathing content — keeps the display active and provides a meditation focus.
                 if settings.visualType == .text {
-                    Text(settings.customText)
+                    Text(displayText)
                         .font(.system(size: 20, weight: .light))
                         .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
                         .scaleEffect(isBreathing ? 1.08 : 0.94)
@@ -93,6 +95,7 @@ struct BlackoutView: View {
         .opacity(opacity)
         .onAppear {
             sessionStart = Date()
+            displayText = settings.resolvedBreathingText()
             duration = settings.randomBlackoutDuration()
 
             // Double chime at start — always plays, respects system mute via .ambient session

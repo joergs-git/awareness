@@ -226,6 +226,17 @@ struct SettingsView: View {
                 } footer: {
                     Text(String(localized: "Records each mindful pause as Mindful Minutes in Apple Health."))
                 }
+
+                // MARK: - Philosophy
+                Section {
+                } footer: {
+                    Text(String(localized: "The goal of this app is to not need it anymore.\nUntil then: Breathe."))
+                        .font(.footnote.italic())
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 8)
+                }
             }
             .scrollContentBackground(.hidden)
             .background(WarmBackground())

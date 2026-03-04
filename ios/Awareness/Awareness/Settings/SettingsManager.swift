@@ -96,7 +96,7 @@ final class SettingsManager: ObservableObject {
         values[Keys.endGongEnabled]    = true
         values[Keys.customImagePath]   = ""
         values[Keys.customVideoPath]   = ""
-        values[Keys.vibrationEnabled]  = false
+        values[Keys.vibrationEnabled]  = true
         values[Keys.endFlashEnabled]   = true
         #endif
 
@@ -483,6 +483,27 @@ final class SettingsManager: ObservableObject {
     var isSnoozed: Bool {
         guard let until = snoozeUntil else { return false }
         return Date() < until
+    }
+
+    /// Default breathing phrases that rotate randomly to prevent habituation.
+    /// Shown only when the user hasn't customized the text (i.e. still set to "Breathe.").
+    /// Mix of English and German — intentionally multilingual for a mindful, universal feel.
+    static let breathingPhrases = [
+        "Breathe.",
+        "You are here.",
+        "Nichts zu tun.",
+        "Nur atmen.",
+        "This moment."
+    ]
+
+    /// Returns the text to display during a text-mode breathing break.
+    /// If the user has the default "Breathe." text, randomly picks from the rotation pool.
+    /// If they've customized the text, returns their custom text as-is.
+    func resolvedBreathingText() -> String {
+        if customText == "Breathe." || customText.isEmpty {
+            return Self.breathingPhrases.randomElement() ?? "Breathe."
+        }
+        return customText
     }
 
     /// Returns a random blackout duration between min and max (seconds).

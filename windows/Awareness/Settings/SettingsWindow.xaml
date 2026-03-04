@@ -149,6 +149,12 @@
                 </StackPanel>
             </GroupBox>
 
+            <!-- Philosophy -->
+            <TextBlock Text="{x:Static res:Strings.PhilosophyText}"
+                       FontSize="11" FontStyle="Italic" Foreground="Gray"
+                       TextAlignment="Center" TextWrapping="Wrap"
+                       Margin="0,8,0,16" />
+
         </StackPanel>
     </ScrollViewer>
 </Window>

@@ -44,6 +44,12 @@ struct ContentView: View {
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
+                            .scaleEffect(breathePulsing ? 1.06 : 0.94)
+                            .animation(
+                                .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                                value: breathePulsing
+                            )
+                            .onTapGesture { showingBlackout = true }
                             .padding(.top, 4)
                     }
                     .frame(maxWidth: .infinity)
