@@ -107,7 +107,8 @@ SupportFiles/
     ├── keywords-en.txt / -de.txt       # Search keywords
     ├── subtitle-en.txt / -de.txt       # App subtitle
     ├── promotional-text-en.txt / -de.txt # Promotional text
-    └── screenshot-guide.md             # Screenshot preparation guide
+    ├── screenshot-guide.md             # Screenshot preparation guide
+    └── screenshots/capture.sh          # Simulator screenshot automation (setup/capture/teardown)
 
 Sources/Awareness/
 ├── main.swift                          # NSApplication bootstrap
@@ -311,14 +312,14 @@ ios/Awareness/AwarenessWidget/
 
 - **Active time window** — hours during which interruptions occur (default: 06:00–22:00)
 - **Blackout duration range** — min/max duration; random within range (default: 20–40s)
-- **Blackout visual** — plain black, custom text, image, or looping video (default: text "Breathe.")
+- **Blackout visual** — plain black, custom text, image, or looping video (default: rotating text phrases)
 - **Random interval range** — min/max delay between interruptions (default: 15–30 min)
 - **Start/End gong** — sounds at blackout start/end (default: on)
 - **Handcuffs mode** — cannot dismiss early (default: off)
 - **Startclick confirmation** (macOS only) — "Ready to breathe?" prompt (default: off)
 - **Snooze** — pause for 10/20/30/60/120 min or indefinitely
 - **Apple Health** (iOS/watchOS) — log as Mindful Minutes (default: off)
-- **Vibration** (iOS), **Reminder/End haptic** (watchOS) — tactile feedback (defaults vary)
+- **Vibration** (iOS, default: on), **Reminder/End haptic** (watchOS) — tactile feedback
 - **End flash** (iOS/watchOS) — white blink at blackout end (default: on)
 - **Start chime** (watchOS) — synthesized 440Hz→660Hz, respects mute (always on)
 
