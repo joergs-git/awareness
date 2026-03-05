@@ -32,6 +32,7 @@
 		A20019 /* PracticeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20019; };
 		A20020 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20020; };
 		A20021 /* BlackoutPhaseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20021; };
+		A20022 /* WarmBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20022; };
 		B2F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A2F00001; };
 /* End PBXBuildFile section */
 
@@ -63,6 +64,7 @@
 		B20019 /* PracticeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeCard.swift; sourceTree = "<group>"; };
 		B20020 /* MicroTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroTask.swift; sourceTree = "<group>"; };
 		B20021 /* BlackoutPhaseState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackoutPhaseState.swift; sourceTree = "<group>"; };
+		B20022 /* WarmBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarmBackground.swift; sourceTree = "<group>"; };
 		B20099 /* Awareness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Awareness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -93,6 +95,7 @@
 				B20001 /* main.swift */,
 				B20002 /* AppDelegate.swift */,
 				B20013 /* UpdateChecker.swift */,
+				B20022 /* WarmBackground.swift */,
 				D20003 /* MenuBar */,
 				D20004 /* Blackout */,
 				D20005 /* Detection */,
@@ -296,6 +299,7 @@
 				A20019 /* PracticeCard.swift in Sources */,
 				A20020 /* MicroTask.swift in Sources */,
 				A20021 /* BlackoutPhaseState.swift in Sources */,
+				A20022 /* WarmBackground.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
