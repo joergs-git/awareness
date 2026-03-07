@@ -422,11 +422,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SupportFiles/Awareness.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FDSVBU33S8;
 				INFOPLIST_FILE = SupportFiles/Info.plist;
 				MARKETING_VERSION = 3.10;
-				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -439,9 +441,10 @@
 				CODE_SIGN_ENTITLEMENTS = SupportFiles/Awareness.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FDSVBU33S8;
 				INFOPLIST_FILE = SupportFiles/Info.plist;
 				MARKETING_VERSION = 3.10;
-				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

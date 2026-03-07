@@ -5,7 +5,7 @@
     <key>CFBundleName</key>
     <string>Awareness reminder</string>
     <key>CFBundleIdentifier</key>
-    <string>com.joergsflow.awareness</string>
+    <string>com.joergsflow.awareness.ios</string>
     <key>CFBundleVersion</key>
     <string>3.10</string>
     <key>CFBundleShortVersionString</key>
