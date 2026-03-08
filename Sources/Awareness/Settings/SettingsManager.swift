@@ -55,7 +55,7 @@ final class SettingsManager: ObservableObject {
         Keys.customText:       "Breathe.",
         Keys.customImagePath:  "",
         Keys.customVideoPath:  "",
-        Keys.startclickConfirmation: false
+        Keys.startclickConfirmation: true
     ]
 
     // MARK: - Published Properties
