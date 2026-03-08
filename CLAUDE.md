@@ -108,7 +108,9 @@ SupportFiles/
     ├── subtitle-en.txt / -de.txt       # App subtitle
     ├── promotional-text-en.txt / -de.txt # Promotional text
     ├── screenshot-guide.md             # Screenshot preparation guide
-    └── screenshots/capture.sh          # Simulator screenshot automation (setup/capture/teardown)
+    └── screenshots/
+        ├── capture.sh                  # Simulator screenshot automation (setup/capture/teardown)
+        └── generate-macos.swift        # macOS screenshot generator (blackout + progress, EN/DE)
 
 Sources/Awareness/
 ├── main.swift                          # NSApplication bootstrap
@@ -210,6 +212,8 @@ ios/Awareness/
     │   └── ForegroundScheduler.swift  # In-app timer for foreground blackouts (no notification permission needed)
     ├── Notifications/
     │   └── NotificationScheduler.swift # UNUserNotificationCenter scheduling
+    ├── Detection/
+    │   └── CallDetector.swift        # CXCallObserver — skip breaks during phone/video calls
     ├── Health/
     │   └── HealthKitManager.swift     # Mindful session logging to Apple Health
     ├── Progress/
@@ -294,6 +298,7 @@ ios/Awareness/AwarenessWidget/
 | HealthKit | `HealthKitManager.shared` logs `HKCategorySample(.mindfulSession)`; opt-in; write-only |
 | Sound | `AVAudioSession(.playback)` for silent mode; notification uses custom `.aiff` |
 | WatchConnectivity | `objectWillChange` (not Combine merge chains — type-checker timeouts). `isApplyingRemoteContext` + 2s cooldown |
+| Call detection | `CallDetector` via `CXCallObserver` — skips breaks during phone/FaceTime/VoIP calls; not counted as triggered |
 | Home screen widget | `WidgetDataBridge` writes to App Group shared UserDefaults; deep link `awareness://breathe` |
 | Localization | `Localizable.xcstrings` string catalog (EN/DE); `String(localized:)` |
 
@@ -316,6 +321,7 @@ ios/Awareness/AwarenessWidget/
 - **Random interval range** — min/max delay between interruptions (default: 15–30 min)
 - **Start/End gong** — sounds at blackout start/end (default: on)
 - **Handcuffs mode** — cannot dismiss early (default: off)
+- **Skip during calls** (iOS) — skips breaks during phone/video calls via CallKit (default: on)
 - **Startclick confirmation** (macOS only) — "Ready to breathe?" prompt (default: off)
 - **Snooze** — pause for 10/20/30/60/120 min or indefinitely
 - **Apple Health** (iOS/watchOS) — log as Mindful Minutes (default: off)

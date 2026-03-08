@@ -21,7 +21,7 @@ Have also a look into the wiki section of this project: (https://github.com/joer
 - **Menu bar / system tray app** — runs quietly with a ☯ icon, no Dock or Taskbar clutter
 - **Random blackout intervals** — configurable min/max range (e.g. 15–30 minutes) so interruptions feel natural, not mechanical
 - **Configurable duration range** — 3 to 120 seconds per blackout, with optional random variation between a min/max range
-- **Smart detection** — automatically skips blackouts when your camera or microphone is in use (video calls, meetings)
+- **Smart detection** — automatically skips blackouts when your camera or microphone is in use (macOS/Windows) or during phone and video calls (iOS via CallKit — FaceTime, Zoom, Teams, WhatsApp). Skipped breaks are not counted in statistics.
 - **Active time window** — only interrupts during configured hours (e.g. 06:00–20:00)
 - **Visual modes** — plain black, custom text ("Breathe."), an image, or a looping video
 - **Start and end gong** — an audible tone marks the beginning (higher pitch) and end (deeper pitch) of each blackout, so you know when to return even with eyes closed
