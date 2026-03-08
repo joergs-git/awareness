@@ -70,11 +70,19 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     /// When a notification arrives while the app is in the foreground,
     /// show the banner so the user can actively tap to start a blackout.
     /// Also records this notification as triggered for progress tracking.
+    /// Skips silently (no banner, no trigger count) if the user is on a call.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
+        // Skip silently if the user is on a phone or video call — don't count as triggered
+        if CallDetector.shared.shouldSkipBlackout() {
+            completionHandler([])
+            NotificationScheduler.shared.refreshOnForeground()
+            return
+        }
+
         // Record as triggered — the notification arrived regardless of user response
         NotificationScheduler.shared.recordNotificationTriggered(notification.request.identifier)
 

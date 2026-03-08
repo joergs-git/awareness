@@ -61,6 +61,7 @@ final class SettingsManager: ObservableObject {
         static let customVideoPath      = "customVideoPath"
         static let vibrationEnabled     = "vibrationEnabled"
         static let endFlashEnabled      = "endFlashEnabled"
+        static let skipDuringCalls      = "skipDuringCalls"
         #endif
 
         #if os(watchOS)
@@ -98,6 +99,7 @@ final class SettingsManager: ObservableObject {
         values[Keys.customVideoPath]   = ""
         values[Keys.vibrationEnabled]  = true
         values[Keys.endFlashEnabled]   = true
+        values[Keys.skipDuringCalls]   = true
         #endif
 
         #if os(watchOS)
@@ -443,6 +445,11 @@ final class SettingsManager: ObservableObject {
     @Published var endFlashEnabled: Bool {
         didSet { defaults.set(endFlashEnabled, forKey: Keys.endFlashEnabled) }
     }
+
+    /// Whether to skip breaks when the user is on a phone or video call
+    @Published var skipDuringCalls: Bool {
+        didSet { defaults.set(skipDuringCalls, forKey: Keys.skipDuringCalls) }
+    }
     #endif
 
     // MARK: - Published Properties (watchOS only)
@@ -702,6 +709,7 @@ final class SettingsManager: ObservableObject {
         customVideoPath     = defaults.string(forKey: Keys.customVideoPath) ?? ""
         vibrationEnabled    = defaults.bool(forKey: Keys.vibrationEnabled)
         endFlashEnabled     = defaults.bool(forKey: Keys.endFlashEnabled)
+        skipDuringCalls     = defaults.bool(forKey: Keys.skipDuringCalls)
         #endif
 
         #if os(watchOS)

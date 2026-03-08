@@ -129,6 +129,12 @@ class ForegroundScheduler: ObservableObject {
             return
         }
 
+        // Skip if the user is on a phone or video call — don't count as triggered
+        if CallDetector.shared.shouldSkipBlackout() {
+            scheduleNext()
+            return
+        }
+
         // Fire the blackout
         lastTriggerDate = Date()
         ProgressTracker.shared.recordTriggered()

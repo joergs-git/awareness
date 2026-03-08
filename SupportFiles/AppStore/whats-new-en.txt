@@ -1,12 +1,6 @@
-What's New in v3.0:
+What's New in v3.11:
 
-- Smart Guru: adaptive algorithm learns your rhythm and adjusts interval and duration automatically
-- 7 daily practice cards with mindfulness assignments (Letting Go, Silence, Presence, and more)
-- 66 micro-tasks: concrete everyday awareness exercises linked to each card
-- Self-report tracking: tap to count succeeded, noticed, or forgot moments throughout the day
-- Two side-by-side discipline donuts (Today + Overall) with brush-stroke style
-- 19 philosophical slogans that adapt to your performance — koans when thriving, wit when struggling
-- watchOS: progress counter on complication, new practice card complication, compact status bar
-- Morning practice card notification at configurable hour
-- Event-level logging with 90-day rolling window for pattern analysis
-- All new content localized in English and German
+- Smart call detection: breaks are automatically skipped during phone and video calls (FaceTime, Zoom, Teams, WhatsApp)
+- Skipped breaks don't count as triggered — your discipline stats stay accurate
+- New setting: "Skip during calls" (on by default) in Settings → Behavior
+- Rotating breathing phrases now follow device language (English/German)

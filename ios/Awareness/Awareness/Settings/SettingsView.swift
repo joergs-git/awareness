@@ -207,10 +207,11 @@ struct SettingsView: View {
                 // MARK: - Behavior
                 Section {
                     Toggle(String(localized: "Handcuffs mode"), isOn: $settings.handcuffsMode)
+                    Toggle(String(localized: "Skip during calls"), isOn: $settings.skipDuringCalls)
                 } header: {
                     Label(String(localized: "Behavior"), systemImage: "lock")
                 } footer: {
-                    Text(String(localized: "When on, tap cannot dismiss the break early."))
+                    Text(String(localized: "Handcuffs: tap cannot dismiss the break early. Skip during calls: no breaks while on a phone or video call (FaceTime, Zoom, etc)."))
                 }
 
                 // MARK: - Health

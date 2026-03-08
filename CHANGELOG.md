@@ -4,6 +4,19 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.11
+
+### iOS: Smart Call Detection
+- **Skip during calls** — breaks are automatically skipped when on a phone or video call (FaceTime, Zoom, Teams, WhatsApp, and any CallKit-integrated app)
+- Skipped breaks are **not counted as triggered** — discipline statistics stay accurate
+- New toggle in Settings → Behavior: "Skip during calls" (default: on)
+- Works for both foreground timer and notification-triggered breaks
+
+### macOS: App Store Screenshots
+- Added screenshot generator script for macOS App Store (blackout + progress views, EN/DE)
+
+---
+
 ## v3.10
 
 ### All Platforms: Localized Breathing Phrases

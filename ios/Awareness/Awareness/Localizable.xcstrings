@@ -757,6 +757,26 @@
         }
       }
     },
+    "Handcuffs: tap cannot dismiss the break early. Skip during calls: no breaks while on a phone or video call (FaceTime, Zoom, etc)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handschellen: Tippen kann die Pause nicht vorzeitig beenden. Bei Anrufen pausieren: Keine Pausen während eines Telefon- oder Videoanrufs (FaceTime, Zoom etc.)."
+          }
+        }
+      }
+    },
+    "Skip during calls" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei Anrufen pausieren"
+          }
+        }
+      }
+    },
     "Health" : {
       "localizations" : {
         "de" : {
