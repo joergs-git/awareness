@@ -47,7 +47,7 @@ bundle-signed: build
 release-direct: bundle-signed
 	ditto -c -k --keepParent $(BUNDLE_DIR) build/Awareness.zip
 	xcrun notarytool submit build/Awareness.zip \
-		--keychain-profile "notarytool-profile" --wait
+		--keychain-profile "notarytool" --wait
 	xcrun stapler staple $(BUNDLE_DIR)
 	@echo "Notarized and stapled $(BUNDLE_DIR)"
 
@@ -59,5 +59,5 @@ clean:
 	rm -rf build/
 
 # One-time setup for notarization credentials (run manually):
-# xcrun notarytool store-credentials "notarytool-profile" \
+# xcrun notarytool store-credentials "notarytool" \
 #     --apple-id "joergsflow@gmail.com" --team-id YOUR_TEAM_ID

@@ -1,0 +1,41 @@
+{
+  "name": "Awareness Source",
+  "identifier": "com.joergsflow.awareness.source",
+  "subtitle": "Mindfulness breathing timer",
+  "description": "Official AltStore source for Awareness reminder — a mindfulness timer that randomly blacks out your screen, forcing you to pause, breathe, and reset.",
+  "iconURL": "https://raw.githubusercontent.com/joergs-git/awareness/main/ios/Awareness/Awareness/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
+  "website": "https://github.com/joergs-git/awareness",
+  "sourceURL": "https://raw.githubusercontent.com/joergs-git/awareness/main/altstore/apps.json",
+  "apps": [
+    {
+      "name": "Awareness reminder",
+      "bundleIdentifier": "com.joergsflow.awareness.ios",
+      "developerName": "joergsflow",
+      "subtitle": "Mindful breathing breaks",
+      "localizedDescription": "Awareness randomly interrupts you with a full-screen blackout, forcing you to stop and breathe. Inspired by Vipassana meditation practice.\n\nFeatures:\n- Random breathing breaks at configurable intervals\n- Daily contemplative practice cards with micro-tasks\n- Home Screen widget with progress and one-tap breathing\n- Apple Watch companion with haptics and complications\n- Apple Health integration (Mindful Minutes)\n- Call detection — skips breaks during phone/video calls\n- Customizable: plain black, text, image, or looping video\n- Bilingual: English and German",
+      "iconURL": "https://raw.githubusercontent.com/joergs-git/awareness/main/ios/Awareness/Awareness/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
+      "tintColor": "B8804D",
+      "versions": [
+        {
+          "version": "3.11",
+          "date": "2026-03-12",
+          "localizedDescription": "v3.11 — Skip breaks during phone/video calls (FaceTime, Zoom, Teams, WhatsApp). Skipped breaks don't count toward your stats.",
+          "downloadURL": "https://github.com/joergs-git/awareness/releases/download/v3.11/Awareness.ipa",
+          "size": 5000000,
+          "minOSVersion": "16.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [
+          "com.apple.security.application-groups"
+        ],
+        "privacy": {
+          "NSHealthUpdateUsageDescription": "Awareness logs mindful breathing sessions to Apple Health as Mindful Minutes.",
+          "NSHealthShareUsageDescription": "Awareness reads Health data to display your mindfulness statistics.",
+          "NSPhotoLibraryUsageDescription": "Awareness lets you pick a custom image or video to display during breathing breaks."
+        }
+      }
+    }
+  ],
+  "news": []
+}
