@@ -45,7 +45,7 @@ class StatusBarController: NSObject {
             button.title = "☯"
         }
 
-        button.toolTip = "Awareness reminder"
+        button.toolTip = "Atempause"
     }
 
     // MARK: - Tooltip
@@ -62,19 +62,19 @@ class StatusBarController: NSObject {
 
         if settings.isSnoozed {
             if let until = settings.snoozeUntil {
-                button.toolTip = String(localized: "Awareness reminder — Snoozed until \(formatTime(until))")
+                button.toolTip = String(localized: "Atempause — Snoozed until \(formatTime(until))")
             } else {
-                button.toolTip = String(localized: "Awareness reminder — Snoozed indefinitely")
+                button.toolTip = String(localized: "Atempause — Snoozed indefinitely")
             }
             return
         }
 
         guard let nextDate = scheduler.nextBlackoutDate else {
-            button.toolTip = "Awareness reminder"
+            button.toolTip = "Atempause"
             return
         }
 
-        button.toolTip = String(localized: "Awareness reminder — Next in \(formatRemainingTime(until: nextDate))")
+        button.toolTip = String(localized: "Atempause — Next in \(formatRemainingTime(until: nextDate))")
     }
 
     private func formatRemainingTime(until date: Date) -> String {
@@ -199,7 +199,7 @@ class StatusBarController: NSObject {
         menu.addItem(helpItem)
 
         // About
-        let aboutItem = NSMenuItem(title: String(localized: "About Awareness reminder..."), action: #selector(showAbout), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: String(localized: "About Atempause..."), action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 
@@ -217,7 +217,7 @@ class StatusBarController: NSObject {
         menu.addItem(NSMenuItem.separator())
 
         // Quit
-        let quitItem = NSMenuItem(title: String(localized: "Quit Awareness reminder"), action: #selector(quitApp), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: String(localized: "Quit Atempause"), action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
@@ -297,8 +297,8 @@ class StatusBarController: NSObject {
 
     @objc private func showHelp() {
         let alert = NSAlert()
-        alert.messageText = String(localized: "How to Use Awareness reminder")
-        alert.informativeText = String(localized: "Awareness reminder runs quietly in your menu bar (☯ icon).\n\nHow it works:\n• At random intervals, your screen fades to black for a few seconds\n• A gong sounds at the start and end of each break\n• Use this pause to breathe, close your eyes, and reset\n\nControls:\n• ESC or Cmd+Q — dismiss a break early (unless Handcuffs mode is on)\n• Snooze — temporarily pause from the menu bar\n• Settings — configure timing, visuals, and sounds\n\nThe app detects active camera/microphone usage and will skip breaks during video calls.")
+        alert.messageText = String(localized: "How to Use Atempause")
+        alert.informativeText = String(localized: "Atempause runs quietly in your menu bar (☯ icon).\n\nHow it works:\n• At random intervals, your screen fades to black for a few seconds\n• A gong sounds at the start and end of each break\n• Use this pause to breathe, close your eyes, and reset\n\nControls:\n• ESC or Cmd+Q — dismiss a break early (unless Handcuffs mode is on)\n• Snooze — temporarily pause from the menu bar\n• Settings — configure timing, visuals, and sounds\n\nThe app detects active camera/microphone usage and will skip breaks during video calls.")
         alert.alertStyle = .informational
         alert.addButton(withTitle: String(localized: "OK"))
 
@@ -309,7 +309,7 @@ class StatusBarController: NSObject {
     @objc private func showAbout() {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let alert = NSAlert()
-        alert.messageText = "Awareness reminder"
+        alert.messageText = "Atempause"
         alert.informativeText = String(localized: "A mindfulness timer for your Mac.\nRandomly pauses your screen to help you breathe.\n\nThe goal of this app is to not need it anymore a little bit later.\n\nby joergsflow\nVersion \(version)\n\ngithub.com/joergs-git/awareness")
         alert.alertStyle = .informational
         alert.addButton(withTitle: String(localized: "OK"))

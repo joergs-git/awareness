@@ -32,7 +32,7 @@ struct OnboardingView: View {
                     .opacity(0.7)
 
                 // Instruction text
-                Text(String(localized: "Tap the symbol — Close your eyes.\nBreathe.\nOpen your eyes.\n\nThis is your first Awareness Reminder."))
+                Text(String(localized: "Tap the symbol — Close your eyes.\nBreathe.\nOpen your eyes.\n\nThis is your first Atempause."))
                     .font(.title3)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.primary.opacity(0.8))

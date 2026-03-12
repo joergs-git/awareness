@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Awareness reminder</string>
+    <string>Atempause</string>
     <key>CFBundleIdentifier</key>
     <string>com.joergsflow.awareness.ios</string>
     <key>CFBundleVersion</key>
-    <string>3.12</string>
+    <string>3.13</string>
     <key>CFBundleShortVersionString</key>
-    <string>3.12</string>
+    <string>3.13</string>
     <key>CFBundleExecutable</key>
     <string>Awareness</string>
     <key>CFBundleIconFile</key>
@@ -29,8 +29,8 @@
     <key>LSUIElement</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>Awareness checks if the camera is active to avoid interrupting video calls.</string>
+    <string>Atempause checks if the camera is active to avoid interrupting video calls.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Awareness checks if the microphone is active to avoid interrupting calls.</string>
+    <string>Atempause checks if the microphone is active to avoid interrupting calls.</string>
 </dict>
 </plist>

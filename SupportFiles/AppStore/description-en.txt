@@ -1,15 +1,15 @@
-Awareness reminder is a mindfulness timer that randomly blacks out your screen for a few seconds, gently reminding you to pause, breathe, and return to the present moment.
+Atempause gently reminds you to stop, breathe, and observe — your thoughts, your body, this moment. At random intervals throughout your day, it invites you to pause and return to awareness.
 
-In the Vipassana meditation tradition, awareness (sati) is the foundation of all practice. Yet we spend hours staring at screens, gradually losing contact with ourselves. Awareness reminder interrupts this pattern with brief moments of stillness woven into your day.
+In the Vipassana meditation tradition, awareness (sati) is the foundation of all practice. Yet we move through our days on autopilot, lost in thought, gradually losing contact with ourselves. Atempause interrupts this pattern with brief moments of stillness woven into your day.
 
-A few times per hour, your screen fades to black. For a few seconds, there is nothing to do. Close your eyes. Feel your breath. Notice your posture. Then the screen returns, and you continue — with a small gap of clarity inserted into your day.
+A few times per hour, you receive a gentle reminder. For a few seconds, there is nothing to do. Close your eyes. Feel your breath. Notice your thoughts. Observe your posture. Then you continue — with a small gap of clarity inserted into your day.
 
 KEY FEATURES
 
-- Random intervals between blackouts (e.g. 15–30 minutes), so interruptions feel natural, not mechanical
-- Configurable duration (3–120 seconds per blackout, with optional random variation)
+- Random intervals between pauses (e.g. 15–30 minutes), so reminders feel natural, not mechanical
+- Configurable duration (3–120 seconds per pause, with optional random variation)
 - Smart detection — automatically skips when your camera or microphone is in use
-- Active time window — only interrupts during configured hours
+- Active time window — only reminds during configured hours
 - Visual modes — plain black, custom text, image, or looping video
 - Start and end gong — audible tones mark the beginning and end of each pause
 - Handcuffs mode — commit to the practice by preventing early dismissal
@@ -24,12 +24,12 @@ KEY FEATURES
 
 APPLE WATCH
 
-The companion watchOS app works standalone or paired with your iPhone. Coordinated scheduling keeps notification times in sync between devices, and your practice stats merge automatically. Receive gentle haptic taps on your wrist, view your mindful moments, and customize settings right from your watch face with WidgetKit complications.
+The companion watchOS app works standalone or paired with your iPhone. Coordinated scheduling keeps reminder times in sync between devices, and your practice stats merge automatically. Receive gentle haptic taps on your wrist, view your mindful moments, and customize settings right from your watch face with WidgetKit complications.
 
 CROSS-PLATFORM
 
-Awareness reminder is also available for macOS and Windows, keeping your practice consistent across all your devices.
+Atempause is also available for macOS and Windows, keeping your practice consistent across all your devices.
 
-This is not a productivity tool. It is a practice aid — micro-interruptions that become anchors of awareness threaded through your working day.
+This is not a productivity tool. It is a practice aid — micro-interruptions that become anchors of awareness threaded through your day. A reminder to breathe, to observe, to come back.
 
 Breathe. You are here.

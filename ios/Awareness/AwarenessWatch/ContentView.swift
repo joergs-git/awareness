@@ -235,7 +235,7 @@ struct ContentView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(WarmBackground())
-            .navigationTitle(String(localized: "Awareness reminder"))
+            .navigationTitle(String(localized: "Atempause"))
             .fullScreenCover(isPresented: $showingBlackout) {
                 BlackoutView(isPresented: $showingBlackout)
             }

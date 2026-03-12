@@ -1,6 +1,15 @@
 # Changelog
 
-All notable changes to Awareness reminder, from initial release to the current version.
+All notable changes to Atempause (formerly Awareness reminder), from initial release to the current version.
+
+---
+
+## v3.13
+
+### App Rename: Atempause
+- **Renamed from "Awareness reminder" to "Atempause"** across all platforms (macOS, iOS/iPadOS, watchOS, Windows)
+- Display name, notifications, tooltips, menu items, App Store metadata, and AltStore source all updated
+- Bundle IDs unchanged — seamless update for existing users, no data loss
 
 ---
 

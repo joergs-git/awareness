@@ -93,7 +93,7 @@ struct AccessoryRectangularView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack {
-                Text(String(localized: "Awareness reminder"))
+                Text(String(localized: "Atempause"))
                     .font(.headline)
                     .widgetAccentable()
                 Spacer()
@@ -274,7 +274,7 @@ struct AwarenessComplicationWidget: Widget {
                 ComplicationEntryView(entry: entry)
             }
         }
-        .configurationDisplayName(String(localized: "Awareness reminder"))
+        .configurationDisplayName(String(localized: "Atempause"))
         .description(String(localized: "Shows your next mindful moment and today's progress."))
         .supportedFamilies([
             .accessoryCircular,

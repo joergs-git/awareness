@@ -2,17 +2,17 @@
   "name": "Awareness Source",
   "identifier": "com.joergsflow.awareness.source",
   "subtitle": "Mindfulness breathing timer",
-  "description": "Official AltStore source for Awareness reminder — a mindfulness timer that randomly blacks out your screen, forcing you to pause, breathe, and reset.",
+  "description": "Official AltStore source for Atempause — a mindfulness timer that randomly blacks out your screen, forcing you to pause, breathe, and reset.",
   "iconURL": "https://raw.githubusercontent.com/joergs-git/awareness/main/ios/Awareness/Awareness/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
   "website": "https://github.com/joergs-git/awareness",
   "sourceURL": "https://raw.githubusercontent.com/joergs-git/awareness/main/altstore/apps.json",
   "apps": [
     {
-      "name": "Awareness reminder",
+      "name": "Atempause",
       "bundleIdentifier": "com.joergsflow.awareness.ios",
       "developerName": "joergsflow",
       "subtitle": "Mindful breathing breaks",
-      "localizedDescription": "Awareness randomly interrupts you with a full-screen blackout, forcing you to stop and breathe. Inspired by Vipassana meditation practice.\n\nFeatures:\n- Random breathing breaks at configurable intervals\n- Daily contemplative practice cards with micro-tasks\n- Home Screen widget with progress and one-tap breathing\n- Apple Watch companion with haptics and complications\n- Apple Health integration (Mindful Minutes)\n- Call detection — skips breaks during phone/video calls\n- Customizable: plain black, text, image, or looping video\n- Bilingual: English and German",
+      "localizedDescription": "Atempause randomly interrupts you with a full-screen blackout, forcing you to stop and breathe. Inspired by Vipassana meditation practice.\n\nFeatures:\n- Random breathing breaks at configurable intervals\n- Daily contemplative practice cards with micro-tasks\n- Home Screen widget with progress and one-tap breathing\n- Apple Watch companion with haptics and complications\n- Apple Health integration (Mindful Minutes)\n- Call detection — skips breaks during phone/video calls\n- Customizable: plain black, text, image, or looping video\n- Bilingual: English and German",
       "iconURL": "https://raw.githubusercontent.com/joergs-git/awareness/main/ios/Awareness/Awareness/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
       "tintColor": "B8804D",
       "versions": [
@@ -30,9 +30,9 @@
           "com.apple.security.application-groups"
         ],
         "privacy": {
-          "NSHealthUpdateUsageDescription": "Awareness logs mindful breathing sessions to Apple Health as Mindful Minutes.",
-          "NSHealthShareUsageDescription": "Awareness reads Health data to display your mindfulness statistics.",
-          "NSPhotoLibraryUsageDescription": "Awareness lets you pick a custom image or video to display during breathing breaks."
+          "NSHealthUpdateUsageDescription": "Atempause logs mindful breathing sessions to Apple Health as Mindful Minutes.",
+          "NSHealthShareUsageDescription": "Atempause reads Health data to display your mindfulness statistics.",
+          "NSPhotoLibraryUsageDescription": "Atempause lets you pick a custom image or video to display during breathing breaks."
         }
       }
     }

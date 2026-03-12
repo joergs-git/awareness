@@ -1,6 +1,4 @@
-Neu in Version 3.11:
+Neu in Version 3.13:
 
-- Intelligente Anruferkennung: Pausen werden bei Telefon- und Videoanrufen automatisch übersprungen (FaceTime, Zoom, Teams, WhatsApp)
-- Übersprungene Pausen zählen nicht als ausgelöst — deine Disziplin-Statistik bleibt korrekt
-- Neue Einstellung: „Bei Anrufen pausieren" (standardmäßig an) unter Einstellungen → Verhalten
-- Rotierende Atemphrasen folgen jetzt der Gerätesprache (Englisch/Deutsch)
+- Umbenannt in „Atempause" — dieselben achtsamen Pausen, frische Identität
+- Alle Plattformen aktualisiert: macOS, iOS, watchOS, Windows

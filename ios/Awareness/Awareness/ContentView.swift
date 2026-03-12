@@ -285,7 +285,7 @@ struct ContentView: View {
 
                 // MARK: - Background
                 Section {
-                    Text(String(localized: "In the Vipassana tradition, awareness (sati) is the foundation of all practice. We spend hours staring at screens and gradually lose contact with ourselves — forgetting to breathe deeply, forgetting we even have a body.\n\nAwareness interrupts this pattern. A few times per hour, you are gently reminded to pause. These micro-interruptions become anchors of presence threaded through your day.\n\nThe goal of this app is to not need it anymore a little bit later."))
+                    Text(String(localized: "In the Vipassana tradition, awareness (sati) is the foundation of all practice. We spend hours staring at screens and gradually lose contact with ourselves — forgetting to breathe deeply, forgetting we even have a body.\n\nAtempause interrupts this pattern. A few times per hour, you are gently reminded to pause. These micro-interruptions become anchors of presence threaded through your day.\n\nThe goal of this app is to not need it anymore a little bit later."))
                         .font(.callout)
                         .foregroundColor(.secondary)
                         .padding(.vertical, 4)
@@ -338,7 +338,7 @@ struct ContentView: View {
             .modifier(CompactSectionSpacingModifier())
             .scrollContentBackground(.hidden)
             .background(WarmBackground())
-            .navigationTitle(String(localized: "Awareness reminder"))
+            .navigationTitle(String(localized: "Atempause"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -417,7 +417,7 @@ struct ContentView: View {
                     settings.healthKitPromptShown = true
                 }
             } message: {
-                Text(String(localized: "Awareness can log each mindful pause to Apple Health so you can track your practice over time."))
+                Text(String(localized: "Atempause can log each mindful pause to Apple Health so you can track your practice over time."))
             }
         }
     }

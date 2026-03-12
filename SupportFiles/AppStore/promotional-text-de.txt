@@ -1,1 +1,1 @@
-v2.0: Namaste-Bestätigung auf iOS, erweiterte Watch-Haptik, Frühester-gewinnt-Synchronisation und ein neuer Name — Awareness reminder.
+v3.13: Neuer Name — Atempause. Eine sanfte Erinnerung innezuhalten, zu atmen und zu beobachten. Plattformübergreifend: macOS, Windows, iOS, watchOS.

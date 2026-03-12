@@ -319,7 +319,7 @@ class NotificationScheduler: ObservableObject {
     /// Build notification content — no image attachment on watchOS, uses default sound
     private func makeNotificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Awareness reminder ☯")
+        content.title = String(localized: "Atempause ☯")
         content.subtitle = String(localized: "Time to pause and breathe")
         content.body = String(localized: "Tap to begin a mindful moment.")
         content.sound = .default

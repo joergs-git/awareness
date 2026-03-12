@@ -1,15 +1,15 @@
-Awareness reminder ist ein Achtsamkeitstimer, der deinen Bildschirm zufällig für einige Sekunden verdunkelt und dich sanft daran erinnert, innezuhalten, zu atmen und in den gegenwärtigen Moment zurückzukehren.
+Atempause erinnert dich sanft daran, innezuhalten, zu atmen und zu beobachten — deine Gedanken, deinen Körper, diesen Moment. In zufälligen Abständen lädt sie dich ein, zu pausieren und zur Achtsamkeit zurückzukehren.
 
-In der Vipassana-Meditationstradition ist Achtsamkeit (Sati) die Grundlage aller Praxis. Doch wir verbringen Stunden vor Bildschirmen und verlieren dabei nach und nach den Kontakt zu uns selbst. Awareness reminder unterbricht dieses Muster mit kurzen Momenten der Stille, eingewoben in deinen Tag.
+In der Vipassana-Meditationstradition ist Achtsamkeit (Sati) die Grundlage aller Praxis. Doch wir bewegen uns im Autopilot durch den Tag, verloren in Gedanken, und verlieren nach und nach den Kontakt zu uns selbst. Atempause unterbricht dieses Muster mit kurzen Momenten der Stille, eingewoben in deinen Tag.
 
-Ein paar Mal pro Stunde wird dein Bildschirm schwarz. Für einige Sekunden gibt es nichts zu tun. Schließe die Augen. Spüre deinen Atem. Bemerke deine Haltung. Dann kehrt der Bildschirm zurück, und du machst weiter — mit einer kleinen Lücke der Klarheit in deinem Tag.
+Ein paar Mal pro Stunde erhältst du eine sanfte Erinnerung. Für einige Sekunden gibt es nichts zu tun. Schließe die Augen. Spüre deinen Atem. Beobachte deine Gedanken. Bemerke deine Haltung. Dann machst du weiter — mit einer kleinen Lücke der Klarheit in deinem Tag.
 
 HAUPTFUNKTIONEN
 
-- Zufällige Intervalle zwischen Verdunkelungen (z.B. 15–30 Minuten), damit Unterbrechungen natürlich wirken
-- Einstellbare Dauer (3–120 Sekunden pro Verdunkelung, mit optionaler zufälliger Variation)
+- Zufällige Intervalle zwischen Pausen (z.B. 15–30 Minuten), damit Erinnerungen natürlich wirken
+- Einstellbare Dauer (3–120 Sekunden pro Pause, mit optionaler zufälliger Variation)
 - Intelligente Erkennung — überspringt automatisch bei aktiver Kamera oder Mikrofon
-- Aktives Zeitfenster — unterbricht nur während konfigurierter Stunden
+- Aktives Zeitfenster — erinnert nur während konfigurierter Stunden
 - Visuelle Modi — reines Schwarz, eigener Text, Bild oder Video in Endlosschleife
 - Start- und Endgong — akustische Signale markieren Anfang und Ende jeder Pause
 - Handschellen-Modus — verpflichte dich zur Praxis, indem du vorzeitiges Beenden verhinderst
@@ -24,12 +24,12 @@ HAUPTFUNKTIONEN
 
 APPLE WATCH
 
-Die watchOS-Begleit-App funktioniert eigenständig oder gekoppelt mit deinem iPhone. Koordinierte Planung hält die Benachrichtigungszeiten zwischen den Geräten synchron, und deine Übungsstatistiken werden automatisch zusammengeführt. Empfange sanfte haptische Impulse am Handgelenk, verfolge deine Achtsamkeitsmomente und passe Einstellungen direkt auf dem Zifferblatt mit WidgetKit-Komplikationen an.
+Die watchOS-Begleit-App funktioniert eigenständig oder gekoppelt mit deinem iPhone. Koordinierte Planung hält die Erinnerungszeiten zwischen den Geräten synchron, und deine Übungsstatistiken werden automatisch zusammengeführt. Empfange sanfte haptische Impulse am Handgelenk, verfolge deine Achtsamkeitsmomente und passe Einstellungen direkt auf dem Zifferblatt mit WidgetKit-Komplikationen an.
 
 PLATTFORMÜBERGREIFEND
 
-Awareness reminder ist auch für macOS und Windows verfügbar, damit deine Praxis auf allen Geräten konsistent bleibt.
+Atempause ist auch für macOS und Windows verfügbar, damit deine Praxis auf allen Geräten konsistent bleibt.
 
-Dies ist kein Produktivitätswerkzeug. Es ist eine Übungshilfe — Mikrounterbrechungen, die zu Ankern der Achtsamkeit in deinem Arbeitstag werden.
+Dies ist kein Produktivitätswerkzeug. Es ist eine Übungshilfe — Mikrounterbrechungen, die zu Ankern der Achtsamkeit in deinem Tag werden. Eine Erinnerung zu atmen, zu beobachten, zurückzukehren.
 
 Atme. Du bist hier.

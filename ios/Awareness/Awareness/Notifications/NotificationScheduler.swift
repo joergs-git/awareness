@@ -290,7 +290,7 @@ class NotificationScheduler: ObservableObject {
     /// Build the notification content with title, subtitle, sound, category, and image attachment
     private func makeNotificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Awareness reminder ☯")
+        content.title = String(localized: "Atempause ☯")
         content.subtitle = String(localized: "Time to pause and breathe")
         content.body = String(localized: "Tap to begin a mindful moment. Close your eyes, feel your breath, and return to the present.")
         content.sound = NotificationScheduler.notificationSound
