@@ -4,6 +4,17 @@ All notable changes to Awareness reminder, from initial release to the current v
 
 ---
 
+## v3.12
+
+### macOS: App Store Compliance
+- **Removed Accessibility usage** — CGEvent tap (keystroke suppression) is now skipped in sandboxed Mac App Store builds, resolving Apple guideline 2.4.5
+- Added settings and menu bar screenshots for App Store listing (EN/DE)
+
+### AltStore Sideloading
+- **AltStore source** — iOS app now available for sideloading via AltStore (`altstore/apps.json`)
+
+---
+
 ## v3.11
 
 ### iOS: Smart Call Detection
