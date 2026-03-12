@@ -17,10 +17,10 @@
       "tintColor": "B8804D",
       "versions": [
         {
-          "version": "3.11",
+          "version": "3.12",
           "date": "2026-03-12",
-          "localizedDescription": "v3.11 — Skip breaks during phone/video calls (FaceTime, Zoom, Teams, WhatsApp). Skipped breaks don't count toward your stats.",
-          "downloadURL": "https://github.com/joergs-git/awareness/releases/download/v3.11/Awareness.ipa",
+          "localizedDescription": "v3.12 — App Store compliance fix, AltStore sideloading support.",
+          "downloadURL": "https://github.com/joergs-git/awareness/releases/download/v3.12/Awareness.ipa",
           "size": 1506698,
           "minOSVersion": "16.0"
         }
