@@ -533,6 +533,13 @@ class BlackoutWindowController {
     /// Requires Accessibility permission — if not granted, the tap simply won't be created
     /// and keystrokes will pass through as before (graceful degradation).
     private func installGlobalEventTap() {
+        // CGEvent tap requires Accessibility permission, which Apple rejects for
+        // non-accessibility purposes in sandboxed Mac App Store builds (guideline 2.4.5).
+        // Skip entirely in the sandbox — the overlay windows capture focus anyway.
+        if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil {
+            return
+        }
+
         let eventMask: CGEventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
 
         guard let tap = CGEvent.tapCreate(
