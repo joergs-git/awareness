@@ -1,4 +1,4 @@
-# Awareness reminder ☯
+# Atempause ☯
 
 A mindfulness timer for macOS, Windows, iOS/iPadOS, and Apple Watch that randomly blacks out your screen for a few seconds, gently forcing you to pause, breathe, and return to the present moment.
 
@@ -8,7 +8,7 @@ In the Vipassana meditation tradition, awareness (*sati*) is the foundation of a
 
 The challenge is that we spend hours each day staring at screens — answering emails, writing code, scrolling feeds — and gradually lose contact with ourselves. We forget to breathe deeply. We forget we even have a body. The mind narrows into a tunnel of tasks, and the day slips by on autopilot.
 
-**Awareness reminder** interrupts this pattern. A few times per hour, your screen gently fades to black. For 10, 20, or 30 seconds, there is nothing to do. You can close your eyes. Feel your breath. Notice your posture. Notice what your mind was just doing. Then the screen returns, and you continue — but now with a small gap of clarity inserted into your day.
+**Atempause** interrupts this pattern. A few times per hour, your screen gently fades to black. For 10, 20, or 30 seconds, there is nothing to do. You can close your eyes. Feel your breath. Notice your posture. Notice what your mind was just doing. Then the screen returns, and you continue — but now with a small gap of clarity inserted into your day.
 
 This is not a break timer or a productivity tool. It is a practice aid. If you are walking the path of wisdom — whether through Vipassana, Zen, mindfulness-based practice, or simply a wish to be more present — these micro-interruptions become anchors of awareness threaded through your working day.
 
@@ -41,9 +41,9 @@ Have also a look into the wiki section of this project: (https://github.com/joer
 - **Active touch blackouts** (iOS/watchOS) — notifications require a tap; no auto-triggering when the app is in the foreground
 - **Coordinated scheduling** — iPhone generates notification times and syncs them to Apple Watch, so both devices stay in harmony
 - **Cross-device progress sync** — your practice stats merge between iPhone and Apple Watch via WatchConnectivity
-- **Namaste confirmation** (watchOS) — a brief namaste shown after each completed blackout
+- **Awareness check** — after each completed breathing moment, a quick question: "Were you there?" with three responses (Yes / Somewhat / No), tracked over time across iOS, watchOS, and macOS
 - **Watch face complications** — see your status and next blackout time directly on your watch face (circular, rectangular, and inline styles)
-- **Progress tracking** — donut chart showing today's completion, lifetime statistics, and a 14-day bar chart history
+- **Progress tracking** — donut charts for discipline, 14-day bar charts for triggered/completed breaks and awareness responses
 - **Localization** — English and German (EN/DE)
 - **Update checker** — checks GitHub for newer releases on startup and shows an "Update Available" menu item linking to the download page
 
@@ -57,24 +57,7 @@ Have also a look into the wiki section of this project: (https://github.com/joer
 2. Unzip and move `Awareness.app` to your `/Applications` folder
 3. Double-click to launch
 
-**Important — macOS Gatekeeper warning:**
-Since this app is not signed with an Apple Developer certificate, macOS will show a warning the first time you open it:
-
-> *"Awareness" can't be opened because Apple cannot check it for malicious software.*
-
-To open it anyway:
-
-1. **Right-click** (or Control-click) on `Awareness.app`
-2. Select **"Open"** from the context menu
-3. In the dialog that appears, click **"Open"** again
-
-You only need to do this once. After the first launch, macOS remembers your choice and the app will open normally.
-
-Alternatively, you can simply go to system settings "date privacy and security", scroll down to the end and click "Open anyway" button.
-Or you can remove the quarantine flag via Terminal:
-```bash
-xattr -cr /Applications/Awareness.app
-```
+The app is signed and notarized by Apple — it should open without any Gatekeeper warnings.
 
 #### Build from source
 
@@ -154,7 +137,7 @@ After launching, a ☯ icon appears in the menu bar. Click it to:
 - **Breathe now** — trigger an immediate blackout with your current settings
 - **Snooze** — pause for 10 min, 20 min, 30 min, 1 hour, 2 hours, or indefinitely
 - **Settings...** — open the configuration window
-- **About Awareness reminder...** — version info and credits
+- **About Atempause...** — version info and credits
 
 During a blackout:
 - **ESC** (or **Cmd+Q** on macOS) dismisses early (unless Handcuffs mode is on)
