@@ -4,6 +4,21 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v3.14
+
+### Awareness Check — "Were you there?"
+- **Post-breathing awareness question** — after each completed breathing moment, a quick check appears: "Were you there?" with three answers: Yes / Somewhat / No (iOS, watchOS, macOS)
+- Responses tracked per day and synced between iOS and watchOS
+- 14-day awareness response chart replaces the old self-report counters in the progress view
+
+### UI Simplification
+- **Removed manual self-report counters** (checkmark/eye/circle icons) from practice card banners on iOS and watchOS
+- **Removed header slogans** ("Mindfulness in Action" / "In der Stille ruht die Kraft") from iOS — just the yin-yang logo
+- **Collapsible lower sections** on iOS — status, progress, snooze, actions, about are hidden behind a subtle toggle to keep focus on breathing
+- **Consolidated layout** — practice card, inspiration, and breathe button form one tight visual unit on iOS and watchOS
+
+---
+
 ## v3.13
 
 ### App Rename: Atempause

@@ -20,8 +20,8 @@ struct BlackoutView: View {
     @State private var flashOpacity: Double = 0
     /// Whether the blackout ran its full duration (not dismissed early)
     @State private var completedFullDuration = false
-    /// Whether to show the namaste confirmation after blackout ends
-    @State private var showingNamaste = false
+    /// Whether to show the awareness check after blackout ends
+    @State private var showingAwarenessCheck = false
     /// Controls the breathing animation — toggled on after fade-in to start pulsing
     @State private var isBreathing = false
     /// The offered duration for event logging (captured at start)
@@ -33,35 +33,36 @@ struct BlackoutView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            // Breathing content — gentle pulsing animation provides a meditation focus
-            switch settings.visualType {
-            case .plainBlack:
-                // Subtle breathing circle as a minimal visual anchor
-                Circle()
-                    .fill(Color.white.opacity(isBreathing ? 0.08 : 0.015))
-                    .frame(width: isBreathing ? 20 : 12, height: isBreathing ? 20 : 12)
-                    .animation(
-                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
-                        value: isBreathing
-                    )
+            // Breathing content — hidden once awareness check appears
+            if !showingAwarenessCheck {
+                switch settings.visualType {
+                case .plainBlack:
+                    Circle()
+                        .fill(Color.white.opacity(isBreathing ? 0.08 : 0.015))
+                        .frame(width: isBreathing ? 20 : 12, height: isBreathing ? 20 : 12)
+                        .animation(
+                            .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                            value: isBreathing
+                        )
 
-            case .text:
-                Text(displayText)
-                    .font(.system(size: 36, weight: .light))
-                    .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
-                    .scaleEffect(isBreathing ? 1.06 : 0.95)
-                    .animation(
-                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
-                        value: isBreathing
-                    )
-                    .multilineTextAlignment(.center)
-                    .padding(40)
+                case .text:
+                    Text(displayText)
+                        .font(.system(size: 36, weight: .light))
+                        .foregroundColor(.white.opacity(isBreathing ? 0.8 : 0.25))
+                        .scaleEffect(isBreathing ? 1.06 : 0.95)
+                        .animation(
+                            .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                            value: isBreathing
+                        )
+                        .multilineTextAlignment(.center)
+                        .padding(40)
 
-            case .image:
-                imageContent
+                case .image:
+                    imageContent
 
-            case .video:
-                videoContent
+                case .video:
+                    videoContent
+                }
             }
 
             // White flash layer — briefly visible at the end of a blackout
@@ -69,19 +70,28 @@ struct BlackoutView: View {
                 .ignoresSafeArea()
                 .opacity(flashOpacity)
 
-            // Namaste confirmation shown after blackout fades out
-            if showingNamaste {
-                Text("🙏")
-                    .font(.system(size: 64))
-                    .grayscale(1.0)
-                    .opacity(0.7)
-                    .transition(.opacity)
+            // Awareness check shown after completed blackout fades out
+            if showingAwarenessCheck {
+                VStack(spacing: 20) {
+                    Text(String(localized: "Were you there?"))
+                        .font(.title2.weight(.light))
+                        .foregroundColor(.white.opacity(0.85))
+
+                    HStack(spacing: 16) {
+                        awarenessButton(String(localized: "Yes"), response: .yes)
+                        awarenessButton(String(localized: "Somewhat"), response: .somewhat)
+                        awarenessButton(String(localized: "No"), response: .no)
+                    }
+                }
+                .transition(.opacity)
             }
         }
         .opacity(opacity)
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
         .onTapGesture {
+            // Don't dismiss during awareness check — buttons handle interaction
+            guard !showingAwarenessCheck else { return }
             // Tap to dismiss early (disabled in handcuffs mode)
             guard !settings.handcuffsMode else { return }
             dismissBlackout()
@@ -182,25 +192,58 @@ struct BlackoutView: View {
         // Delay fade-out when flash is active so the flash completes first
         let fadeDelay = settings.endFlashEnabled ? 1.3 : 0.0
         DispatchQueue.main.asyncAfter(deadline: .now() + fadeDelay) {
-            withAnimation(.easeOut(duration: 2.0)) {
-                opacity = 0
-            }
-            // After fade-out, show namaste confirmation briefly before dismissing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                withAnimation(.easeIn(duration: 0.3)) {
-                    opacity = 1.0
-                    showingNamaste = true
+            if completedFullDuration {
+                // Show awareness check — fade content out, then show the question
+                withAnimation(.easeOut(duration: 1.5)) {
+                    opacity = 0
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        opacity = 0
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        opacity = 1.0
+                        showingAwarenessCheck = true
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        UIApplication.shared.isIdleTimerDisabled = false
-                        isPresented = false
-                    }
+                    // User taps a button to dismiss (handled by awarenessButton)
+                }
+            } else {
+                // Early dismiss — no awareness check, just fade out
+                withAnimation(.easeOut(duration: 1.0)) {
+                    opacity = 0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    UIApplication.shared.isIdleTimerDisabled = false
+                    isPresented = false
                 }
             }
+        }
+    }
+
+    /// Record awareness response and dismiss
+    private func handleAwarenessResponse(_ response: AwarenessResponse) {
+        ProgressTracker.shared.recordAwarenessResponse(response)
+        withAnimation(.easeOut(duration: 0.3)) {
+            opacity = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            UIApplication.shared.isIdleTimerDisabled = false
+            isPresented = false
+        }
+    }
+
+    /// Outlined capsule button for awareness response
+    @ViewBuilder
+    private func awarenessButton(_ label: String, response: AwarenessResponse) -> some View {
+        Button {
+            handleAwarenessResponse(response)
+        } label: {
+            Text(label)
+                .font(.body)
+                .foregroundColor(.white.opacity(0.85))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule()
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
         }
     }
 

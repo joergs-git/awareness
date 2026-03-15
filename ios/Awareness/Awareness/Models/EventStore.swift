@@ -13,7 +13,6 @@ class EventStore: ObservableObject {
         static let events = "eventStoreEvents"
         static let hourProfile = "eventStoreHourProfile"
         static let weekdayProfile = "eventStoreWeekdayProfile"
-        static let selfReports = "eventStoreSelfReports"
         static let lastEventTimestamp = "eventStoreLastEventTimestamp"
     }
 
@@ -29,15 +28,11 @@ class EventStore: ObservableObject {
     /// Index 0 = Sunday, 6 = Saturday
     private var weekdayProfile: [[Int]] = Array(repeating: [0, 0], count: 7)
 
-    /// Archived daily self-reports
-    @Published private(set) var selfReports: [DailySelfReport] = []
-
     // MARK: - Init
 
     private init() {
         loadEvents()
         loadProfiles()
-        loadSelfReports()
     }
 
     // MARK: - Recording
@@ -64,18 +59,6 @@ class EventStore: ObservableObject {
         UserDefaults.standard.set(event.timestamp, forKey: Keys.lastEventTimestamp)
 
         pruneAndSave()
-    }
-
-    /// Archive a daily self-report (called on day change)
-    func archiveSelfReport(_ report: DailySelfReport) {
-        selfReports.append(report)
-        // Keep last 90 days of reports
-        let cutoff = Calendar.current.date(byAdding: .day, value: -90, to: Date())!
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let cutoffString = formatter.string(from: cutoff)
-        selfReports = selfReports.filter { $0.date >= cutoffString }
-        saveSelfReports()
     }
 
     // MARK: - Queries
@@ -160,43 +143,6 @@ class EventStore: ObservableObject {
         return total
     }
 
-    // MARK: - WatchConnectivity Sync
-
-    /// Export archived self-reports for cross-device sync via applicationContext
-    func selfReportConnectivityContext() -> [String: Any] {
-        guard let data = try? JSONEncoder().encode(selfReports),
-              let json = String(data: data, encoding: .utf8) else { return [:] }
-        return ["archivedSelfReports": json]
-    }
-
-    /// Merge remote archived self-reports using max per field per date.
-    /// Prevents double-counting when the same blackout is counted on both devices.
-    func applyFromSelfReportContext(_ context: [String: Any]) {
-        guard let json = context["archivedSelfReports"] as? String,
-              let data = json.data(using: .utf8),
-              let remote = try? JSONDecoder().decode([DailySelfReport].self, from: data) else { return }
-
-        var lookup: [String: DailySelfReport] = [:]
-        for r in selfReports { lookup[r.date] = r }
-
-        for r in remote {
-            if let existing = lookup[r.date] {
-                lookup[r.date] = DailySelfReport(
-                    date: r.date,
-                    cardID: existing.cardID.isEmpty ? r.cardID : existing.cardID,
-                    succeeded: max(existing.succeeded, r.succeeded),
-                    noticed: max(existing.noticed, r.noticed),
-                    forgot: max(existing.forgot, r.forgot)
-                )
-            } else {
-                lookup[r.date] = r
-            }
-        }
-
-        selfReports = lookup.values.sorted { $0.date < $1.date }
-        saveSelfReports()
-    }
-
     // MARK: - Persistence
 
     private func pruneAndSave() {
@@ -241,27 +187,4 @@ class EventStore: ObservableObject {
         }
     }
 
-    private func saveSelfReports() {
-        if let data = try? JSONEncoder().encode(selfReports) {
-            UserDefaults.standard.set(data, forKey: Keys.selfReports)
-        }
-    }
-
-    private func loadSelfReports() {
-        guard let data = UserDefaults.standard.data(forKey: Keys.selfReports),
-              let decoded = try? JSONDecoder().decode([DailySelfReport].self, from: data) else { return }
-        selfReports = decoded
-    }
-}
-
-// MARK: - Daily Self-Report
-
-struct DailySelfReport: Codable, Identifiable {
-    let date: String           // "yyyy-MM-dd"
-    let cardID: String         // Which practice card was active
-    var succeeded: Int         // checkmark counter
-    var noticed: Int           // eye counter
-    var forgot: Int            // circle counter
-
-    var id: String { date }
 }

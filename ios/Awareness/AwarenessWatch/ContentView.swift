@@ -10,17 +10,15 @@ struct ContentView: View {
     @ObservedObject var scheduler = NotificationScheduler.shared
 
     @State private var showingBlackout = false
-    /// Whether to show the namaste overlay after an alarm-dismissed blackout
-    @State private var showingNamaste = false
-    /// Opacity for the namaste overlay fade in/out
-    @State private var namasteOpacity: Double = 0
+    /// Whether to show the awareness check overlay after an alarm-dismissed blackout
+    @State private var showingAwarenessCheck = false
+    /// Opacity for the awareness check overlay fade in/out
+    @State private var awarenessCheckOpacity: Double = 0
 
     /// Today's practice card (assigned from iOS or locally)
     @State private var todaysCard: PracticeCard?
     /// Current micro-task for today
     @State private var currentTask: MicroTask?
-    /// Self-report counters for today
-    @State private var selfReport: DailySelfReport?
     /// Whether to show the practice card detail sheet
     @State private var showingCardDetail = false
 
@@ -30,7 +28,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
-                // MARK: - Status + Card + Micro-Task (single row, zero gap)
+                // MARK: - Status + Card + Micro-Task + Breathe (unified block)
                 if let card = todaysCard {
                     Section {
                         VStack(spacing: 2) {
@@ -64,10 +62,8 @@ struct ContentView: View {
                             }
                             .padding(.horizontal, 4)
 
-                            // Card + counters + micro-task
-                            // Card banner with title + counters
-                            // Tap anywhere on card opens detail (counters have own gestures)
-                            VStack(spacing: 4) {
+                            // Card banner with title + ☯ breathe shortcut
+                            HStack(spacing: 0) {
                                 Text(card.localizedTitle)
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.white)
@@ -75,42 +71,17 @@ struct ContentView: View {
                                     .multilineTextAlignment(.center)
                                     .frame(maxWidth: .infinity)
 
-                                // Counter buttons + breathe trigger below title
-                                if let report = selfReport {
-                                    HStack(spacing: 0) {
-                                        HStack(spacing: 20) {
-                                            selfReportButton(
-                                                icon: "checkmark.circle",
-                                                count: report.succeeded,
-                                                keyPath: \.succeeded
-                                            )
-                                            selfReportButton(
-                                                icon: "eye.circle",
-                                                count: report.noticed,
-                                                keyPath: \.noticed
-                                            )
-                                            selfReportButton(
-                                                icon: "circle",
-                                                count: report.forgot,
-                                                keyPath: \.forgot
-                                            )
-                                        }
-
-                                        Spacer()
-
-                                        // Breathe now shortcut
-                                        Button {
-                                            showingBlackout = true
-                                        } label: {
-                                            Text("☯")
-                                                .font(.system(size: 36))
-                                                .grayscale(1.0)
-                                                .opacity(0.7)
-                                        }
-                                        .buttonStyle(.plain)
-                                        .padding(.leading, 12)
-                                    }
+                                // Breathe shortcut on the right
+                                Button {
+                                    showingBlackout = true
+                                } label: {
+                                    Text("☯")
+                                        .font(.system(size: 36))
+                                        .grayscale(1.0)
+                                        .opacity(0.7)
                                 }
+                                .buttonStyle(.plain)
+                                .padding(.leading, 8)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 6)
@@ -122,7 +93,7 @@ struct ContentView: View {
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                            // Micro-task below card (iOS-style tinted box with connector)
+                            // Micro-task below card
                             if let task = currentTask {
                                 Rectangle()
                                     .fill(card.color.opacity(0.4))
@@ -147,6 +118,16 @@ struct ContentView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture { showingCardDetail = true }
                             }
+
+                            // Breathe now button — directly below the card/task
+                            Button {
+                                showingBlackout = true
+                            } label: {
+                                Label(String(localized: "Breathe now"), systemImage: "play.circle")
+                                    .font(.footnote)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .padding(.top, 4)
                         }
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
@@ -155,36 +136,36 @@ struct ContentView: View {
                         WatchCardDetailView(card: card)
                     }
                 } else {
-                    // Fallback: status bar only when no card assigned
+                    // Fallback: status bar + breathe button when no card assigned
                     Section {
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(statusColor)
-                                .frame(width: 8, height: 8)
-                            if settings.isSnoozed {
-                                if let until = settings.snoozeUntil, until < Date.distantFuture {
-                                    Text(formatTime(until)).font(.system(size: 11)).foregroundColor(.orange)
-                                } else {
-                                    Text(String(localized: "Paused")).font(.system(size: 11)).foregroundColor(.orange)
+                        VStack(spacing: 4) {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(statusColor)
+                                    .frame(width: 8, height: 8)
+                                if settings.isSnoozed {
+                                    if let until = settings.snoozeUntil, until < Date.distantFuture {
+                                        Text(formatTime(until)).font(.system(size: 11)).foregroundColor(.orange)
+                                    } else {
+                                        Text(String(localized: "Paused")).font(.system(size: 11)).foregroundColor(.orange)
+                                    }
+                                } else if let nextDate = scheduler.nextNotificationDate {
+                                    Text(formatTime(nextDate)).font(.system(size: 11)).foregroundColor(.secondary)
                                 }
-                            } else if let nextDate = scheduler.nextNotificationDate {
-                                Text(formatTime(nextDate)).font(.system(size: 11)).foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
+                                    .font(.system(size: 11).monospacedDigit()).foregroundColor(.secondary)
                             }
-                            Spacer()
-                            Text("\(ProgressTracker.shared.todayCompleted)/\(ProgressTracker.shared.todayTriggered)")
-                                .font(.system(size: 11).monospacedDigit()).foregroundColor(.secondary)
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
-                    }
-                }
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
 
-                // MARK: - Breathe Now
-                Section {
-                    Button {
-                        showingBlackout = true
-                    } label: {
-                        Label(String(localized: "Breathe now"), systemImage: "play.circle")
+                            Button {
+                                showingBlackout = true
+                            } label: {
+                                Label(String(localized: "Breathe now"), systemImage: "play.circle")
+                                    .font(.footnote)
+                            }
+                        }
                     }
                 }
 
@@ -244,7 +225,6 @@ struct ContentView: View {
                 // to ensure the watch shows the same card as the phone
                 todaysCard = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
                 currentTask = settings.currentMicroTask()
-                selfReport = settings.currentSelfReportData()
                 // Ensure complication shows the same card as the app
                 WidgetCenter.shared.reloadAllTimelines()
             }
@@ -259,28 +239,19 @@ struct ContentView: View {
                 showingBlackout = true
             }
             .onChange(of: showingBlackout) { _, isShowing in
-                // When the blackout dismisses after an alarm fired, show namaste here
-                // because the system alarm UI covered the BlackoutView's namaste
+                // When the blackout dismisses after an alarm fired, show awareness check here
+                // because the system alarm UI covered the BlackoutView's awareness check
                 if !isShowing && AlarmSessionManager.shared.hasFired {
                     AlarmSessionManager.shared.resetHasFired()
-                    showingNamaste = true
+                    showingAwarenessCheck = true
                     withAnimation(.easeIn(duration: 0.3)) {
-                        namasteOpacity = 1.0
+                        awarenessCheckOpacity = 1.0
                     }
-                    // Hold for 1.5s then fade out
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        withAnimation(.easeOut(duration: 0.3)) {
-                            namasteOpacity = 0
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            showingNamaste = false
-                        }
-                    }
+                    // User taps a button to dismiss (handled by overlay buttons)
                 }
 
                 // Refresh state after blackout
                 if !isShowing {
-                    selfReport = settings.currentSelfReportData()
                     todaysCard = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
                     // Rotate micro-task to a new random one after each blackout
                     currentTask = settings.rotateMicroTask()
@@ -289,43 +260,54 @@ struct ContentView: View {
                 }
             }
             .overlay {
-                // Namaste overlay shown after alarm-dismissed blackout
-                if showingNamaste {
+                // Awareness check overlay shown after alarm-dismissed blackout
+                if showingAwarenessCheck {
                     ZStack {
                         Color.black.ignoresSafeArea()
-                        Text("🙏")
-                            .font(.system(size: 48))
-                            .grayscale(1.0)
-                            .opacity(0.7)
+                        VStack(spacing: 10) {
+                            Text(String(localized: "Were you there?"))
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.85))
+
+                            HStack(spacing: 8) {
+                                overlayAwarenessButton(String(localized: "Yes"), response: .yes)
+                                overlayAwarenessButton(String(localized: "Somewhat"), response: .somewhat)
+                                overlayAwarenessButton(String(localized: "No"), response: .no)
+                            }
+                        }
                     }
-                    .opacity(namasteOpacity)
+                    .opacity(awarenessCheckOpacity)
                 }
             }
         }
     }
 
-    // MARK: - Self-Report Button
+    // MARK: - Awareness Check Overlay Button
 
-    /// Single self-report counter icon. Tap to increment, double-tap to decrement.
+    /// Compact awareness button for the alarm-dismissed overlay
     @ViewBuilder
-    private func selfReportButton(icon: String, count: Int, keyPath: WritableKeyPath<DailySelfReport, Int>) -> some View {
-        VStack(spacing: 2) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-            Text("\(count)")
-                .font(.system(size: 12).monospacedDigit())
+    private func overlayAwarenessButton(_ label: String, response: AwarenessResponse) -> some View {
+        Button {
+            ProgressTracker.shared.recordAwarenessResponse(response)
+            WKInterfaceDevice.current().play(.click)
+            withAnimation(.easeOut(duration: 0.3)) {
+                awarenessCheckOpacity = 0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                showingAwarenessCheck = false
+            }
+        } label: {
+            Text(label)
+                .font(.system(size: 13))
+                .foregroundColor(.white.opacity(0.85))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
         }
-        .foregroundColor(.white.opacity(0.85))
-        .contentShape(Rectangle())
-        .onTapGesture(count: 2) {
-            decrementSelfReport(keyPath)
-            #if os(watchOS)
-            WKInterfaceDevice.current().play(.directionDown)
-            #endif
-        }
-        .onTapGesture(count: 1) {
-            incrementSelfReport(keyPath)
-        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Computed
@@ -356,25 +338,6 @@ struct ContentView: View {
         }
     }
 
-    /// Increment a self-report counter by keypath
-    private func incrementSelfReport(_ keyPath: WritableKeyPath<DailySelfReport, Int>) {
-        var report = settings.currentSelfReportData()
-        report[keyPath: keyPath] += 1
-        settings.updateSelfReport(report)
-        selfReport = report
-        #if os(watchOS)
-        WKInterfaceDevice.current().play(.click)
-        #endif
-    }
-
-    /// Decrement a self-report counter (double-tap to undo accidental increment), floor at 0
-    private func decrementSelfReport(_ keyPath: WritableKeyPath<DailySelfReport, Int>) {
-        var report = settings.currentSelfReportData()
-        guard report[keyPath: keyPath] > 0 else { return }
-        report[keyPath: keyPath] -= 1
-        settings.updateSelfReport(report)
-        selfReport = report
-    }
 }
 
 // MARK: - Watch Card Background (aquarelle style)

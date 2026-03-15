@@ -108,7 +108,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Awareness"
+            "value" : "Achtsamkeit"
           }
         }
       }
@@ -465,6 +465,16 @@
         }
       }
     },
+    "no" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nein"
+          }
+        }
+      }
+    },
     "No video selected" : {
       "localizations" : {
         "de" : {
@@ -593,6 +603,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pausiert bis %@"
+          }
+        }
+      }
+    },
+    "Somewhat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etwas"
+          }
+        }
+      }
+    },
+    "somewhat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "etwas"
           }
         }
       }
@@ -730,6 +760,16 @@
         }
       }
     },
+    "Were you there?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warst Du da?"
+          }
+        }
+      }
+    },
     "When on, ESC and Cmd+Q cannot dismiss the break early." : {
       "localizations" : {
         "de" : {
@@ -746,6 +786,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ja"
+          }
+        }
+      }
+    },
+    "yes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ja"
           }
         }
       }

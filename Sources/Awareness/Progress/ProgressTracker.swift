@@ -1,16 +1,45 @@
 import Foundation
 import Combine
 
-/// A single day's blackout statistics
+/// Post-blackout awareness response: "Were you there?"
+enum AwarenessResponse {
+    case yes, somewhat, no
+}
+
+/// A single day's blackout statistics and awareness responses
 struct DayRecord: Codable, Identifiable {
     let date: String       // "yyyy-MM-dd"
     var triggered: Int
     var completed: Int
+    var yes: Int
+    var somewhat: Int
+    var no: Int
 
     var id: String { date }
+
+    // Backward-compatible decoding: old records without awareness fields decode as 0
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        date = try container.decode(String.self, forKey: .date)
+        triggered = try container.decode(Int.self, forKey: .triggered)
+        completed = try container.decode(Int.self, forKey: .completed)
+        yes = try container.decodeIfPresent(Int.self, forKey: .yes) ?? 0
+        somewhat = try container.decodeIfPresent(Int.self, forKey: .somewhat) ?? 0
+        no = try container.decodeIfPresent(Int.self, forKey: .no) ?? 0
+    }
+
+    init(date: String, triggered: Int, completed: Int, yes: Int = 0, somewhat: Int = 0, no: Int = 0) {
+        self.date = date
+        self.triggered = triggered
+        self.completed = completed
+        self.yes = yes
+        self.somewhat = somewhat
+        self.no = no
+    }
 }
 
 /// Tracks blackout progress statistics: triggered vs completed counts per day and lifetime.
+/// Also tracks post-blackout awareness responses (yes/somewhat/no).
 /// Persists to UserDefaults with a rolling 14-day window for daily records.
 final class ProgressTracker: ObservableObject {
 
@@ -23,6 +52,9 @@ final class ProgressTracker: ObservableObject {
     private enum Keys {
         static let lifetimeTriggered = "progressLifetimeTriggered"
         static let lifetimeCompleted = "progressLifetimeCompleted"
+        static let lifetimeYes       = "progressLifetimeYes"
+        static let lifetimeSomewhat  = "progressLifetimeSomewhat"
+        static let lifetimeNo        = "progressLifetimeNo"
         static let dailyRecords      = "progressDailyRecords"
     }
 
@@ -30,6 +62,9 @@ final class ProgressTracker: ObservableObject {
 
     @Published private(set) var lifetimeTriggered: Int
     @Published private(set) var lifetimeCompleted: Int
+    @Published private(set) var lifetimeYes: Int
+    @Published private(set) var lifetimeSomewhat: Int
+    @Published private(set) var lifetimeNo: Int
     @Published private(set) var dailyRecords: [DayRecord]
 
     // MARK: - Computed Properties
@@ -42,6 +77,19 @@ final class ProgressTracker: ObservableObject {
     /// Number of blackouts completed today (full duration)
     var todayCompleted: Int {
         dailyRecords.first(where: { $0.date == todayKey() })?.completed ?? 0
+    }
+
+    /// Today's awareness responses
+    var todayYes: Int {
+        dailyRecords.first(where: { $0.date == todayKey() })?.yes ?? 0
+    }
+
+    var todaySomewhat: Int {
+        dailyRecords.first(where: { $0.date == todayKey() })?.somewhat ?? 0
+    }
+
+    var todayNo: Int {
+        dailyRecords.first(where: { $0.date == todayKey() })?.no ?? 0
     }
 
     /// Lifetime success rate (0.0 to 1.0)
@@ -82,6 +130,22 @@ final class ProgressTracker: ObservableObject {
     func recordCompleted() {
         lifetimeCompleted += 1
         updateTodayRecord { $0.completed += 1 }
+        save()
+    }
+
+    /// Record the user's post-blackout awareness response
+    func recordAwarenessResponse(_ response: AwarenessResponse) {
+        switch response {
+        case .yes:
+            lifetimeYes += 1
+            updateTodayRecord { $0.yes += 1 }
+        case .somewhat:
+            lifetimeSomewhat += 1
+            updateTodayRecord { $0.somewhat += 1 }
+        case .no:
+            lifetimeNo += 1
+            updateTodayRecord { $0.no += 1 }
+        }
         save()
     }
 
@@ -147,6 +211,9 @@ final class ProgressTracker: ObservableObject {
     private func save() {
         defaults.set(lifetimeTriggered, forKey: Keys.lifetimeTriggered)
         defaults.set(lifetimeCompleted, forKey: Keys.lifetimeCompleted)
+        defaults.set(lifetimeYes, forKey: Keys.lifetimeYes)
+        defaults.set(lifetimeSomewhat, forKey: Keys.lifetimeSomewhat)
+        defaults.set(lifetimeNo, forKey: Keys.lifetimeNo)
 
         if let data = try? JSONEncoder().encode(dailyRecords) {
             defaults.set(data, forKey: Keys.dailyRecords)
@@ -166,6 +233,9 @@ final class ProgressTracker: ObservableObject {
     private init() {
         lifetimeTriggered = defaults.integer(forKey: Keys.lifetimeTriggered)
         lifetimeCompleted = defaults.integer(forKey: Keys.lifetimeCompleted)
+        lifetimeYes = defaults.integer(forKey: Keys.lifetimeYes)
+        lifetimeSomewhat = defaults.integer(forKey: Keys.lifetimeSomewhat)
+        lifetimeNo = defaults.integer(forKey: Keys.lifetimeNo)
         dailyRecords = []
 
         // Load daily records after init to avoid property access before initialization

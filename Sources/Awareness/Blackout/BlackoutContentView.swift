@@ -129,17 +129,17 @@ struct BlackoutContentView: View {
     }
 }
 
-// MARK: - Post-Blackout View (Namaste → Card + Micro-Task)
+// MARK: - Post-Blackout View (Awareness Check → Card + Micro-Task)
 
-/// Shown after the breathing session ends: first a namaste 🙏 (1.5s fade),
-/// then the day's practice card title and a random micro-task.
-/// Stays on screen until the user clicks anywhere to dismiss.
+/// Shown after the breathing session ends: first the awareness check "Warst Du da?"
+/// with three answer buttons, then the day's practice card title and a random micro-task.
+/// Card stays on screen until the user clicks anywhere to dismiss.
 struct PostBlackoutView: View {
 
     @ObservedObject var state: BlackoutPhaseState
 
-    /// Opacity for namaste fade-in/fade-out
-    @State private var namasteOpacity: Double = 0
+    /// Opacity for awareness check fade-in
+    @State private var checkOpacity: Double = 0
     /// Opacity for card content fade-in
     @State private var cardOpacity: Double = 0
 
@@ -151,17 +151,24 @@ struct PostBlackoutView: View {
             case .breathing:
                 EmptyView()
 
-            case .namaste:
-                Text("🙏")
-                    .font(.system(size: 72))
-                    .grayscale(1.0)
-                    .opacity(0.7)
-                    .opacity(namasteOpacity)
-                    .onAppear {
-                        withAnimation(.easeIn(duration: 0.4)) {
-                            namasteOpacity = 1.0
-                        }
+            case .awarenessCheck:
+                VStack(spacing: 24) {
+                    Text(String(localized: "Were you there?"))
+                        .font(.system(size: 28, weight: .light))
+                        .foregroundColor(.white.opacity(0.85))
+
+                    HStack(spacing: 20) {
+                        awarenessButton(String(localized: "Yes"), response: .yes)
+                        awarenessButton(String(localized: "Somewhat"), response: .somewhat)
+                        awarenessButton(String(localized: "No"), response: .no)
                     }
+                }
+                .opacity(checkOpacity)
+                .onAppear {
+                    withAnimation(.easeIn(duration: 0.4)) {
+                        checkOpacity = 1.0
+                    }
+                }
 
             case .practiceCard:
                 VStack(spacing: 20) {
@@ -205,6 +212,26 @@ struct PostBlackoutView: View {
                 state.onDismissRequest?()
             }
         }
+    }
+
+    /// Outlined capsule button for awareness response
+    @ViewBuilder
+    private func awarenessButton(_ label: String, response: AwarenessResponse) -> some View {
+        Button {
+            ProgressTracker.shared.recordAwarenessResponse(response)
+            state.onAwarenessAnswered?()
+        } label: {
+            Text(label)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(.white.opacity(0.85))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule()
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
     }
 }
 

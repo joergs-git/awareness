@@ -1,4 +1,6 @@
-What's New in v3.13:
+What's New in v3.14:
 
-- Renamed to "Atempause" — same mindful pauses, fresh identity
-- All platforms updated: macOS, iOS, watchOS, Windows
+- "Were you there?" — quick awareness check after each breathing moment (Yes / Somewhat / No)
+- Awareness response tracking with 14-day chart
+- Cleaner home screen: collapsible lower sections, consolidated card + breathe layout
+- Removed manual self-report counters — awareness is now captured directly after each pause

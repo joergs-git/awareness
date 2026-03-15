@@ -4,9 +4,9 @@ import SwiftUI
 /// Shared between BlackoutWindowController (which drives transitions) and
 /// PostBlackoutView (which renders the content).
 enum BlackoutPhase {
-    case breathing     // Normal blackout content (breathing animation)
-    case namaste       // 🙏 shown for 1.5s after breathing completes
-    case practiceCard  // Card title + micro-task, stays until user clicks
+    case breathing       // Normal blackout content (breathing animation)
+    case awarenessCheck  // "Warst Du da?" — user picks Ja/Etwas/Nein
+    case practiceCard    // Card title + micro-task, stays until user clicks
 }
 
 /// Observable state object passed to PostBlackoutView.
@@ -16,6 +16,8 @@ class BlackoutPhaseState: ObservableObject {
     var practiceCard: PracticeCard?
     var microTask: MicroTask?
 
+    /// Called when the user answers the awareness check — transitions to practice card
+    var onAwarenessAnswered: (() -> Void)?
     /// Called when the user clicks/presses a key to dismiss the card phase
     var onDismissRequest: (() -> Void)?
 }

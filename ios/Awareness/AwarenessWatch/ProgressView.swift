@@ -9,10 +9,10 @@ struct ProgressView: View {
     /// Warm earthy color for donut arcs (Chinese sunrise palette)
     private let donutColor = Color(red: 0.72, green: 0.50, blue: 0.38)
 
-    /// Self-report category colors
-    private let succeededColor = Color(red: 0.45, green: 0.65, blue: 0.45)
-    private let noticedColor = Color(red: 0.55, green: 0.55, blue: 0.70)
-    private let forgotColor = Color(red: 0.70, green: 0.50, blue: 0.45)
+    /// Awareness response colors
+    private let yesColor = Color(red: 0.45, green: 0.65, blue: 0.45)
+    private let somewhatColor = Color(red: 0.55, green: 0.55, blue: 0.70)
+    private let noColor = Color(red: 0.70, green: 0.50, blue: 0.45)
 
     var body: some View {
         List {
@@ -96,43 +96,48 @@ struct ProgressView: View {
                 }
             }
 
-            // MARK: - Today's Practice Tracking
+            // MARK: - Today's Awareness
             Section {
-                let report = SettingsManager.shared.currentSelfReportData()
                 HStack(spacing: 12) {
                     Spacer()
-                    // Succeeded
                     VStack(spacing: 2) {
-                        Image(systemName: "checkmark.circle")
-                            .font(.system(size: 14))
-                            .foregroundColor(succeededColor)
-                        Text("\(report.succeeded)")
+                        Circle()
+                            .fill(yesColor)
+                            .frame(width: 10, height: 10)
+                        Text("\(tracker.todayYes)")
                             .font(.system(size: 11).monospacedDigit())
                             .foregroundColor(.secondary)
-                    }
-                    // Noticed
-                    VStack(spacing: 2) {
-                        Image(systemName: "eye.circle")
-                            .font(.system(size: 14))
-                            .foregroundColor(noticedColor)
-                        Text("\(report.noticed)")
-                            .font(.system(size: 11).monospacedDigit())
+                        Text(String(localized: "yes"))
+                            .font(.system(size: 8))
                             .foregroundColor(.secondary)
                     }
-                    // Forgot
                     VStack(spacing: 2) {
-                        Image(systemName: "circle")
-                            .font(.system(size: 14))
-                            .foregroundColor(forgotColor)
-                        Text("\(report.forgot)")
+                        Circle()
+                            .fill(somewhatColor)
+                            .frame(width: 10, height: 10)
+                        Text("\(tracker.todaySomewhat)")
                             .font(.system(size: 11).monospacedDigit())
+                            .foregroundColor(.secondary)
+                        Text(String(localized: "somewhat"))
+                            .font(.system(size: 8))
+                            .foregroundColor(.secondary)
+                    }
+                    VStack(spacing: 2) {
+                        Circle()
+                            .fill(noColor)
+                            .frame(width: 10, height: 10)
+                        Text("\(tracker.todayNo)")
+                            .font(.system(size: 11).monospacedDigit())
+                            .foregroundColor(.secondary)
+                        Text(String(localized: "no"))
+                            .font(.system(size: 8))
                             .foregroundColor(.secondary)
                     }
                     Spacer()
                 }
                 .listRowBackground(Color.clear)
             } header: {
-                Text(String(localized: "Situations"))
+                Text(String(localized: "Awareness"))
             }
         }
         .scrollContentBackground(.hidden)

@@ -72,10 +72,22 @@ struct ProgressView: View {
             // MARK: - 14-Day Bar Chart
             barChart
                 .padding(.horizontal, 16)
+
+            Divider()
+                .padding(.horizontal, 16)
+
+            // MARK: - 14-Day Awareness Chart
+            awarenessChart
+                .padding(.horizontal, 16)
                 .padding(.bottom, 12)
         }
         .frame(width: 300)
     }
+
+    /// Awareness response colors
+    private let yesColor = Color(red: 0.45, green: 0.65, blue: 0.45)
+    private let somewhatColor = Color(red: 0.55, green: 0.55, blue: 0.70)
+    private let noColor = Color(red: 0.70, green: 0.50, blue: 0.45)
 
     // MARK: - Brush-Style Donut
 
@@ -188,6 +200,61 @@ struct ProgressView: View {
             .padding(.top, 4)
         }
         .background(WarmBackground())
+    }
+
+    // MARK: - 14-Day Awareness Chart
+
+    @ViewBuilder
+    private var awarenessChart: some View {
+        let days = tracker.last14Days
+        let maxVal = max(days.map { max($0.yes, max($0.somewhat, $0.no)) }.max() ?? 1, 1)
+
+        VStack(spacing: 4) {
+            HStack(alignment: .bottom, spacing: 3) {
+                ForEach(days) { day in
+                    VStack(spacing: 2) {
+                        HStack(alignment: .bottom, spacing: 1) {
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(yesColor)
+                                .frame(width: 5, height: awarenessBarHeight(day.yes, max: maxVal))
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(somewhatColor)
+                                .frame(width: 5, height: awarenessBarHeight(day.somewhat, max: maxVal))
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(noColor)
+                                .frame(width: 5, height: awarenessBarHeight(day.no, max: maxVal))
+                        }
+                        .frame(height: 50, alignment: .bottom)
+
+                        Text(weekdayLabel(for: day.date))
+                            .font(.system(size: 8))
+                            .foregroundColor(isToday(day.date) ? .primary : .secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+
+            HStack(spacing: 10) {
+                HStack(spacing: 3) {
+                    RoundedRectangle(cornerRadius: 1).fill(yesColor).frame(width: 6, height: 6)
+                    Text(String(localized: "yes")).font(.system(size: 8)).foregroundColor(.secondary)
+                }
+                HStack(spacing: 3) {
+                    RoundedRectangle(cornerRadius: 1).fill(somewhatColor).frame(width: 6, height: 6)
+                    Text(String(localized: "somewhat")).font(.system(size: 8)).foregroundColor(.secondary)
+                }
+                HStack(spacing: 3) {
+                    RoundedRectangle(cornerRadius: 1).fill(noColor).frame(width: 6, height: 6)
+                    Text(String(localized: "no")).font(.system(size: 8)).foregroundColor(.secondary)
+                }
+            }
+            .padding(.top, 2)
+        }
+    }
+
+    private func awarenessBarHeight(_ value: Int, max: Int) -> CGFloat {
+        guard value > 0 else { return 0 }
+        return Swift.max(CGFloat(value) / CGFloat(max) * 50, 2)
     }
 
     // MARK: - Helpers

@@ -50,7 +50,6 @@ final class SettingsManager: ObservableObject {
         static let microTaskDate         = "microTaskDate"
         static let lastMicroTaskIDs      = "lastMicroTaskIDs"
         static let microTaskShownToday   = "microTaskShownToday"
-        static let currentSelfReport     = "currentSelfReport"
         static let practiceCardNotificationHour = "practiceCardNotificationHour"
         static let hasLaunchedBefore = "hasLaunchedBefore"
 
@@ -314,9 +313,6 @@ final class SettingsManager: ObservableObject {
         defaults.set(newCard.id, forKey: Keys.todaysPracticeCardID)
         defaults.set(today, forKey: Keys.practiceCardDate)
 
-        // Archive yesterday's self-report on day change
-        archiveYesterdaysSelfReport()
-
         // Reset micro-task state for new day
         defaults.removeObject(forKey: Keys.currentMicroTaskID)
         defaults.set(false, forKey: Keys.microTaskShownToday)
@@ -373,38 +369,6 @@ final class SettingsManager: ObservableObject {
     /// Whether a micro-task has been shown today (first blackout already happened)
     var microTaskShownToday: Bool {
         defaults.bool(forKey: Keys.microTaskShownToday)
-    }
-
-    // MARK: - Self-Report
-
-    /// Get or create today's self-report
-    func currentSelfReportData() -> DailySelfReport {
-        if let data = defaults.data(forKey: Keys.currentSelfReport),
-           let report = try? JSONDecoder().decode(DailySelfReport.self, from: data),
-           report.date == todayString() {
-            return report
-        }
-        let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) ?? ""
-        return DailySelfReport(date: todayString(), cardID: cardID, succeeded: 0, noticed: 0, forgot: 0)
-    }
-
-    /// Update today's self-report
-    func updateSelfReport(_ report: DailySelfReport) {
-        if let data = try? JSONEncoder().encode(report) {
-            defaults.set(data, forKey: Keys.currentSelfReport)
-        }
-        objectWillChange.send()
-    }
-
-    /// Archive yesterday's self-report to EventStore when the day changes
-    private func archiveYesterdaysSelfReport() {
-        if let data = defaults.data(forKey: Keys.currentSelfReport),
-           let report = try? JSONDecoder().decode(DailySelfReport.self, from: data),
-           report.date != todayString() {
-            EventStore.shared.archiveSelfReport(report)
-        }
-        // Reset for new day
-        defaults.removeObject(forKey: Keys.currentSelfReport)
     }
 
     private func todayString() -> String {
@@ -584,11 +548,6 @@ final class SettingsManager: ObservableObject {
             context["microTaskDate"] = taskDate
         }
 
-        // Sync today's self-report counters so both devices merge taps
-        if let reportData = defaults.data(forKey: Keys.currentSelfReport) {
-            context["currentSelfReport"] = reportData
-        }
-
         return context
     }
 
@@ -636,21 +595,6 @@ final class SettingsManager: ObservableObject {
             defaults.set(taskID, forKey: Keys.currentMicroTaskID)
             defaults.set(taskDate, forKey: Keys.microTaskDate)
         }
-
-        // Merge today's self-report counters (max per field prevents double-counting)
-        if let reportData = context["currentSelfReport"] as? Data,
-           let remote = try? JSONDecoder().decode(DailySelfReport.self, from: reportData),
-           remote.date == todayString() {
-            let local = currentSelfReportData()
-            let merged = DailySelfReport(
-                date: remote.date,
-                cardID: local.cardID.isEmpty ? remote.cardID : local.cardID,
-                succeeded: max(local.succeeded, remote.succeeded),
-                noticed: max(local.noticed, remote.noticed),
-                forgot: max(local.forgot, remote.forgot)
-            )
-            updateSelfReport(merged)
-        }
     }
 
     // MARK: - Init
@@ -671,7 +615,7 @@ final class SettingsManager: ObservableObject {
             for key in [Keys.todaysPracticeCardID, Keys.practiceCardDate,
                         Keys.yesterdaysCardID, Keys.currentMicroTaskID,
                         Keys.microTaskDate, Keys.lastMicroTaskIDs,
-                        Keys.microTaskShownToday, Keys.currentSelfReport,
+                        Keys.microTaskShownToday,
                         Keys.guruAdaptiveState] {
                 if let value = standard.object(forKey: key) {
                     shared.set(value, forKey: key)

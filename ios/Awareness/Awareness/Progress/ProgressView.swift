@@ -89,12 +89,12 @@ struct ProgressView: View {
                 Text(String(localized: "Breathings"))
             }
 
-            // MARK: - 14-Day Self-Report Chart
+            // MARK: - 14-Day Awareness Chart
             Section {
-                selfReportChart
+                awarenessChart
                     .padding(.vertical, 8)
             } header: {
-                Text(String(localized: "Situations"))
+                Text(String(localized: "Awareness"))
             }
         }
         .scrollContentBackground(.hidden)
@@ -208,67 +208,37 @@ struct ProgressView: View {
         }
     }
 
-    // MARK: - Self-Report Bar Chart
+    // MARK: - Awareness Response Chart
 
-    /// Colors for the three self-report categories
-    private let succeededColor = Color(red: 0.45, green: 0.65, blue: 0.45)
-    private let noticedColor = Color(red: 0.55, green: 0.55, blue: 0.70)
-    private let forgotColor = Color(red: 0.70, green: 0.50, blue: 0.45)
-
-    /// Self-report data for the last 14 days (archived + today)
-    private var last14DaysSelfReports: [(date: String, succeeded: Int, noticed: Int, forgot: Int)] {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-
-        // Build lookup from archived reports
-        var lookup: [String: DailySelfReport] = [:]
-        for report in EventStore.shared.selfReports {
-            lookup[report.date] = report
-        }
-
-        // Add today's live data
-        let todayReport = SettingsManager.shared.currentSelfReportData()
-        lookup[todayReport.date] = todayReport
-
-        var result: [(date: String, succeeded: Int, noticed: Int, forgot: Int)] = []
-        for offset in (0..<14).reversed() {
-            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { continue }
-            let key = formatter.string(from: date)
-            if let report = lookup[key] {
-                result.append((key, report.succeeded, report.noticed, report.forgot))
-            } else {
-                result.append((key, 0, 0, 0))
-            }
-        }
-        return result
-    }
+    /// Colors for the three awareness response categories
+    private let yesColor = Color(red: 0.45, green: 0.65, blue: 0.45)
+    private let somewhatColor = Color(red: 0.55, green: 0.55, blue: 0.70)
+    private let noColor = Color(red: 0.70, green: 0.50, blue: 0.45)
 
     @ViewBuilder
-    private var selfReportChart: some View {
-        let days = last14DaysSelfReports
-        let maxVal = max(days.map { max($0.succeeded, max($0.noticed, $0.forgot)) }.max() ?? 1, 1)
+    private var awarenessChart: some View {
+        let days = tracker.last14Days
+        let maxVal = max(days.map { max($0.yes, max($0.somewhat, $0.no)) }.max() ?? 1, 1)
 
         VStack(spacing: 4) {
             HStack(alignment: .bottom, spacing: 3) {
-                ForEach(Array(days.enumerated()), id: \.offset) { _, day in
+                ForEach(days) { day in
                     VStack(spacing: 2) {
                         HStack(alignment: .bottom, spacing: 1) {
-                            // Succeeded bar
+                            // Yes bar
                             RoundedRectangle(cornerRadius: 1)
-                                .fill(succeededColor)
-                                .frame(width: 5, height: selfReportBarHeight(day.succeeded, max: maxVal))
+                                .fill(yesColor)
+                                .frame(width: 5, height: awarenessBarHeight(day.yes, max: maxVal))
 
-                            // Noticed bar
+                            // Somewhat bar
                             RoundedRectangle(cornerRadius: 1)
-                                .fill(noticedColor)
-                                .frame(width: 5, height: selfReportBarHeight(day.noticed, max: maxVal))
+                                .fill(somewhatColor)
+                                .frame(width: 5, height: awarenessBarHeight(day.somewhat, max: maxVal))
 
-                            // Forgot bar
+                            // No bar
                             RoundedRectangle(cornerRadius: 1)
-                                .fill(forgotColor)
-                                .frame(width: 5, height: selfReportBarHeight(day.forgot, max: maxVal))
+                                .fill(noColor)
+                                .frame(width: 5, height: awarenessBarHeight(day.no, max: maxVal))
                         }
                         .frame(height: 60, alignment: .bottom)
 
@@ -285,25 +255,25 @@ struct ProgressView: View {
             HStack(spacing: 10) {
                 HStack(spacing: 3) {
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(succeededColor)
+                        .fill(yesColor)
                         .frame(width: 8, height: 8)
-                    Text(String(localized: "succeeded"))
+                    Text(String(localized: "yes"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
                 HStack(spacing: 3) {
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(noticedColor)
+                        .fill(somewhatColor)
                         .frame(width: 8, height: 8)
-                    Text(String(localized: "noticed"))
+                    Text(String(localized: "somewhat"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
                 HStack(spacing: 3) {
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(forgotColor)
+                        .fill(noColor)
                         .frame(width: 8, height: 8)
-                    Text(String(localized: "forgot"))
+                    Text(String(localized: "no"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -312,8 +282,8 @@ struct ProgressView: View {
         }
     }
 
-    /// Bar height for self-report chart (minimum 2pt for non-zero)
-    private func selfReportBarHeight(_ value: Int, max: Int) -> CGFloat {
+    /// Bar height for awareness chart (minimum 2pt for non-zero)
+    private func awarenessBarHeight(_ value: Int, max: Int) -> CGFloat {
         guard value > 0 else { return 0 }
         return Swift.max(CGFloat(value) / CGFloat(max) * 60, 2)
     }

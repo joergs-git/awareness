@@ -51,12 +51,6 @@ class WatchConnectivityManager: NSObject, ObservableObject {
             context[key] = value
         }
 
-        // Include archived self-reports for cross-device sync
-        let selfReportContext = EventStore.shared.selfReportConnectivityContext()
-        for (key, value) in selfReportContext {
-            context[key] = value
-        }
-
         try? WCSession.default.updateApplicationContext(context)
     }
 
@@ -116,7 +110,6 @@ extension WatchConnectivityManager: WCSessionDelegate {
             NotificationScheduler.shared.isApplyingRemoteContext = true
             SettingsManager.shared.applyFromConnectivityContext(applicationContext)
             ProgressTracker.shared.applyFromConnectivityContext(applicationContext)
-            EventStore.shared.applyFromSelfReportContext(applicationContext)
 
             // Apply coordinated fire dates from iOS (master scheduler) if available
             if let timestamps = applicationContext["scheduledFireDates"] as? [Double] {

@@ -274,14 +274,14 @@ class BlackoutWindowController {
         DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: work)
     }
 
-    // MARK: - Post-Blackout Phase (Namaste → Card + Micro-Task)
+    // MARK: - Post-Blackout Phase (Awareness Check → Card + Micro-Task)
 
-    /// After breathing completes, transition to namaste → card+task flow.
-    /// Play end gong, swap window content to PostBlackoutView, then animate through phases.
+    /// After breathing completes, transition to awareness check → card+task flow.
+    /// Play end gong, swap window content to PostBlackoutView, show awareness check.
     private func beginPostBlackoutPhase() {
         isInPostBlackoutPhase = true
 
-        // Play end gong at the breathing → namaste transition
+        // Play end gong at the breathing → awareness check transition
         GongPlayer.shared.playEndIfEnabled()
 
         // Get today's card and a fresh random micro-task
@@ -292,6 +292,10 @@ class BlackoutWindowController {
         let state = BlackoutPhaseState()
         state.practiceCard = card
         state.microTask = task
+        state.onAwarenessAnswered = { [weak self] in
+            guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return }
+            state.phase = .practiceCard
+        }
         state.onDismissRequest = { [weak self] in
             self?.dismiss(silent: true)  // silent: end gong already played
         }
@@ -311,23 +315,17 @@ class BlackoutWindowController {
         installPostBlackoutMouseMonitor()
         // Keep global event tap active to prevent background typing
 
-        // Phase 1: Show namaste 🙏
-        state.phase = .namaste
-
-        // Phase 2: After 1.5s, transition to practice card
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return }
-            state.phase = .practiceCard
-        }
+        // Show the awareness check — user interaction drives the transition to card
+        state.phase = .awarenessCheck
     }
 
-    /// Keyboard monitor during post-blackout: any key dismisses (no handcuffs check)
+    /// Keyboard monitor during post-blackout: any key dismisses card phase (no handcuffs check)
     private func installPostBlackoutKeyboardMonitor() {
         keyEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return event }
 
-            // During namaste, ignore keys (brief 1.5s phase)
-            if self.phaseState?.phase == .namaste {
+            // During awareness check, let SwiftUI buttons handle interaction
+            if self.phaseState?.phase == .awarenessCheck {
                 return nil
             }
 
@@ -337,14 +335,14 @@ class BlackoutWindowController {
         }
     }
 
-    /// Mouse monitor during post-blackout: click anywhere dismisses (no handcuffs check)
+    /// Mouse monitor during post-blackout: click anywhere dismisses card phase (no handcuffs check)
     private func installPostBlackoutMouseMonitor() {
         mouseEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
             guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return event }
 
-            // During namaste, ignore clicks
-            if self.phaseState?.phase == .namaste {
-                return nil
+            // During awareness check, let SwiftUI buttons handle the click
+            if self.phaseState?.phase == .awarenessCheck {
+                return event
             }
 
             // During card phase, click anywhere dismisses
@@ -501,7 +499,7 @@ class BlackoutWindowController {
         globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
             guard let self = self, self.isActive else { return }
 
-            // During post-blackout card phase: click anywhere dismisses (no handcuffs check)
+            // During post-blackout: only dismiss during card phase (not awareness check)
             if self.isInPostBlackoutPhase {
                 if self.phaseState?.phase == .practiceCard {
                     NSApp.activate(ignoringOtherApps: true)

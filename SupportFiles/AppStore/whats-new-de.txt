@@ -1,4 +1,6 @@
-Neu in Version 3.13:
+Neu in Version 3.14:
 
-- Umbenannt in „Atempause" — dieselben achtsamen Pausen, frische Identität
-- Alle Plattformen aktualisiert: macOS, iOS, watchOS, Windows
+- „Warst Du da?" — schnelle Achtsamkeitsfrage nach jeder Atempause (Ja / Etwas / Nein)
+- Achtsamkeits-Tracking mit 14-Tage-Diagramm
+- Aufgeräumter Startbildschirm: einklappbare untere Bereiche, kompakteres Layout
+- Manuelle Zähler entfernt — Achtsamkeit wird jetzt direkt nach jeder Pause erfasst

@@ -48,12 +48,6 @@ class WatchConnectivityManager: NSObject, ObservableObject {
             context[key] = value
         }
 
-        // Include archived self-reports for cross-device sync
-        let selfReportContext = EventStore.shared.selfReportConnectivityContext()
-        for (key, value) in selfReportContext {
-            context[key] = value
-        }
-
         // Include the latest fire dates for coordinated scheduling
         let timestamps = NotificationScheduler.shared.scheduledFireDates.map { $0.timeIntervalSince1970 }
         if !timestamps.isEmpty {
@@ -74,12 +68,6 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         // Include progress stats
         let progressContext = ProgressTracker.shared.connectivityContext()
         for (key, value) in progressContext {
-            context[key] = value
-        }
-
-        // Include archived self-reports for cross-device sync
-        let selfReportContext = EventStore.shared.selfReportConnectivityContext()
-        for (key, value) in selfReportContext {
             context[key] = value
         }
 
@@ -144,7 +132,6 @@ extension WatchConnectivityManager: WCSessionDelegate {
             self.lastRemoteContextDate = Date()
             SettingsManager.shared.applyFromConnectivityContext(applicationContext)
             ProgressTracker.shared.applyFromConnectivityContext(applicationContext)
-            EventStore.shared.applyFromSelfReportContext(applicationContext)
             self.isApplyingRemoteContext = false
 
             // Reschedule with (potentially updated) settings and push to watch
