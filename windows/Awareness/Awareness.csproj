@@ -4,7 +4,6 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Awareness</RootNamespace>
     <AssemblyName>Awareness</AssemblyName>
     <ApplicationIcon>Resources\tray-icon.ico</ApplicationIcon>
@@ -22,6 +21,11 @@
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+  </ItemGroup>
+
+  <!-- Reference WinForms for Screen enumeration only (not UseWindowsForms to avoid implicit using conflicts) -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
   </ItemGroup>
 
   <ItemGroup>
