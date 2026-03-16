@@ -11,6 +11,8 @@
     <Version>3.15.0</Version>
     <Description>Atempause — a mindfulness timer for your computer</Description>
     <Nullable>enable</Nullable>
+    <StartupObject>Awareness.Program</StartupObject>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Ensure NuGet packages are available during WPF XAML markup compilation -->
     <IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
