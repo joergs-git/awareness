@@ -1,3 +1,5 @@
-// WinForms is referenced via FrameworkReference (not UseWindowsForms) to avoid
-// implicit using conflicts with WPF types. Only System.Windows.Forms.Screen is
-// used directly (for multi-monitor enumeration in BlackoutWindowController).
+// The WPF XAML compiler generates a temporary project (_wpftmp.csproj) that
+// does not inherit implicit usings. These global usings ensure all types are
+// available during both normal and XAML temp-project compilation.
+global using System.IO;
+global using NAudio.CoreAudioApi;
