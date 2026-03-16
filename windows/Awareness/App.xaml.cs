@@ -39,35 +39,44 @@ public partial class App : Application
                     MessageBoxButton.OK, MessageBoxImage.Error);
         };
 
-        // Single instance enforcement
-        _singleInstanceMutex = new Mutex(true, "Awareness-SingleInstance", out bool isNew);
-        if (!isNew)
+        try
         {
-            MessageBox.Show(Strings.AlreadyRunning,
-                Strings.Awareness, MessageBoxButton.OK, MessageBoxImage.Information);
-            Shutdown();
-            return;
+            // Single instance enforcement
+            _singleInstanceMutex = new Mutex(true, "Awareness-SingleInstance", out bool isNew);
+            if (!isNew)
+            {
+                MessageBox.Show(Strings.AlreadyRunning,
+                    Strings.Awareness, MessageBoxButton.OK, MessageBoxImage.Information);
+                Shutdown();
+                return;
+            }
+
+            // Create core components
+            _blackoutController = new BlackoutWindowController();
+            _scheduler = new BlackoutScheduler(_blackoutController);
+            _trayIconController = new TrayIconController(_blackoutController, _scheduler);
+
+            // Auto-start the scheduler
+            _scheduler.Start();
+
+            // Pause blackouts when the system is idle (sleep, lock screen, screensaver)
+            ConfigureSystemStateDetector();
+
+            // Register for display power change notifications (requires UI thread)
+            SystemStateDetector.Shared.RegisterDisplayNotifications();
+
+            // Check for updates on GitHub (background, non-blocking)
+            _ = UpdateChecker.Shared.CheckAsync();
+
+            // Show a welcome message on first launch
+            ShowWelcomeIfFirstLaunch();
         }
-
-        // Create core components
-        _blackoutController = new BlackoutWindowController();
-        _scheduler = new BlackoutScheduler(_blackoutController);
-        _trayIconController = new TrayIconController(_blackoutController, _scheduler);
-
-        // Auto-start the scheduler
-        _scheduler.Start();
-
-        // Pause blackouts when the system is idle (sleep, lock screen, screensaver)
-        ConfigureSystemStateDetector();
-
-        // Register for display power change notifications (requires UI thread)
-        SystemStateDetector.Shared.RegisterDisplayNotifications();
-
-        // Check for updates on GitHub (background, non-blocking)
-        _ = UpdateChecker.Shared.CheckAsync();
-
-        // Show a welcome message on first launch
-        ShowWelcomeIfFirstLaunch();
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Startup failed:\n\n{ex}", "Atempause Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown();
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)
