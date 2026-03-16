@@ -49,6 +49,13 @@ public partial class ProgressWindow : Window
         {
             TopGradientStop.Color = Color.FromRgb(36, 31, 28);    // (0.14, 0.12, 0.11)
             BottomGradientStop.Color = Color.FromRgb(26, 23, 20); // (0.10, 0.09, 0.08)
+
+            // Light text for dark background
+            var lightBrush = new SolidColorBrush(Color.FromRgb(230, 225, 220));
+            Foreground = lightBrush;
+            var tbStyle = new Style(typeof(System.Windows.Controls.TextBlock));
+            tbStyle.Setters.Add(new Setter(System.Windows.Controls.TextBlock.ForegroundProperty, lightBrush));
+            Resources[typeof(System.Windows.Controls.TextBlock)] = tbStyle;
         }
     }
 

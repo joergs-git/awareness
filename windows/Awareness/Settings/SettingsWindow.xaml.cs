@@ -46,6 +46,53 @@ public partial class SettingsWindow : Window
         {
             TopGradientStop.Color = Color.FromRgb(36, 31, 28);    // (0.14, 0.12, 0.11)
             BottomGradientStop.Color = Color.FromRgb(26, 23, 20); // (0.10, 0.09, 0.08)
+
+            // Set all text to light colors for dark background contrast
+            var lightBrush = new SolidColorBrush(Color.FromRgb(230, 225, 220)); // warm white
+            var dimBrush = new SolidColorBrush(Color.FromRgb(160, 155, 148));   // warm gray
+            Resources[SystemColors.WindowTextBrushKey] = lightBrush;
+            Resources[SystemColors.ControlTextBrushKey] = lightBrush;
+            Foreground = lightBrush;
+
+            // Style GroupBox headers and borders
+            var gbStyle = new Style(typeof(GroupBox));
+            gbStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
+            gbStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(60, 52, 46))));
+            Resources[typeof(GroupBox)] = gbStyle;
+
+            // Style text controls
+            var tbStyle = new Style(typeof(System.Windows.Controls.TextBlock));
+            tbStyle.Setters.Add(new Setter(System.Windows.Controls.TextBlock.ForegroundProperty, lightBrush));
+            Resources[typeof(System.Windows.Controls.TextBlock)] = tbStyle;
+
+            // Style checkboxes and radio buttons
+            var cbStyle = new Style(typeof(System.Windows.Controls.CheckBox));
+            cbStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
+            Resources[typeof(System.Windows.Controls.CheckBox)] = cbStyle;
+
+            var rbStyle = new Style(typeof(System.Windows.Controls.RadioButton));
+            rbStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
+            Resources[typeof(System.Windows.Controls.RadioButton)] = rbStyle;
+
+            // Style ComboBox
+            var comboStyle = new Style(typeof(System.Windows.Controls.ComboBox));
+            comboStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
+            comboStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(45, 40, 36))));
+            Resources[typeof(System.Windows.Controls.ComboBox)] = comboStyle;
+
+            // Style TextBox
+            var textBoxStyle = new Style(typeof(System.Windows.Controls.TextBox));
+            textBoxStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
+            textBoxStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(45, 40, 36))));
+            textBoxStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(60, 52, 46))));
+            Resources[typeof(System.Windows.Controls.TextBox)] = textBoxStyle;
+
+            // Style Buttons
+            var btnStyle = new Style(typeof(System.Windows.Controls.Button));
+            btnStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
+            btnStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(50, 44, 40))));
+            btnStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(70, 62, 56))));
+            Resources[typeof(System.Windows.Controls.Button)] = btnStyle;
         }
     }
 
