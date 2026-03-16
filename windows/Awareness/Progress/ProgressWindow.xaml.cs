@@ -158,7 +158,7 @@ public partial class ProgressWindow : Window
         var geometry = new PathGeometry();
         geometry.Figures.Add(figure);
 
-        var path = new Path
+        var path = new System.Windows.Shapes.Path
         {
             Data = geometry,
             Stroke = stroke,
