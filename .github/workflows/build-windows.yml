@@ -1,0 +1,37 @@
+name: Build Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish self-contained exe
+        run: dotnet publish windows/Awareness/Awareness.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o publish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Awareness-Windows-x64
+          path: publish/Awareness.exe
+
+      - name: Create zip for release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: Compress-Archive -Path publish/Awareness.exe -DestinationPath Awareness-Windows-x64.zip
+
+      - name: Upload to release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} Awareness-Windows-x64.zip --clobber
