@@ -1,3 +1,7 @@
-// With GenerateTemporaryTargetAssembly=false, the WPF XAML compiler no longer
-// creates a temp project that fails to resolve NuGet packages and implicit usings.
-// No additional global usings needed.
+// The WPF XAML compiler generates a temporary project (_wpftmp.csproj) that
+// does not inherit implicit usings properly. These global using aliases ensure
+// System.IO types are available and disambiguated from System.Windows.Shapes.Path.
+global using Directory = System.IO.Directory;
+global using File = System.IO.File;
+global using Path = System.IO.Path;
+global using MemoryStream = System.IO.MemoryStream;
