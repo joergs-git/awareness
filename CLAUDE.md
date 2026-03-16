@@ -41,6 +41,8 @@ dotnet publish Awareness -c Release -r win-x64   # self-contained exe
 
 Requires Windows 10+, .NET 8 SDK.
 
+**CI/CD:** GitHub Actions workflow `.github/workflows/build-windows.yml` builds the Windows exe on `windows-latest`. Triggered by tag push (`v*`) or manual dispatch. Artifacts are uploaded to GitHub Releases automatically on tag push.
+
 ### iOS/iPadOS
 
 ```bash
@@ -286,7 +288,14 @@ ios/Awareness/AwarenessWidget/
 | Launch at Login | Registry `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run` |
 | Single instance | Named `Mutex("Awareness-SingleInstance")` |
 | Audio | NAudio `WaveOutEvent`, self-disposing playback |
-| Localization | `.resx` files (EN/DE); `Strings.Designer.cs` auto-generated |
+| Localization | `.resx` files (EN/DE); `Strings.Designer.cs` auto-generated via `PublicResXFileCodeGenerator` |
+| Blackout phases | Confirmation → breathing → awareness check → practice card (orchestrated by `BlackoutWindowController`) |
+| Post-blackout | `PostBlackoutControl` (awareness check + practice card); `ConfirmationControl` (startclick) |
+| Practice cards | `PracticeCard.cs` + `MicroTask.cs` models with EN/DE, daily rotation via `SettingsManager` |
+| Progress | Twin brush-stroke donuts + awareness response chart; `ProgressTracker` with yes/somewhat/no fields |
+| CI/CD | GitHub Actions `.github/workflows/build-windows.yml` on `windows-latest` |
+| MessageBox dialogs | Require hidden topmost owner window in tray-only app (otherwise dismissed immediately) |
+| Dark mode | `AppsUseLightTheme` registry detection; styles set programmatically for text/controls contrast |
 
 ### iOS/iPadOS
 
@@ -341,7 +350,11 @@ ios/Awareness/AwarenessWidget/
 ### Windows
 - Audio: `.wav` converted from `.aiff` via `afconvert -d LEI16 -f WAVE`
 - Icon: `.ico` generated from PNGs via `ffmpeg`
-- `UseWindowsForms` in `.csproj` for `Screen` multi-monitor enumeration
+- `UseWindowsForms` in `.csproj` for `Screen` multi-monitor enumeration; WinForms implicit usings removed via `<Using Remove="System.Drawing" />` and `<Using Remove="System.Windows.Forms" />` to avoid type ambiguity with WPF
+- `GlobalUsings.cs` aliases `System.IO.Path`/`File`/`Directory`/`MemoryStream` to avoid collision with `System.Windows.Shapes.Path` in WPF temp project
+- `IncludePackageReferencesDuringMarkupCompilation=true` ensures NuGet packages resolve in WPF XAML compilation
+- `IncludeNativeLibrariesForSelfExtract=true` bundles WPF native DLLs (wpfgfx_cor3.dll etc.) into the single-file exe
+- `Program.cs` custom entry point wraps `App.Run()` in try-catch to surface XAML parsing errors that would otherwise crash silently
 - Display power notifications need hidden message-only window (`HWND_MESSAGE`)
 - Settings migration: `blackoutDuration` → `minBlackoutDuration`/`maxBlackoutDuration`
 

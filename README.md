@@ -41,7 +41,8 @@ Have also a look into the wiki section of this project: (https://github.com/joer
 - **Active touch blackouts** (iOS/watchOS) — notifications require a tap; no auto-triggering when the app is in the foreground
 - **Coordinated scheduling** — iPhone generates notification times and syncs them to Apple Watch, so both devices stay in harmony
 - **Cross-device progress sync** — your practice stats merge between iPhone and Apple Watch via WatchConnectivity
-- **Awareness check** — after each completed breathing moment, a quick question: "Were you there?" with three responses (Yes / Somewhat / No), tracked over time across iOS, watchOS, and macOS
+- **Awareness check** — after each completed breathing moment, a quick question: "Were you there?" with three responses (Yes / Somewhat / No), tracked over time across all platforms
+- **Practice cards & micro-tasks** — 7 daily mindfulness themes with 58 contemplative micro-tasks, shown after each awareness check (macOS/Windows/iOS/watchOS)
 - **Watch face complications** — see your status and next blackout time directly on your watch face (circular, rectangular, and inline styles)
 - **Progress tracking** — donut charts for discipline, 14-day bar charts for triggered/completed breaks and awareness responses
 - **Localization** — English and German (EN/DE)
@@ -80,6 +81,14 @@ The app will be at `build/Awareness.app`.
 
 ### Windows
 
+#### Download (easiest)
+
+1. Download the latest `Awareness-Windows-x64.zip` from the [Releases](https://github.com/joergs-git/awareness/releases) page
+2. Unzip and run `Awareness.exe`
+3. The app appears as a ☯ icon in the system tray (bottom-right)
+
+**Note:** Windows SmartScreen may show an "unknown publisher" warning until code signing is set up. Click "More info" → "Run anyway" to proceed.
+
 #### Build from source
 
 Requirements: Windows 10+, [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
@@ -97,6 +106,8 @@ dotnet publish Awareness -c Release -r win-x64
 ```
 
 The output will be in `Awareness/bin/Release/net8.0-windows/win-x64/publish/`.
+
+Windows builds are also produced automatically via GitHub Actions on each release tag.
 
 ### iOS/iPadOS
 
@@ -151,11 +162,12 @@ During a blackout:
 |---|---|---|
 | Active hours | Time window for blackouts | 06:00 – 20:00 |
 | Interval range | Min/max minutes between blackouts | 15 – 30 min |
-| Duration range | Min/max seconds per blackout | 20 – 20 seconds |
+| Duration range | Min/max seconds per blackout | 20 – 40 seconds |
 | Visual mode | Plain black / custom text / image / video | Text ("Breathe.") |
 | Start gong | Sound at blackout start | On |
 | End gong | Sound at blackout end | On |
 | Handcuffs mode | Prevent early dismissal | Off |
+| Startclick confirmation | "Ready to breathe?" prompt before each break (macOS/Windows) | On |
 | Apple Health (iOS/watchOS) | Log blackouts as Mindful Minutes | Off |
 | Vibration (iOS) | Haptic feedback at start and end of blackout | Off |
 | End flash (iOS) | White screen blink at end of blackout | Off |
