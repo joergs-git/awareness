@@ -21,6 +21,8 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <!-- WPF native DLLs (wpfgfx_cor3.dll etc.) must be extracted from the single-file bundle -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <!-- Remove WinForms implicit usings that clash with WPF types -->
