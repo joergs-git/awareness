@@ -147,11 +147,15 @@ public partial class App : Application
         // Small delay so the tray icon is visible before the dialog appears
         Dispatcher.BeginInvoke(() =>
         {
-            MessageBox.Show(
+            var owner = new Window { Width = 0, Height = 0, WindowStyle = WindowStyle.None,
+                ShowInTaskbar = false, ShowActivated = true, Topmost = true };
+            owner.Show();
+            MessageBox.Show(owner,
                 Strings.WelcomeText,
                 Strings.WelcomeTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
+            owner.Close();
         }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
     }
 }

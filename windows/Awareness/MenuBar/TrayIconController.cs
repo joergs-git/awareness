@@ -346,11 +346,14 @@ public class TrayIconController : IDisposable
 
     private void ShowHelp()
     {
-        MessageBox.Show(
+        // Tray-only apps need a temporary owner window to keep MessageBox in front
+        var owner = CreateMessageBoxOwner();
+        MessageBox.Show(owner,
             Strings.HowToUseText,
             Strings.HowToUseTitle,
             MessageBoxButton.OK,
             MessageBoxImage.Information);
+        owner.Close();
     }
 
     private static void OpenReleasePage()
@@ -364,11 +367,13 @@ public class TrayIconController : IDisposable
     private void ShowAbout()
     {
         var version = typeof(App).Assembly.GetName().Version?.ToString(2) ?? "?";
-        var result = MessageBox.Show(
+        var owner = CreateMessageBoxOwner();
+        var result = MessageBox.Show(owner,
             string.Format(Strings.AboutText, version),
             Strings.AboutTitle,
             MessageBoxButton.OKCancel,
             MessageBoxImage.Information);
+        owner.Close();
 
         if (result == MessageBoxResult.Cancel)
         {
@@ -377,6 +382,27 @@ public class TrayIconController : IDisposable
                 UseShellExecute = true
             });
         }
+    }
+
+    // MARK: - Helpers
+
+    /// <summary>
+    /// Create a hidden topmost window to act as MessageBox owner.
+    /// Without this, MessageBox in a tray-only app has no owner and can
+    /// immediately lose focus and appear to close.
+    /// </summary>
+    private static Window CreateMessageBoxOwner()
+    {
+        var owner = new Window
+        {
+            Width = 0, Height = 0,
+            WindowStyle = WindowStyle.None,
+            ShowInTaskbar = false,
+            ShowActivated = true,
+            Topmost = true
+        };
+        owner.Show();
+        return owner;
     }
 
     // MARK: - Cleanup
