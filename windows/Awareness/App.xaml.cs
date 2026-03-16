@@ -108,7 +108,7 @@ public partial class App : Application
     private void ShowWelcomeIfFirstLaunch()
     {
         // Use a simple file marker in the settings directory to track first launch
-        string markerPath = Path.Combine(
+        string markerPath = System.IO.Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "Awareness", ".launched");
 
@@ -116,7 +116,7 @@ public partial class App : Application
 
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(markerPath)!);
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(markerPath)!);
             File.WriteAllText(markerPath, "");
         }
         catch { /* ignore — worst case the welcome shows again */ }

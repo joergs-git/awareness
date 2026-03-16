@@ -266,7 +266,7 @@ public partial class SettingsWindow : Window
         }
         else
         {
-            ImagePathLabel.Text = Path.GetFileName(_settings.CustomImagePath);
+            ImagePathLabel.Text = System.IO.Path.GetFileName(_settings.CustomImagePath);
             ClearImageButton.Visibility = Visibility.Visible;
         }
 
@@ -278,7 +278,7 @@ public partial class SettingsWindow : Window
         }
         else
         {
-            VideoPathLabel.Text = Path.GetFileName(_settings.CustomVideoPath);
+            VideoPathLabel.Text = System.IO.Path.GetFileName(_settings.CustomVideoPath);
             ClearVideoButton.Visibility = Visibility.Visible;
         }
     }

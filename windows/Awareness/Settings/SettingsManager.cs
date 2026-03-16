@@ -18,10 +18,10 @@ public class SettingsManager : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private static readonly string SettingsDirectory =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Awareness");
+        System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Awareness");
 
     private static readonly string SettingsFilePath =
-        Path.Combine(SettingsDirectory, "settings.json");
+        System.IO.Path.Combine(SettingsDirectory, "settings.json");
 
     // Debounce timer to avoid writing on every keystroke
     private System.Timers.Timer? _saveDebounce;

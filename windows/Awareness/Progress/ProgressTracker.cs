@@ -55,10 +55,10 @@ public class ProgressTracker : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private static readonly string ProgressDirectory =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Awareness");
+        System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Awareness");
 
     private static readonly string ProgressFilePath =
-        Path.Combine(ProgressDirectory, "progress.json");
+        System.IO.Path.Combine(ProgressDirectory, "progress.json");
 
     // MARK: - Backing Fields
 

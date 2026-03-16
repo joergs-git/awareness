@@ -105,7 +105,7 @@ public class MediaUsageDetector
                     for (int i = 0; i < sessions.Count; i++)
                     {
                         var session = sessions[i];
-                        if (session.State == AudioSessionState.AudioSessionStateActive)
+                        if (session.State == NAudio.CoreAudioApi.Interfaces.AudioSessionState.AudioSessionStateActive)
                             return true;
                     }
                 }
