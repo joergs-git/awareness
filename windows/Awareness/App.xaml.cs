@@ -25,6 +25,20 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Catch unhandled exceptions so tray-only app doesn't die silently
+        DispatcherUnhandledException += (_, args) =>
+        {
+            MessageBox.Show($"Unhandled error:\n\n{args.Exception}", "Atempause Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            args.Handled = true;
+        };
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            if (args.ExceptionObject is Exception ex)
+                MessageBox.Show($"Fatal error:\n\n{ex}", "Atempause Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+        };
+
         // Single instance enforcement
         _singleInstanceMutex = new Mutex(true, "Awareness-SingleInstance", out bool isNew);
         if (!isNew)
