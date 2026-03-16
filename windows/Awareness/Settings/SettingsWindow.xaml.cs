@@ -150,6 +150,7 @@ public partial class SettingsWindow : Window
 
         // Behavior
         HandcuffsCheck.IsChecked = _settings.HandcuffsMode;
+        StartclickCheck.IsChecked = _settings.StartclickConfirmation;
     }
 
     // MARK: - Active Hours
@@ -302,5 +303,11 @@ public partial class SettingsWindow : Window
     {
         if (_isLoading) return;
         _settings.HandcuffsMode = HandcuffsCheck.IsChecked == true;
+    }
+
+    private void OnStartclickChanged(object sender, RoutedEventArgs e)
+    {
+        if (_isLoading) return;
+        _settings.StartclickConfirmation = StartclickCheck.IsChecked == true;
     }
 }

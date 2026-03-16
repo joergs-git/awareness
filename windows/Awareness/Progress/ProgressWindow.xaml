@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:res="clr-namespace:Awareness.Resources"
         Title="{x:Static res:Strings.ProgressTitle}"
-        Width="340" Height="460"
+        Width="360" Height="620"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
 
@@ -17,12 +17,22 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="16">
 
-            <!-- Donut Chart -->
-            <Canvas x:Name="DonutCanvas" Width="140" Height="140"
-                    HorizontalAlignment="Center" Margin="0,8,0,12" />
+            <!-- Twin Donut Charts (Today + Overall) -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,4">
+                <StackPanel HorizontalAlignment="Center">
+                    <Canvas x:Name="TodayDonutCanvas" Width="120" Height="120" />
+                    <TextBlock Text="{x:Static res:Strings.Today}" FontSize="11" Foreground="Gray"
+                               HorizontalAlignment="Center" Margin="0,4,0,0" />
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Center" Margin="20,0,0,0">
+                    <Canvas x:Name="LifetimeDonutCanvas" Width="120" Height="120" />
+                    <TextBlock Text="{x:Static res:Strings.Lifetime}" FontSize="11" Foreground="Gray"
+                               HorizontalAlignment="Center" Margin="0,4,0,0" />
+                </StackPanel>
+            </StackPanel>
 
             <!-- Stats -->
-            <StackPanel Margin="0,0,0,8">
+            <StackPanel Margin="0,8,0,8">
                 <Grid Margin="0,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -47,7 +57,7 @@
 
             <Separator Margin="0,4" />
 
-            <!-- 14-Day Bar Chart -->
+            <!-- 14-Day Bar Chart (Triggered/Completed) -->
             <Canvas x:Name="BarChartCanvas" Height="120"
                     HorizontalAlignment="Stretch" Margin="0,12,0,4" />
 
@@ -56,8 +66,27 @@
                 <Rectangle Width="8" Height="8" Fill="#66808080" RadiusX="1" RadiusY="1" />
                 <TextBlock Text="{x:Static res:Strings.Triggered}" Foreground="Gray"
                            FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
-                <Rectangle Width="8" Height="8" Fill="#4CAF50" RadiusX="1" RadiusY="1" />
+                <Rectangle Width="8" Height="8" Fill="#B88061" RadiusX="1" RadiusY="1" />
                 <TextBlock Text="{x:Static res:Strings.Completed}" Foreground="Gray"
+                           FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <Separator Margin="0,4" />
+
+            <!-- Awareness Response Chart -->
+            <Canvas x:Name="AwarenessChartCanvas" Height="100"
+                    HorizontalAlignment="Stretch" Margin="0,12,0,4" />
+
+            <!-- Awareness Legend -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                <Rectangle Width="8" Height="8" Fill="#739A73" RadiusX="1" RadiusY="1" />
+                <TextBlock Text="{x:Static res:Strings.Yes}" Foreground="Gray"
+                           FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
+                <Rectangle Width="8" Height="8" Fill="#8C8EB3" RadiusX="1" RadiusY="1" />
+                <TextBlock Text="{x:Static res:Strings.Somewhat}" Foreground="Gray"
+                           FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
+                <Rectangle Width="8" Height="8" Fill="#B37F72" RadiusX="1" RadiusY="1" />
+                <TextBlock Text="{x:Static res:Strings.No}" Foreground="Gray"
                            FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
 

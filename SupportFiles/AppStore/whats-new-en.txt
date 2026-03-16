@@ -1,6 +1,5 @@
-What's New in v3.14:
+What's New in v3.15:
 
-- "Were you there?" — quick awareness check after each breathing moment (Yes / Somewhat / No)
-- Awareness response tracking with 14-day chart
-- Cleaner home screen: collapsible lower sections, consolidated card + breathe layout
-- Removed manual self-report counters — awareness is now captured directly after each pause
+- Yin-yang logo now slowly rotates — a subtle, meditative touch
+- Fixed: breathing pulse animation reliably starts on logo and button
+- watchOS: awareness check now appears exactly once (alarm race condition fixed)

@@ -31,6 +31,7 @@ public partial class BlackoutContentControl : UserControl
     public void Configure(BlackoutVisualType visualType, string customText, string imagePath, string videoPath)
     {
         // Hide everything first
+        BreathingCircle.Visibility = Visibility.Collapsed;
         TextContent.Visibility = Visibility.Collapsed;
         ImageContent.Visibility = Visibility.Collapsed;
         VideoContent.Visibility = Visibility.Collapsed;
@@ -39,7 +40,9 @@ public partial class BlackoutContentControl : UserControl
         switch (visualType)
         {
             case BlackoutVisualType.PlainBlack:
-                // Just the black background — nothing to show
+                // Subtle breathing circle as minimal visual anchor
+                BreathingCircle.Visibility = Visibility.Visible;
+                StartBreathingAnimation(BreathingCircle, CircleScale, 0.015, 0.08);
                 break;
 
             case BlackoutVisualType.Text:

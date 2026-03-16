@@ -27,6 +27,23 @@ public partial class BlackoutOverlayWindow : Window
     }
 
     /// <summary>
+    /// Replace the window content with a new UIElement (used for post-blackout phase swap).
+    /// </summary>
+    public void SetContent(UIElement content)
+    {
+        ContentControl.StopMedia();
+        Content = content;
+    }
+
+    /// <summary>
+    /// Restore the original BlackoutContentControl as the window content.
+    /// </summary>
+    public void RestoreContent()
+    {
+        Content = ContentControl;
+    }
+
+    /// <summary>
     /// Position this window to cover the specified screen bounds.
     /// Coordinates are in device-independent pixels (WPF logical units).
     /// </summary>

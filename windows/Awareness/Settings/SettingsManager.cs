@@ -31,7 +31,7 @@ public class SettingsManager : INotifyPropertyChanged
     private int _activeStartHour = 6;
     private int _activeEndHour = 20;
     private double _minBlackoutDuration = 20.0;
-    private double _maxBlackoutDuration = 20.0;
+    private double _maxBlackoutDuration = 40.0;
     private double _minInterval = 15.0;   // minutes
     private double _maxInterval = 30.0;   // minutes
     private bool _startGongEnabled = true;
@@ -42,6 +42,15 @@ public class SettingsManager : INotifyPropertyChanged
     private string _customImagePath = "";
     private string _customVideoPath = "";
     private DateTime? _snoozeUntil = null;
+    private bool _startclickConfirmation = true;
+
+    // Practice Card & Micro-Task state (not persisted in SettingsData — uses separate keys in JSON)
+    private string _todaysPracticeCardID = "";
+    private string _practiceCardDate = "";
+    private string _yesterdaysCardID = "";
+    private string _currentMicroTaskID = "";
+    private string _microTaskDate = "";
+    private List<string> _lastMicroTaskIDs = new();
 
     // MARK: - Properties
 
@@ -179,6 +188,13 @@ public class SettingsManager : INotifyPropertyChanged
         set { if (SetField(ref _snoozeUntil, value)) ScheduleSave(); }
     }
 
+    /// <summary>Whether to show "Ready to breathe?" before each break (default: on)</summary>
+    public bool StartclickConfirmation
+    {
+        get => _startclickConfirmation;
+        set { if (SetField(ref _startclickConfirmation, value)) ScheduleSave(); }
+    }
+
     // MARK: - Computed Helpers
 
     /// <summary>The active time window as a TimeWindow model</summary>
@@ -224,6 +240,96 @@ public class SettingsManager : INotifyPropertyChanged
         return _minBlackoutDuration + Random.Shared.NextDouble() * (_maxBlackoutDuration - _minBlackoutDuration);
     }
 
+    // MARK: - Practice Card & Micro-Task
+
+    /// <summary>
+    /// Get today's practice card, assigning a new one if the day changed.
+    /// Avoids repeating yesterday's card.
+    /// </summary>
+    public PracticeCard? TodaysPracticeCard()
+    {
+        string today = TodayString();
+
+        // Same day — return stored card
+        if (_practiceCardDate == today && !string.IsNullOrEmpty(_todaysPracticeCardID))
+            return PracticeCard.CardWithId(_todaysPracticeCardID);
+
+        // New day — assign a random card (avoid yesterday's)
+        _yesterdaysCardID = _todaysPracticeCardID;
+
+        var candidates = PracticeCard.AllCards
+            .Where(c => c.Id != _yesterdaysCardID)
+            .ToArray();
+
+        if (candidates.Length == 0) return null;
+
+        var newCard = candidates[Random.Shared.Next(candidates.Length)];
+        _todaysPracticeCardID = newCard.Id;
+        _practiceCardDate = today;
+
+        // Reset micro-task state for new day
+        _currentMicroTaskID = "";
+        _microTaskDate = "";
+
+        ScheduleSave();
+        return newCard;
+    }
+
+    /// <summary>
+    /// Get the current micro-task, auto-assigning one from today's card pool if none exists.
+    /// </summary>
+    public MicroTask? CurrentMicroTask()
+    {
+        string today = TodayString();
+
+        // If we already have a task for today, return it
+        if (_microTaskDate == today && !string.IsNullOrEmpty(_currentMicroTaskID))
+            return MicroTask.AllTasks.FirstOrDefault(t => t.Id == _currentMicroTaskID);
+
+        // Auto-assign from today's card pool
+        return AssignMicroTask();
+    }
+
+    /// <summary>
+    /// Pick a new random micro-task from today's card pool.
+    /// Tracks last 3 IDs to avoid immediate repeats.
+    /// </summary>
+    public MicroTask? RotateMicroTask()
+    {
+        return AssignMicroTask();
+    }
+
+    private MicroTask? AssignMicroTask()
+    {
+        var card = TodaysPracticeCard();
+        if (card == null) return null;
+
+        var allCardTasks = MicroTask.TasksForCard(card.Id);
+        var pool = allCardTasks.Where(t => !_lastMicroTaskIDs.Contains(t.Id)).ToArray();
+
+        // Fallback to full pool if all tasks recently used
+        MicroTask? task = pool.Length > 0
+            ? pool[Random.Shared.Next(pool.Length)]
+            : allCardTasks.Length > 0
+                ? allCardTasks[Random.Shared.Next(allCardTasks.Length)]
+                : null;
+
+        if (task == null) return null;
+
+        string today = TodayString();
+        _currentMicroTaskID = task.Id;
+        _microTaskDate = today;
+
+        // Track last 3 micro-task IDs to avoid immediate repeats
+        _lastMicroTaskIDs.Add(task.Id);
+        if (_lastMicroTaskIDs.Count > 3) _lastMicroTaskIDs.RemoveAt(0);
+
+        ScheduleSave();
+        return task;
+    }
+
+    private static string TodayString() => DateTime.Today.ToString("yyyy-MM-dd");
+
     // MARK: - Init
 
     private SettingsManager()
@@ -259,7 +365,7 @@ public class SettingsManager : INotifyPropertyChanged
             else
             {
                 _minBlackoutDuration = data.MinBlackoutDuration > 0 ? data.MinBlackoutDuration : 20.0;
-                _maxBlackoutDuration = data.MaxBlackoutDuration > 0 ? data.MaxBlackoutDuration : 20.0;
+                _maxBlackoutDuration = data.MaxBlackoutDuration > 0 ? data.MaxBlackoutDuration : 40.0;
             }
 
             _minInterval = data.MinInterval;
@@ -272,6 +378,15 @@ public class SettingsManager : INotifyPropertyChanged
             _customImagePath = data.CustomImagePath ?? "";
             _customVideoPath = data.CustomVideoPath ?? "";
             _snoozeUntil = data.SnoozeUntil;
+            _startclickConfirmation = data.StartclickConfirmation;
+
+            // Practice Card & Micro-Task state
+            _todaysPracticeCardID = data.TodaysPracticeCardID ?? "";
+            _practiceCardDate = data.PracticeCardDate ?? "";
+            _yesterdaysCardID = data.YesterdaysCardID ?? "";
+            _currentMicroTaskID = data.CurrentMicroTaskID ?? "";
+            _microTaskDate = data.MicroTaskDate ?? "";
+            _lastMicroTaskIDs = data.LastMicroTaskIDs ?? new List<string>();
         }
         catch (Exception ex)
         {
@@ -303,7 +418,14 @@ public class SettingsManager : INotifyPropertyChanged
                 CustomText = _customText,
                 CustomImagePath = _customImagePath,
                 CustomVideoPath = _customVideoPath,
-                SnoozeUntil = _snoozeUntil
+                SnoozeUntil = _snoozeUntil,
+                StartclickConfirmation = _startclickConfirmation,
+                TodaysPracticeCardID = _todaysPracticeCardID,
+                PracticeCardDate = _practiceCardDate,
+                YesterdaysCardID = _yesterdaysCardID,
+                CurrentMicroTaskID = _currentMicroTaskID,
+                MicroTaskDate = _microTaskDate,
+                LastMicroTaskIDs = _lastMicroTaskIDs
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
@@ -387,5 +509,27 @@ public class SettingsManager : INotifyPropertyChanged
 
         [JsonPropertyName("snoozeUntil")]
         public DateTime? SnoozeUntil { get; set; }
+
+        [JsonPropertyName("startclickConfirmation")]
+        public bool StartclickConfirmation { get; set; } = true;
+
+        // Practice Card & Micro-Task state
+        [JsonPropertyName("todaysPracticeCardID")]
+        public string? TodaysPracticeCardID { get; set; } = "";
+
+        [JsonPropertyName("practiceCardDate")]
+        public string? PracticeCardDate { get; set; } = "";
+
+        [JsonPropertyName("yesterdaysCardID")]
+        public string? YesterdaysCardID { get; set; } = "";
+
+        [JsonPropertyName("currentMicroTaskID")]
+        public string? CurrentMicroTaskID { get; set; } = "";
+
+        [JsonPropertyName("microTaskDate")]
+        public string? MicroTaskDate { get; set; } = "";
+
+        [JsonPropertyName("lastMicroTaskIDs")]
+        public List<string>? LastMicroTaskIDs { get; set; } = new();
     }
 }

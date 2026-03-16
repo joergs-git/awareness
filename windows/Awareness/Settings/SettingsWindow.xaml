@@ -71,7 +71,7 @@
                     </StackPanel>
                     <settings:RangeSlider x:Name="DurationSlider"
                                           Minimum="3" Maximum="120" Step="1"
-                                          LowValue="20" HighValue="20" />
+                                          LowValue="20" HighValue="40" />
                 </StackPanel>
             </GroupBox>
 
@@ -145,6 +145,10 @@
                     <CheckBox x:Name="HandcuffsCheck" Content="{x:Static res:Strings.HandcuffsMode}"
                               Margin="0,4,0,4" Checked="OnHandcuffsChanged" Unchecked="OnHandcuffsChanged" />
                     <TextBlock Text="{x:Static res:Strings.HandcuffsDescription}"
+                               FontSize="11" Foreground="Gray" Margin="20,0,0,8" />
+                    <CheckBox x:Name="StartclickCheck" Content="{x:Static res:Strings.StartclickConfirmation}"
+                              Margin="0,4,0,4" Checked="OnStartclickChanged" Unchecked="OnStartclickChanged" />
+                    <TextBlock Text="{x:Static res:Strings.StartclickDescription}"
                                FontSize="11" Foreground="Gray" Margin="20,0,0,0" />
                 </StackPanel>
             </GroupBox>

@@ -632,5 +632,153 @@ namespace Awareness.Resources {
                 return ResourceManager.GetString("AboutTitle", resourceCulture);
             }
         }
+
+        // -- Startclick Confirmation --
+
+        /// <summary>
+        ///   Looks up a localized string similar to Ready to breathe?.
+        /// </summary>
+        public static string ReadyToBreathe {
+            get {
+                return ResourceManager.GetString("ReadyToBreathe", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+
+        // -- Post-Blackout Awareness Check --
+
+        /// <summary>
+        ///   Looks up a localized string similar to Were you there?.
+        /// </summary>
+        public static string WereYouThere {
+            get {
+                return ResourceManager.GetString("WereYouThere", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Somewhat.
+        /// </summary>
+        public static string Somewhat {
+            get {
+                return ResourceManager.GetString("Somewhat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to click anywhere to continue.
+        /// </summary>
+        public static string ClickAnywhere {
+            get {
+                return ResourceManager.GetString("ClickAnywhere", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Overall.
+        /// </summary>
+        public static string Overall {
+            get {
+                return ResourceManager.GetString("Overall", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Awareness.
+        /// </summary>
+        public static string AwarenessLabel {
+            get {
+                return ResourceManager.GetString("AwarenessLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The goal of this app is to not need it anymore. Until then: Breathe..
+        /// </summary>
+        public static string PhilosophyText {
+            get {
+                return ResourceManager.GetString("PhilosophyText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Breathe..
+        /// </summary>
+        public static string BreathingPhrase1 {
+            get {
+                return ResourceManager.GetString("BreathingPhrase1", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to You are here..
+        /// </summary>
+        public static string BreathingPhrase2 {
+            get {
+                return ResourceManager.GetString("BreathingPhrase2", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing to do..
+        /// </summary>
+        public static string BreathingPhrase3 {
+            get {
+                return ResourceManager.GetString("BreathingPhrase3", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Just breathe..
+        /// </summary>
+        public static string BreathingPhrase4 {
+            get {
+                return ResourceManager.GetString("BreathingPhrase4", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to This moment..
+        /// </summary>
+        public static string BreathingPhrase5 {
+            get {
+                return ResourceManager.GetString("BreathingPhrase5", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Startclick confirmation.
+        /// </summary>
+        public static string StartclickConfirmation {
+            get {
+                return ResourceManager.GetString("StartclickConfirmation", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shows "Ready to breathe?" before each break..
+        /// </summary>
+        public static string StartclickDescription {
+            get {
+                return ResourceManager.GetString("StartclickDescription", resourceCulture);
+            }
+        }
     }
 }

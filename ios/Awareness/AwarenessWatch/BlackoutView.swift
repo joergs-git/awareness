@@ -216,6 +216,9 @@ struct BlackoutView: View {
         let alarmFired = AlarmSessionManager.shared.hasFired
         DispatchQueue.main.asyncAfter(deadline: .now() + fadeDelay) {
             if completedFullDuration && !alarmFired {
+                // Timer won the race — cancel alarm so it can't fire during async chain
+                // and set hasFired to true later, which would cause a double awareness check
+                AlarmSessionManager.shared.cancelAlarm()
                 // Show awareness check
                 withAnimation(.easeOut(duration: 0.8)) {
                     opacity = 0
@@ -251,6 +254,9 @@ struct BlackoutView: View {
     private func handleWatchAwarenessResponse(_ response: AwarenessResponse) {
         ProgressTracker.shared.recordAwarenessResponse(response)
         WKInterfaceDevice.current().play(.click)
+        // Reset hasFired before dismissing — prevents ContentView.onChange from
+        // showing a second awareness check if the alarm fired during our async chain
+        AlarmSessionManager.shared.resetHasFired()
         withAnimation(.easeOut(duration: 0.3)) {
             opacity = 0
         }

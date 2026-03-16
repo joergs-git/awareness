@@ -85,10 +85,21 @@ public partial class App : Application
                 _blackoutController.Dismiss(silent: true);
         };
 
-        // When the user comes back, reschedule with a fresh random delay
+        // When the user comes back, clear any active snooze and restart
+        // (matches macOS behavior: snooze auto-clears on wake)
         detector.OnSystemDidBecomeActive = () =>
         {
-            _scheduler?.RescheduleIfRunning();
+            var settings = SettingsManager.Shared;
+            if (settings.IsSnoozed || !(_scheduler?.IsCurrentlyRunning ?? false))
+            {
+                settings.SnoozeUntil = null;
+                _scheduler?.Start();
+                _trayIconController?.RefreshMenu();
+            }
+            else
+            {
+                _scheduler?.RescheduleIfRunning();
+            }
         };
     }
 

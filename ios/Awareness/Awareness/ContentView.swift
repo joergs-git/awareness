@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var showingCardDetail = false
     @State private var showingTaskDetail = false
     @State private var breathePulsing = false
+    @State private var logoRotation: Double = 0
     @State private var showingOnboarding = false
     @State private var showingMore = false
 
@@ -38,10 +39,12 @@ struct ContentView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
                         .scaleEffect(breathePulsing ? 1.06 : 0.94)
-                        .animation(
-                            .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
-                            value: breathePulsing
-                        )
+                        .rotationEffect(.degrees(logoRotation))
+                        .onAppear {
+                            withAnimation(.linear(duration: 60).repeatForever(autoreverses: false)) {
+                                logoRotation = -360
+                            }
+                        }
                         .onTapGesture { showingBlackout = true }
                         .frame(maxWidth: .infinity)
                         .padding(.top, 8)
@@ -108,15 +111,18 @@ struct ContentView: View {
                                         RoundedRectangle(cornerRadius: 10)
                                             .stroke(Color.primary.opacity(breathePulsing ? 0.4 : 0.15), lineWidth: 1)
                                     )
-                                    .animation(
-                                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
-                                        value: breathePulsing
-                                    )
                             }
                             .buttonStyle(.plain)
                             .padding(.top, 6)
                             .padding(.horizontal, 16)
-                            .onAppear { breathePulsing = true }
+                            .onAppear {
+                                // Use withAnimation instead of .animation(value:) modifier —
+                                // value-driven animations in List sections can miss state changes
+                                // originating from other sections (logo is in a separate Section)
+                                withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+                                    breathePulsing = true
+                                }
+                            }
                         }
                         .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 24, trailing: 0))
                         .listRowBackground(Color.clear)

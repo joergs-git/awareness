@@ -4,6 +4,28 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v3.15
+
+### Windows Feature Parity
+- **Post-breathing awareness check** — "Were you there?" with Yes/Somewhat/No, matching macOS/iOS/watchOS
+- **Practice cards & micro-tasks** — 7 cards with 58 micro-tasks, daily rotation, shown after each breathing moment
+- **Startclick confirmation** — optional "Ready to breathe?" prompt before each break (setting + UI)
+- **Twin donut charts** — Today + Lifetime with brush-stroke style in warm earthy palette
+- **Awareness response chart** — 14-day yes/somewhat/no bar chart in progress window
+- **Breathing circle** — subtle pulsing dot in plain-black mode
+- **Snooze auto-clear on wake** — snooze now resets when returning from sleep/lock (matches macOS)
+- **Monitor hot-plug** — overlay windows adapt when displays are connected/disconnected during a break
+- **Default blackout range** fixed — fresh installs now default to 20–40s (was 20–20s)
+
+### iOS/iPadOS
+- **Logo rotation** — yin-yang logo slowly rotates counterclockwise (1 revolution per minute)
+- **Logo pulse fix** — breathing pulse animation now reliably starts on both logo and "Breathe now" button
+
+### watchOS
+- **Double awareness check fix** — alarm race condition resolved; "Were you there?" now appears exactly once
+
+---
+
 ## v3.14
 
 ### Awareness Check — "Were you there?"

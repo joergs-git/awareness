@@ -142,4 +142,18 @@ Suche das ☯ Symbol unten rechts auf deinem Bildschirm. Klicke es mit der recht
 Dein Bildschirm wird in sanften Abständen zufällig schwarz — ein Moment zum Innehalten, Atmen und Zurückkehren in die Gegenwart.
 
 Du kannst alles über das Symbol im Infobereich → Einstellungen anpassen.</value></data>
+
+  <!-- Startclick Confirmation -->
+  <data name="StartclickConfirmation" xml:space="preserve"><value>Startklick-Bestätigung</value></data>
+  <data name="StartclickDescription" xml:space="preserve"><value>Zeigt „Bereit zu atmen?" vor jeder Atempause.</value></data>
+  <data name="ReadyToBreathe" xml:space="preserve"><value>Bereit zu atmen?</value></data>
+  <data name="Yes" xml:space="preserve"><value>Ja</value></data>
+  <data name="No" xml:space="preserve"><value>Nein</value></data>
+
+  <!-- Post-Blackout Awareness Check -->
+  <data name="WereYouThere" xml:space="preserve"><value>Warst du da?</value></data>
+  <data name="Somewhat" xml:space="preserve"><value>Ansatzweise</value></data>
+  <data name="ClickAnywhere" xml:space="preserve"><value>Klicke irgendwo um fortzufahren</value></data>
+  <data name="Overall" xml:space="preserve"><value>Gesamt</value></data>
+  <data name="AwarenessLabel" xml:space="preserve"><value>Achtsamkeit</value></data>
 </root>

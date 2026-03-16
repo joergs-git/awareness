@@ -129,6 +129,14 @@ public class TrayIconController : IDisposable
 
     // MARK: - Menu Construction
 
+    /// <summary>
+    /// Rebuild the tray context menu to reflect current state (e.g. after snooze clear on wake).
+    /// </summary>
+    public void RefreshMenu()
+    {
+        _trayIcon.ContextMenu = BuildMenu();
+    }
+
     private ContextMenu BuildMenu()
     {
         var menu = new ContextMenu();
