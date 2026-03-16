@@ -1,5 +1,3 @@
-// The WPF XAML compiler generates a temporary project (_wpftmp.csproj) that
-// does not inherit implicit usings. These global usings ensure all types are
-// available during both normal and XAML temp-project compilation.
-global using System.IO;
-global using NAudio.CoreAudioApi;
+// With GenerateTemporaryTargetAssembly=false, the WPF XAML compiler no longer
+// creates a temp project that fails to resolve NuGet packages and implicit usings.
+// No additional global usings needed.

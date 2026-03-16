@@ -11,6 +11,8 @@
     <Description>Atempause — a mindfulness timer for your computer</Description>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Prevent WPF from generating a temp project that fails to resolve NuGet packages -->
+    <GenerateTemporaryTargetAssembly>false</GenerateTemporaryTargetAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
