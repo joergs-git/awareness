@@ -150,6 +150,50 @@ final class ProgressTracker: ObservableObject {
         save()
     }
 
+    // MARK: - Remote Event Integration (Desktop Sync)
+
+    /// Integrate a single remote desktop event into daily records and lifetime counters.
+    /// Called by SyncManager for each event pulled from Supabase.
+    func integrateRemoteEvent(date: String, completed: Bool, awareness: AwarenessResponse?) {
+        // Every synced event counts as triggered
+        lifetimeTriggered += 1
+        updateRecord(for: date) { $0.triggered += 1 }
+
+        if completed {
+            lifetimeCompleted += 1
+            updateRecord(for: date) { $0.completed += 1 }
+        }
+
+        if let awareness = awareness {
+            switch awareness {
+            case .yes:
+                lifetimeYes += 1
+                updateRecord(for: date) { $0.yes += 1 }
+            case .somewhat:
+                lifetimeSomewhat += 1
+                updateRecord(for: date) { $0.somewhat += 1 }
+            case .no:
+                lifetimeNo += 1
+                updateRecord(for: date) { $0.no += 1 }
+            }
+        }
+
+        save()
+    }
+
+    /// Get or create a DayRecord for a specific date string and apply a mutation.
+    /// Unlike updateTodayRecord, this works for arbitrary dates (remote events may be from past days).
+    private func updateRecord(for dateKey: String, _ mutation: (inout DayRecord) -> Void) {
+        if let index = dailyRecords.firstIndex(where: { $0.date == dateKey }) {
+            mutation(&dailyRecords[index])
+        } else {
+            var record = DayRecord(date: dateKey, triggered: 0, completed: 0)
+            mutation(&record)
+            dailyRecords.append(record)
+        }
+        pruneOldRecords()
+    }
+
     // MARK: - Review Prompt
 
     /// Milestones at which to prompt for App Store review

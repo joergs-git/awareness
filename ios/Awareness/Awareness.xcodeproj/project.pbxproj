@@ -81,6 +81,10 @@
 		A10027 /* WarmBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028 /* WarmBackground.swift */; };
 		A30025 /* WarmBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028 /* WarmBackground.swift */; };
 		A10028 /* CallDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10029 /* CallDetector.swift */; };
+		A10029 /* SyncWordList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10030 /* SyncWordList.swift */; };
+		A10030 /* SyncKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10031 /* SyncKeyManager.swift */; };
+		A10031 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10032 /* SupabaseClient.swift */; };
+		A10032 /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10033 /* SyncManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -201,6 +205,10 @@
 		B10027 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		B10028 /* WarmBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarmBackground.swift; sourceTree = "<group>"; };
 		B10029 /* CallDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDetector.swift; sourceTree = "<group>"; };
+		B10030 /* SyncWordList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncWordList.swift; sourceTree = "<group>"; };
+		B10031 /* SyncKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncKeyManager.swift; sourceTree = "<group>"; };
+		B10032 /* SupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClient.swift; sourceTree = "<group>"; };
+		B10033 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -262,6 +270,7 @@
 				D10007 /* Notifications */,
 				D10009 /* Health */,
 				D10012 /* Detection */,
+				D10013 /* Sync */,
 				D10011 /* Progress */,
 				D30009 /* Connectivity */,
 				D10008 /* Resources */,
@@ -347,6 +356,17 @@
 				B10029 /* CallDetector.swift */,
 			);
 			path = Detection;
+			sourceTree = "<group>";
+		};
+		D10013 /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				B10030 /* SyncWordList.swift */,
+				B10031 /* SyncKeyManager.swift */,
+				B10032 /* SupabaseClient.swift */,
+				B10033 /* SyncManager.swift */,
+			);
+			path = Sync;
 			sourceTree = "<group>";
 		};
 		D10011 /* Progress */ = {
@@ -622,6 +642,10 @@
 				A10026 /* OnboardingView.swift in Sources */,
 				A10027 /* WarmBackground.swift in Sources */,
 				A10028 /* CallDetector.swift in Sources */,
+				A10029 /* SyncWordList.swift in Sources */,
+				A10030 /* SyncKeyManager.swift in Sources */,
+				A10031 /* SupabaseClient.swift in Sources */,
+				A10032 /* SyncManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

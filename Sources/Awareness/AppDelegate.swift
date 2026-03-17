@@ -27,6 +27,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Check for updates on GitHub (background, non-blocking)
         UpdateChecker.shared.check()
 
+        // Flush any pending sync events from previous sessions
+        SyncManager.shared.flushPending()
+
         // Show a welcome message on first launch
         showWelcomeIfFirstLaunch()
     }

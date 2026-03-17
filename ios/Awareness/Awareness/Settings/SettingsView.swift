@@ -10,6 +10,9 @@ struct SettingsView: View {
 
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showingVideoImporter = false
+    @State private var showingRegenerateConfirmation = false
+    /// Tracks the current sync passphrase for reactivity (SyncKeyManager is not observable)
+    @State private var syncPassphrase: String? = SyncKeyManager.shared.passphrase
 
     var body: some View {
         NavigationStack {
@@ -64,6 +67,49 @@ struct SettingsView: View {
                     Label(String(localized: "Adaptive Scheduling"), systemImage: "brain.head.profile")
                 } footer: {
                     Text(String(localized: "When enabled, the guru learns your rhythm and adjusts intervals and duration automatically."))
+                }
+
+                // MARK: - Desktop Sync
+                Section {
+                    Toggle(String(localized: "I also work on a computer"), isOn: $settings.worksOnComputer)
+
+                    if settings.worksOnComputer {
+                        if let phrase = syncPassphrase, !phrase.isEmpty {
+                            HStack {
+                                Text(String(localized: "Sync Key"))
+                                Spacer()
+                                Text(phrase)
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Button {
+                                UIPasteboard.general.string = phrase
+                            } label: {
+                                Label(String(localized: "Copy to Clipboard"), systemImage: "doc.on.doc")
+                            }
+
+                            Button(role: .destructive) {
+                                showingRegenerateConfirmation = true
+                            } label: {
+                                Label(String(localized: "Regenerate Key"), systemImage: "arrow.triangle.2.circlepath")
+                            }
+                        } else {
+                            Button {
+                                syncPassphrase = SyncKeyManager.shared.generatePassphrase()
+                            } label: {
+                                Label(String(localized: "Generate Sync Key"), systemImage: "key")
+                            }
+                        }
+                    }
+                } header: {
+                    Label(String(localized: "Desktop Sync"), systemImage: "arrow.triangle.2.circlepath.icloud")
+                } footer: {
+                    if settings.worksOnComputer {
+                        Text(String(localized: "Generate a sync key and enter it in the Mac or Windows app. Your desktop breaks will then count toward your iPhone stats and Apple Health. Anonymous, no account needed."))
+                    } else {
+                        Text(String(localized: "If you also use Atempause on Mac or Windows, you can sync your desktop breaks to this device."))
+                    }
                 }
 
                 // MARK: - Interval Range (hidden when guru is active)
@@ -249,6 +295,16 @@ struct SettingsView: View {
                         dismiss()
                     }
                 }
+            }
+            .alert(String(localized: "Regenerate Sync Key?"), isPresented: $showingRegenerateConfirmation) {
+                Button(String(localized: "Regenerate"), role: .destructive) {
+                    // Pull latest data with the old key before regenerating
+                    SyncManager.shared.pullAndIntegrate()
+                    syncPassphrase = SyncKeyManager.shared.regeneratePassphrase()
+                }
+                Button(String(localized: "Cancel"), role: .cancel) {}
+            } message: {
+                Text(String(localized: "This will pull the latest desktop data and then create a new sync key. You must enter the new key on your Mac or Windows app before it will work again — otherwise desktop breaks will be lost in transit."))
             }
         }
     }

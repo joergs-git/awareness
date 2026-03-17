@@ -219,6 +219,7 @@ struct PostBlackoutView: View {
     private func awarenessButton(_ label: String, response: AwarenessResponse) -> some View {
         Button {
             ProgressTracker.shared.recordAwarenessResponse(response)
+            state.awarenessResponse = response
             state.onAwarenessAnswered?()
         } label: {
             Text(label)

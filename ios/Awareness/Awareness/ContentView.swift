@@ -407,6 +407,9 @@ struct ContentView: View {
 
                 // Update home screen widget with initial state
                 WidgetDataBridge.shared.updateWidget()
+
+                // Pull desktop events from Supabase (one-way sync: desktop → iOS)
+                SyncManager.shared.pullAndIntegrate()
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Re-check whenever app becomes active (e.g. returning from system Settings)
@@ -416,6 +419,8 @@ struct ContentView: View {
                 currentTask = settings.currentMicroTask()
                 // Keep widget up to date
                 WidgetDataBridge.shared.updateWidget()
+                // Sync desktop events on foreground return
+                SyncManager.shared.pullAndIntegrate()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
@@ -550,6 +555,8 @@ struct ContentView: View {
         WidgetDataBridge.shared.updateWidget()
         // Prompt for App Store review at milestone completions (30, 50, 100)
         ReviewHelper.requestReviewIfEligible()
+        // Sync desktop events after each local blackout
+        SyncManager.shared.pullAndIntegrate()
     }
 }
 

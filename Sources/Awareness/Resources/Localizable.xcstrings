@@ -291,6 +291,46 @@
         }
       }
     },
+    "Desktop Sync" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desktop-Sync"
+          }
+        }
+      }
+    },
+    "Connected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbunden"
+          }
+        }
+      }
+    },
+    "Sync Key (from iPhone)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync-Schlüssel (vom iPhone)"
+          }
+        }
+      }
+    },
+    "Enter the key from your iPhone's Settings to sync breaks to your phone." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib den Schlüssel aus den iPhone-Einstellungen ein, um Pausen auf dein Telefon zu synchronisieren."
+          }
+        }
+      }
+    },
     "Discipline" : {
       "localizations" : {
         "de" : {

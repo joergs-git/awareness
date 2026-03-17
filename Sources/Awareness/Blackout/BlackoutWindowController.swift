@@ -32,6 +32,15 @@ class BlackoutWindowController {
     /// Whether the blackout is in a post-breathing phase (namaste or card)
     private var isInPostBlackoutPhase = false
 
+    // MARK: - Sync Event Tracking
+    /// Tracks the current blackout event lifecycle for Supabase upload
+    private var syncEventStartTime: Date?
+    private var syncEventDuration: TimeInterval = 0
+    private var syncEventCompleted = false
+    private var syncEventAwareness: String?
+    /// Whether the sync event has already been uploaded (prevents double-upload)
+    private var syncEventUploaded = false
+
     // MARK: - Startclick Confirmation State
 
     /// Whether we're currently showing the "Ready to breathe?" confirmation screen
@@ -144,6 +153,13 @@ class BlackoutWindowController {
     private func handleConfirmYes() {
         isInConfirmationPhase = false
 
+        // Track sync event from confirmation start
+        syncEventStartTime = Date()
+        syncEventDuration = pendingDuration
+        syncEventCompleted = false
+        syncEventAwareness = nil
+        syncEventUploaded = false
+
         // Replace window content with the actual blackout view
         let contentView = BlackoutContentView(
             visualType: pendingVisualType,
@@ -179,6 +195,7 @@ class BlackoutWindowController {
         // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
+            self?.syncEventCompleted = true
             // Prompt for App Store review at milestone completions (sandbox/App Store builds only)
             if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil,
                ProgressTracker.shared.shouldRequestReview() {
@@ -193,6 +210,8 @@ class BlackoutWindowController {
     /// User declined — dismiss silently without counting as completed
     private func handleConfirmNo() {
         isInConfirmationPhase = false
+        // Upload sync event for the declined confirmation (triggered but not completed)
+        uploadSyncEvent()
         dismiss(silent: true)
     }
 
@@ -206,6 +225,13 @@ class BlackoutWindowController {
         imagePath: String,
         videoPath: String
     ) {
+        // Track sync event for Supabase upload
+        syncEventStartTime = Date()
+        syncEventDuration = duration
+        syncEventCompleted = false
+        syncEventAwareness = nil
+        syncEventUploaded = false
+
         // Play start gong immediately (before fade begins)
         GongPlayer.shared.playStartIfEnabled()
 
@@ -263,6 +289,7 @@ class BlackoutWindowController {
         // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
+            self?.syncEventCompleted = true
             // Prompt for App Store review at milestone completions (sandbox/App Store builds only)
             if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil,
                ProgressTracker.shared.shouldRequestReview() {
@@ -294,9 +321,19 @@ class BlackoutWindowController {
         state.microTask = task
         state.onAwarenessAnswered = { [weak self] in
             guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return }
+            // Capture awareness response for sync upload
+            if let response = state.awarenessResponse {
+                switch response {
+                case .yes: self.syncEventAwareness = "yes"
+                case .somewhat: self.syncEventAwareness = "somewhat"
+                case .no: self.syncEventAwareness = "no"
+                }
+            }
             state.phase = .practiceCard
         }
         state.onDismissRequest = { [weak self] in
+            // Upload sync event before dismissing (full lifecycle complete)
+            self?.uploadSyncEvent()
             self?.dismiss(silent: true)  // silent: end gong already played
         }
         self.phaseState = state
@@ -355,6 +392,9 @@ class BlackoutWindowController {
     /// Pass `silent: true` when dismissing due to system idle (sleep/lock/screensaver)
     /// to avoid playing sounds while the user isn't at the screen.
     func dismiss(silent: Bool = false) {
+        // Upload sync event if not already uploaded (early dismiss, system idle, etc.)
+        uploadSyncEvent()
+
         dismissTimer?.cancel()
         dismissTimer = nil
         isInPostBlackoutPhase = false
@@ -393,6 +433,25 @@ class BlackoutWindowController {
             self?.completionHandler = nil
             handler?()
         })
+    }
+
+    // MARK: - Sync Upload
+
+    /// Upload the current blackout event to Supabase. Called once per blackout lifecycle.
+    /// Safe to call multiple times — uses syncEventUploaded flag to prevent duplicates.
+    private func uploadSyncEvent() {
+        guard !syncEventUploaded, let startTime = syncEventStartTime else { return }
+        syncEventUploaded = true
+
+        SyncManager.shared.recordEvent(
+            startedAt: startTime,
+            duration: syncEventDuration,
+            completed: syncEventCompleted,
+            awareness: syncEventAwareness
+        )
+
+        // Also flush any pending events from previous failed uploads
+        SyncManager.shared.flushPending()
     }
 
     // MARK: - Screen Change Handling

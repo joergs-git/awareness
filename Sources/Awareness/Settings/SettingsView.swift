@@ -176,6 +176,31 @@ struct SettingsView: View {
                     Label(String(localized: "Behavior"), systemImage: "lock")
                 }
 
+                // MARK: - Desktop Sync
+                Section {
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextField(String(localized: "Sync Key (from iPhone)"), text: $settings.syncPassphrase)
+                            .textFieldStyle(.roundedBorder)
+                        Text(String(localized: "Enter the key from your iPhone's Settings to sync breaks to your phone."))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        if SyncKeyManager.shared.isConfigured {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.caption)
+                                Text(String(localized: "Connected"))
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                            .padding(.top, 2)
+                        }
+                    }
+                } header: {
+                    Label(String(localized: "Desktop Sync"), systemImage: "arrow.triangle.2.circlepath.icloud")
+                }
+
                 // MARK: - Philosophy
                 Section {
                 } footer: {

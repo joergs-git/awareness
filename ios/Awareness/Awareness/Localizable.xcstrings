@@ -548,6 +548,16 @@
         }
       }
     },
+    "Copy to Clipboard" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Zwischenablage kopieren"
+          }
+        }
+      }
+    },
     "Consistency is the quiet form of mastery" : {
       "localizations" : {
         "de" : {
@@ -574,6 +584,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Standard"
+          }
+        }
+      }
+    },
+    "Do you also work on a computer?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeitest du auch an einem Computer?"
+          }
+        }
+      }
+    },
+    "Desktop Sync" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desktop-Sync"
+          }
+        }
+      }
+    },
+    "Do you also use Atempause on Mac or Windows? Enter your sync key there to have your desktop breaks added to your iPhone stats and Apple Health. It's anonymous, safe, and easy." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nutzt du Atempause auch auf Mac oder Windows? Gib dort deinen Sync-Schlüssel ein, um Desktop-Pausen in deine iPhone-Statistik und Apple Health zu übernehmen. Anonym, sicher und einfach."
           }
         }
       }
@@ -731,6 +771,16 @@
         }
       }
     },
+    "Generate Sync Key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync-Schlüssel erzeugen"
+          }
+        }
+      }
+    },
     "GitHub" : {
       "localizations" : {
         "de" : {
@@ -747,6 +797,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Handschellen"
+          }
+        }
+      }
+    },
+    "Generate a sync key and enter it in the Mac or Windows app. Your desktop breaks will then count toward your iPhone stats and Apple Health. Anonymous, no account needed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erzeuge einen Sync-Schlüssel und gib ihn in der Mac- oder Windows-App ein. Deine Desktop-Pausen zählen dann zu deiner iPhone-Statistik und Apple Health. Anonym, kein Konto nötig."
+          }
+        }
+      }
+    },
+    "I also work on a computer" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich arbeite auch am Computer"
+          }
+        }
+      }
+    },
+    "If you also use Atempause on Mac or Windows, you can sync your desktop breaks to this device." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du Atempause auch auf Mac oder Windows nutzt, kannst du deine Desktop-Pausen auf dieses Gerät synchronisieren."
           }
         }
       }
@@ -926,6 +1006,16 @@
         }
       }
     },
+    "Later" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Später"
+          }
+        }
+      }
+    },
     "Log to Apple Health" : {
       "localizations" : {
         "de" : {
@@ -1074,6 +1164,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nicht jetzt"
+          }
+        }
+      }
+    },
+    "Not really" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eher nicht"
           }
         }
       }
@@ -1231,6 +1331,36 @@
         }
       }
     },
+    "Regenerate" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu erzeugen"
+          }
+        }
+      }
+    },
+    "Regenerate Key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlüssel erneuern"
+          }
+        }
+      }
+    },
+    "Regenerate Sync Key?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync-Schlüssel erneuern?"
+          }
+        }
+      }
+    },
     "Resume" : {
       "localizations" : {
         "de" : {
@@ -1258,6 +1388,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ausgewählt"
+          }
+        }
+      }
+    },
+    "Set Up Now" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt einrichten"
           }
         }
       }
@@ -1449,6 +1589,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stil"
+          }
+        }
+      }
+    },
+    "Sync Your Desktop Breaks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desktop-Pausen synchronisieren"
+          }
+        }
+      }
+    },
+    "Atempause is also available for Mac. Install it, then generate a sync key in Settings → Desktop Sync. Enter the key on your Mac and all your desktop breaks will count toward your iPhone stats and Apple Health. Anonymous, no account needed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atempause gibt es auch für den Mac. Installiere die App, erzeuge dann einen Sync-Schlüssel unter Einstellungen → Desktop-Sync. Gib den Schlüssel auf deinem Mac ein und alle Desktop-Pausen zählen zu deiner iPhone-Statistik und Apple Health. Anonym, kein Konto nötig."
+          }
+        }
+      }
+    },
+    "Atempause is also available for Windows. Install it, then generate a sync key in Settings → Desktop Sync. Enter the key on your PC and all your desktop breaks will count toward your iPhone stats and Apple Health. Anonymous, no account needed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atempause gibt es auch für Windows. Installiere die App, erzeuge dann einen Sync-Schlüssel unter Einstellungen → Desktop-Sync. Gib den Schlüssel auf deinem PC ein und alle Desktop-Pausen zählen zu deiner iPhone-Statistik und Apple Health. Anonym, kein Konto nötig."
+          }
+        }
+      }
+    },
+    "Sync Key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync-Schlüssel"
+          }
+        }
+      }
+    },
+    "This will pull the latest desktop data and then create a new sync key. You must enter the new key on your Mac or Windows app before it will work again — otherwise desktop breaks will be lost in transit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die neuesten Desktop-Daten werden abgerufen und dann ein neuer Sync-Schlüssel erzeugt. Du musst den neuen Schlüssel in deiner Mac- oder Windows-App eingeben, bevor es wieder funktioniert — sonst gehen Desktop-Pausen bei der Übertragung verloren."
           }
         }
       }
@@ -1841,6 +2031,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Du bist hier."
+          }
+        }
+      }
+    },
+    "Yes, on a Mac" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja, auf einem Mac"
+          }
+        }
+      }
+    },
+    "Yes, on Windows" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja, auf Windows"
           }
         }
       }

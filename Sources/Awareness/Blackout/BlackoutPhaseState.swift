@@ -16,6 +16,9 @@ class BlackoutPhaseState: ObservableObject {
     var practiceCard: PracticeCard?
     var microTask: MicroTask?
 
+    /// The user's awareness response (set by the button before calling onAwarenessAnswered)
+    var awarenessResponse: AwarenessResponse?
+
     /// Called when the user answers the awareness check — transitions to practice card
     var onAwarenessAnswered: (() -> Void)?
     /// Called when the user clicks/presses a key to dismiss the card phase

@@ -61,6 +61,8 @@ final class SettingsManager: ObservableObject {
         static let vibrationEnabled     = "vibrationEnabled"
         static let endFlashEnabled      = "endFlashEnabled"
         static let skipDuringCalls      = "skipDuringCalls"
+        static let syncPassphrase       = "syncPassphrase"
+        static let desktopSyncUsesComputer = "desktopSyncWorksOnComputer"
         #endif
 
         #if os(watchOS)
@@ -442,6 +444,19 @@ final class SettingsManager: ObservableObject {
         get { defaults.bool(forKey: Keys.hasLaunchedBefore) }
         set { defaults.set(newValue, forKey: Keys.hasLaunchedBefore) }
     }
+
+    // MARK: - Desktop Sync (iOS only)
+
+    #if !os(watchOS)
+    /// Whether the user indicated they also work on a desktop computer
+    var worksOnComputer: Bool {
+        get { defaults.bool(forKey: Keys.desktopSyncUsesComputer) }
+        set {
+            defaults.set(newValue, forKey: Keys.desktopSyncUsesComputer)
+            objectWillChange.send()
+        }
+    }
+    #endif
 
     // MARK: - Computed Helpers
 

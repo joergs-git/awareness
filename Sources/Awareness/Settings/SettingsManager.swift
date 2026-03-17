@@ -30,6 +30,9 @@ final class SettingsManager: ObservableObject {
         static let snoozeUntil              = "snoozeUntil"
         static let startclickConfirmation   = "startclickConfirmation"
 
+        // Desktop Sync
+        static let syncPassphrase        = "syncPassphrase"
+
         // Practice Cards & Micro-Tasks
         static let todaysPracticeCardID  = "todaysPracticeCardID"
         static let practiceCardDate      = "practiceCardDate"
@@ -55,7 +58,8 @@ final class SettingsManager: ObservableObject {
         Keys.customText:       "Breathe.",
         Keys.customImagePath:  "",
         Keys.customVideoPath:  "",
-        Keys.startclickConfirmation: true
+        Keys.startclickConfirmation: true,
+        Keys.syncPassphrase: ""
     ]
 
     // MARK: - Published Properties
@@ -152,6 +156,11 @@ final class SettingsManager: ObservableObject {
     /// When on, a "Ready to breathe?" prompt appears before each blackout
     @Published var startclickConfirmation: Bool {
         didSet { defaults.set(startclickConfirmation, forKey: Keys.startclickConfirmation) }
+    }
+
+    /// Sync passphrase entered by the user (from iOS app)
+    @Published var syncPassphrase: String {
+        didSet { defaults.set(syncPassphrase, forKey: Keys.syncPassphrase) }
     }
 
     /// Date until which the app is snoozed (nil = not snoozed)
@@ -368,6 +377,7 @@ final class SettingsManager: ObservableObject {
         customImagePath  = defaults.string(forKey: Keys.customImagePath) ?? ""
         customVideoPath  = defaults.string(forKey: Keys.customVideoPath) ?? ""
         startclickConfirmation = defaults.bool(forKey: Keys.startclickConfirmation)
+        syncPassphrase   = defaults.string(forKey: Keys.syncPassphrase) ?? ""
         snoozeUntil      = defaults.object(forKey: Keys.snoozeUntil) as? Date
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue
