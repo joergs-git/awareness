@@ -4,6 +4,29 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v3.16
+
+### Cross-Platform Sync via Supabase
+- **Desktop-to-iOS sync** — macOS and Windows upload blackout events (timestamp, duration, completion, awareness response) to Supabase. iOS pulls and integrates into local stats and Apple Health
+- **Sync key** — iOS generates a 4-word + number passphrase (nature/zen themed). Enter it on your desktop app to link devices. SHA-256 hashed, anonymous, no account needed
+- **Offline resilience** — pending events queue on desktop (max 500, 7-day TTL), auto-retry on launch and after each break
+- **Deduplication** — 4 layers prevent double-counting: processed event IDs, last-pull cursor, concurrency guard, server-side unique constraint
+
+### iOS/iPadOS
+- **"I also work on a computer" toggle** in Settings — collapses the Desktop Sync section for a clean look when not needed
+- **Generate / Copy / Regenerate sync key** — regenerate pulls latest data first and warns about re-entering on desktop
+
+### macOS
+- **Desktop Sync section** in Settings — text field for entering the sync passphrase from iPhone
+- **Status indicator** — shows "Connected" when a valid sync key is configured
+
+### Windows
+- **Desktop Sync section** in Settings — checkbox to expand sync key input, matching macOS flow
+- **Settings UI polish** — warm brown accent replaces Google Blue, clean text headers (no emoji), better spacing
+- **Sync upload** — events uploaded after each blackout with offline queue fallback
+
+---
+
 ## v3.15
 
 ### Windows Feature Parity

@@ -92,6 +92,16 @@ Requires watchOS 10+, Xcode 15+.
 - `WKExtendedRuntimeSession` alarm mode for end-of-blackout haptic (see `AlarmSessionManager.swift`)
 - WidgetKit complication extension (circular/rectangular/inline)
 
+### Cross-Platform Sync (Supabase)
+- **One-way**: macOS/Windows → Supabase → iOS. Desktop uploads individual blackout events; iOS pulls and integrates
+- **Supabase project**: `dntkhnjmczkqluwgddir.supabase.co`, table `blackout_events` with RLS
+- **Sync key**: iOS generates 4 zen words + 2-digit number (e.g. `lotus-ember-cedar-moonrise-42`). SHA-256 hashed as `sync_key` in DB
+- **Dedup**: `processedEventIDs` Set + `lastPullDate` cursor + `isPulling` flag + `UNIQUE(sync_key, started_at, source)` constraint
+- **Offline**: Desktop pending queue (JSON file, max 500 events, 7-day TTL), flushed on launch + after each blackout
+- **HealthKit**: iOS logs completed synced events as mindful sessions (if enabled)
+- **Files**: `Sync/SyncKeyManager`, `Sync/SupabaseClient`, `Sync/SyncManager` on each platform; `Sync/SyncWordList.swift` iOS-only
+- **pbxproj IDs**: B10030–B10033 (file refs), A10029–A10032 (build files), D10013 (Sync group)
+
 ## Project Structure
 
 ### macOS (`Sources/Awareness/`)

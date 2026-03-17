@@ -37,6 +37,7 @@ Have also a look into the wiki section of this project: (https://github.com/joer
 - **Haptic vibration** (iOS) — optional vibration at the start and end of each blackout, useful when the phone is on silent and your eyes are closed
 - **End flash** (iOS) — optional 1-second white screen blink at the end of a blackout, visible through closed eyelids to signal the session is ending
 - **Apple Watch companion** — standalone watchOS app with haptic feedback, notification scheduling, and WidgetKit complications for your watch face
+- **Cross-platform sync** — desktop breaks (macOS/Windows) sync to your iPhone via Supabase. Generate a sync key on iOS, enter it on your desktop app — your breaks count toward iPhone stats and Apple Health. Anonymous, no account needed
 - **Settings sync** — bidirectional settings sync between iPhone and Apple Watch via WatchConnectivity
 - **Active touch blackouts** (iOS/watchOS) — notifications require a tap; no auto-triggering when the app is in the foreground
 - **Coordinated scheduling** — iPhone generates notification times and syncs them to Apple Watch, so both devices stay in harmony
