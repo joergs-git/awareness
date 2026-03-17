@@ -121,16 +121,31 @@ class BlackoutScheduler {
             return
         }
 
-        // Trigger the blackout with all configured visual settings
-        blackoutController.show(
-            duration: settings.randomBlackoutDuration(),
-            visualType: settings.visualType,
-            customText: settings.resolvedBreathingText(),
-            imagePath: settings.customImagePath,
-            videoPath: settings.customVideoPath
-        ) { [weak self] in
-            // After blackout ends, schedule the next one
-            self?.scheduleNext()
+        // Pre-trigger: check Supabase for recent breaks from other platforms
+        Task { [weak self] in
+            let shouldDefer = await SyncManager.shared.shouldDeferToRecentBreak()
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.isRunning else { return }
+
+                if shouldDefer {
+                    // Another device had a break recently — reschedule
+                    self.scheduleNext()
+                    return
+                }
+
+                // Trigger the blackout with all configured visual settings
+                self.blackoutController.show(
+                    duration: self.settings.randomBlackoutDuration(),
+                    visualType: self.settings.visualType,
+                    customText: self.settings.resolvedBreathingText(),
+                    imagePath: self.settings.customImagePath,
+                    videoPath: self.settings.customVideoPath
+                ) { [weak self] in
+                    // After blackout ends, schedule the next one
+                    self?.scheduleNext()
+                }
+            }
         }
     }
 

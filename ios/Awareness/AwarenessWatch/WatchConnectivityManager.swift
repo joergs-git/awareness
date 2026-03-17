@@ -54,6 +54,32 @@ class WatchConnectivityManager: NSObject, ObservableObject {
         try? WCSession.default.updateApplicationContext(context)
     }
 
+    // MARK: - Blackout Event Relay
+
+    /// Metadata for the last blackout, stored so ContentView's alarm awareness
+    /// handler can relay the updated event with the awareness response
+    static var lastBlackoutStartTime: Date?
+    static var lastBlackoutDuration: Double = 0
+    static var lastBlackoutCompleted: Bool = false
+
+    /// Relay a completed blackout event to the companion iPhone for Supabase upload.
+    /// Uses transferUserInfo for guaranteed delivery (queued if phone is not reachable).
+    func relayBlackoutEvent(startedAt: Date, duration: Double, completed: Bool, awareness: String?) {
+        guard WCSession.default.activationState == .activated else { return }
+
+        var info: [String: Any] = [
+            "watchBlackoutEvent": true,
+            "startedAt": startedAt.timeIntervalSince1970,
+            "duration": duration,
+            "completed": completed
+        ]
+        if let awareness = awareness {
+            info["awareness"] = awareness
+        }
+
+        WCSession.default.transferUserInfo(info)
+    }
+
     // MARK: - Settings & Progress Observation
 
     /// Observe local settings and progress changes and push to the phone (debounced).

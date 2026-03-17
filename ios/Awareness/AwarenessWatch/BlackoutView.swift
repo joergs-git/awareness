@@ -186,6 +186,22 @@ struct BlackoutView: View {
             ProgressTracker.shared.recordCompleted()
         }
 
+        // Store metadata for ContentView alarm awareness relay
+        WatchConnectivityManager.lastBlackoutStartTime = sessionStart
+        WatchConnectivityManager.lastBlackoutDuration = sessionStart.map { Date().timeIntervalSince($0) } ?? duration
+        WatchConnectivityManager.lastBlackoutCompleted = completedFullDuration
+
+        // Relay event to iOS for Supabase upload (early dismiss only — completed blackouts
+        // wait for awareness response before relaying)
+        if !completedFullDuration, let start = sessionStart {
+            WatchConnectivityManager.shared.relayBlackoutEvent(
+                startedAt: start,
+                duration: Date().timeIntervalSince(start),
+                completed: false,
+                awareness: nil
+            )
+        }
+
         // Haptic at end
         if settings.hapticEndEnabled {
             HapticPlayer.playEnd()
@@ -253,6 +269,22 @@ struct BlackoutView: View {
     /// Record awareness response and dismiss
     private func handleWatchAwarenessResponse(_ response: AwarenessResponse) {
         ProgressTracker.shared.recordAwarenessResponse(response)
+        // Relay completed event with awareness to iOS for Supabase upload
+        if let start = WatchConnectivityManager.lastBlackoutStartTime {
+            let awarenessStr: String = {
+                switch response {
+                case .yes: return "yes"
+                case .somewhat: return "somewhat"
+                case .no: return "no"
+                }
+            }()
+            WatchConnectivityManager.shared.relayBlackoutEvent(
+                startedAt: start,
+                duration: WatchConnectivityManager.lastBlackoutDuration,
+                completed: WatchConnectivityManager.lastBlackoutCompleted,
+                awareness: awarenessStr
+            )
+        }
         WKInterfaceDevice.current().play(.click)
         // Reset hasFired before dismissing — prevents ContentView.onChange from
         // showing a second awareness check if the alarm fired during our async chain

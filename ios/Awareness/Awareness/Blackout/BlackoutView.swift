@@ -28,6 +28,8 @@ struct BlackoutView: View {
     @State private var offeredDuration: Double = 0
     /// Resolved breathing text (picked once at start to avoid mid-session changes)
     @State private var displayText: String = ""
+    /// Sync event start time (for Supabase upload — consistent across start/end upsert)
+    @State private var syncEventStartTime: Date?
 
     var body: some View {
         ZStack {
@@ -101,12 +103,23 @@ struct BlackoutView: View {
             UIApplication.shared.isIdleTimerDisabled = true
 
             sessionStart = Date()
+            syncEventStartTime = sessionStart
             // Resolve breathing text once (random rotation for default, custom text otherwise)
             displayText = settings.resolvedBreathingText()
             // Use guru-adapted duration when Smart Guru is enabled
             duration = settings.effectiveRandomBlackoutDuration()
             offeredDuration = duration
             GongPlayer.shared.playStartIfEnabled()
+
+            // Upload sync event at START so other platforms know a break is in progress
+            if let start = syncEventStartTime {
+                SyncManager.shared.recordEvent(
+                    startedAt: start,
+                    duration: offeredDuration,
+                    completed: false,
+                    awareness: nil
+                )
+            }
 
             // Haptic feedback at start
             if settings.vibrationEnabled {
@@ -205,7 +218,9 @@ struct BlackoutView: View {
                     // User taps a button to dismiss (handled by awarenessButton)
                 }
             } else {
-                // Early dismiss — no awareness check, just fade out
+                // Early dismiss — upload final sync event (no awareness check)
+                uploadSyncEvent(completed: false, awareness: nil)
+                // No awareness check, just fade out
                 withAnimation(.easeOut(duration: 1.0)) {
                     opacity = 0
                 }
@@ -220,6 +235,8 @@ struct BlackoutView: View {
     /// Record awareness response and dismiss
     private func handleAwarenessResponse(_ response: AwarenessResponse) {
         ProgressTracker.shared.recordAwarenessResponse(response)
+        // Upload final sync event with awareness response (upserts the start event)
+        uploadSyncEvent(completed: true, awareness: awarenessString(response))
         withAnimation(.easeOut(duration: 0.3)) {
             opacity = 0
         }
@@ -244,6 +261,30 @@ struct BlackoutView: View {
                     Capsule()
                         .stroke(Color.white.opacity(0.3), lineWidth: 1)
                 )
+        }
+    }
+
+    // MARK: - Sync Upload
+
+    /// Upload the current blackout state to Supabase (upserts on sync_key + started_at + source)
+    private func uploadSyncEvent(completed: Bool, awareness: String?) {
+        guard let start = syncEventStartTime else { return }
+        let actualDuration = Date().timeIntervalSince(start)
+        SyncManager.shared.recordEvent(
+            startedAt: start,
+            duration: actualDuration,
+            completed: completed,
+            awareness: awareness
+        )
+        SyncManager.shared.flushPending()
+    }
+
+    /// Convert AwarenessResponse enum to string for Supabase
+    private func awarenessString(_ response: AwarenessResponse) -> String {
+        switch response {
+        case .yes: return "yes"
+        case .somewhat: return "somewhat"
+        case .no: return "no"
         }
     }
 

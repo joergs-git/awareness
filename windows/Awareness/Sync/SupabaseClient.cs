@@ -62,10 +62,57 @@ public class SupabaseClient
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>Minimal event received from Supabase (for pre-trigger check)</summary>
+    public class RemoteEvent
+    {
+        [JsonPropertyName("started_at")]
+        public string StartedAt { get; set; } = "";
+
+        [JsonPropertyName("duration")]
+        public double Duration { get; set; }
+
+        [JsonPropertyName("source")]
+        public string Source { get; set; } = "";
+    }
+
+    /// <summary>
+    /// Fetch recent events from other platforms for the given sync key.
+    /// Used to check if another device had a break recently, preventing double-triggering.
+    /// </summary>
+    public async Task<List<RemoteEvent>> FetchRecentEventsAsync(string syncKeyHash, DateTime since)
+    {
+        var iso = FormatDate(since);
+        var url = $"{SupabaseUrl}/rest/v1/blackout_events"
+            + $"?sync_key=eq.{syncKeyHash}"
+            + "&source=neq.windows"
+            + $"&started_at=gt.{iso}"
+            + "&select=started_at,duration,source"
+            + "&order=started_at.desc"
+            + "&limit=5";
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("apikey", SupabaseAnonKey);
+        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+
+        var response = await _http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<List<RemoteEvent>>(json) ?? new();
+    }
+
     /// <summary>Format a DateTime as ISO 8601 with fractional seconds</summary>
     public static string FormatDate(DateTime date)
     {
         return date.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+    }
+
+    /// <summary>Parse an ISO 8601 date string to UTC DateTime</summary>
+    public static DateTime? ParseDate(string iso)
+    {
+        if (DateTime.TryParse(iso, null, System.Globalization.DateTimeStyles.RoundtripKind, out var dt))
+            return dt.ToUniversalTime();
+        return null;
     }
 
     private SupabaseClient() { }

@@ -135,10 +135,10 @@ class ForegroundScheduler: ObservableObject {
             return
         }
 
-        // Pre-flight: check if a desktop break just happened via Supabase.
+        // Pre-flight: check if a break just happened on another device via Supabase.
         // If so, postpone instead of double-triggering.
         Task {
-            let shouldDefer = await SyncManager.shared.shouldDeferToDesktopBreak()
+            let shouldDefer = await SyncManager.shared.shouldDeferToRecentBreak()
 
             await MainActor.run {
                 guard self.isRunning else { return }

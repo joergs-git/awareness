@@ -1,7 +1,8 @@
 import Foundation
 
-/// Orchestrates pulling desktop blackout events from Supabase and integrating them
-/// into the local ProgressTracker and HealthKit. One-way sync: desktop → Supabase → iOS.
+/// Orchestrates bidirectional Supabase sync for iOS:
+/// - Pulls desktop/watchOS events and integrates into ProgressTracker + HealthKit
+/// - Uploads iOS blackout events so other platforms can coordinate triggers
 final class SyncManager {
 
     static let shared = SyncManager()
@@ -9,9 +10,15 @@ final class SyncManager {
     /// Prevents concurrent pull operations
     private var isPulling = false
 
+    private let defaults = UserDefaults.standard
+    private let pendingKey = "syncPendingUploadEvents"
+    private let maxPendingEvents = 500
+    private let maxPendingAgeDays = 7
+
     // MARK: - Pull & Integrate
 
     /// Fetch new desktop events from Supabase and integrate into local stats + HealthKit.
+    /// Excludes iOS and watchOS events (watchOS syncs progress via WCSession).
     /// Called on app open, after local blackout, and on foreground return.
     /// Silently fails on network errors — the cursor ensures catch-up on next success.
     func pullAndIntegrate() {
@@ -26,9 +33,11 @@ final class SyncManager {
 
             do {
                 let since = SyncKeyManager.shared.lastPullDate
+                // Only pull desktop events — watchOS progress is synced via WCSession
                 let events = try await SupabaseClient.shared.fetchEvents(
                     syncKeyHash: syncKeyHash,
-                    since: since
+                    since: since,
+                    excludeSources: ["ios", "watchos"]
                 )
 
                 guard !events.isEmpty else { return }
@@ -131,18 +140,20 @@ final class SyncManager {
 
     // MARK: - Pre-Trigger Check
 
-    /// Quick check: was there a recent desktop break that should prevent iOS from triggering?
-    /// Called by ForegroundScheduler right before firing a blackout.
-    /// Returns true if iOS should NOT trigger (desktop break was recent).
-    func shouldDeferToDesktopBreak() async -> Bool {
+    /// Quick check: was there a recent break on any other device that should prevent iOS from triggering?
+    /// Checks macOS, Windows, and watchOS events. Called by ForegroundScheduler right before firing.
+    /// Returns true if iOS should NOT trigger (another device's break was recent).
+    func shouldDeferToRecentBreak() async -> Bool {
         guard SyncKeyManager.shared.isConfigured,
               let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else { return false }
 
         do {
             let since = SyncKeyManager.shared.lastPullDate
+            // Check all non-iOS sources (macOS, Windows, watchOS)
             let events = try await SupabaseClient.shared.fetchEvents(
                 syncKeyHash: syncKeyHash,
-                since: since
+                since: since,
+                excludeSources: ["ios"]
             )
 
             guard !events.isEmpty else { return false }
@@ -174,6 +185,110 @@ final class SyncManager {
             // Network error — don't block the trigger, just proceed
             return false
         }
+    }
+
+    // MARK: - Upload & Pending Queue
+
+    /// Record a blackout event from this device (or watchOS relay) and upload to Supabase.
+    /// If the upload fails, the event is queued for later retry.
+    func recordEvent(
+        startedAt: Date,
+        duration: TimeInterval,
+        completed: Bool,
+        awareness: String?,
+        source: String = "ios"
+    ) {
+        guard SyncKeyManager.shared.isConfigured,
+              let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else { return }
+
+        let event = PendingEvent(
+            syncKey: syncKeyHash,
+            startedAt: SupabaseClient.formatDate(startedAt),
+            duration: duration,
+            completed: completed,
+            awareness: awareness,
+            source: source,
+            queuedAt: Date()
+        )
+
+        Task {
+            do {
+                try await uploadPendingEvent(event)
+            } catch {
+                print("Awareness Sync: upload failed, queuing — \(error.localizedDescription)")
+                appendToPendingQueue(event)
+            }
+        }
+    }
+
+    /// Retry all pending events in the queue. Called on app launch and after each blackout.
+    func flushPending() {
+        var pending = loadPendingQueue()
+        guard !pending.isEmpty else { return }
+
+        let cutoff = Date().addingTimeInterval(-Double(maxPendingAgeDays * 86400))
+        pending.removeAll { $0.queuedAt < cutoff }
+        savePendingQueue(pending)
+
+        guard !pending.isEmpty else { return }
+
+        Task {
+            var remaining: [PendingEvent] = []
+            for event in pending {
+                do {
+                    try await uploadPendingEvent(event)
+                } catch {
+                    remaining.append(event)
+                }
+            }
+            savePendingQueue(remaining)
+        }
+    }
+
+    private func uploadPendingEvent(_ event: PendingEvent) async throws {
+        let uploadEvent = SupabaseClient.UploadEvent(
+            syncKey: event.syncKey,
+            startedAt: event.startedAt,
+            duration: event.duration,
+            completed: event.completed,
+            awareness: event.awareness,
+            source: event.source
+        )
+        try await SupabaseClient.shared.uploadEvent(uploadEvent)
+    }
+
+    private func appendToPendingQueue(_ event: PendingEvent) {
+        var queue = loadPendingQueue()
+        queue.append(event)
+        if queue.count > maxPendingEvents {
+            queue = Array(queue.suffix(maxPendingEvents))
+        }
+        savePendingQueue(queue)
+    }
+
+    private func loadPendingQueue() -> [PendingEvent] {
+        guard let data = defaults.data(forKey: pendingKey),
+              let events = try? JSONDecoder().decode([PendingEvent].self, from: data) else {
+            return []
+        }
+        return events
+    }
+
+    private func savePendingQueue(_ events: [PendingEvent]) {
+        if let data = try? JSONEncoder().encode(events) {
+            defaults.set(data, forKey: pendingKey)
+        }
+    }
+
+    /// Queued event with metadata for retry logic
+    private struct PendingEvent: Codable {
+        let syncKey: String
+        let startedAt: String
+        let duration: Double
+        let completed: Bool
+        let awareness: String?
+        let source: String
+        let queuedAt: Date
     }
 
     // MARK: - Helpers

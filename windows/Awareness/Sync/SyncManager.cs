@@ -139,6 +139,53 @@ public class SyncManager
         catch { /* best-effort */ }
     }
 
+    // MARK: - Pre-Trigger Check
+
+    /// <summary>
+    /// Quick check: was there a recent break on any other device that should prevent Windows
+    /// from triggering? Checks macOS, iOS, and watchOS events.
+    /// Returns true if Windows should NOT trigger (another device's break was recent).
+    /// </summary>
+    public async Task<bool> ShouldDeferToRecentBreakAsync()
+    {
+        if (!SyncKeyManager.Shared.IsConfigured) return false;
+        var syncKeyHash = SyncKeyManager.Shared.HashedSyncKey;
+        if (syncKeyHash == null) return false;
+
+        try
+        {
+            var minInterval = Settings.SettingsManager.Shared.MinInterval;
+            var since = DateTime.UtcNow.AddMinutes(-minInterval);
+            var events = await SupabaseClient.Shared.FetchRecentEventsAsync(syncKeyHash, since);
+
+            if (events.Count == 0) return false;
+
+            // Find the latest break end time
+            DateTime? latestBreakEnd = null;
+            foreach (var ev in events)
+            {
+                var startedAt = SupabaseClient.ParseDate(ev.StartedAt);
+                if (startedAt == null) continue;
+
+                var breakEnd = startedAt.Value.AddSeconds(ev.Duration);
+                if (latestBreakEnd == null || breakEnd > latestBreakEnd)
+                    latestBreakEnd = breakEnd;
+            }
+
+            if (latestBreakEnd == null) return false;
+
+            var timeSinceBreak = DateTime.UtcNow - latestBreakEnd.Value;
+            var minIntervalSpan = TimeSpan.FromMinutes(minInterval);
+
+            return timeSinceBreak < minIntervalSpan && timeSinceBreak >= TimeSpan.Zero;
+        }
+        catch
+        {
+            // Network error — don't block the trigger, just proceed
+            return false;
+        }
+    }
+
     private class PendingEvent
     {
         [JsonPropertyName("syncKey")]

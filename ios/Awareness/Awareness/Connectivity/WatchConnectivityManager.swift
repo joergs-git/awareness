@@ -139,6 +139,27 @@ extension WatchConnectivityManager: WCSessionDelegate {
         }
     }
 
+    /// Receive blackout event relays from the companion Apple Watch.
+    /// Each transfer represents a completed (or dismissed) watchOS blackout that should
+    /// be uploaded to Supabase so other platforms can coordinate triggers.
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        guard userInfo["watchBlackoutEvent"] as? Bool == true,
+              let startedAtTimestamp = userInfo["startedAt"] as? Double,
+              let duration = userInfo["duration"] as? Double,
+              let completed = userInfo["completed"] as? Bool else { return }
+
+        let startedAt = Date(timeIntervalSince1970: startedAtTimestamp)
+        let awareness = userInfo["awareness"] as? String
+
+        SyncManager.shared.recordEvent(
+            startedAt: startedAt,
+            duration: duration,
+            completed: completed,
+            awareness: awareness,
+            source: "watchos"
+        )
+    }
+
     func sessionReachabilityDidChange(_ session: WCSession) {
         DispatchQueue.main.async {
             self.isReachable = session.isReachable

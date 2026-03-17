@@ -122,7 +122,7 @@ public class BlackoutScheduler
         _timer.Start();
     }
 
-    private void TimerFired()
+    private async void TimerFired()
     {
         if (!_isRunning) return;
         NextBlackoutDate = null;
@@ -152,6 +152,17 @@ public class BlackoutScheduler
         // Skip if system is idle (sleeping, display off, locked, or screensaver)
         if (SystemStateDetector.Shared.IsSystemIdle())
         {
+            ScheduleNext();
+            return;
+        }
+
+        // Pre-trigger: check Supabase for recent breaks from other platforms
+        bool shouldDefer = await Sync.SyncManager.Shared.ShouldDeferToRecentBreakAsync();
+        if (!_isRunning) return; // re-check after async call
+
+        if (shouldDefer)
+        {
+            // Another device had a break recently — reschedule
             ScheduleNext();
             return;
         }

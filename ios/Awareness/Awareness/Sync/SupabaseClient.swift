@@ -21,7 +21,7 @@ final class SupabaseClient {
         let duration: Double       // seconds
         let completed: Bool
         let awareness: String?     // "yes" / "somewhat" / "no" / null
-        let source: String         // "macos" / "windows"
+        let source: String         // "macos" / "windows" / "ios" / "watchos"
         let createdAt: String      // ISO 8601 timestamp
 
         enum CodingKeys: String, CodingKey {
@@ -36,7 +36,7 @@ final class SupabaseClient {
         }
     }
 
-    /// Event payload for uploading from desktop (macOS)
+    /// Event payload for uploading to Supabase
     struct UploadEvent: Codable {
         let syncKey: String
         let startedAt: String
@@ -57,13 +57,19 @@ final class SupabaseClient {
 
     // MARK: - Fetch Events (iOS pulls from Supabase)
 
-    /// Fetch all events for the given sync key that were created after the given date.
-    /// Only returns events from desktop sources (macos/windows), not iOS.
-    func fetchEvents(syncKeyHash: String, since: Date?) async throws -> [RemoteEvent] {
+    /// Fetch events for the given sync key that were created after the given date.
+    /// Excludes the specified sources to avoid pulling own events.
+    func fetchEvents(syncKeyHash: String, since: Date?, excludeSources: [String] = ["ios"]) async throws -> [RemoteEvent] {
         var urlString = "\(Self.supabaseURL)/rest/v1/blackout_events"
             + "?sync_key=eq.\(syncKeyHash)"
-            + "&source=neq.ios"
             + "&order=created_at.asc"
+
+        // Build source exclusion filter
+        if excludeSources.count == 1 {
+            urlString += "&source=neq.\(excludeSources[0])"
+        } else if excludeSources.count > 1 {
+            urlString += "&source=not.in.(\(excludeSources.joined(separator: ",")))"
+        }
 
         if let since = since {
             let iso = Self.iso8601Formatter.string(from: since)
@@ -91,12 +97,13 @@ final class SupabaseClient {
         return try decoder.decode([RemoteEvent].self, from: data)
     }
 
-    // MARK: - Upload Event (macOS/Windows push to Supabase)
+    // MARK: - Upload Event
 
     /// Upload a single blackout event to Supabase.
-    /// Uses ON CONFLICT DO NOTHING for idempotent retries.
+    /// Uses upsert (ON CONFLICT merge) so the same event can be updated
+    /// (e.g. upload at blackout start with completed=false, then update at end with completed=true).
     func uploadEvent(_ event: UploadEvent) async throws {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/blackout_events") else {
+        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/blackout_events?on_conflict=sync_key,started_at,source") else {
             throw SyncError.invalidURL
         }
 
@@ -105,7 +112,7 @@ final class SupabaseClient {
         request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("return=minimal,resolution=ignore-duplicates", forHTTPHeaderField: "Prefer")
+        request.setValue("return=minimal,resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
 
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(event)

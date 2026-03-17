@@ -289,6 +289,22 @@ struct ContentView: View {
     private func overlayAwarenessButton(_ label: String, response: AwarenessResponse) -> some View {
         Button {
             ProgressTracker.shared.recordAwarenessResponse(response)
+            // Relay completed event with awareness to iOS for Supabase upload
+            if let start = WatchConnectivityManager.lastBlackoutStartTime {
+                let awarenessStr: String = {
+                    switch response {
+                    case .yes: return "yes"
+                    case .somewhat: return "somewhat"
+                    case .no: return "no"
+                    }
+                }()
+                WatchConnectivityManager.shared.relayBlackoutEvent(
+                    startedAt: start,
+                    duration: WatchConnectivityManager.lastBlackoutDuration,
+                    completed: WatchConnectivityManager.lastBlackoutCompleted,
+                    awareness: awarenessStr
+                )
+            }
             WKInterfaceDevice.current().play(.click)
             withAnimation(.easeOut(duration: 0.3)) {
                 awarenessCheckOpacity = 0

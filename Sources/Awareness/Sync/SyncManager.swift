@@ -111,6 +111,45 @@ final class SyncManager {
         }
     }
 
+    // MARK: - Pre-Trigger Check
+
+    /// Quick check: was there a recent break on any other device that should prevent macOS
+    /// from triggering? Checks iOS, Windows, and watchOS events.
+    /// Returns true if macOS should NOT trigger (another device's break was recent).
+    func shouldDeferToRecentBreak() async -> Bool {
+        guard SyncKeyManager.shared.isConfigured,
+              let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else { return false }
+
+        do {
+            let minInterval = SettingsManager.shared.minInterval * 60.0
+            let since = Date().addingTimeInterval(-minInterval)
+            let events = try await SupabaseClient.shared.fetchRecentEvents(
+                syncKeyHash: syncKeyHash,
+                since: since
+            )
+
+            guard !events.isEmpty else { return false }
+
+            // Find the latest break end time
+            var latestBreakEnd: Date?
+            for event in events {
+                guard let startedAt = SupabaseClient.parseDate(event.startedAt) else { continue }
+                let breakEnd = startedAt.addingTimeInterval(event.duration)
+                if latestBreakEnd == nil || breakEnd > latestBreakEnd! {
+                    latestBreakEnd = breakEnd
+                }
+            }
+
+            guard let breakEnd = latestBreakEnd else { return false }
+
+            let timeSinceBreak = Date().timeIntervalSince(breakEnd)
+            return timeSinceBreak < minInterval && timeSinceBreak >= 0
+        } catch {
+            // Network error — don't block the trigger, just proceed
+            return false
+        }
+    }
+
     /// Queued event with metadata for retry logic
     private struct PendingEvent: Codable {
         let syncKey: String
