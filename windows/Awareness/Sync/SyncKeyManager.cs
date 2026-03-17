@@ -40,7 +40,7 @@ public class SyncKeyManager
             var normalized = phrase.ToLowerInvariant().Trim();
             var bytes = Encoding.UTF8.GetBytes(normalized);
             var hash = SHA256.HashData(bytes);
-            return Convert.ToHexStringLower(hash);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
     }
 
