@@ -4,7 +4,7 @@
         xmlns:settings="clr-namespace:Awareness.Settings"
         xmlns:res="clr-namespace:Awareness.Resources"
         Title="{x:Static res:Strings.AwarenessSettings}"
-        Width="480" Height="640"
+        Width="480" Height="700"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="True">
@@ -17,18 +17,18 @@
     </Window.Background>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-        <StackPanel Margin="20">
+        <StackPanel Margin="24,16,24,20">
 
             <!-- Header -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                <TextBlock Text="☯" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0"
-                           Foreground="Gray" />
-                <TextBlock Text="{x:Static res:Strings.AwarenessSettings}" FontSize="20" FontWeight="Medium"
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
+                <TextBlock Text="☯" FontSize="26" VerticalAlignment="Center" Margin="0,0,10,0"
+                           Foreground="#B88061" />
+                <TextBlock Text="{x:Static res:Strings.AwarenessSettings}" FontSize="22" FontWeight="Light"
                            VerticalAlignment="Center" />
             </StackPanel>
 
             <!-- Active Hours -->
-            <GroupBox x:Name="ActiveHoursGroup" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="ActiveHoursGroup" Margin="0,0,0,14" Padding="12">
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                     <StackPanel>
                         <TextBlock Text="{x:Static res:Strings.From}" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
@@ -43,15 +43,30 @@
                 </StackPanel>
             </GroupBox>
 
-            <!-- Interval Between Blackouts -->
-            <GroupBox x:Name="IntervalGroup" Margin="0,0,0,12" Padding="10">
+            <!-- Desktop Sync -->
+            <GroupBox x:Name="DesktopSyncGroup" Margin="0,0,0,14" Padding="12">
+                <StackPanel>
+                    <CheckBox x:Name="WorksOnPhoneCheck" Margin="0,4,0,4"
+                              Checked="OnWorksOnPhoneChanged" Unchecked="OnWorksOnPhoneChanged" />
+                    <StackPanel x:Name="SyncKeyPanel" Visibility="Collapsed" Margin="0,8,0,0">
+                        <TextBlock x:Name="SyncKeyLabel" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
+                        <TextBox x:Name="SyncKeyInput" Margin="0,0,0,6"
+                                 FontFamily="Consolas" FontSize="12"
+                                 TextChanged="OnSyncKeyChanged" />
+                        <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="Gray" x:Name="SyncKeyHint" />
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Interval Between Breaks -->
+            <GroupBox x:Name="IntervalGroup" Margin="0,0,0,14" Padding="12">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                         <TextBlock x:Name="MinIntervalLabel" Width="55" TextAlignment="Right"
-                                   Foreground="#4285F4" FontFamily="Consolas" />
+                                   Foreground="#B88061" FontFamily="Consolas" />
                         <TextBlock Text=" – " Foreground="Gray" />
                         <TextBlock x:Name="MaxIntervalLabel" Width="55"
-                                   Foreground="#4285F4" FontFamily="Consolas" />
+                                   Foreground="#B88061" FontFamily="Consolas" />
                     </StackPanel>
                     <settings:RangeSlider x:Name="IntervalSlider"
                                           Minimum="1" Maximum="120" Step="1"
@@ -59,15 +74,15 @@
                 </StackPanel>
             </GroupBox>
 
-            <!-- Blackout Duration -->
-            <GroupBox x:Name="DurationGroup" Margin="0,0,0,12" Padding="10">
+            <!-- Break Duration -->
+            <GroupBox x:Name="DurationGroup" Margin="0,0,0,14" Padding="12">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                         <TextBlock x:Name="MinDurationLabel" Width="40" TextAlignment="Right"
-                                   Foreground="#4285F4" FontFamily="Consolas" />
+                                   Foreground="#B88061" FontFamily="Consolas" />
                         <TextBlock Text=" – " Foreground="Gray" />
                         <TextBlock x:Name="MaxDurationLabel" Width="40"
-                                   Foreground="#4285F4" FontFamily="Consolas" />
+                                   Foreground="#B88061" FontFamily="Consolas" />
                     </StackPanel>
                     <settings:RangeSlider x:Name="DurationSlider"
                                           Minimum="3" Maximum="120" Step="1"
@@ -75,38 +90,37 @@
                 </StackPanel>
             </GroupBox>
 
-            <!-- Blackout Visual -->
-            <GroupBox x:Name="VisualGroup" Margin="0,0,0,12" Padding="10">
+            <!-- Break Visual -->
+            <GroupBox x:Name="VisualGroup" Margin="0,0,0,14" Padding="12">
                 <StackPanel>
-                    <!-- Visual type selector as radio buttons in a horizontal panel -->
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                         <RadioButton x:Name="RadioPlainBlack" Content="{x:Static res:Strings.PlainBlack}"
-                                     GroupName="VisualType" Margin="0,0,12,0"
+                                     GroupName="VisualType" Margin="0,0,14,0"
                                      Checked="OnVisualTypeChanged" />
                         <RadioButton x:Name="RadioText" Content="{x:Static res:Strings.CustomText}"
-                                     GroupName="VisualType" Margin="0,0,12,0"
+                                     GroupName="VisualType" Margin="0,0,14,0"
                                      Checked="OnVisualTypeChanged" />
                         <RadioButton x:Name="RadioImage" Content="{x:Static res:Strings.Image}"
-                                     GroupName="VisualType" Margin="0,0,12,0"
+                                     GroupName="VisualType" Margin="0,0,14,0"
                                      Checked="OnVisualTypeChanged" />
                         <RadioButton x:Name="RadioVideo" Content="{x:Static res:Strings.Video}"
                                      GroupName="VisualType"
                                      Checked="OnVisualTypeChanged" />
                     </StackPanel>
 
-                    <!-- Text input (visible when Text mode is selected) -->
+                    <!-- Text input -->
                     <DockPanel x:Name="TextPanel" Visibility="Collapsed" Margin="0,0,0,4">
                         <TextBlock Text="{x:Static res:Strings.DisplayText}" DockPanel.Dock="Left"
                                    VerticalAlignment="Center" Margin="0,0,8,0" />
                         <TextBox x:Name="CustomTextBox" TextChanged="OnCustomTextChanged" />
                     </DockPanel>
 
-                    <!-- Image picker (visible when Image mode is selected) -->
+                    <!-- Image picker -->
                     <DockPanel x:Name="ImagePanel" Visibility="Collapsed" Margin="0,0,0,4">
                         <Button Content="{x:Static res:Strings.Choose}" DockPanel.Dock="Right" Margin="8,0,0,0"
-                                Click="OnChooseImage" Padding="8,2" />
+                                Click="OnChooseImage" Padding="10,4" />
                         <Button x:Name="ClearImageButton" Content="✕" DockPanel.Dock="Right"
-                                Margin="4,0,0,0" Click="OnClearImage" Padding="4,2"
+                                Margin="4,0,0,0" Click="OnClearImage" Padding="6,4"
                                 Visibility="Collapsed" />
                         <TextBlock Text="{x:Static res:Strings.ImageLabel}" VerticalAlignment="Center" Margin="0,0,8,0" />
                         <TextBlock x:Name="ImagePathLabel" Text="{x:Static res:Strings.Default}"
@@ -114,12 +128,12 @@
                                    TextTrimming="CharacterEllipsis" />
                     </DockPanel>
 
-                    <!-- Video picker (visible when Video mode is selected) -->
+                    <!-- Video picker -->
                     <DockPanel x:Name="VideoPanel" Visibility="Collapsed" Margin="0,0,0,4">
                         <Button Content="{x:Static res:Strings.Choose}" DockPanel.Dock="Right" Margin="8,0,0,0"
-                                Click="OnChooseVideo" Padding="8,2" />
+                                Click="OnChooseVideo" Padding="10,4" />
                         <Button x:Name="ClearVideoButton" Content="✕" DockPanel.Dock="Right"
-                                Margin="4,0,0,0" Click="OnClearVideo" Padding="4,2"
+                                Margin="4,0,0,0" Click="OnClearVideo" Padding="6,4"
                                 Visibility="Collapsed" />
                         <TextBlock Text="{x:Static res:Strings.VideoLabel}" VerticalAlignment="Center" Margin="0,0,8,0" />
                         <TextBlock x:Name="VideoPathLabel" Text="{x:Static res:Strings.NoneLabel}"
@@ -130,26 +144,26 @@
             </GroupBox>
 
             <!-- Sound -->
-            <GroupBox x:Name="SoundGroup" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="SoundGroup" Margin="0,0,0,14" Padding="12">
                 <StackPanel>
                     <CheckBox x:Name="StartGongCheck" Content="{x:Static res:Strings.StartGong}"
-                              Margin="0,4,0,4" Checked="OnStartGongChanged" Unchecked="OnStartGongChanged" />
+                              Margin="0,4,0,6" Checked="OnStartGongChanged" Unchecked="OnStartGongChanged" />
                     <CheckBox x:Name="EndGongCheck" Content="{x:Static res:Strings.EndGong}"
                               Margin="0,0,0,4" Checked="OnEndGongChanged" Unchecked="OnEndGongChanged" />
                 </StackPanel>
             </GroupBox>
 
             <!-- Behavior -->
-            <GroupBox x:Name="BehaviorGroup" Margin="0,0,0,12" Padding="10">
+            <GroupBox x:Name="BehaviorGroup" Margin="0,0,0,14" Padding="12">
                 <StackPanel>
                     <CheckBox x:Name="HandcuffsCheck" Content="{x:Static res:Strings.HandcuffsMode}"
                               Margin="0,4,0,4" Checked="OnHandcuffsChanged" Unchecked="OnHandcuffsChanged" />
                     <TextBlock Text="{x:Static res:Strings.HandcuffsDescription}"
-                               FontSize="11" Foreground="Gray" Margin="20,0,0,8" />
+                               FontSize="11" Foreground="Gray" Margin="22,0,0,10" TextWrapping="Wrap" />
                     <CheckBox x:Name="StartclickCheck" Content="{x:Static res:Strings.StartclickConfirmation}"
                               Margin="0,4,0,4" Checked="OnStartclickChanged" Unchecked="OnStartclickChanged" />
                     <TextBlock Text="{x:Static res:Strings.StartclickDescription}"
-                               FontSize="11" Foreground="Gray" Margin="20,0,0,0" />
+                               FontSize="11" Foreground="Gray" Margin="22,0,0,0" TextWrapping="Wrap" />
                 </StackPanel>
             </GroupBox>
 
@@ -157,7 +171,7 @@
             <TextBlock Text="{x:Static res:Strings.PhilosophyText}"
                        FontSize="11" FontStyle="Italic" Foreground="Gray"
                        TextAlignment="Center" TextWrapping="Wrap"
-                       Margin="0,8,0,16" />
+                       Margin="0,4,0,16" />
 
         </StackPanel>
     </ScrollViewer>

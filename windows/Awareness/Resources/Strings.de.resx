@@ -156,4 +156,10 @@ Du kannst alles über das Symbol im Infobereich → Einstellungen anpassen.</val
   <data name="ClickAnywhere" xml:space="preserve"><value>Klicke irgendwo um fortzufahren</value></data>
   <data name="Overall" xml:space="preserve"><value>Gesamt</value></data>
   <data name="AwarenessLabel" xml:space="preserve"><value>Achtsamkeit</value></data>
+
+  <!-- Desktop Sync -->
+  <data name="DesktopSync" xml:space="preserve"><value>Desktop-Sync</value></data>
+  <data name="IAlsoWorkOnComputer" xml:space="preserve"><value>Ich nutze Atempause auch auf dem Handy</value></data>
+  <data name="SyncKeyFromPhone" xml:space="preserve"><value>Sync-Schlüssel (vom iPhone)</value></data>
+  <data name="SyncKeyHint" xml:space="preserve"><value>Gib den Schlüssel aus den iPhone-Einstellungen ein, um deine Pausen in die Handy-Statistik und Apple Health zu übernehmen.</value></data>
 </root>

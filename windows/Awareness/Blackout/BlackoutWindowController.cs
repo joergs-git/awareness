@@ -5,6 +5,7 @@ using Awareness.Interop;
 using Awareness.Models;
 using Awareness.Progress;
 using Awareness.Settings;
+using Awareness.Sync;
 using Microsoft.Win32;
 
 namespace Awareness.Blackout;
@@ -34,6 +35,13 @@ public class BlackoutWindowController : IDisposable
     private string _pendingCustomText = "";
     private string _pendingImagePath = "";
     private string _pendingVideoPath = "";
+
+    // Sync event tracking
+    private DateTime? _syncEventStartTime;
+    private double _syncEventDuration;
+    private bool _syncEventCompleted;
+    private string? _syncEventAwareness;
+    private bool _syncEventUploaded;
 
     /// <summary>Whether a blackout (or confirmation/post-blackout phase) is currently being displayed</summary>
     public bool IsActive => _windows.Count > 0;
@@ -120,6 +128,13 @@ public class BlackoutWindowController : IDisposable
     {
         _isInConfirmationPhase = false;
 
+        // Track sync event from confirmation start
+        _syncEventStartTime = DateTime.UtcNow;
+        _syncEventDuration = _pendingDuration;
+        _syncEventCompleted = false;
+        _syncEventAwareness = null;
+        _syncEventUploaded = false;
+
         // Close confirmation windows and show the actual blackout
         var oldWindows = new List<BlackoutOverlayWindow>(_windows);
         _windows.Clear();
@@ -138,6 +153,9 @@ public class BlackoutWindowController : IDisposable
     private void HandleConfirmNo()
     {
         _isInConfirmationPhase = false;
+
+        // Upload sync event for the declined confirmation (triggered but not completed)
+        UploadSyncEvent();
 
         // Clean up — don't count as completed since the user declined
         _keyboardHook.SuppressAll = false;
@@ -173,6 +191,13 @@ public class BlackoutWindowController : IDisposable
         string imagePath,
         string videoPath)
     {
+        // Track sync event for Supabase upload
+        _syncEventStartTime = DateTime.UtcNow;
+        _syncEventDuration = duration;
+        _syncEventCompleted = false;
+        _syncEventAwareness = null;
+        _syncEventUploaded = false;
+
         // Play start gong immediately (before fade begins)
         GongPlayer.Shared.PlayStartIfEnabled();
 
@@ -212,6 +237,7 @@ public class BlackoutWindowController : IDisposable
         {
             _dismissTimer?.Stop();
             ProgressTracker.Shared.RecordCompleted();
+            _syncEventCompleted = true;
             BeginPostBlackoutPhase();
         };
         _dismissTimer.Start();
@@ -241,6 +267,15 @@ public class BlackoutWindowController : IDisposable
             _isInAwarenessCheckPhase = false;
             ProgressTracker.Shared.RecordAwarenessResponse(response);
 
+            // Capture awareness for sync upload
+            _syncEventAwareness = response switch
+            {
+                AwarenessResponse.Yes => "yes",
+                AwarenessResponse.Somewhat => "somewhat",
+                AwarenessResponse.No => "no",
+                _ => null
+            };
+
             if (card != null)
             {
                 // Show practice card phase
@@ -256,6 +291,8 @@ public class BlackoutWindowController : IDisposable
         };
         postBlackout.OnDismissRequested = () =>
         {
+            // Upload sync event before dismissing (full lifecycle complete)
+            UploadSyncEvent();
             // Rotate micro-task after dismissal
             SettingsManager.Shared.RotateMicroTask();
             Dismiss(silent: true);
@@ -280,6 +317,9 @@ public class BlackoutWindowController : IDisposable
     /// </summary>
     public void Dismiss(bool silent = false)
     {
+        // Upload sync event if not already uploaded (early dismiss, system idle, etc.)
+        UploadSyncEvent();
+
         _dismissTimer?.Stop();
         _dismissTimer = null;
         _isInConfirmationPhase = false;
@@ -378,6 +418,27 @@ public class BlackoutWindowController : IDisposable
         }
 
         return true; // swallow all other keys during blackout
+    }
+
+    // MARK: - Sync Upload
+
+    /// <summary>
+    /// Upload the current blackout event to Supabase. Called once per blackout lifecycle.
+    /// Safe to call multiple times — uses _syncEventUploaded flag to prevent duplicates.
+    /// </summary>
+    private void UploadSyncEvent()
+    {
+        if (_syncEventUploaded || _syncEventStartTime == null) return;
+        _syncEventUploaded = true;
+
+        SyncManager.Shared.RecordEvent(
+            _syncEventStartTime.Value,
+            _syncEventDuration,
+            _syncEventCompleted,
+            _syncEventAwareness);
+
+        // Also flush any pending events from previous failed uploads
+        SyncManager.Shared.FlushPending();
     }
 
     // MARK: - Monitor Hot-Plug

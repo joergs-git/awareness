@@ -101,12 +101,18 @@ public partial class SettingsWindow : Window
     /// </summary>
     private void SetLocalizedHeaders()
     {
-        ActiveHoursGroup.Header = $"🕐  {Strings.ActiveHours}";
-        IntervalGroup.Header = $"⏱  {Strings.IntervalBetweenBlackouts}";
-        DurationGroup.Header = $"👁  {Strings.BlackoutDuration}";
-        VisualGroup.Header = $"🎨  {Strings.BlackoutVisual}";
-        SoundGroup.Header = $"🔔  {Strings.Sound}";
-        BehaviorGroup.Header = $"🔒  {Strings.Behavior}";
+        ActiveHoursGroup.Header = Strings.ActiveHours;
+        DesktopSyncGroup.Header = Strings.DesktopSync;
+        IntervalGroup.Header = Strings.IntervalBetweenBlackouts;
+        DurationGroup.Header = Strings.BlackoutDuration;
+        VisualGroup.Header = Strings.BlackoutVisual;
+        SoundGroup.Header = Strings.Sound;
+        BehaviorGroup.Header = Strings.Behavior;
+
+        // Desktop Sync localized labels
+        WorksOnPhoneCheck.Content = Strings.IAlsoWorkOnComputer;
+        SyncKeyLabel.Text = Strings.SyncKeyFromPhone;
+        SyncKeyHint.Text = Strings.SyncKeyHint;
     }
 
     /// <summary>
@@ -198,6 +204,12 @@ public partial class SettingsWindow : Window
         // Behavior
         HandcuffsCheck.IsChecked = _settings.HandcuffsMode;
         StartclickCheck.IsChecked = _settings.StartclickConfirmation;
+
+        // Desktop Sync
+        SyncKeyInput.Text = _settings.SyncPassphrase;
+        bool hasSyncKey = !string.IsNullOrWhiteSpace(_settings.SyncPassphrase);
+        WorksOnPhoneCheck.IsChecked = hasSyncKey;
+        SyncKeyPanel.Visibility = hasSyncKey ? Visibility.Visible : Visibility.Collapsed;
     }
 
     // MARK: - Active Hours
@@ -356,5 +368,20 @@ public partial class SettingsWindow : Window
     {
         if (_isLoading) return;
         _settings.StartclickConfirmation = StartclickCheck.IsChecked == true;
+    }
+
+    // MARK: - Desktop Sync
+
+    private void OnWorksOnPhoneChanged(object sender, RoutedEventArgs e)
+    {
+        if (_isLoading) return;
+        bool expanded = WorksOnPhoneCheck.IsChecked == true;
+        SyncKeyPanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnSyncKeyChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_isLoading) return;
+        _settings.SyncPassphrase = SyncKeyInput.Text.Trim();
     }
 }

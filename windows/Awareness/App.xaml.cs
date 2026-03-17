@@ -68,6 +68,9 @@ public partial class App : Application
             // Check for updates on GitHub (background, non-blocking)
             _ = UpdateChecker.Shared.CheckAsync();
 
+            // Flush any pending sync events from previous sessions
+            Sync.SyncManager.Shared.FlushPending();
+
             // Show a welcome message on first launch
             ShowWelcomeIfFirstLaunch();
         }

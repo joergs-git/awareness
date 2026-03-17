@@ -43,6 +43,7 @@ public class SettingsManager : INotifyPropertyChanged
     private string _customVideoPath = "";
     private DateTime? _snoozeUntil = null;
     private bool _startclickConfirmation = true;
+    private string _syncPassphrase = "";
 
     // Practice Card & Micro-Task state (not persisted in SettingsData — uses separate keys in JSON)
     private string _todaysPracticeCardID = "";
@@ -193,6 +194,13 @@ public class SettingsManager : INotifyPropertyChanged
     {
         get => _startclickConfirmation;
         set { if (SetField(ref _startclickConfirmation, value)) ScheduleSave(); }
+    }
+
+    /// <summary>Sync passphrase entered by the user (from iOS app)</summary>
+    public string SyncPassphrase
+    {
+        get => _syncPassphrase;
+        set { if (SetField(ref _syncPassphrase, value)) ScheduleSave(); }
     }
 
     // MARK: - Computed Helpers
@@ -379,6 +387,7 @@ public class SettingsManager : INotifyPropertyChanged
             _customVideoPath = data.CustomVideoPath ?? "";
             _snoozeUntil = data.SnoozeUntil;
             _startclickConfirmation = data.StartclickConfirmation;
+            _syncPassphrase = data.SyncPassphrase ?? "";
 
             // Practice Card & Micro-Task state
             _todaysPracticeCardID = data.TodaysPracticeCardID ?? "";
@@ -420,6 +429,7 @@ public class SettingsManager : INotifyPropertyChanged
                 CustomVideoPath = _customVideoPath,
                 SnoozeUntil = _snoozeUntil,
                 StartclickConfirmation = _startclickConfirmation,
+                SyncPassphrase = _syncPassphrase,
                 TodaysPracticeCardID = _todaysPracticeCardID,
                 PracticeCardDate = _practiceCardDate,
                 YesterdaysCardID = _yesterdaysCardID,
@@ -512,6 +522,9 @@ public class SettingsManager : INotifyPropertyChanged
 
         [JsonPropertyName("startclickConfirmation")]
         public bool StartclickConfirmation { get; set; } = true;
+
+        [JsonPropertyName("syncPassphrase")]
+        public string? SyncPassphrase { get; set; } = "";
 
         // Practice Card & Micro-Task state
         [JsonPropertyName("todaysPracticeCardID")]

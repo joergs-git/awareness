@@ -780,5 +780,41 @@ namespace Awareness.Resources {
                 return ResourceManager.GetString("StartclickDescription", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Desktop Sync.
+        /// </summary>
+        public static string DesktopSync {
+            get {
+                return ResourceManager.GetString("DesktopSync", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to I also use Atempause on my phone.
+        /// </summary>
+        public static string IAlsoWorkOnComputer {
+            get {
+                return ResourceManager.GetString("IAlsoWorkOnComputer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sync Key (from iPhone).
+        /// </summary>
+        public static string SyncKeyFromPhone {
+            get {
+                return ResourceManager.GetString("SyncKeyFromPhone", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the key from your iPhone's Settings....
+        /// </summary>
+        public static string SyncKeyHint {
+            get {
+                return ResourceManager.GetString("SyncKeyHint", resourceCulture);
+            }
+        }
     }
 }

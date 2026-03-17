@@ -156,4 +156,10 @@ You can configure everything from the tray icon → Settings.</value></data>
   <data name="ClickAnywhere" xml:space="preserve"><value>click anywhere to continue</value></data>
   <data name="Overall" xml:space="preserve"><value>Overall</value></data>
   <data name="AwarenessLabel" xml:space="preserve"><value>Awareness</value></data>
+
+  <!-- Desktop Sync -->
+  <data name="DesktopSync" xml:space="preserve"><value>Desktop Sync</value></data>
+  <data name="IAlsoWorkOnComputer" xml:space="preserve"><value>I also use Atempause on my phone</value></data>
+  <data name="SyncKeyFromPhone" xml:space="preserve"><value>Sync Key (from iPhone)</value></data>
+  <data name="SyncKeyHint" xml:space="preserve"><value>Enter the key from your iPhone's Settings to sync your breaks to your phone stats and Apple Health.</value></data>
 </root>
