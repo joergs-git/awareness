@@ -147,6 +147,33 @@ class ForegroundScheduler: ObservableObject {
         scheduleNext()
     }
 
+    // MARK: - Desktop Sync Postpone
+
+    /// Postpone the next foreground blackout to at least the given date.
+    /// Called by SyncManager when a recent desktop break is detected,
+    /// so iOS doesn't fire a break too soon after the desktop did.
+    func postponeIfNeeded(until date: Date) {
+        guard isRunning else { return }
+        guard let next = nextBlackoutDate, next < date else { return }
+
+        // Cancel the current timer and reschedule to fire after the postpone date
+        timer?.invalidate()
+        timer = nil
+
+        let delay = date.timeIntervalSinceNow
+        guard delay > 0 else { return }
+
+        // Add a random extra offset (30–120s) so it doesn't fire exactly at the boundary
+        let extra = TimeInterval.random(in: 30...120)
+        let totalDelay = delay + extra
+        let fireDate = Date().addingTimeInterval(totalDelay)
+        nextBlackoutDate = fireDate
+
+        timer = Timer.scheduledTimer(withTimeInterval: totalDelay, repeats: false) { [weak self] _ in
+            self?.timerFired()
+        }
+    }
+
     // MARK: - Helpers
 
     /// Returns a random delay (in seconds) using effective (guru-adapted or manual) intervals

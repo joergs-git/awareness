@@ -35,6 +35,7 @@ final class SyncManager {
 
                 var processedIDs = SyncKeyManager.shared.processedEventIDs
                 var latestDate: Date?
+                var latestBreakEndTime: Date?
                 var integrated = false
 
                 for event in events {
@@ -79,6 +80,12 @@ final class SyncManager {
                     processedIDs.insert(event.id)
                     integrated = true
 
+                    // Track latest break end time for scheduler postpone
+                    let breakEnd = startedAt.addingTimeInterval(event.duration)
+                    if latestBreakEndTime == nil || breakEnd > latestBreakEndTime! {
+                        latestBreakEndTime = breakEnd
+                    }
+
                     // Track latest created_at for cursor
                     if let createdAt = SupabaseClient.parseDate(event.createdAt) {
                         if latestDate == nil || createdAt > latestDate! {
@@ -100,6 +107,19 @@ final class SyncManager {
                 if integrated {
                     await MainActor.run {
                         WidgetDataBridge.shared.updateWidget()
+                    }
+                }
+
+                // Postpone iOS schedulers if a desktop break just ended recently.
+                // Avoids double-triggering (e.g. Mac break at 10:00, iOS fires at 10:01).
+                if let breakEnd = latestBreakEndTime {
+                    let minInterval = SettingsManager.shared.effectiveMinInterval * 60.0
+                    let timeSinceBreak = Date().timeIntervalSince(breakEnd)
+                    if timeSinceBreak < minInterval && timeSinceBreak >= 0 {
+                        let postponeUntil = breakEnd.addingTimeInterval(minInterval)
+                        await MainActor.run {
+                            ForegroundScheduler.shared.postponeIfNeeded(until: postponeUntil)
+                        }
                     }
                 }
             } catch {
