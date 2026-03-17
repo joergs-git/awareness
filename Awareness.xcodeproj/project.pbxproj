@@ -33,6 +33,9 @@
 		A20020 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20020; };
 		A20021 /* BlackoutPhaseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20021; };
 		A20022 /* WarmBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20022; };
+		A20023 /* SyncKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20023; };
+		A20024 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20024; };
+		A20025 /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20025; };
 		B2F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A2F00001; };
 /* End PBXBuildFile section */
 
@@ -65,6 +68,9 @@
 		B20020 /* MicroTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroTask.swift; sourceTree = "<group>"; };
 		B20021 /* BlackoutPhaseState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackoutPhaseState.swift; sourceTree = "<group>"; };
 		B20022 /* WarmBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarmBackground.swift; sourceTree = "<group>"; };
+		B20023 /* SyncKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncKeyManager.swift; sourceTree = "<group>"; };
+		B20024 /* SupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClient.swift; sourceTree = "<group>"; };
+		B20025 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
 		B20099 /* Awareness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Awareness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -103,6 +109,7 @@
 				D20007 /* Audio */,
 				D20008 /* Models */,
 				D20011 /* Progress */,
+				D20012 /* Sync */,
 				D20009 /* Resources */,
 			);
 			path = "Sources/Awareness";
@@ -173,6 +180,16 @@
 				B20018 /* ProgressWindowController.swift */,
 			);
 			path = Progress;
+			sourceTree = "<group>";
+		};
+		D20012 /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				B20023 /* SyncKeyManager.swift */,
+				B20024 /* SupabaseClient.swift */,
+				B20025 /* SyncManager.swift */,
+			);
+			path = Sync;
 			sourceTree = "<group>";
 		};
 		D20009 /* Resources */ = {
@@ -300,6 +317,9 @@
 				A20020 /* MicroTask.swift in Sources */,
 				A20021 /* BlackoutPhaseState.swift in Sources */,
 				A20022 /* WarmBackground.swift in Sources */,
+				A20023 /* SyncKeyManager.swift in Sources */,
+				A20024 /* SupabaseClient.swift in Sources */,
+				A20025 /* SyncManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
