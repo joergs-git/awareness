@@ -42,6 +42,19 @@ public partial class SettingsWindow : Window
         }
         catch { /* Default to light */ }
 
+        // Light mode: ensure ComboBox and TextBox text is readable against the warm background
+        if (!isDark)
+        {
+            var darkText = new SolidColorBrush(Colors.Black);
+            var comboLightStyle = new Style(typeof(System.Windows.Controls.ComboBox));
+            comboLightStyle.Setters.Add(new Setter(ForegroundProperty, darkText));
+            Resources[typeof(System.Windows.Controls.ComboBox)] = comboLightStyle;
+
+            var comboItemLightStyle = new Style(typeof(System.Windows.Controls.ComboBoxItem));
+            comboItemLightStyle.Setters.Add(new Setter(ForegroundProperty, darkText));
+            Resources[typeof(System.Windows.Controls.ComboBoxItem)] = comboItemLightStyle;
+        }
+
         if (isDark)
         {
             TopGradientStop.Color = Color.FromRgb(36, 31, 28);    // (0.14, 0.12, 0.11)
