@@ -43,16 +43,17 @@ public partial class SettingsWindow : Window
         catch { /* Default to light */ }
         var isDark = _isDarkMode;
 
-        // Light mode: ensure ComboBox and TextBox text is readable against the warm background
+        // Light mode: give ComboBoxes a solid white background so the warm gradient
+        // doesn't bleed through and make text unreadable
         if (!isDark)
         {
-            var darkText = new SolidColorBrush(Colors.Black);
             var comboLightStyle = new Style(typeof(System.Windows.Controls.ComboBox));
-            comboLightStyle.Setters.Add(new Setter(ForegroundProperty, darkText));
+            comboLightStyle.Setters.Add(new Setter(ForegroundProperty, System.Windows.Media.Brushes.Black));
+            comboLightStyle.Setters.Add(new Setter(BackgroundProperty, System.Windows.Media.Brushes.White));
             Resources[typeof(System.Windows.Controls.ComboBox)] = comboLightStyle;
 
             var comboItemLightStyle = new Style(typeof(System.Windows.Controls.ComboBoxItem));
-            comboItemLightStyle.Setters.Add(new Setter(ForegroundProperty, darkText));
+            comboItemLightStyle.Setters.Add(new Setter(ForegroundProperty, System.Windows.Media.Brushes.Black));
             Resources[typeof(System.Windows.Controls.ComboBoxItem)] = comboItemLightStyle;
         }
 
@@ -144,11 +145,14 @@ public partial class SettingsWindow : Window
             StartHourCombo.Items.Add(new ComboBoxItem { Content = label, Tag = h, Foreground = comboTextBrush });
             EndHourCombo.Items.Add(new ComboBoxItem { Content = label, Tag = h, Foreground = comboTextBrush });
         }
-        // Also set the ComboBox itself for the selected-value display
-        if (!_isDarkMode)
+        // Override XAML defaults for dark mode; light mode uses XAML White/Black
+        if (_isDarkMode)
         {
-            StartHourCombo.Foreground = System.Windows.Media.Brushes.Black;
-            EndHourCombo.Foreground = System.Windows.Media.Brushes.Black;
+            var darkBg = new SolidColorBrush(Color.FromRgb(45, 40, 36));
+            StartHourCombo.Foreground = comboTextBrush;
+            StartHourCombo.Background = darkBg;
+            EndHourCombo.Foreground = comboTextBrush;
+            EndHourCombo.Background = darkBg;
         }
         StartHourCombo.SelectedIndex = _settings.ActiveStartHour;
         EndHourCombo.SelectedIndex = _settings.ActiveEndHour;
