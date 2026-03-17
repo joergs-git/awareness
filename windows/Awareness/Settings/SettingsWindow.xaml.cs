@@ -17,6 +17,7 @@ public partial class SettingsWindow : Window
 {
     private readonly SettingsManager _settings;
     private bool _isLoading = true; // Prevents event handlers from firing during initial load
+    private bool _isDarkMode;
 
     public SettingsWindow()
     {
@@ -33,14 +34,14 @@ public partial class SettingsWindow : Window
     /// </summary>
     private void ApplyWarmBackground()
     {
-        bool isDark = false;
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
             if (key?.GetValue("AppsUseLightTheme") is int value)
-                isDark = value == 0;
+                _isDarkMode = value == 0;
         }
         catch { /* Default to light */ }
+        var isDark = _isDarkMode;
 
         // Light mode: ensure ComboBox and TextBox text is readable against the warm background
         if (!isDark)
@@ -134,11 +135,20 @@ public partial class SettingsWindow : Window
     private void LoadSettingsIntoUI()
     {
         // Active Hours — populate hour combo boxes
+        var comboTextBrush = _isDarkMode
+            ? new SolidColorBrush(Color.FromRgb(230, 225, 220))
+            : System.Windows.Media.Brushes.Black;
         for (int h = 0; h < 24; h++)
         {
             string label = $"{h:D2}:00";
-            StartHourCombo.Items.Add(new ComboBoxItem { Content = label, Tag = h });
-            EndHourCombo.Items.Add(new ComboBoxItem { Content = label, Tag = h });
+            StartHourCombo.Items.Add(new ComboBoxItem { Content = label, Tag = h, Foreground = comboTextBrush });
+            EndHourCombo.Items.Add(new ComboBoxItem { Content = label, Tag = h, Foreground = comboTextBrush });
+        }
+        // Also set the ComboBox itself for the selected-value display
+        if (!_isDarkMode)
+        {
+            StartHourCombo.Foreground = System.Windows.Media.Brushes.Black;
+            EndHourCombo.Foreground = System.Windows.Media.Brushes.Black;
         }
         StartHourCombo.SelectedIndex = _settings.ActiveStartHour;
         EndHourCombo.SelectedIndex = _settings.ActiveEndHour;
