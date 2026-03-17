@@ -1,5 +1,6 @@
-Neu in Version 3.15:
+Neu in Version 3.17:
 
-- Yin-Yang-Logo dreht sich jetzt langsam — ein subtiler, meditativer Akzent
-- Behoben: Atem-Pulsanimation startet jetzt zuverlässig bei Logo und Button
-- watchOS: Achtsamkeitsfrage erscheint jetzt genau einmal (Alarm-Timing behoben)
+- Bidirektionale Synchronisation: iPhone und Apple Watch laden Atemereignisse zu Supabase hoch — alle Geräte wissen voneinander
+- Intelligente Koordination: Mac und Windows prüfen vor dem Auslösen auf kürzliche Pausen und vermeiden Doppelunterbrechungen
+- watchOS-Ereignisse werden zuverlässig via WatchConnectivity weitergeleitet
+- Offline-Upload-Warteschlange auf iOS (wie bei Desktop)

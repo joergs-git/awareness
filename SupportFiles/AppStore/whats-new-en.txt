@@ -1,5 +1,6 @@
-What's New in v3.15:
+What's New in v3.17:
 
-- Yin-yang logo now slowly rotates — a subtle, meditative touch
-- Fixed: breathing pulse animation reliably starts on logo and button
-- watchOS: awareness check now appears exactly once (alarm race condition fixed)
+- Bidirectional sync: iPhone and Apple Watch now upload breathing events to Supabase — all devices stay aware of each other
+- Smart coordination: Mac and Windows check for recent breaks before triggering, preventing double-interruptions
+- watchOS events relayed via WatchConnectivity for reliable syncing
+- Offline upload queue on iOS (matches desktop resilience)

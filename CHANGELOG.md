@@ -4,6 +4,20 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v3.17
+
+### Bidirectional Cross-Platform Sync
+- **iOS now uploads blackout events to Supabase** — desktop and watchOS can see when iOS had a break, preventing uncoordinated double-triggers
+- **watchOS relays events to iOS** via WatchConnectivity (guaranteed delivery) — iOS uploads them to Supabase with source "watchos"
+- **macOS and Windows pre-trigger check** — before firing a break, desktop queries Supabase for recent events from any other platform. If another device had a break within the minimum interval, the trigger is deferred
+- **iOS pre-trigger check expanded** — now checks macOS, Windows, and watchOS events (previously desktop only)
+- **Offline resilience on iOS** — pending upload queue (max 500, 7-day TTL) mirrors the desktop pattern
+
+### Windows
+- **ComboBox readability fix** — white background on time dropdowns in light mode settings (warm gradient no longer bleeds through)
+
+---
+
 ## v3.16
 
 ### Cross-Platform Sync via Supabase
