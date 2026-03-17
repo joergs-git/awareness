@@ -135,16 +135,36 @@ class ForegroundScheduler: ObservableObject {
             return
         }
 
-        // Fire the blackout
-        lastTriggerDate = Date()
-        ProgressTracker.shared.recordTriggered()
+        // Pre-flight: check if a desktop break just happened via Supabase.
+        // If so, postpone instead of double-triggering.
+        Task {
+            let shouldDefer = await SyncManager.shared.shouldDeferToDesktopBreak()
 
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .showBlackout, object: nil)
+            await MainActor.run {
+                guard self.isRunning else { return }
+
+                if shouldDefer {
+                    // Desktop break was recent — postpone
+                    let minDelay = self.settings.effectiveMinInterval * 60.0
+                    let extra = TimeInterval.random(in: 30...120)
+                    let fireDate = Date().addingTimeInterval(minDelay + extra)
+                    self.nextBlackoutDate = fireDate
+                    self.timer = Timer.scheduledTimer(withTimeInterval: minDelay + extra, repeats: false) { [weak self] _ in
+                        self?.timerFired()
+                    }
+                    return
+                }
+
+                // Fire the blackout
+                self.lastTriggerDate = Date()
+                ProgressTracker.shared.recordTriggered()
+
+                NotificationCenter.default.post(name: .showBlackout, object: nil)
+
+                // Schedule the next one
+                self.scheduleNext()
+            }
         }
-
-        // Schedule the next one
-        scheduleNext()
     }
 
     // MARK: - Desktop Sync Postpone

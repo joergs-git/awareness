@@ -129,6 +129,53 @@ final class SyncManager {
         }
     }
 
+    // MARK: - Pre-Trigger Check
+
+    /// Quick check: was there a recent desktop break that should prevent iOS from triggering?
+    /// Called by ForegroundScheduler right before firing a blackout.
+    /// Returns true if iOS should NOT trigger (desktop break was recent).
+    func shouldDeferToDesktopBreak() async -> Bool {
+        guard SyncKeyManager.shared.isConfigured,
+              let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else { return false }
+
+        do {
+            let since = SyncKeyManager.shared.lastPullDate
+            let events = try await SupabaseClient.shared.fetchEvents(
+                syncKeyHash: syncKeyHash,
+                since: since
+            )
+
+            guard !events.isEmpty else { return false }
+
+            // Find the latest break end time among new events
+            var latestBreakEnd: Date?
+            for event in events {
+                guard let startedAt = SupabaseClient.parseDate(event.startedAt) else { continue }
+                let breakEnd = startedAt.addingTimeInterval(event.duration)
+                if latestBreakEnd == nil || breakEnd > latestBreakEnd! {
+                    latestBreakEnd = breakEnd
+                }
+            }
+
+            guard let breakEnd = latestBreakEnd else { return false }
+
+            // Check if the desktop break ended within the minimum interval
+            let minInterval = SettingsManager.shared.effectiveMinInterval * 60.0
+            let timeSinceBreak = Date().timeIntervalSince(breakEnd)
+
+            if timeSinceBreak < minInterval && timeSinceBreak >= 0 {
+                // Also integrate the events while we're here
+                pullAndIntegrate()
+                return true
+            }
+
+            return false
+        } catch {
+            // Network error — don't block the trigger, just proceed
+            return false
+        }
+    }
+
     // MARK: - Helpers
 
     /// Format a date as "yyyy-MM-dd" for ProgressTracker date keys
