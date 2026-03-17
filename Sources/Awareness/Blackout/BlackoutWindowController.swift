@@ -38,8 +38,6 @@ class BlackoutWindowController {
     private var syncEventDuration: TimeInterval = 0
     private var syncEventCompleted = false
     private var syncEventAwareness: String?
-    /// Whether the sync event has already been uploaded (prevents double-upload)
-    private var syncEventUploaded = false
 
     // MARK: - Startclick Confirmation State
 
@@ -158,7 +156,9 @@ class BlackoutWindowController {
         syncEventDuration = pendingDuration
         syncEventCompleted = false
         syncEventAwareness = nil
-        syncEventUploaded = false
+
+        // Upload immediately so iOS knows a desktop break just started
+        uploadSyncEvent()
 
         // Replace window content with the actual blackout view
         let contentView = BlackoutContentView(
@@ -230,7 +230,9 @@ class BlackoutWindowController {
         syncEventDuration = duration
         syncEventCompleted = false
         syncEventAwareness = nil
-        syncEventUploaded = false
+
+        // Upload immediately so iOS knows a desktop break just started
+        uploadSyncEvent()
 
         // Play start gong immediately (before fade begins)
         GongPlayer.shared.playStartIfEnabled()
@@ -437,11 +439,11 @@ class BlackoutWindowController {
 
     // MARK: - Sync Upload
 
-    /// Upload the current blackout event to Supabase. Called once per blackout lifecycle.
-    /// Safe to call multiple times — uses syncEventUploaded flag to prevent duplicates.
+    /// Upload the current blackout event to Supabase via upsert.
+    /// Called at blackout START (completed=false) and again at END (completed=true, awareness set).
+    /// The upsert (merge-duplicates) updates the row with the final data on the second call.
     private func uploadSyncEvent() {
-        guard !syncEventUploaded, let startTime = syncEventStartTime else { return }
-        syncEventUploaded = true
+        guard let startTime = syncEventStartTime else { return }
 
         SyncManager.shared.recordEvent(
             startedAt: startTime,

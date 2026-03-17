@@ -48,14 +48,15 @@ public class SupabaseClient
     public async Task UploadEventAsync(UploadEvent ev)
     {
         var json = JsonSerializer.Serialize(ev);
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"{SupabaseUrl}/rest/v1/blackout_events")
+        // on_conflict enables upsert: INSERT or UPDATE when (sync_key, started_at, source) matches
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{SupabaseUrl}/rest/v1/blackout_events?on_conflict=sync_key,started_at,source")
         {
             Content = new StringContent(json, Encoding.UTF8, "application/json")
         };
 
         request.Headers.Add("apikey", SupabaseAnonKey);
         request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
-        request.Headers.Add("Prefer", "return=minimal,resolution=ignore-duplicates");
+        request.Headers.Add("Prefer", "return=minimal,resolution=merge-duplicates");
 
         var response = await _http.SendAsync(request);
         response.EnsureSuccessStatusCode();

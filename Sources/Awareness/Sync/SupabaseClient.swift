@@ -37,7 +37,8 @@ final class SupabaseClient {
     /// Upload a single blackout event to Supabase.
     /// Uses ON CONFLICT DO NOTHING for idempotent retries.
     func uploadEvent(_ event: UploadEvent) async throws {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/blackout_events") else {
+        // on_conflict enables upsert: INSERT or UPDATE when (sync_key, started_at, source) matches
+        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/blackout_events?on_conflict=sync_key,started_at,source") else {
             throw SyncError.invalidURL
         }
 
@@ -46,7 +47,7 @@ final class SupabaseClient {
         request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("return=minimal,resolution=ignore-duplicates", forHTTPHeaderField: "Prefer")
+        request.setValue("return=minimal,resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
 
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(event)

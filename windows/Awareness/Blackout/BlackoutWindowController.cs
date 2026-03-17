@@ -41,7 +41,6 @@ public class BlackoutWindowController : IDisposable
     private double _syncEventDuration;
     private bool _syncEventCompleted;
     private string? _syncEventAwareness;
-    private bool _syncEventUploaded;
 
     /// <summary>Whether a blackout (or confirmation/post-blackout phase) is currently being displayed</summary>
     public bool IsActive => _windows.Count > 0;
@@ -133,7 +132,9 @@ public class BlackoutWindowController : IDisposable
         _syncEventDuration = _pendingDuration;
         _syncEventCompleted = false;
         _syncEventAwareness = null;
-        _syncEventUploaded = false;
+
+        // Upload immediately so iOS knows a desktop break just started
+        UploadSyncEvent();
 
         // Close confirmation windows and show the actual blackout
         var oldWindows = new List<BlackoutOverlayWindow>(_windows);
@@ -196,7 +197,9 @@ public class BlackoutWindowController : IDisposable
         _syncEventDuration = duration;
         _syncEventCompleted = false;
         _syncEventAwareness = null;
-        _syncEventUploaded = false;
+
+        // Upload immediately so iOS knows a desktop break just started
+        UploadSyncEvent();
 
         // Play start gong immediately (before fade begins)
         GongPlayer.Shared.PlayStartIfEnabled();
@@ -424,12 +427,12 @@ public class BlackoutWindowController : IDisposable
 
     /// <summary>
     /// Upload the current blackout event to Supabase. Called once per blackout lifecycle.
-    /// Safe to call multiple times — uses _syncEventUploaded flag to prevent duplicates.
+    /// Called at blackout START (completed=false) and again at END (completed=true).
+    /// The upsert (merge-duplicates) updates the row with the final data on the second call.
     /// </summary>
     private void UploadSyncEvent()
     {
-        if (_syncEventUploaded || _syncEventStartTime == null) return;
-        _syncEventUploaded = true;
+        if (_syncEventStartTime == null) return;
 
         SyncManager.Shared.RecordEvent(
             _syncEventStartTime.Value,
