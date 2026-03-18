@@ -253,8 +253,9 @@ struct BlackoutView: View {
     /// Record awareness score and dismiss
     private func handleAwarenessScore(_ score: Int) {
         ProgressTracker.shared.recordAwarenessScore(score)
-        // Upload final sync event with awareness score (upserts the start event)
-        uploadSyncEvent(completed: true, awareness: "\(score)")
+        // Upload final sync event with awareness mapped to Supabase format
+        // (Supabase CHECK constraint only allows "yes"/"somewhat"/"no"/null)
+        uploadSyncEvent(completed: true, awareness: Self.awarenessForSync(score))
         withAnimation(.easeOut(duration: 0.3)) {
             opacity = 0
         }
@@ -262,6 +263,15 @@ struct BlackoutView: View {
             UIApplication.shared.isIdleTimerDisabled = false
             isPresented = false
         }
+    }
+
+    /// Map a 0–100 awareness score to Supabase-compatible string.
+    /// Supabase CHECK constraint only allows "yes"/"somewhat"/"no".
+    /// 0–33 → "no", 34–66 → "somewhat", 67–100 → "yes"
+    private static func awarenessForSync(_ score: Int) -> String {
+        if score >= 67 { return "yes" }
+        if score >= 34 { return "somewhat" }
+        return "no"
     }
 
     // MARK: - Sync Upload

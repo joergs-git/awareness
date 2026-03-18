@@ -323,9 +323,12 @@ class BlackoutWindowController {
         state.microTask = task
         state.onAwarenessAnswered = { [weak self] in
             guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return }
-            // Capture awareness score for sync upload
+            // Capture awareness for sync upload (mapped to Supabase format:
+            // CHECK constraint only allows "yes"/"somewhat"/"no")
             if let score = state.awarenessScore {
-                self.syncEventAwareness = "\(score)"
+                if score >= 67 { self.syncEventAwareness = "yes" }
+                else if score >= 34 { self.syncEventAwareness = "somewhat" }
+                else { self.syncEventAwareness = "no" }
             }
             state.phase = .practiceCard
         }

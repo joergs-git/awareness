@@ -20,7 +20,7 @@ final class SupabaseClient {
         let startedAt: String      // ISO 8601 timestamp
         let duration: Double       // seconds
         let completed: Bool
-        let awareness: String?     // numeric "0"–"100" or legacy "yes"/"somewhat"/"no" / null
+        let awareness: String?     // "yes" / "somewhat" / "no" / null
         let source: String         // "macos" / "windows" / "ios" / "watchos"
         let createdAt: String      // ISO 8601 timestamp
 

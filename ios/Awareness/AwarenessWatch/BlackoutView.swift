@@ -290,7 +290,7 @@ struct BlackoutView: View {
                 startedAt: start,
                 duration: WatchConnectivityManager.lastBlackoutDuration,
                 completed: WatchConnectivityManager.lastBlackoutCompleted,
-                awareness: "\(score)"
+                awareness: Self.awarenessForSync(score)
             )
         }
         WKInterfaceDevice.current().play(.click)
@@ -303,6 +303,14 @@ struct BlackoutView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isPresented = false
         }
+    }
+
+    /// Map a 0–100 awareness score to Supabase-compatible string.
+    /// Supabase CHECK constraint only allows "yes"/"somewhat"/"no".
+    private static func awarenessForSync(_ score: Int) -> String {
+        if score >= 67 { return "yes" }
+        if score >= 34 { return "somewhat" }
+        return "no"
     }
 
     // MARK: - End Signal Notification
