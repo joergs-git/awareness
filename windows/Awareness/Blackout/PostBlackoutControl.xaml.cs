@@ -1,8 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using Awareness.Progress;
 
 namespace Awareness.Blackout;
 
@@ -10,8 +10,8 @@ namespace Awareness.Blackout;
 /// Post-blackout UserControl that manages the two-phase awareness flow:
 ///
 ///   Phase 1 — Awareness Check:
-///     "Were you there?" question with Yes / Somewhat / No capsule buttons.
-///     Invokes OnAwarenessAnswered when the user picks a response.
+///     "Were you there?" question with a slider (0–100).
+///     Saves on slider release. Invokes OnAwarenessAnswered with the score.
 ///
 ///   Phase 2 — Practice Card:
 ///     Card title, thin separator, optional micro-task text, and a
@@ -21,7 +21,7 @@ namespace Awareness.Blackout;
 /// Usage:
 ///   1. Create the control and wire up the two callbacks.
 ///   2. Call ShowAwarenessCheck() to fade in Phase 1.
-///   3. After the user responds, call ShowPracticeCard() to cross-fade to Phase 2.
+///   3. After the user releases the slider, call ShowPracticeCard() to cross-fade to Phase 2.
 ///   4. After OnDismissRequested fires, remove or hide the control.
 /// </summary>
 public partial class PostBlackoutControl : UserControl
@@ -37,10 +37,11 @@ public partial class PostBlackoutControl : UserControl
     // MARK: - Public API
 
     /// <summary>
-    /// Called when the user taps one of the three awareness buttons (Yes / Somewhat / No).
+    /// Called when the user releases the awareness slider.
+    /// The int parameter is the score (0–100).
     /// Fires before the phase transition to the practice card begins.
     /// </summary>
-    public Action<AwarenessResponse>? OnAwarenessAnswered { get; set; }
+    public Action<int>? OnAwarenessAnswered { get; set; }
 
     /// <summary>
     /// Called when the user clicks anywhere while the practice card is visible.
@@ -49,8 +50,8 @@ public partial class PostBlackoutControl : UserControl
     public Action? OnDismissRequested { get; set; }
 
     /// <summary>
-    /// True while the awareness check panel is the active phase (buttons are visible
-    /// and clickable).  False during transitions and in the practice card phase.
+    /// True while the awareness check panel is the active phase (slider is visible
+    /// and interactive).  False during transitions and in the practice card phase.
     /// </summary>
     public bool IsInAwarenessPhase { get; private set; }
 
@@ -76,6 +77,9 @@ public partial class PostBlackoutControl : UserControl
         AwarenessPanel.Visibility = Visibility.Visible;
         AwarenessPanel.Opacity = 0;
 
+        // Reset slider to center
+        AwarenessSlider.Value = 50;
+
         IsInAwarenessPhase = true;
 
         // Fade the awareness panel in from 0 → 1
@@ -97,7 +101,7 @@ public partial class PostBlackoutControl : UserControl
     /// </param>
     public void ShowPracticeCard(string cardTitle, string? microTaskText)
     {
-        // Prevent further button interaction during the transition
+        // Prevent further slider interaction during the transition
         IsInAwarenessPhase = false;
 
         // Populate card content before the animation starts to avoid a visible flash
@@ -137,24 +141,13 @@ public partial class PostBlackoutControl : UserControl
         AwarenessPanel.BeginAnimation(OpacityProperty, fadeOut);
     }
 
-    // MARK: - Button Click Handlers
+    // MARK: - Slider Handler
 
-    private void OnYesClicked(object sender, RoutedEventArgs e)
+    private void OnSliderDragCompleted(object sender, DragCompletedEventArgs e)
     {
         if (!IsInAwarenessPhase) return;
-        OnAwarenessAnswered?.Invoke(AwarenessResponse.Yes);
-    }
-
-    private void OnSomewhatClicked(object sender, RoutedEventArgs e)
-    {
-        if (!IsInAwarenessPhase) return;
-        OnAwarenessAnswered?.Invoke(AwarenessResponse.Somewhat);
-    }
-
-    private void OnNoClicked(object sender, RoutedEventArgs e)
-    {
-        if (!IsInAwarenessPhase) return;
-        OnAwarenessAnswered?.Invoke(AwarenessResponse.No);
+        int score = (int)AwarenessSlider.Value;
+        OnAwarenessAnswered?.Invoke(score);
     }
 
     // MARK: - Card Dismiss Handler

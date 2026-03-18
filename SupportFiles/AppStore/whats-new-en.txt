@@ -1,6 +1,6 @@
-What's New in v3.17:
+What's New in v3.18:
 
-- Bidirectional sync: iPhone and Apple Watch now upload breathing events to Supabase — all devices stay aware of each other
-- Smart coordination: Mac and Windows check for recent breaks before triggering, preventing double-interruptions
-- watchOS events relayed via WatchConnectivity for reliable syncing
-- Offline upload queue on iOS (matches desktop resilience)
+- Awareness slider: replaced Yes/Somewhat/No buttons with a smooth 0–100 slider for more nuanced self-assessment
+- Candlestick chart: new stock-chart-style awareness visualization with min–max range, median dots, and trend line
+- watchOS: compact median display with 7-day sparkline
+- Existing data migrated automatically

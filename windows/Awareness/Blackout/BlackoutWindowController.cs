@@ -265,19 +265,13 @@ public class BlackoutWindowController : IDisposable
 
         // Create the post-blackout control and swap it into all windows
         var postBlackout = new PostBlackoutControl();
-        postBlackout.OnAwarenessAnswered = response =>
+        postBlackout.OnAwarenessAnswered = score =>
         {
             _isInAwarenessCheckPhase = false;
-            ProgressTracker.Shared.RecordAwarenessResponse(response);
+            ProgressTracker.Shared.RecordAwarenessScore(score);
 
-            // Capture awareness for sync upload
-            _syncEventAwareness = response switch
-            {
-                AwarenessResponse.Yes => "yes",
-                AwarenessResponse.Somewhat => "somewhat",
-                AwarenessResponse.No => "no",
-                _ => null
-            };
+            // Capture awareness score for sync upload
+            _syncEventAwareness = score.ToString();
 
             if (card != null)
             {

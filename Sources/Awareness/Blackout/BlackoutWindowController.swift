@@ -323,13 +323,9 @@ class BlackoutWindowController {
         state.microTask = task
         state.onAwarenessAnswered = { [weak self] in
             guard let self = self, self.isActive, self.isInPostBlackoutPhase else { return }
-            // Capture awareness response for sync upload
-            if let response = state.awarenessResponse {
-                switch response {
-                case .yes: self.syncEventAwareness = "yes"
-                case .somewhat: self.syncEventAwareness = "somewhat"
-                case .no: self.syncEventAwareness = "no"
-                }
+            // Capture awareness score for sync upload
+            if let score = state.awarenessScore {
+                self.syncEventAwareness = "\(score)"
             }
             state.phase = .practiceCard
         }

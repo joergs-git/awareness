@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Progress statistics view for iOS showing two donut charts (today + overall),
-/// a philosophical slogan, today/lifetime counters, and a 14-day bar chart.
+/// a philosophical slogan, today/lifetime counters, a 14-day bar chart,
+/// and a candlestick awareness chart.
 struct ProgressView: View {
 
     @ObservedObject var tracker = ProgressTracker.shared
@@ -89,7 +90,7 @@ struct ProgressView: View {
                 Text(String(localized: "Breathings"))
             }
 
-            // MARK: - 14-Day Awareness Chart
+            // MARK: - 14-Day Awareness Candlestick Chart
             Section {
                 awarenessChart
                     .padding(.vertical, 8)
@@ -208,84 +209,83 @@ struct ProgressView: View {
         }
     }
 
-    // MARK: - Awareness Response Chart
-
-    /// Colors for the three awareness response categories
-    private let yesColor = Color(red: 0.45, green: 0.65, blue: 0.45)
-    private let somewhatColor = Color(red: 0.55, green: 0.55, blue: 0.70)
-    private let noColor = Color(red: 0.70, green: 0.50, blue: 0.45)
+    // MARK: - Awareness Candlestick Chart
 
     @ViewBuilder
     private var awarenessChart: some View {
         let days = tracker.last14Days
-        let maxVal = max(days.map { max($0.yes, max($0.somewhat, $0.no)) }.max() ?? 1, 1)
+        let hasData = days.contains { !$0.awarenessScores.isEmpty }
+        let chartHeight: CGFloat = 60
 
         VStack(spacing: 4) {
-            HStack(alignment: .bottom, spacing: 3) {
-                ForEach(days) { day in
-                    VStack(spacing: 2) {
-                        HStack(alignment: .bottom, spacing: 1) {
-                            // Yes bar
-                            RoundedRectangle(cornerRadius: 1)
-                                .fill(yesColor)
-                                .frame(width: 5, height: awarenessBarHeight(day.yes, max: maxVal))
+            if hasData {
+                ZStack(alignment: .bottom) {
+                    // Candlestick wicks + median dots
+                    HStack(alignment: .bottom, spacing: 3) {
+                        ForEach(days) { day in
+                            VStack(spacing: 2) {
+                                GeometryReader { geo in
+                                    let width = geo.size.width
+                                    let height = chartHeight
 
-                            // Somewhat bar
-                            RoundedRectangle(cornerRadius: 1)
-                                .fill(somewhatColor)
-                                .frame(width: 5, height: awarenessBarHeight(day.somewhat, max: maxVal))
+                                    if !day.awarenessScores.isEmpty {
+                                        // Min-max wick (thin vertical line)
+                                        let minY = height - CGFloat(day.awarenessMax) / 100.0 * height
+                                        let maxY = height - CGFloat(day.awarenessMin) / 100.0 * height
+                                        let wickHeight = max(maxY - minY, 1)
 
-                            // No bar
-                            RoundedRectangle(cornerRadius: 1)
-                                .fill(noColor)
-                                .frame(width: 5, height: awarenessBarHeight(day.no, max: maxVal))
+                                        Rectangle()
+                                            .fill(Color.gray.opacity(0.4))
+                                            .frame(width: 1, height: wickHeight)
+                                            .position(x: width / 2, y: minY + wickHeight / 2)
+
+                                        // Median dot
+                                        let medianY = height - CGFloat(day.awarenessMedian) / 100.0 * height
+                                        Circle()
+                                            .fill(donutColor)
+                                            .frame(width: 6, height: 6)
+                                            .position(x: width / 2, y: medianY)
+                                    }
+                                }
+                                .frame(height: chartHeight)
+
+                                // Weekday label
+                                Text(weekdayLabel(for: day.date))
+                                    .font(.system(size: 9))
+                                    .foregroundColor(isToday(day.date) ? .primary : .secondary)
+                            }
+                            .frame(maxWidth: .infinity)
                         }
-                        .frame(height: 60, alignment: .bottom)
-
-                        // Weekday label
-                        Text(weekdayLabel(for: day.date))
-                            .font(.system(size: 9))
-                            .foregroundColor(isToday(day.date) ? .primary : .secondary)
                     }
-                    .frame(maxWidth: .infinity)
+
+                    // Trend line connecting median dots
+                    CandlestickTrendLine(days: days, chartHeight: chartHeight, color: donutColor)
+                        .frame(height: chartHeight)
+                        .allowsHitTesting(false)
                 }
             }
 
             // Legend
             HStack(spacing: 10) {
                 HStack(spacing: 3) {
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(yesColor)
-                        .frame(width: 8, height: 8)
-                    Text(String(localized: "yes"))
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.4))
+                        .frame(width: 1, height: 10)
+                    Text(String(localized: "range"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
                 HStack(spacing: 3) {
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(somewhatColor)
-                        .frame(width: 8, height: 8)
-                    Text(String(localized: "somewhat"))
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-                HStack(spacing: 3) {
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(noColor)
-                        .frame(width: 8, height: 8)
-                    Text(String(localized: "no"))
+                    Circle()
+                        .fill(donutColor)
+                        .frame(width: 5, height: 5)
+                    Text(String(localized: "median"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
             }
             .padding(.top, 4)
         }
-    }
-
-    /// Bar height for awareness chart (minimum 2pt for non-zero)
-    private func awarenessBarHeight(_ value: Int, max: Int) -> CGFloat {
-        guard value > 0 else { return 0 }
-        return Swift.max(CGFloat(value) / CGFloat(max) * 60, 2)
     }
 
     // MARK: - Slogans
@@ -388,6 +388,41 @@ struct ProgressView: View {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         let todayString = formatter.string(from: Date())
         return dateString == todayString
+    }
+}
+
+// MARK: - Candlestick Trend Line
+
+/// Draws a connecting line between median dots across days in the awareness chart.
+/// Skips days without data, connecting only adjacent days that have scores.
+struct CandlestickTrendLine: View {
+    let days: [DayRecord]
+    let chartHeight: CGFloat
+    let color: Color
+
+    var body: some View {
+        GeometryReader { geo in
+            let totalWidth = geo.size.width
+            let dayCount = CGFloat(days.count)
+            let dayWidth = totalWidth / dayCount
+
+            Path { path in
+                var started = false
+                for (index, day) in days.enumerated() {
+                    guard !day.awarenessScores.isEmpty else { continue }
+                    let x = dayWidth * CGFloat(index) + dayWidth / 2
+                    let y = chartHeight - CGFloat(day.awarenessMedian) / 100.0 * chartHeight
+
+                    if !started {
+                        path.move(to: CGPoint(x: x, y: y))
+                        started = true
+                    } else {
+                        path.addLine(to: CGPoint(x: x, y: y))
+                    }
+                }
+            }
+            .stroke(color, lineWidth: 1)
+        }
     }
 }
 

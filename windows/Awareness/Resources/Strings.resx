@@ -156,6 +156,8 @@ You can configure everything from the tray icon → Settings.</value></data>
   <data name="ClickAnywhere" xml:space="preserve"><value>click anywhere to continue</value></data>
   <data name="Overall" xml:space="preserve"><value>Overall</value></data>
   <data name="AwarenessLabel" xml:space="preserve"><value>Awareness</value></data>
+  <data name="Range" xml:space="preserve"><value>range</value></data>
+  <data name="Median" xml:space="preserve"><value>median</value></data>
 
   <!-- Desktop Sync -->
   <data name="DesktopSync" xml:space="preserve"><value>Desktop Sync</value></data>

@@ -11,18 +11,13 @@ namespace Awareness.Progress;
 /// <summary>
 /// Progress statistics window showing twin donut charts (today + lifetime),
 /// today/lifetime counters, a 14-day bar chart of triggered vs completed,
-/// and an awareness response chart (yes/somewhat/no).
+/// and a candlestick awareness chart (min-max wick + median dot + trend line).
 /// </summary>
 public partial class ProgressWindow : Window
 {
     // Warm earthy color matching the macOS/iOS donut charts: (0.72, 0.50, 0.38)
     private static readonly Color EarthyColor = Color.FromRgb(184, 128, 97); // #B88061
     private static readonly Brush EarthyBrush = new SolidColorBrush(EarthyColor);
-
-    // Awareness response colors (matching macOS ProgressView)
-    private static readonly Brush YesBrush = new SolidColorBrush(Color.FromRgb(0x73, 0x9A, 0x73));
-    private static readonly Brush SomewhatBrush = new SolidColorBrush(Color.FromRgb(0x8C, 0x8E, 0xB3));
-    private static readonly Brush NoBrush = new SolidColorBrush(Color.FromRgb(0xB3, 0x7F, 0x72));
 
     public ProgressWindow()
     {
@@ -260,8 +255,8 @@ public partial class ProgressWindow : Window
     }
 
     /// <summary>
-    /// Draw the awareness response chart showing yes/somewhat/no per day for the last 14 days.
-    /// Three bars per day in sage green, muted blue-violet, and dusty rose.
+    /// Draw the awareness candlestick chart showing min-max wick, median dot,
+    /// and trend line connecting medians across the last 14 days.
     /// </summary>
     private void DrawAwarenessChart(ProgressTracker tracker)
     {
@@ -270,29 +265,56 @@ public partial class ProgressWindow : Window
         var days = tracker.Last14Days;
 
         // Check if there's any awareness data at all
-        bool hasData = days.Any(d => d.Yes > 0 || d.Somewhat > 0 || d.No > 0);
+        bool hasData = days.Any(d => d.AwarenessScores.Count > 0);
         if (!hasData) return;
-
-        int maxVal = Math.Max(days.Max(d => Math.Max(d.Yes, Math.Max(d.Somewhat, d.No))), 1);
 
         double canvasWidth = AwarenessChartCanvas.ActualWidth > 0 ? AwarenessChartCanvas.ActualWidth : 310;
         double chartHeight = 60;
-        double barWidth = 5;
-        double tripleSpacing = 1;
-        double tripleWidth = barWidth * 3 + tripleSpacing * 2;
-        double colSpacing = (canvasWidth - tripleWidth * 14) / 13;
-        if (colSpacing < 1) colSpacing = 1;
+        double colWidth = canvasWidth / 14;
 
         string todayKey = DateTime.Today.ToString("yyyy-MM-dd");
+
+        var grayBrush = new SolidColorBrush(Color.FromArgb(100, 128, 128, 128));
+
+        // Collect median points for trend line
+        var trendPoints = new List<Point>();
 
         for (int i = 0; i < days.Count; i++)
         {
             var day = days[i];
-            double x = i * (tripleWidth + colSpacing);
+            double centerX = i * colWidth + colWidth / 2;
 
-            DrawAwarenessBar(x, day.Yes, maxVal, chartHeight, barWidth, YesBrush);
-            DrawAwarenessBar(x + barWidth + tripleSpacing, day.Somewhat, maxVal, chartHeight, barWidth, SomewhatBrush);
-            DrawAwarenessBar(x + (barWidth + tripleSpacing) * 2, day.No, maxVal, chartHeight, barWidth, NoBrush);
+            if (day.AwarenessScores.Count > 0)
+            {
+                // Min-max wick (thin vertical line)
+                double minY = chartHeight - (double)day.AwarenessMax / 100.0 * chartHeight;
+                double maxY = chartHeight - (double)day.AwarenessMin / 100.0 * chartHeight;
+                double wickHeight = Math.Max(maxY - minY, 1);
+
+                var wick = new Rectangle
+                {
+                    Width = 1,
+                    Height = wickHeight,
+                    Fill = grayBrush
+                };
+                Canvas.SetLeft(wick, centerX - 0.5);
+                Canvas.SetTop(wick, minY);
+                AwarenessChartCanvas.Children.Add(wick);
+
+                // Median dot
+                double medianY = chartHeight - day.AwarenessMedian / 100.0 * chartHeight;
+                var dot = new Ellipse
+                {
+                    Width = 5,
+                    Height = 5,
+                    Fill = EarthyBrush
+                };
+                Canvas.SetLeft(dot, centerX - 2.5);
+                Canvas.SetTop(dot, medianY - 2.5);
+                AwarenessChartCanvas.Children.Add(dot);
+
+                trendPoints.Add(new Point(centerX, medianY));
+            }
 
             // Weekday label
             var dateObj = DateTime.ParseExact(day.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -304,29 +326,31 @@ public partial class ProgressWindow : Window
                 FontSize = 8,
                 Foreground = day.Date == todayKey ? Brushes.Black : Brushes.Gray,
                 TextAlignment = TextAlignment.Center,
-                Width = tripleWidth
+                Width = colWidth
             };
-            Canvas.SetLeft(label, x);
+            Canvas.SetLeft(label, i * colWidth);
             Canvas.SetTop(label, chartHeight + 4);
             AwarenessChartCanvas.Children.Add(label);
         }
-    }
 
-    private void DrawAwarenessBar(double x, int value, int maxVal, double chartHeight, double barWidth, Brush fill)
-    {
-        if (value <= 0) return;
-
-        double height = Math.Max((double)value / maxVal * chartHeight, 2);
-        var rect = new Rectangle
+        // Draw trend line connecting median dots
+        if (trendPoints.Count >= 2)
         {
-            Width = barWidth,
-            Height = height,
-            Fill = fill,
-            RadiusX = 1,
-            RadiusY = 1
-        };
-        Canvas.SetLeft(rect, x);
-        Canvas.SetTop(rect, chartHeight - height);
-        AwarenessChartCanvas.Children.Add(rect);
+            var figure = new PathFigure { StartPoint = trendPoints[0], IsClosed = false };
+            for (int i = 1; i < trendPoints.Count; i++)
+            {
+                figure.Segments.Add(new LineSegment(trendPoints[i], true));
+            }
+            var geometry = new PathGeometry();
+            geometry.Figures.Add(figure);
+
+            var trendLine = new System.Windows.Shapes.Path
+            {
+                Data = geometry,
+                Stroke = EarthyBrush,
+                StrokeThickness = 1
+            };
+            AwarenessChartCanvas.Children.Add(trendLine);
+        }
     }
 }

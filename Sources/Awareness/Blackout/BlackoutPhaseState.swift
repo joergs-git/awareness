@@ -5,7 +5,7 @@ import SwiftUI
 /// PostBlackoutView (which renders the content).
 enum BlackoutPhase {
     case breathing       // Normal blackout content (breathing animation)
-    case awarenessCheck  // "Warst Du da?" — user picks Ja/Etwas/Nein
+    case awarenessCheck  // "Were you there?" — user adjusts slider (0–100)
     case practiceCard    // Card title + micro-task, stays until user clicks
 }
 
@@ -16,8 +16,8 @@ class BlackoutPhaseState: ObservableObject {
     var practiceCard: PracticeCard?
     var microTask: MicroTask?
 
-    /// The user's awareness response (set by the button before calling onAwarenessAnswered)
-    var awarenessResponse: AwarenessResponse?
+    /// The user's awareness score (0–100, set by the slider before calling onAwarenessAnswered)
+    var awarenessScore: Int?
 
     /// Called when the user answers the awareness check — transitions to practice card
     var onAwarenessAnswered: (() -> Void)?

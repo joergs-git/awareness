@@ -14,6 +14,8 @@ struct ContentView: View {
     @State private var showingAwarenessCheck = false
     /// Opacity for the awareness check overlay fade in/out
     @State private var awarenessCheckOpacity: Double = 0
+    /// Awareness slider value for the overlay (0–100, default at center)
+    @State private var overlaySliderValue: Double = 50
 
     /// Today's practice card (assigned from iOS or locally)
     @State private var todaysCard: PracticeCard?
@@ -264,17 +266,30 @@ struct ContentView: View {
                 if showingAwarenessCheck {
                     ZStack {
                         Color.black.ignoresSafeArea()
-                        VStack(spacing: 10) {
+                        VStack(spacing: 8) {
                             Text(String(localized: "Were you there?"))
                                 .font(.headline)
                                 .foregroundColor(.white.opacity(0.85))
 
-                            HStack(spacing: 8) {
-                                overlayAwarenessButton(String(localized: "Yes"), response: .yes)
-                                overlayAwarenessButton(String(localized: "Somewhat"), response: .somewhat)
-                                overlayAwarenessButton(String(localized: "No"), response: .no)
+                            HStack {
+                                Text(String(localized: "No"))
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.5))
+                                Spacer()
+                                Text(String(localized: "Yes"))
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.5))
                             }
+                            .padding(.horizontal, 4)
+
+                            Slider(value: $overlaySliderValue, in: 0...100, step: 1) { editing in
+                                if !editing {
+                                    handleOverlayAwarenessScore(Int(overlaySliderValue))
+                                }
+                            }
+                            .tint(.white.opacity(0.6))
                         }
+                        .padding(.horizontal, 8)
                     }
                     .opacity(awarenessCheckOpacity)
                 }
@@ -282,48 +297,27 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Awareness Check Overlay Button
+    // MARK: - Awareness Check Overlay
 
-    /// Compact awareness button for the alarm-dismissed overlay
-    @ViewBuilder
-    private func overlayAwarenessButton(_ label: String, response: AwarenessResponse) -> some View {
-        Button {
-            ProgressTracker.shared.recordAwarenessResponse(response)
-            // Relay completed event with awareness to iOS for Supabase upload
-            if let start = WatchConnectivityManager.lastBlackoutStartTime {
-                let awarenessStr: String = {
-                    switch response {
-                    case .yes: return "yes"
-                    case .somewhat: return "somewhat"
-                    case .no: return "no"
-                    }
-                }()
-                WatchConnectivityManager.shared.relayBlackoutEvent(
-                    startedAt: start,
-                    duration: WatchConnectivityManager.lastBlackoutDuration,
-                    completed: WatchConnectivityManager.lastBlackoutCompleted,
-                    awareness: awarenessStr
-                )
-            }
-            WKInterfaceDevice.current().play(.click)
-            withAnimation(.easeOut(duration: 0.3)) {
-                awarenessCheckOpacity = 0
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                showingAwarenessCheck = false
-            }
-        } label: {
-            Text(label)
-                .font(.system(size: 13))
-                .foregroundColor(.white.opacity(0.85))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .background(
-                    Capsule()
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                )
+    /// Handle awareness score from the overlay slider
+    private func handleOverlayAwarenessScore(_ score: Int) {
+        ProgressTracker.shared.recordAwarenessScore(score)
+        // Relay completed event with awareness score to iOS for Supabase upload
+        if let start = WatchConnectivityManager.lastBlackoutStartTime {
+            WatchConnectivityManager.shared.relayBlackoutEvent(
+                startedAt: start,
+                duration: WatchConnectivityManager.lastBlackoutDuration,
+                completed: WatchConnectivityManager.lastBlackoutCompleted,
+                awareness: "\(score)"
+            )
         }
-        .buttonStyle(.plain)
+        WKInterfaceDevice.current().play(.click)
+        withAnimation(.easeOut(duration: 0.3)) {
+            awarenessCheckOpacity = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            showingAwarenessCheck = false
+        }
     }
 
     // MARK: - Computed

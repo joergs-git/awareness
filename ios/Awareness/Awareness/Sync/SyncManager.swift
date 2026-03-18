@@ -57,12 +57,16 @@ final class SyncManager {
                     // Convert to local date key for ProgressTracker daily records
                     let dateKey = Self.dateKey(for: startedAt)
 
-                    // Map awareness string to enum
-                    let awareness: AwarenessResponse? = {
-                        switch event.awareness {
-                        case "yes": return .yes
-                        case "somewhat": return .somewhat
-                        case "no": return .no
+                    // Map awareness string to score (supports both old and new formats)
+                    let awarenessScore: Int? = {
+                        guard let str = event.awareness else { return nil }
+                        // New format: numeric string ("75")
+                        if let num = Int(str) { return max(0, min(100, num)) }
+                        // Old format: "yes"/"somewhat"/"no"
+                        switch str {
+                        case "yes": return 100
+                        case "somewhat": return 50
+                        case "no": return 0
                         default: return nil
                         }
                     }()
@@ -71,7 +75,7 @@ final class SyncManager {
                     ProgressTracker.shared.integrateRemoteEvent(
                         date: dateKey,
                         completed: event.completed,
-                        awareness: awareness
+                        awarenessScore: awarenessScore
                     )
 
                     // Log to HealthKit if completed and enabled

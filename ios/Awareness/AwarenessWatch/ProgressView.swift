@@ -1,18 +1,14 @@
 import SwiftUI
 
 /// Compact progress statistics view for Apple Watch showing two donut charts
-/// (today + overall), a philosophical slogan, and today/lifetime counters.
+/// (today + overall), a philosophical slogan, today/lifetime counters,
+/// and a compact awareness sparkline.
 struct ProgressView: View {
 
     @ObservedObject var tracker = ProgressTracker.shared
 
     /// Warm earthy color for donut arcs (Chinese sunrise palette)
     private let donutColor = Color(red: 0.72, green: 0.50, blue: 0.38)
-
-    /// Awareness response colors
-    private let yesColor = Color(red: 0.45, green: 0.65, blue: 0.45)
-    private let somewhatColor = Color(red: 0.55, green: 0.55, blue: 0.70)
-    private let noColor = Color(red: 0.70, green: 0.50, blue: 0.45)
 
     var body: some View {
         List {
@@ -96,44 +92,29 @@ struct ProgressView: View {
                 }
             }
 
-            // MARK: - Today's Awareness
+            // MARK: - Awareness (Median + 7-Day Sparkline)
             Section {
-                HStack(spacing: 12) {
-                    Spacer()
-                    VStack(spacing: 2) {
-                        Circle()
-                            .fill(yesColor)
-                            .frame(width: 10, height: 10)
-                        Text("\(tracker.todayYes)")
-                            .font(.system(size: 11).monospacedDigit())
-                            .foregroundColor(.secondary)
-                        Text(String(localized: "yes"))
-                            .font(.system(size: 8))
-                            .foregroundColor(.secondary)
+                VStack(spacing: 6) {
+                    // Today's median awareness
+                    HStack {
+                        if let median = tracker.todayMedianAwareness {
+                            Text("Ø \(Int(median))%")
+                                .font(.system(size: 13, weight: .medium).monospacedDigit())
+                                .foregroundColor(donutColor)
+                        } else {
+                            Text("Ø —")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
                     }
-                    VStack(spacing: 2) {
-                        Circle()
-                            .fill(somewhatColor)
-                            .frame(width: 10, height: 10)
-                        Text("\(tracker.todaySomewhat)")
-                            .font(.system(size: 11).monospacedDigit())
-                            .foregroundColor(.secondary)
-                        Text(String(localized: "somewhat"))
-                            .font(.system(size: 8))
-                            .foregroundColor(.secondary)
+
+                    // 7-day sparkline of median awareness
+                    let last7 = Array(tracker.last14Days.suffix(7))
+                    if last7.contains(where: { !$0.awarenessScores.isEmpty }) {
+                        AwarenessSparkline(days: last7, color: donutColor)
+                            .frame(height: 24)
                     }
-                    VStack(spacing: 2) {
-                        Circle()
-                            .fill(noColor)
-                            .frame(width: 10, height: 10)
-                        Text("\(tracker.todayNo)")
-                            .font(.system(size: 11).monospacedDigit())
-                            .foregroundColor(.secondary)
-                        Text(String(localized: "no"))
-                            .font(.system(size: 8))
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
                 }
                 .listRowBackground(Color.clear)
             } header: {
@@ -254,6 +235,53 @@ struct ProgressView: View {
         String(localized: "The journey of awareness has no finish line"),
         String(localized: "Before the first breath, everything is possible"),
     ]
+}
+
+// MARK: - 7-Day Awareness Sparkline
+
+/// Compact sparkline showing median awareness for the last 7 days.
+/// Dots for days with data, connected by a line.
+struct AwarenessSparkline: View {
+    let days: [DayRecord]
+    let color: Color
+
+    var body: some View {
+        GeometryReader { geo in
+            let width = geo.size.width
+            let height = geo.size.height
+            let dayWidth = width / CGFloat(max(days.count, 1))
+
+            // Trend line
+            Path { path in
+                var started = false
+                for (index, day) in days.enumerated() {
+                    guard !day.awarenessScores.isEmpty else { continue }
+                    let x = dayWidth * CGFloat(index) + dayWidth / 2
+                    let y = height - CGFloat(day.awarenessMedian) / 100.0 * height
+
+                    if !started {
+                        path.move(to: CGPoint(x: x, y: y))
+                        started = true
+                    } else {
+                        path.addLine(to: CGPoint(x: x, y: y))
+                    }
+                }
+            }
+            .stroke(color, lineWidth: 1)
+
+            // Dots
+            ForEach(Array(days.enumerated()), id: \.offset) { index, day in
+                if !day.awarenessScores.isEmpty {
+                    let x = dayWidth * CGFloat(index) + dayWidth / 2
+                    let y = height - CGFloat(day.awarenessMedian) / 100.0 * height
+                    Circle()
+                        .fill(color)
+                        .frame(width: 4, height: 4)
+                        .position(x: x, y: y)
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Stable Random Selection

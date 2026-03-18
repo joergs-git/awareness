@@ -6,17 +6,7 @@ using System.Text.Json.Serialization;
 namespace Awareness.Progress;
 
 /// <summary>
-/// Post-blackout awareness response: "Were you there?"
-/// </summary>
-public enum AwarenessResponse
-{
-    Yes,
-    Somewhat,
-    No
-}
-
-/// <summary>
-/// A single day's blackout statistics and awareness responses.
+/// A single day's blackout statistics and awareness scores.
 /// </summary>
 public class DayRecord
 {
@@ -29,23 +19,67 @@ public class DayRecord
     [JsonPropertyName("completed")]
     public int Completed { get; set; }
 
-    // Awareness response counters — default 0; old JSON files without these fields
-    // will deserialize cleanly because System.Text.Json leaves missing properties at
-    // their default values when JsonIgnoreCondition is not set to require them.
+    /// <summary>Individual 0–100 awareness scores for the day</summary>
+    [JsonPropertyName("awarenessScores")]
+    public List<int> AwarenessScores { get; set; } = new();
 
+    // Legacy fields for backward-compatible deserialization (not serialized)
     [JsonPropertyName("yes")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int Yes { get; set; }
 
     [JsonPropertyName("somewhat")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int Somewhat { get; set; }
 
     [JsonPropertyName("no")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int No { get; set; }
+
+    // Computed awareness stats
+    [JsonIgnore]
+    public double AwarenessAverage =>
+        AwarenessScores.Count > 0 ? AwarenessScores.Average() : 0;
+
+    [JsonIgnore]
+    public double AwarenessMedian
+    {
+        get
+        {
+            if (AwarenessScores.Count == 0) return 0;
+            var sorted = AwarenessScores.OrderBy(x => x).ToList();
+            int count = sorted.Count;
+            if (count % 2 == 0)
+                return (sorted[count / 2 - 1] + sorted[count / 2]) / 2.0;
+            else
+                return sorted[count / 2];
+        }
+    }
+
+    [JsonIgnore]
+    public int AwarenessMin => AwarenessScores.Count > 0 ? AwarenessScores.Min() : 0;
+
+    [JsonIgnore]
+    public int AwarenessMax => AwarenessScores.Count > 0 ? AwarenessScores.Max() : 0;
+
+    /// <summary>
+    /// After deserialization, migrate old yes/somewhat/no fields into awarenessScores
+    /// if the new array is empty.
+    /// </summary>
+    public void MigrateFromLegacy()
+    {
+        if (AwarenessScores.Count == 0 && (Yes > 0 || Somewhat > 0 || No > 0))
+        {
+            for (int i = 0; i < Yes; i++) AwarenessScores.Add(100);
+            for (int i = 0; i < Somewhat; i++) AwarenessScores.Add(50);
+            for (int i = 0; i < No; i++) AwarenessScores.Add(0);
+        }
+    }
 }
 
 /// <summary>
 /// Tracks blackout progress statistics: triggered vs completed counts per day and lifetime.
-/// Also tracks post-blackout awareness responses (yes/somewhat/no).
+/// Also tracks post-blackout awareness scores (0–100 continuous scale).
 /// Persists to a JSON file in %APPDATA%\Awareness\progress.json with a rolling 14-day window.
 /// </summary>
 public class ProgressTracker : INotifyPropertyChanged
@@ -64,9 +98,8 @@ public class ProgressTracker : INotifyPropertyChanged
 
     private int _lifetimeTriggered;
     private int _lifetimeCompleted;
-    private int _lifetimeYes;
-    private int _lifetimeSomewhat;
-    private int _lifetimeNo;
+    private int _lifetimeAwarenessSum;
+    private int _lifetimeAwarenessCount;
     private List<DayRecord> _dailyRecords = new();
 
     // MARK: - Properties
@@ -85,25 +118,18 @@ public class ProgressTracker : INotifyPropertyChanged
         private set { SetField(ref _lifetimeCompleted, value); }
     }
 
-    /// <summary>Total "yes" awareness responses across all time</summary>
-    public int LifetimeYes
+    /// <summary>Sum of all awareness scores (for lifetime average)</summary>
+    public int LifetimeAwarenessSum
     {
-        get => _lifetimeYes;
-        private set { SetField(ref _lifetimeYes, value); }
+        get => _lifetimeAwarenessSum;
+        private set { SetField(ref _lifetimeAwarenessSum, value); }
     }
 
-    /// <summary>Total "somewhat" awareness responses across all time</summary>
-    public int LifetimeSomewhat
+    /// <summary>Total number of awareness scores recorded</summary>
+    public int LifetimeAwarenessCount
     {
-        get => _lifetimeSomewhat;
-        private set { SetField(ref _lifetimeSomewhat, value); }
-    }
-
-    /// <summary>Total "no" awareness responses across all time</summary>
-    public int LifetimeNo
-    {
-        get => _lifetimeNo;
-        private set { SetField(ref _lifetimeNo, value); }
+        get => _lifetimeAwarenessCount;
+        private set { SetField(ref _lifetimeAwarenessCount, value); }
     }
 
     /// <summary>Daily records for the last 14 days</summary>
@@ -119,17 +145,24 @@ public class ProgressTracker : INotifyPropertyChanged
     public int TodayCompleted =>
         _dailyRecords.FirstOrDefault(r => r.Date == TodayKey())?.Completed ?? 0;
 
-    /// <summary>Today's "yes" awareness responses</summary>
-    public int TodayYes =>
-        _dailyRecords.FirstOrDefault(r => r.Date == TodayKey())?.Yes ?? 0;
+    /// <summary>Today's awareness scores</summary>
+    public List<int> TodayAwarenessScores =>
+        _dailyRecords.FirstOrDefault(r => r.Date == TodayKey())?.AwarenessScores ?? new();
 
-    /// <summary>Today's "somewhat" awareness responses</summary>
-    public int TodaySomewhat =>
-        _dailyRecords.FirstOrDefault(r => r.Date == TodayKey())?.Somewhat ?? 0;
+    /// <summary>Today's median awareness (0–100), or -1 if no scores</summary>
+    public double TodayMedianAwareness
+    {
+        get
+        {
+            var record = _dailyRecords.FirstOrDefault(r => r.Date == TodayKey());
+            if (record == null || record.AwarenessScores.Count == 0) return -1;
+            return record.AwarenessMedian;
+        }
+    }
 
-    /// <summary>Today's "no" awareness responses</summary>
-    public int TodayNo =>
-        _dailyRecords.FirstOrDefault(r => r.Date == TodayKey())?.No ?? 0;
+    /// <summary>Lifetime average awareness (0–100)</summary>
+    public double LifetimeAwarenessAverage =>
+        _lifetimeAwarenessCount > 0 ? (double)_lifetimeAwarenessSum / _lifetimeAwarenessCount : 0;
 
     /// <summary>Today's success rate (0.0 to 1.0)</summary>
     public double TodayRate =>
@@ -180,28 +213,15 @@ public class ProgressTracker : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SuccessRate)));
     }
 
-    /// <summary>Record the user's post-blackout awareness response</summary>
-    public void RecordAwarenessResponse(AwarenessResponse response)
+    /// <summary>Record the user's post-blackout awareness score (0–100)</summary>
+    public void RecordAwarenessScore(int score)
     {
-        switch (response)
-        {
-            case AwarenessResponse.Yes:
-                LifetimeYes++;
-                UpdateTodayRecord(r => r.Yes++);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TodayYes)));
-                break;
-            case AwarenessResponse.Somewhat:
-                LifetimeSomewhat++;
-                UpdateTodayRecord(r => r.Somewhat++);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TodaySomewhat)));
-                break;
-            case AwarenessResponse.No:
-                LifetimeNo++;
-                UpdateTodayRecord(r => r.No++);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TodayNo)));
-                break;
-        }
+        int clamped = Math.Clamp(score, 0, 100);
+        LifetimeAwarenessSum += clamped;
+        LifetimeAwarenessCount++;
+        UpdateTodayRecord(r => r.AwarenessScores.Add(clamped));
         Save();
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TodayAwarenessScores)));
     }
 
     // MARK: - Private Helpers
@@ -249,9 +269,8 @@ public class ProgressTracker : INotifyPropertyChanged
             {
                 LifetimeTriggered = _lifetimeTriggered,
                 LifetimeCompleted = _lifetimeCompleted,
-                LifetimeYes = _lifetimeYes,
-                LifetimeSomewhat = _lifetimeSomewhat,
-                LifetimeNo = _lifetimeNo,
+                LifetimeAwarenessSum = _lifetimeAwarenessSum,
+                LifetimeAwarenessCount = _lifetimeAwarenessCount,
                 DailyRecords = _dailyRecords
             };
 
@@ -278,11 +297,33 @@ public class ProgressTracker : INotifyPropertyChanged
 
             _lifetimeTriggered = data.LifetimeTriggered;
             _lifetimeCompleted = data.LifetimeCompleted;
-            // Awareness response totals — default 0 for old files that lack these fields
-            _lifetimeYes = data.LifetimeYes;
-            _lifetimeSomewhat = data.LifetimeSomewhat;
-            _lifetimeNo = data.LifetimeNo;
+
             _dailyRecords = data.DailyRecords ?? new List<DayRecord>();
+
+            // Migrate daily records from legacy yes/somewhat/no fields
+            foreach (var record in _dailyRecords)
+            {
+                record.MigrateFromLegacy();
+            }
+
+            // Try new keys first, then migrate from old yes/somewhat/no
+            if (data.LifetimeAwarenessCount > 0 || data.LifetimeAwarenessSum > 0)
+            {
+                _lifetimeAwarenessSum = data.LifetimeAwarenessSum;
+                _lifetimeAwarenessCount = data.LifetimeAwarenessCount;
+            }
+            else
+            {
+                // Migrate from old keys
+                int oldYes = data.LifetimeYes;
+                int oldSomewhat = data.LifetimeSomewhat;
+                int oldNo = data.LifetimeNo;
+                if (oldYes > 0 || oldSomewhat > 0 || oldNo > 0)
+                {
+                    _lifetimeAwarenessSum = oldYes * 100 + oldSomewhat * 50;
+                    _lifetimeAwarenessCount = oldYes + oldSomewhat + oldNo;
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -319,7 +360,13 @@ public class ProgressTracker : INotifyPropertyChanged
         [JsonPropertyName("lifetimeCompleted")]
         public int LifetimeCompleted { get; set; }
 
-        // Awareness response totals — absent in old JSON files, deserialize as 0 by default
+        [JsonPropertyName("lifetimeAwarenessSum")]
+        public int LifetimeAwarenessSum { get; set; }
+
+        [JsonPropertyName("lifetimeAwarenessCount")]
+        public int LifetimeAwarenessCount { get; set; }
+
+        // Legacy fields for migration from old format
         [JsonPropertyName("lifetimeYes")]
         public int LifetimeYes { get; set; }
 

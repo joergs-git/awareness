@@ -22,6 +22,8 @@ struct BlackoutView: View {
     @State private var completedFullDuration = false
     /// Whether to show the awareness check after blackout ends
     @State private var showingAwarenessCheck = false
+    /// Awareness slider value (0–100, default at center)
+    @State private var sliderValue: Double = 50
     /// Controls the breathing animation — toggled on after fade-in to start pulsing
     @State private var isBreathing = false
     /// The offered duration for event logging (captured at start)
@@ -74,16 +76,32 @@ struct BlackoutView: View {
 
             // Awareness check shown after completed blackout fades out
             if showingAwarenessCheck {
-                VStack(spacing: 20) {
+                VStack(spacing: 24) {
                     Text(String(localized: "Were you there?"))
                         .font(.title2.weight(.light))
                         .foregroundColor(.white.opacity(0.85))
 
-                    HStack(spacing: 16) {
-                        awarenessButton(String(localized: "Yes"), response: .yes)
-                        awarenessButton(String(localized: "Somewhat"), response: .somewhat)
-                        awarenessButton(String(localized: "No"), response: .no)
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text(String(localized: "No"))
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.5))
+                            Spacer()
+                            Text(String(localized: "Yes"))
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+                        .padding(.horizontal, 4)
+
+                        Slider(value: $sliderValue, in: 0...100, step: 1) { editing in
+                            if !editing {
+                                // Save on release
+                                handleAwarenessScore(Int(sliderValue))
+                            }
+                        }
+                        .tint(.white.opacity(0.6))
                     }
+                    .frame(width: 280)
                 }
                 .transition(.opacity)
             }
@@ -232,35 +250,17 @@ struct BlackoutView: View {
         }
     }
 
-    /// Record awareness response and dismiss
-    private func handleAwarenessResponse(_ response: AwarenessResponse) {
-        ProgressTracker.shared.recordAwarenessResponse(response)
-        // Upload final sync event with awareness response (upserts the start event)
-        uploadSyncEvent(completed: true, awareness: awarenessString(response))
+    /// Record awareness score and dismiss
+    private func handleAwarenessScore(_ score: Int) {
+        ProgressTracker.shared.recordAwarenessScore(score)
+        // Upload final sync event with awareness score (upserts the start event)
+        uploadSyncEvent(completed: true, awareness: "\(score)")
         withAnimation(.easeOut(duration: 0.3)) {
             opacity = 0
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             UIApplication.shared.isIdleTimerDisabled = false
             isPresented = false
-        }
-    }
-
-    /// Outlined capsule button for awareness response
-    @ViewBuilder
-    private func awarenessButton(_ label: String, response: AwarenessResponse) -> some View {
-        Button {
-            handleAwarenessResponse(response)
-        } label: {
-            Text(label)
-                .font(.body)
-                .foregroundColor(.white.opacity(0.85))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(
-                    Capsule()
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                )
         }
     }
 
@@ -277,15 +277,6 @@ struct BlackoutView: View {
             awareness: awareness
         )
         SyncManager.shared.flushPending()
-    }
-
-    /// Convert AwarenessResponse enum to string for Supabase
-    private func awarenessString(_ response: AwarenessResponse) -> String {
-        switch response {
-        case .yes: return "yes"
-        case .somewhat: return "somewhat"
-        case .no: return "no"
-        }
     }
 
     // MARK: - Image Content

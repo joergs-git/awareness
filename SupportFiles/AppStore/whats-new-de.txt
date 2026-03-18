@@ -1,6 +1,6 @@
-Neu in Version 3.17:
+Neu in Version 3.18:
 
-- Bidirektionale Synchronisation: iPhone und Apple Watch laden Atemereignisse zu Supabase hoch — alle Geräte wissen voneinander
-- Intelligente Koordination: Mac und Windows prüfen vor dem Auslösen auf kürzliche Pausen und vermeiden Doppelunterbrechungen
-- watchOS-Ereignisse werden zuverlässig via WatchConnectivity weitergeleitet
-- Offline-Upload-Warteschlange auf iOS (wie bei Desktop)
+- Achtsamkeits-Slider: Ja/Ansatzweise/Nein-Buttons durch einen fließenden 0–100 Schieberegler für differenziertere Selbsteinschätzung ersetzt
+- Candlestick-Diagramm: neue börsenartige Achtsamkeits-Visualisierung mit Min–Max-Bereich, Median-Punkten und Trendlinie
+- watchOS: kompakte Median-Anzeige mit 7-Tage-Sparkline
+- Bestehende Daten werden automatisch migriert

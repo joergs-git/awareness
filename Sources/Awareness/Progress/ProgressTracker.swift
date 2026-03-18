@@ -1,45 +1,88 @@
 import Foundation
 import Combine
 
-/// Post-blackout awareness response: "Were you there?"
-enum AwarenessResponse {
-    case yes, somewhat, no
-}
-
-/// A single day's blackout statistics and awareness responses
+/// A single day's blackout statistics and awareness scores
 struct DayRecord: Codable, Identifiable {
     let date: String       // "yyyy-MM-dd"
     var triggered: Int
     var completed: Int
-    var yes: Int
-    var somewhat: Int
-    var no: Int
+    var awarenessScores: [Int]  // Individual 0–100 scores for the day
 
     var id: String { date }
 
-    // Backward-compatible decoding: old records without awareness fields decode as 0
+    // Computed awareness stats
+    var awarenessAverage: Double {
+        guard !awarenessScores.isEmpty else { return 0 }
+        return Double(awarenessScores.reduce(0, +)) / Double(awarenessScores.count)
+    }
+
+    var awarenessMedian: Double {
+        guard !awarenessScores.isEmpty else { return 0 }
+        let sorted = awarenessScores.sorted()
+        let count = sorted.count
+        if count % 2 == 0 {
+            return Double(sorted[count / 2 - 1] + sorted[count / 2]) / 2.0
+        } else {
+            return Double(sorted[count / 2])
+        }
+    }
+
+    var awarenessMin: Int {
+        awarenessScores.min() ?? 0
+    }
+
+    var awarenessMax: Int {
+        awarenessScores.max() ?? 0
+    }
+
+    // Backward-compatible decoding: old records with yes/somewhat/no fields are synthesized
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         date = try container.decode(String.self, forKey: .date)
         triggered = try container.decode(Int.self, forKey: .triggered)
         completed = try container.decode(Int.self, forKey: .completed)
-        yes = try container.decodeIfPresent(Int.self, forKey: .yes) ?? 0
-        somewhat = try container.decodeIfPresent(Int.self, forKey: .somewhat) ?? 0
-        no = try container.decodeIfPresent(Int.self, forKey: .no) ?? 0
+
+        // Try new format first
+        if let scores = try container.decodeIfPresent([Int].self, forKey: .awarenessScores), !scores.isEmpty {
+            awarenessScores = scores
+        } else {
+            // Migrate from old yes/somewhat/no fields
+            let yes = try container.decodeIfPresent(Int.self, forKey: .yes) ?? 0
+            let somewhat = try container.decodeIfPresent(Int.self, forKey: .somewhat) ?? 0
+            let no = try container.decodeIfPresent(Int.self, forKey: .no) ?? 0
+            var scores: [Int] = []
+            scores += Array(repeating: 100, count: yes)
+            scores += Array(repeating: 50, count: somewhat)
+            scores += Array(repeating: 0, count: no)
+            awarenessScores = scores
+        }
     }
 
-    init(date: String, triggered: Int, completed: Int, yes: Int = 0, somewhat: Int = 0, no: Int = 0) {
+    init(date: String, triggered: Int, completed: Int, awarenessScores: [Int] = []) {
         self.date = date
         self.triggered = triggered
         self.completed = completed
-        self.yes = yes
-        self.somewhat = somewhat
-        self.no = no
+        self.awarenessScores = awarenessScores
+    }
+
+    // Only encode the new fields (drop yes/somewhat/no)
+    private enum CodingKeys: String, CodingKey {
+        case date, triggered, completed, awarenessScores
+        // Legacy keys for decoding only
+        case yes, somewhat, no
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(date, forKey: .date)
+        try container.encode(triggered, forKey: .triggered)
+        try container.encode(completed, forKey: .completed)
+        try container.encode(awarenessScores, forKey: .awarenessScores)
     }
 }
 
 /// Tracks blackout progress statistics: triggered vs completed counts per day and lifetime.
-/// Also tracks post-blackout awareness responses (yes/somewhat/no).
+/// Also tracks post-blackout awareness scores (0–100 continuous scale).
 /// Persists to UserDefaults with a rolling 14-day window for daily records.
 final class ProgressTracker: ObservableObject {
 
@@ -50,21 +93,23 @@ final class ProgressTracker: ObservableObject {
     // MARK: - UserDefaults Keys
 
     private enum Keys {
-        static let lifetimeTriggered = "progressLifetimeTriggered"
-        static let lifetimeCompleted = "progressLifetimeCompleted"
+        static let lifetimeTriggered       = "progressLifetimeTriggered"
+        static let lifetimeCompleted       = "progressLifetimeCompleted"
+        static let lifetimeAwarenessSum    = "progressLifetimeAwarenessSum"
+        static let lifetimeAwarenessCount  = "progressLifetimeAwarenessCount"
+        static let dailyRecords            = "progressDailyRecords"
+        // Legacy keys (read-only for migration)
         static let lifetimeYes       = "progressLifetimeYes"
         static let lifetimeSomewhat  = "progressLifetimeSomewhat"
         static let lifetimeNo        = "progressLifetimeNo"
-        static let dailyRecords      = "progressDailyRecords"
     }
 
     // MARK: - Published Properties
 
     @Published private(set) var lifetimeTriggered: Int
     @Published private(set) var lifetimeCompleted: Int
-    @Published private(set) var lifetimeYes: Int
-    @Published private(set) var lifetimeSomewhat: Int
-    @Published private(set) var lifetimeNo: Int
+    @Published private(set) var lifetimeAwarenessSum: Int
+    @Published private(set) var lifetimeAwarenessCount: Int
     @Published private(set) var dailyRecords: [DayRecord]
 
     // MARK: - Computed Properties
@@ -79,17 +124,22 @@ final class ProgressTracker: ObservableObject {
         dailyRecords.first(where: { $0.date == todayKey() })?.completed ?? 0
     }
 
-    /// Today's awareness responses
-    var todayYes: Int {
-        dailyRecords.first(where: { $0.date == todayKey() })?.yes ?? 0
+    /// Today's awareness scores
+    var todayAwarenessScores: [Int] {
+        dailyRecords.first(where: { $0.date == todayKey() })?.awarenessScores ?? []
     }
 
-    var todaySomewhat: Int {
-        dailyRecords.first(where: { $0.date == todayKey() })?.somewhat ?? 0
+    /// Today's median awareness (0–100), or nil if no scores
+    var todayMedianAwareness: Double? {
+        let record = dailyRecords.first(where: { $0.date == todayKey() })
+        guard let r = record, !r.awarenessScores.isEmpty else { return nil }
+        return r.awarenessMedian
     }
 
-    var todayNo: Int {
-        dailyRecords.first(where: { $0.date == todayKey() })?.no ?? 0
+    /// Lifetime average awareness (0–100)
+    var lifetimeAwarenessAverage: Double {
+        guard lifetimeAwarenessCount > 0 else { return 0 }
+        return Double(lifetimeAwarenessSum) / Double(lifetimeAwarenessCount)
     }
 
     /// Lifetime success rate (0.0 to 1.0)
@@ -133,19 +183,12 @@ final class ProgressTracker: ObservableObject {
         save()
     }
 
-    /// Record the user's post-blackout awareness response
-    func recordAwarenessResponse(_ response: AwarenessResponse) {
-        switch response {
-        case .yes:
-            lifetimeYes += 1
-            updateTodayRecord { $0.yes += 1 }
-        case .somewhat:
-            lifetimeSomewhat += 1
-            updateTodayRecord { $0.somewhat += 1 }
-        case .no:
-            lifetimeNo += 1
-            updateTodayRecord { $0.no += 1 }
-        }
+    /// Record the user's post-blackout awareness score (0–100)
+    func recordAwarenessScore(_ score: Int) {
+        let clamped = max(0, min(100, score))
+        lifetimeAwarenessSum += clamped
+        lifetimeAwarenessCount += 1
+        updateTodayRecord { $0.awarenessScores.append(clamped) }
         save()
     }
 
@@ -211,9 +254,8 @@ final class ProgressTracker: ObservableObject {
     private func save() {
         defaults.set(lifetimeTriggered, forKey: Keys.lifetimeTriggered)
         defaults.set(lifetimeCompleted, forKey: Keys.lifetimeCompleted)
-        defaults.set(lifetimeYes, forKey: Keys.lifetimeYes)
-        defaults.set(lifetimeSomewhat, forKey: Keys.lifetimeSomewhat)
-        defaults.set(lifetimeNo, forKey: Keys.lifetimeNo)
+        defaults.set(lifetimeAwarenessSum, forKey: Keys.lifetimeAwarenessSum)
+        defaults.set(lifetimeAwarenessCount, forKey: Keys.lifetimeAwarenessCount)
 
         if let data = try? JSONEncoder().encode(dailyRecords) {
             defaults.set(data, forKey: Keys.dailyRecords)
@@ -233,13 +275,37 @@ final class ProgressTracker: ObservableObject {
     private init() {
         lifetimeTriggered = defaults.integer(forKey: Keys.lifetimeTriggered)
         lifetimeCompleted = defaults.integer(forKey: Keys.lifetimeCompleted)
-        lifetimeYes = defaults.integer(forKey: Keys.lifetimeYes)
-        lifetimeSomewhat = defaults.integer(forKey: Keys.lifetimeSomewhat)
-        lifetimeNo = defaults.integer(forKey: Keys.lifetimeNo)
+
+        // Try new keys first, then migrate from old yes/somewhat/no
+        let storedSum = defaults.integer(forKey: Keys.lifetimeAwarenessSum)
+        let storedCount = defaults.integer(forKey: Keys.lifetimeAwarenessCount)
+
+        if storedCount > 0 || storedSum > 0 {
+            lifetimeAwarenessSum = storedSum
+            lifetimeAwarenessCount = storedCount
+        } else {
+            // Migrate from old keys: yes*100 + somewhat*50 + no*0
+            let oldYes = defaults.integer(forKey: Keys.lifetimeYes)
+            let oldSomewhat = defaults.integer(forKey: Keys.lifetimeSomewhat)
+            let oldNo = defaults.integer(forKey: Keys.lifetimeNo)
+            if oldYes > 0 || oldSomewhat > 0 || oldNo > 0 {
+                lifetimeAwarenessSum = oldYes * 100 + oldSomewhat * 50
+                lifetimeAwarenessCount = oldYes + oldSomewhat + oldNo
+            } else {
+                lifetimeAwarenessSum = 0
+                lifetimeAwarenessCount = 0
+            }
+        }
+
         dailyRecords = []
 
         // Load daily records after init to avoid property access before initialization
         dailyRecords = loadDailyRecords()
         pruneOldRecords()
+
+        // Persist migrated values if migration occurred
+        if storedCount == 0 && storedSum == 0 && (lifetimeAwarenessSum > 0 || lifetimeAwarenessCount > 0) {
+            save()
+        }
     }
 }

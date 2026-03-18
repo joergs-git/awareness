@@ -862,7 +862,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -894,7 +894,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -921,7 +921,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Atempause logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -950,7 +950,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Atempause logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -973,7 +973,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Complication";
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -996,7 +996,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Complication";
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1019,7 +1019,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Widget";
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1040,7 +1040,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Widget";
-				MARKETING_VERSION = 3.17;
+				MARKETING_VERSION = 3.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

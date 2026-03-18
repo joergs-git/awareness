@@ -7,7 +7,7 @@
     <Grid>
 
         <!-- ============================================================
-             Phase 1: Awareness Check — "Were you there?" + three buttons
+             Phase 1: Awareness Check — "Were you there?" + slider (0–100)
              Starts hidden (Opacity=0), fades in via ShowAwarenessCheck().
              ============================================================ -->
         <StackPanel x:Name="AwarenessPanel"
@@ -26,82 +26,29 @@
                        TextAlignment="Center"
                        Margin="0,0,0,28" />
 
-            <!-- Response buttons: Yes / Somewhat / No -->
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Center">
+            <!-- Slider labels: No / Yes -->
+            <Grid Width="300" Margin="0,0,0,8">
+                <TextBlock Text="{x:Static res:Strings.No}"
+                           Foreground="#80FFFFFF"
+                           FontSize="14"
+                           HorizontalAlignment="Left" />
+                <TextBlock Text="{x:Static res:Strings.Yes}"
+                           Foreground="#80FFFFFF"
+                           FontSize="14"
+                           HorizontalAlignment="Right" />
+            </Grid>
 
-                <!-- "Yes" button -->
-                <Button x:Name="YesButton"
-                        Content="{x:Static res:Strings.Yes}"
-                        Click="OnYesClicked"
-                        Margin="0,0,12,0"
-                        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent"
-                                    BorderBrush="#4DFFFFFF"
-                                    BorderThickness="1"
-                                    CornerRadius="20"
-                                    Padding="12,8">
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center" />
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <Button.Foreground>
-                        <SolidColorBrush Color="#D9FFFFFF" />
-                    </Button.Foreground>
-                    <Button.FontSize>16</Button.FontSize>
-                </Button>
+            <!-- Awareness slider (0–100) -->
+            <Slider x:Name="AwarenessSlider"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="50"
+                    Width="300"
+                    IsSnapToTickEnabled="True"
+                    TickFrequency="1"
+                    Thumb.DragCompleted="OnSliderDragCompleted"
+                    Cursor="Hand" />
 
-                <!-- "Somewhat" button -->
-                <Button x:Name="SomewhatButton"
-                        Content="{x:Static res:Strings.Somewhat}"
-                        Click="OnSomewhatClicked"
-                        Margin="0,0,12,0"
-                        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent"
-                                    BorderBrush="#4DFFFFFF"
-                                    BorderThickness="1"
-                                    CornerRadius="20"
-                                    Padding="12,8">
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center" />
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <Button.Foreground>
-                        <SolidColorBrush Color="#D9FFFFFF" />
-                    </Button.Foreground>
-                    <Button.FontSize>16</Button.FontSize>
-                </Button>
-
-                <!-- "No" button -->
-                <Button x:Name="NoButton"
-                        Content="{x:Static res:Strings.No}"
-                        Click="OnNoClicked"
-                        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent"
-                                    BorderBrush="#4DFFFFFF"
-                                    BorderThickness="1"
-                                    CornerRadius="20"
-                                    Padding="12,8">
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center" />
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <Button.Foreground>
-                        <SolidColorBrush Color="#D9FFFFFF" />
-                    </Button.Foreground>
-                    <Button.FontSize>16</Button.FontSize>
-                </Button>
-
-            </StackPanel>
         </StackPanel>
 
         <!-- ============================================================

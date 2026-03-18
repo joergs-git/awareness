@@ -4,6 +4,21 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v3.18
+
+### Awareness Slider (All Platforms)
+- **Replaced Yes/Somewhat/No buttons** with a continuous awareness slider (0–100) — more nuanced self-assessment after each break
+- **Slider saves on release** — no extra confirmation needed; default position at center (50)
+- **Candlestick awareness chart** — replaces the three-bar chart with a stock-chart-style visualization: min–max wick, median dot, and trend line connecting medians across days
+- **watchOS**: compact "Ø X%" median display + 7-day sparkline replaces the yes/somewhat/no circles
+- **Backward compatible** — existing data with yes/somewhat/no is automatically migrated (yes→100, somewhat→50, no→0)
+
+### Supabase Sync
+- **Awareness score** now synced as numeric value (0–100) instead of "yes"/"somewhat"/"no"
+- **Pull handles both formats** — old and new devices can coexist during rollout
+
+---
+
 ## v3.17
 
 ### Bidirectional Cross-Platform Sync

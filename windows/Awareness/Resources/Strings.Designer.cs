@@ -710,6 +710,24 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to range.
+        /// </summary>
+        public static string Range {
+            get {
+                return ResourceManager.GetString("Range", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to median.
+        /// </summary>
+        public static string Median {
+            get {
+                return ResourceManager.GetString("Median", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The goal of this app is to not need it anymore. Until then: Breathe..
         /// </summary>
         public static string PhilosophyText {

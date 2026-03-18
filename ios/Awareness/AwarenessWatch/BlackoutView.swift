@@ -39,6 +39,8 @@ struct BlackoutView: View {
     @State private var completedFullDuration = false
     /// Whether to show the awareness check after blackout ends
     @State private var showingAwarenessCheck = false
+    /// Awareness slider value (0–100, default at center)
+    @State private var sliderValue: Double = 50
     /// Controls the breathing animation — toggled on after fade-in to start pulsing
     @State private var isBreathing = false
     /// Guards against double-dismiss from both timer and notification signal
@@ -85,17 +87,30 @@ struct BlackoutView: View {
 
                 // Awareness check shown after completed blackout fades out
                 if showingAwarenessCheck {
-                    VStack(spacing: 10) {
+                    VStack(spacing: 8) {
                         Text(String(localized: "Were you there?"))
                             .font(.headline)
                             .foregroundColor(.white.opacity(0.85))
 
-                        HStack(spacing: 8) {
-                            watchAwarenessButton(String(localized: "Yes"), response: .yes)
-                            watchAwarenessButton(String(localized: "Somewhat"), response: .somewhat)
-                            watchAwarenessButton(String(localized: "No"), response: .no)
+                        HStack {
+                            Text(String(localized: "No"))
+                                .font(.system(size: 10))
+                                .foregroundColor(.white.opacity(0.5))
+                            Spacer()
+                            Text(String(localized: "Yes"))
+                                .font(.system(size: 10))
+                                .foregroundColor(.white.opacity(0.5))
                         }
+                        .padding(.horizontal, 4)
+
+                        Slider(value: $sliderValue, in: 0...100, step: 1) { editing in
+                            if !editing {
+                                handleWatchAwarenessScore(Int(sliderValue))
+                            }
+                        }
+                        .tint(.white.opacity(0.6))
                     }
+                    .padding(.horizontal, 8)
                     .transition(.opacity)
                 }
             }
@@ -266,23 +281,16 @@ struct BlackoutView: View {
         }
     }
 
-    /// Record awareness response and dismiss
-    private func handleWatchAwarenessResponse(_ response: AwarenessResponse) {
-        ProgressTracker.shared.recordAwarenessResponse(response)
-        // Relay completed event with awareness to iOS for Supabase upload
+    /// Record awareness score and dismiss
+    private func handleWatchAwarenessScore(_ score: Int) {
+        ProgressTracker.shared.recordAwarenessScore(score)
+        // Relay completed event with awareness score to iOS for Supabase upload
         if let start = WatchConnectivityManager.lastBlackoutStartTime {
-            let awarenessStr: String = {
-                switch response {
-                case .yes: return "yes"
-                case .somewhat: return "somewhat"
-                case .no: return "no"
-                }
-            }()
             WatchConnectivityManager.shared.relayBlackoutEvent(
                 startedAt: start,
                 duration: WatchConnectivityManager.lastBlackoutDuration,
                 completed: WatchConnectivityManager.lastBlackoutCompleted,
-                awareness: awarenessStr
+                awareness: "\(score)"
             )
         }
         WKInterfaceDevice.current().play(.click)
@@ -295,25 +303,6 @@ struct BlackoutView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isPresented = false
         }
-    }
-
-    /// Compact awareness button for watchOS
-    @ViewBuilder
-    private func watchAwarenessButton(_ label: String, response: AwarenessResponse) -> some View {
-        Button {
-            handleWatchAwarenessResponse(response)
-        } label: {
-            Text(label)
-                .font(.system(size: 13))
-                .foregroundColor(.white.opacity(0.85))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .background(
-                    Capsule()
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                )
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - End Signal Notification
