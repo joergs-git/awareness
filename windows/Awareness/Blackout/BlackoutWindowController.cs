@@ -270,9 +270,8 @@ public class BlackoutWindowController : IDisposable
             _isInAwarenessCheckPhase = false;
             ProgressTracker.Shared.RecordAwarenessScore(score);
 
-            // Capture awareness for sync upload (mapped to Supabase format:
-            // CHECK constraint only allows "yes"/"somewhat"/"no")
-            _syncEventAwareness = score >= 67 ? "yes" : score >= 34 ? "somewhat" : "no";
+            // Capture awareness score for sync upload
+            _syncEventAwareness = score.ToString();
 
             if (card != null)
             {
