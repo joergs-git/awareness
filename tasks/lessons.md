@@ -1,5 +1,11 @@
 # Lessons Learned
 
+## [2026-03-19] — CFBundleVersion must be build number, not marketing version
+- **Mistake:** Set `CFBundleVersion` in Info.plist to `4.0.2` (same as `CFBundleShortVersionString`). App Store Connect rejected it for review because it interpreted the build as "202" instead of "1".
+- **Root cause:** `CFBundleVersion` is the build number (integer or simple dotted integer), NOT the marketing version. `CFBundleShortVersionString` is the marketing version (e.g. `4.0.2`). They serve different purposes.
+- **Rule:** When bumping versions, set `CFBundleShortVersionString` to the marketing version (e.g. `4.0.2`) and keep `CFBundleVersion` as `1` (or increment for subsequent builds of the same version). Never copy the marketing version into CFBundleVersion.
+- **Applies to:** All Apple platforms (macOS, iOS, watchOS) Info.plist and pbxproj version bumping
+
 ## [2026-03-19] — Supabase PostgREST Prefer header must use separate addValue calls
 - **Mistake:** Used `setValue("return=minimal,resolution=merge-duplicates")` as a single combined header. Some PostgREST versions misparse this, silently ignoring `resolution=merge-duplicates`, causing upsert to fail as a conflicting INSERT.
 - **Root cause:** HTTP `Prefer` header with multiple values needs separate `addValue` calls or proper comma+space separation to be reliably parsed by all PostgREST versions.
