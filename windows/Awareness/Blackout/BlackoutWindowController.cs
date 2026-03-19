@@ -36,8 +36,8 @@ public class BlackoutWindowController : IDisposable
     private string _pendingImagePath = "";
     private string _pendingVideoPath = "";
 
-    // Sync event tracking
-    private DateTime? _syncEventStartTime;
+    // Sync event tracking — stored as pre-formatted ISO 8601 string to guarantee upsert match
+    private string? _syncEventStartTimeISO;
     private double _syncEventDuration;
     private bool _syncEventCompleted;
     private string? _syncEventAwareness;
@@ -127,8 +127,8 @@ public class BlackoutWindowController : IDisposable
     {
         _isInConfirmationPhase = false;
 
-        // Track sync event from confirmation start
-        _syncEventStartTime = DateTime.UtcNow;
+        // Track sync event from confirmation start — format once, reuse for upsert match
+        _syncEventStartTimeISO = SupabaseClient.FormatDate(DateTime.UtcNow);
         _syncEventDuration = _pendingDuration;
         _syncEventCompleted = false;
         _syncEventAwareness = null;
@@ -192,8 +192,8 @@ public class BlackoutWindowController : IDisposable
         string imagePath,
         string videoPath)
     {
-        // Track sync event for Supabase upload
-        _syncEventStartTime = DateTime.UtcNow;
+        // Track sync event for Supabase upload — format once, reuse for upsert match
+        _syncEventStartTimeISO = SupabaseClient.FormatDate(DateTime.UtcNow);
         _syncEventDuration = duration;
         _syncEventCompleted = false;
         _syncEventAwareness = null;
@@ -423,19 +423,17 @@ public class BlackoutWindowController : IDisposable
     /// Upload the current blackout event to Supabase. Called once per blackout lifecycle.
     /// Called at blackout START (completed=false) and again at END (completed=true).
     /// The upsert (merge-duplicates) updates the row with the final data on the second call.
+    /// Uses RecordEventRaw with the pre-formatted ISO string to guarantee upsert key match.
     /// </summary>
     private void UploadSyncEvent()
     {
-        if (_syncEventStartTime == null) return;
+        if (_syncEventStartTimeISO == null) return;
 
-        SyncManager.Shared.RecordEvent(
-            _syncEventStartTime.Value,
+        SyncManager.Shared.RecordEventRaw(
+            _syncEventStartTimeISO,
             _syncEventDuration,
             _syncEventCompleted,
             _syncEventAwareness);
-
-        // Also flush any pending events from previous failed uploads
-        SyncManager.Shared.FlushPending();
     }
 
     // MARK: - Monitor Hot-Plug

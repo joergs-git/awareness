@@ -22,12 +22,29 @@ final class SyncManager {
         completed: Bool,
         awareness: String?
     ) {
+        let formattedDate = SupabaseClient.formatDate(startedAt)
+        recordEventRaw(
+            startedAt: formattedDate,
+            duration: duration,
+            completed: completed,
+            awareness: awareness
+        )
+    }
+
+    /// Record a blackout event using a pre-formatted ISO 8601 date string.
+    /// Use this when the same `started_at` must match an earlier upload (upsert).
+    func recordEventRaw(
+        startedAt: String,
+        duration: TimeInterval,
+        completed: Bool,
+        awareness: String?
+    ) {
         guard SyncKeyManager.shared.isConfigured,
               let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else { return }
 
         let event = PendingEvent(
             syncKey: syncKeyHash,
-            startedAt: SupabaseClient.formatDate(startedAt),
+            startedAt: startedAt,
             duration: duration,
             completed: completed,
             awareness: awareness,

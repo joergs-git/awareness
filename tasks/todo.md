@@ -1,64 +1,59 @@
-# v3.03 — Practice Cards + Micro-Tasks + Twin Donuts for macOS + Micro-Task Rotation
+# v4.0 — Supabase Fix, Smart Guru Awareness, Setup Guide, Always-Upload
 
-## Task A: Copy Model Files to macOS
+## (b) Fix End Record Upload (All Platforms)
+- [x] Fix Prefer header — separate addValue calls
+- [x] Store formatted ISO 8601 date at start, reuse for end
+- [x] Add recordEventRaw to SyncManager
+- [x] Remove flushPending race condition
+- [x] Upload completed=true before awareness check as fallback
+- [x] Apply same fixes to macOS and Windows
 
-- [x] A.1 Copy PracticeCard.swift from iOS to Sources/Awareness/Models/
-- [x] A.2 Copy MicroTask.swift from iOS to Sources/Awareness/Models/
+## (b2) watchOS Volume-Slider Awareness Check
+- [x] Create WatchAwarenessBar with fillable bar + Digital Crown
+- [x] Auto-save after 2s inactivity
+- [x] Apply to BlackoutView and ContentView overlay
 
-## Task B: Extend macOS SettingsManager
+## (b3) watchOS Bigger Breathe Now Button
+- [x] Increase font and padding
+- [x] Fix contentShape tap area collision
 
-- [x] B.1 Add practice card & micro-task UserDefaults keys
-- [x] B.2 Add todaysPracticeCard() — daily random, avoids yesterday
-- [x] B.3 Add randomMicroTask() — fresh random each call, avoids last 3
-- [x] B.4 Add todayString() helper
+## (a) Supabase Online Status on iOS
+- [x] Add checkConnectivity to SupabaseClient
+- [x] Make SyncManager ObservableObject with isSyncOnline
+- [x] Show in ContentView and SettingsView
 
-## Task C: Post-Blackout Phase (macOS)
+## (e) Always Upload to Supabase
+- [x] Auto-generate device UUID in SyncKeyManager
+- [x] Modify hashedSyncKey fallback
+- [x] Guard on smartGuruEnabled
+- [x] Update Smart Guru footer with privacy disclosure
 
-- [x] C.1 Create BlackoutPhaseState.swift (phase enum + observable state)
-- [x] C.2 Add PostBlackoutView to BlackoutContentView.swift (namaste + card + micro-task)
-- [x] C.3 Add beginPostBlackoutPhase() to BlackoutWindowController
-- [x] C.4 Modify dismiss timer to transition to post-blackout instead of immediate dismiss
-- [x] C.5 Add post-blackout keyboard/mouse monitors (any click/key dismisses during card phase)
-- [x] C.6 Update global mouse monitor for post-blackout phase handling
+## (c) Local Event Log
+- [x] Create LocalEventLog.swift
+- [x] Integrate in SyncManager and BlackoutView
+- [x] Add to pbxproj
 
-## Task D: Twin Donuts (macOS ProgressView)
+## (d) Smart Guru Awareness-Based Duration
+- [x] Add awarenessScore to MindfulEvent
+- [x] Extend AdaptiveState with awareness fields
+- [x] Add hourAwarenessProfile to EventStore
+- [x] Implement evaluateAwarenessDurationAdaptation in SmartGuru
+- [x] Defer MindfulEvent recording for completed blackouts
 
-- [x] D.1 Replace single donut with twin donuts (Today + Overall)
-- [x] D.2 Port brush-stroke effect from iOS (4-layer overlapping arcs)
-- [x] D.3 Use warm earthy donut color matching iOS Chinese sunrise palette
-- [x] D.4 Update bar chart to use donut color instead of green
+## (f) Setup Guide / Einrichtungshilfe
+- [x] Create SetupGuideView with 7 guide sections
+- [x] Cropped monochrome screenshots with step-by-step paths
+- [x] Auto-hide after 2nd opening, checkbox toggle
+- [x] Prominent on main screen, moves to burger menu when hidden
+- [x] Also accessible from Settings
+- [x] Watch-aware (isPaired conditional)
+- [x] Full EN/DE translations
+- [x] Notification sounds refresh guide section
 
-## Task E: macOS Xcode Project (pbxproj)
-
-- [x] E.1 Add PracticeCard.swift (B20019/A20019)
-- [x] E.2 Add MicroTask.swift (B20020/A20020)
-- [x] E.3 Add BlackoutPhaseState.swift (B20021/A20021)
-- [x] E.4 Add to Models and Blackout groups
-- [x] E.5 Add to Sources build phase
-
-## Task F: iOS/watchOS Micro-Task Rotation
-
-- [x] F.1 Add rotateMicroTask() to iOS SettingsManager
-- [x] F.2 Call rotateMicroTask() in iOS handlePostBlackout()
-- [x] F.3 Call rotateMicroTask() in watchOS post-blackout onChange
-
-## Task G: Version Bump + Docs
-
-- [x] G.1 SupportFiles/Info.plist → 3.03
-- [x] G.2 Awareness.xcodeproj/project.pbxproj → 3.03 (2 configs)
-- [x] G.3 ios/Awareness/.../project.pbxproj → 3.03 (8 configs)
-- [x] G.4 windows/Awareness/Awareness.csproj → 3.03.0
-- [x] G.5 CHANGELOG.md — add v3.03 entry
-
-## Verification
-
-- [x] H.1 macOS SPM build — BUILD SUCCEEDED
-- [x] H.2 iOS build (all targets: iOS + watchOS + widget) — BUILD SUCCEEDED
+## Version Bump + Docs
+- [x] All 4 files bumped to 4.0 / 4.0.0
+- [x] CHANGELOG.md updated
+- [x] lessons.md updated
 
 ## Results
-
-All tasks completed. New files: PracticeCard.swift, MicroTask.swift, BlackoutPhaseState.swift (macOS).
-Modified: SettingsManager.swift (macOS + iOS), BlackoutContentView.swift (macOS),
-BlackoutWindowController.swift (macOS), ProgressView.swift (macOS),
-project.pbxproj (macOS + iOS), ContentView.swift (iOS + watchOS),
-Info.plist, Awareness.csproj, CHANGELOG.md.
+All tasks completed. macOS SPM, iOS (+ watchOS + widget) all build successfully.

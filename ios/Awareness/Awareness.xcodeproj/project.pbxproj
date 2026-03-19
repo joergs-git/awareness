@@ -54,6 +54,7 @@
 		A30018 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30013 /* ProgressView.swift */; };
 		A30019 /* ChimePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30014 /* ChimePlayer.swift */; };
 		A30020 /* AlarmSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30015 /* AlarmSessionManager.swift */; };
+		A30026 /* WatchAwarenessBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30017 /* WatchAwarenessBar.swift */; };
 		A40009 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
 		B1F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
 		B3F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1F00001 /* Localizable.xcstrings */; };
@@ -62,6 +63,7 @@
 		A10021 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021 /* MicroTask.swift */; };
 		A10022 /* MindfulEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10022 /* MindfulEvent.swift */; };
 		A10023 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* EventStore.swift */; };
+		A10033 /* LocalEventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10034 /* LocalEventLog.swift */; };
 		A10024 /* SmartGuru.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024 /* SmartGuru.swift */; };
 		A30021 /* PracticeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10020 /* PracticeCard.swift */; };
 		A30022 /* MicroTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021 /* MicroTask.swift */; };
@@ -78,6 +80,7 @@
 		A50005 /* AwarenessWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B50099 /* AwarenessWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A10025 /* ReviewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* ReviewHelper.swift */; };
 		A10026 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10027 /* OnboardingView.swift */; };
+		A10034 /* SetupGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10035 /* SetupGuideView.swift */; };
 		A10027 /* WarmBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028 /* WarmBackground.swift */; };
 		A30025 /* WarmBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028 /* WarmBackground.swift */; };
 		A10028 /* CallDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10029 /* CallDetector.swift */; };
@@ -187,11 +190,13 @@
 		B30013 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		B30014 /* ChimePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChimePlayer.swift; sourceTree = "<group>"; };
 		B30015 /* AlarmSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSessionManager.swift; sourceTree = "<group>"; };
+		B30017 /* WatchAwarenessBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAwarenessBar.swift; sourceTree = "<group>"; };
 		A1F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B10020 /* PracticeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeCard.swift; sourceTree = "<group>"; };
 		B10021 /* MicroTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroTask.swift; sourceTree = "<group>"; };
 		B10022 /* MindfulEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MindfulEvent.swift; sourceTree = "<group>"; };
 		B10023 /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
+		B10034 /* LocalEventLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalEventLog.swift; sourceTree = "<group>"; };
 		B10024 /* SmartGuru.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartGuru.swift; sourceTree = "<group>"; };
 		B50001 /* AwarenessWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessWidgetBundle.swift; sourceTree = "<group>"; };
 		B50002 /* AwarenessWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessWidgetProvider.swift; sourceTree = "<group>"; };
@@ -203,6 +208,7 @@
 		B10025 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10026 /* ReviewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewHelper.swift; sourceTree = "<group>"; };
 		B10027 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		B10035 /* SetupGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupGuideView.swift; sourceTree = "<group>"; };
 		B10028 /* WarmBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarmBackground.swift; sourceTree = "<group>"; };
 		B10029 /* CallDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDetector.swift; sourceTree = "<group>"; };
 		B10030 /* SyncWordList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncWordList.swift; sourceTree = "<group>"; };
@@ -276,6 +282,7 @@
 				D10008 /* Resources */,
 				B10026 /* ReviewHelper.swift */,
 				B10027 /* OnboardingView.swift */,
+				B10035 /* SetupGuideView.swift */,
 				B10028 /* WarmBackground.swift */,
 				B10011 /* Assets.xcassets */,
 				A1F00001 /* Localizable.xcstrings */,
@@ -293,6 +300,7 @@
 				B10021 /* MicroTask.swift */,
 				B10022 /* MindfulEvent.swift */,
 				B10023 /* EventStore.swift */,
+				B10034 /* LocalEventLog.swift */,
 				B10024 /* SmartGuru.swift */,
 			);
 			path = Models;
@@ -408,6 +416,7 @@
 				B30005 /* HapticPlayer.swift */,
 				B30014 /* ChimePlayer.swift */,
 				B30015 /* AlarmSessionManager.swift */,
+				B30017 /* WatchAwarenessBar.swift */,
 				B30006 /* NotificationScheduler.swift */,
 				B30007 /* WatchConnectivityManager.swift */,
 				B30013 /* ProgressView.swift */,
@@ -636,10 +645,12 @@
 				A10021 /* MicroTask.swift in Sources */,
 				A10022 /* MindfulEvent.swift in Sources */,
 				A10023 /* EventStore.swift in Sources */,
+				A10033 /* LocalEventLog.swift in Sources */,
 				A10024 /* SmartGuru.swift in Sources */,
 				A50004 /* WidgetDataBridge.swift in Sources */,
 				A10025 /* ReviewHelper.swift in Sources */,
 				A10026 /* OnboardingView.swift in Sources */,
+				A10034 /* SetupGuideView.swift in Sources */,
 				A10027 /* WarmBackground.swift in Sources */,
 				A10028 /* CallDetector.swift in Sources */,
 				A10029 /* SyncWordList.swift in Sources */,
@@ -674,6 +685,7 @@
 				A30023 /* MindfulEvent.swift in Sources */,
 				A30024 /* EventStore.swift in Sources */,
 				A30025 /* WarmBackground.swift in Sources */,
+				A30026 /* WatchAwarenessBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -862,7 +874,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -894,7 +906,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -921,7 +933,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Atempause logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -950,7 +962,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Atempause logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -973,7 +985,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Complication";
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -996,7 +1008,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Complication";
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1019,7 +1031,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Widget";
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1040,7 +1052,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Widget";
-				MARKETING_VERSION = 3.19;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

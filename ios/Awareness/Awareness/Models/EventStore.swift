@@ -14,6 +14,7 @@ class EventStore: ObservableObject {
         static let hourProfile = "eventStoreHourProfile"
         static let weekdayProfile = "eventStoreWeekdayProfile"
         static let lastEventTimestamp = "eventStoreLastEventTimestamp"
+        static let hourAwarenessProfile = "eventStoreHourAwarenessProfile"
     }
 
     // MARK: - Properties
@@ -27,6 +28,9 @@ class EventStore: ObservableObject {
     /// Cumulative success counts per weekday (7 buckets: [completed, total])
     /// Index 0 = Sunday, 6 = Saturday
     private var weekdayProfile: [[Int]] = Array(repeating: [0, 0], count: 7)
+
+    /// Cumulative awareness scores per hour (24 buckets: [sum, count]) for future ML
+    private var hourAwarenessProfile: [[Int]] = Array(repeating: [0, 0], count: 24)
 
     // MARK: - Init
 
@@ -53,6 +57,12 @@ class EventStore: ObservableObject {
         weekdayProfile[weekdayIndex][1] += 1
         if event.outcome == .completed {
             weekdayProfile[weekdayIndex][0] += 1
+        }
+
+        // Update hourly awareness profile (data collection for future ML)
+        if let score = event.awarenessScore {
+            hourAwarenessProfile[hour][0] += score
+            hourAwarenessProfile[hour][1] += 1
         }
 
         // Store timestamp of last event for interval calculation
@@ -133,6 +143,25 @@ class EventStore: ObservableObject {
         recentEvents(days: days).filter { $0.outcome == .dismissed }.count
     }
 
+    /// Rolling awareness average from the last N events that have awareness scores
+    func rollingAwarenessAverage(last n: Int) -> Double? {
+        let scores = events.reversed().compactMap { $0.awarenessScore }.prefix(n)
+        guard scores.count >= 3 else { return nil }
+        return Double(scores.reduce(0, +)) / Double(scores.count)
+    }
+
+    /// Average awareness score for a specific hour (±1 hour smoothing) from cumulative profile
+    func hourlyAwarenessAverage(hour: Int) -> Double? {
+        var sum = 0, count = 0
+        for offset in -1...1 {
+            let h = (hour + offset + 24) % 24
+            sum += hourAwarenessProfile[h][0]
+            count += hourAwarenessProfile[h][1]
+        }
+        guard count >= 5 else { return nil }
+        return Double(sum) / Double(count)
+    }
+
     /// Total event count in the hour profile for a given hour (for data sufficiency checks)
     func hourProfileTotal(hour: Int) -> Int {
         var total = 0
@@ -172,6 +201,9 @@ class EventStore: ObservableObject {
         if let weekdayData = try? JSONEncoder().encode(weekdayProfile) {
             UserDefaults.standard.set(weekdayData, forKey: Keys.weekdayProfile)
         }
+        if let awarenessData = try? JSONEncoder().encode(hourAwarenessProfile) {
+            UserDefaults.standard.set(awarenessData, forKey: Keys.hourAwarenessProfile)
+        }
     }
 
     private func loadProfiles() {
@@ -184,6 +216,11 @@ class EventStore: ObservableObject {
            let decoded = try? JSONDecoder().decode([[Int]].self, from: data),
            decoded.count == 7 {
             weekdayProfile = decoded
+        }
+        if let data = UserDefaults.standard.data(forKey: Keys.hourAwarenessProfile),
+           let decoded = try? JSONDecoder().decode([[Int]].self, from: data),
+           decoded.count == 24 {
+            hourAwarenessProfile = decoded
         }
     }
 

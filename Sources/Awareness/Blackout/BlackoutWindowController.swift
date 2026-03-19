@@ -34,7 +34,8 @@ class BlackoutWindowController {
 
     // MARK: - Sync Event Tracking
     /// Tracks the current blackout event lifecycle for Supabase upload
-    private var syncEventStartTime: Date?
+    /// Stored as pre-formatted ISO 8601 string to guarantee upsert match between START and END uploads
+    private var syncEventStartTimeISO: String?
     private var syncEventDuration: TimeInterval = 0
     private var syncEventCompleted = false
     private var syncEventAwareness: String?
@@ -151,8 +152,8 @@ class BlackoutWindowController {
     private func handleConfirmYes() {
         isInConfirmationPhase = false
 
-        // Track sync event from confirmation start
-        syncEventStartTime = Date()
+        // Track sync event from confirmation start — format once, reuse for upsert match
+        syncEventStartTimeISO = SupabaseClient.formatDate(Date())
         syncEventDuration = pendingDuration
         syncEventCompleted = false
         syncEventAwareness = nil
@@ -225,8 +226,8 @@ class BlackoutWindowController {
         imagePath: String,
         videoPath: String
     ) {
-        // Track sync event for Supabase upload
-        syncEventStartTime = Date()
+        // Track sync event for Supabase upload — format once, reuse for upsert match
+        syncEventStartTimeISO = SupabaseClient.formatDate(Date())
         syncEventDuration = duration
         syncEventCompleted = false
         syncEventAwareness = nil
@@ -438,18 +439,16 @@ class BlackoutWindowController {
     /// Upload the current blackout event to Supabase via upsert.
     /// Called at blackout START (completed=false) and again at END (completed=true, awareness set).
     /// The upsert (merge-duplicates) updates the row with the final data on the second call.
+    /// Uses recordEventRaw with the pre-formatted ISO string to guarantee upsert key match.
     private func uploadSyncEvent() {
-        guard let startTime = syncEventStartTime else { return }
+        guard let startTimeISO = syncEventStartTimeISO else { return }
 
-        SyncManager.shared.recordEvent(
-            startedAt: startTime,
+        SyncManager.shared.recordEventRaw(
+            startedAt: startTimeISO,
             duration: syncEventDuration,
             completed: syncEventCompleted,
             awareness: syncEventAwareness
         )
-
-        // Also flush any pending events from previous failed uploads
-        SyncManager.shared.flushPending()
     }
 
     // MARK: - Screen Change Handling

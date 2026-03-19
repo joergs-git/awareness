@@ -87,30 +87,12 @@ struct BlackoutView: View {
 
                 // Awareness check shown after completed blackout fades out
                 if showingAwarenessCheck {
-                    VStack(spacing: 8) {
-                        Text(String(localized: "Were you there?"))
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.85))
-
-                        HStack {
-                            Text(String(localized: "No"))
-                                .font(.system(size: 10))
-                                .foregroundColor(.white.opacity(0.5))
-                            Spacer()
-                            Text(String(localized: "Yes"))
-                                .font(.system(size: 10))
-                                .foregroundColor(.white.opacity(0.5))
+                    WatchAwarenessBar(
+                        value: $sliderValue,
+                        onSubmit: { score in
+                            handleWatchAwarenessScore(score)
                         }
-                        .padding(.horizontal, 4)
-
-                        Slider(value: $sliderValue, in: 0...100, step: 1) { editing in
-                            if !editing {
-                                handleWatchAwarenessScore(Int(sliderValue))
-                            }
-                        }
-                        .tint(.white.opacity(0.6))
-                    }
-                    .padding(.horizontal, 8)
+                    )
                     .transition(.opacity)
                 }
             }

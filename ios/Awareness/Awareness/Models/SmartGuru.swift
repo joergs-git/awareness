@@ -23,8 +23,8 @@ class SmartGuru {
     /// Minimum spread between min and max interval (minutes)
     private let minIntervalSpread: Double = 5
 
-    /// Minimum blackout duration floor (seconds)
-    private let minDurationFloor: Double = 5
+    /// Minimum blackout duration floor (seconds) — awareness adaptation never goes below 6s
+    private let minDurationFloor: Double = 6
 
     /// Maximum blackout duration ceiling (seconds)
     private let maxDurationCeiling: Double = 120
@@ -119,9 +119,13 @@ class SmartGuru {
         }
         // 0.50 <= blendedRate < 0.80: sweet spot, hold steady
 
-        // --- Duration adaptation ---
+        // --- Duration adaptation (dismissal-based) ---
         let durationAdjusted = evaluateDurationAdaptation(&state)
         adjusted = adjusted || durationAdjusted
+
+        // --- Duration adaptation (awareness-based) ---
+        let awarenessAdjusted = evaluateAwarenessDurationAdaptation(&state)
+        adjusted = adjusted || awarenessAdjusted
 
         // Update streak tracking
         switch event.outcome {
@@ -177,6 +181,98 @@ class SmartGuru {
         }
 
         return false
+    }
+
+    // MARK: - Awareness-Based Duration Adaptation
+
+    /// Awareness window size for rolling average
+    private let awarenessWindowSize: Int = 5
+    /// Threshold below which awareness is considered "low"
+    private let awarenessLowThreshold: Double = 50.0
+    /// High awareness threshold for slow increases
+    private let awarenessHighThreshold: Double = 50.0
+
+    /// Adjusts duration based on awareness score trends.
+    /// Algorithm:
+    /// - Below 50% consistently → decrease by random 3-8s (floor 6s)
+    /// - Stable/improving for 3-8 breaths → hold, then increase by 1s per breath
+    /// - When decline starts → go back 3-5s, hold for 2 days before resuming increases
+    private func evaluateAwarenessDurationAdaptation(_ state: inout AdaptiveState) -> Bool {
+        guard let currentAvg = store.rollingAwarenessAverage(last: awarenessWindowSize) else {
+            return false
+        }
+
+        var lowCount = state.consecutiveLowAwareness ?? 0
+        var stable = state.stableStreak ?? 0
+        let holdActive = state.awaitingLongerHold ?? false
+
+        if currentAvg < awarenessLowThreshold {
+            // Awareness declining — shorten duration
+            lowCount += 1
+            stable = 0
+
+            let decrease = Double.random(in: 3...8)
+            state.currentMinDuration = max(state.currentMinDuration - decrease, minDurationFloor)
+            state.currentMaxDuration = max(state.currentMaxDuration - decrease, state.currentMinDuration + minDurationSpread)
+
+            // If this is a new decline (transition from good to bad), activate longer hold
+            if !holdActive && lowCount == 1 {
+                let goBack = Double.random(in: 3...5)
+                state.currentMinDuration = max(state.currentMinDuration - goBack, minDurationFloor)
+                state.currentMaxDuration = max(state.currentMaxDuration - goBack, state.currentMinDuration + minDurationSpread)
+                state.awaitingLongerHold = true
+                state.holdUntilDate = todayString()
+            }
+
+            state.consecutiveLowAwareness = lowCount
+            state.stableStreak = 0
+            return true
+        } else {
+            // Awareness stable or improving
+            lowCount = 0
+            stable += 1
+
+            state.consecutiveLowAwareness = 0
+            state.stableStreak = stable
+
+            // If in longer hold period, check if 2 days have passed
+            if holdActive {
+                if let holdDate = state.holdUntilDate {
+                    let daysSinceHold = daysBetween(holdDate, todayString())
+                    if daysSinceHold >= 2 {
+                        // 2 days of steadiness — exit hold, resume increases
+                        state.awaitingLongerHold = false
+                        state.holdUntilDate = nil
+                    } else {
+                        // Still in hold period — don't change duration
+                        return false
+                    }
+                }
+            }
+
+            // After 3-8 breaths of stability, start increasing by 1s per breath
+            let stabilityThreshold = Int.random(in: 3...8)
+            if stable >= stabilityThreshold {
+                let today = todayString()
+                if state.lastDurationIncreaseDate != today {
+                    state.currentMinDuration = min(state.currentMinDuration + 1, maxDurationCeiling - minDurationSpread)
+                    state.currentMaxDuration = min(state.currentMaxDuration + 1, maxDurationCeiling)
+                    state.lastDurationIncreaseDate = today
+                    return true
+                }
+            }
+
+            return false
+        }
+    }
+
+    /// Calculate days between two "yyyy-MM-dd" date strings
+    private func daysBetween(_ from: String, _ to: String) -> Int {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let fromDate = formatter.date(from: from),
+              let toDate = formatter.date(from: to) else { return 0 }
+        return Calendar.current.dateComponents([.day], from: fromDate, to: toDate).day ?? 0
     }
 
     // MARK: - State Management

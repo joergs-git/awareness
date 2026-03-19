@@ -52,6 +52,9 @@ final class SettingsManager: ObservableObject {
         static let microTaskShownToday   = "microTaskShownToday"
         static let practiceCardNotificationHour = "practiceCardNotificationHour"
         static let hasLaunchedBefore = "hasLaunchedBefore"
+        static let stage2OnboardingShown = "stage2OnboardingShown"
+        static let setupGuideOpenCount = "setupGuideOpenCount"
+        static let setupGuideHidden = "setupGuideHidden"
 
         #if !os(watchOS)
         static let startGongEnabled     = "startGongEnabled"
@@ -445,6 +448,23 @@ final class SettingsManager: ObservableObject {
         set { defaults.set(newValue, forKey: Keys.hasLaunchedBefore) }
     }
 
+    /// Whether the stage 2 onboarding (setup guide) has been shown
+    var stage2OnboardingShown: Bool {
+        get { defaults.bool(forKey: Keys.stage2OnboardingShown) }
+        set { defaults.set(newValue, forKey: Keys.stage2OnboardingShown) }
+    }
+
+    /// How many times the setup guide has been opened
+    var setupGuideOpenCount: Int {
+        get { defaults.integer(forKey: Keys.setupGuideOpenCount) }
+        set { defaults.set(newValue, forKey: Keys.setupGuideOpenCount) }
+    }
+
+    /// Whether the user chose to hide the setup guide from the main screen
+    @Published var setupGuideHidden: Bool {
+        didSet { defaults.set(setupGuideHidden, forKey: Keys.setupGuideHidden) }
+    }
+
     // MARK: - Desktop Sync (iOS only)
 
     #if !os(watchOS)
@@ -656,6 +676,7 @@ final class SettingsManager: ObservableObject {
         healthKitEnabled    = defaults.bool(forKey: Keys.healthKitEnabled)
         healthKitPromptShown = defaults.bool(forKey: Keys.healthKitPromptShown)
         smartGuruEnabled    = defaults.bool(forKey: Keys.smartGuruEnabled)
+        setupGuideHidden    = defaults.bool(forKey: Keys.setupGuideHidden)
         practiceCardNotificationHour = defaults.integer(forKey: Keys.practiceCardNotificationHour)
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue

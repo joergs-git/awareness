@@ -7,6 +7,7 @@ struct ContentView: View {
     @ObservedObject var settings = SettingsManager.shared
     @ObservedObject var scheduler = NotificationScheduler.shared
     @ObservedObject var foregroundScheduler = ForegroundScheduler.shared
+    @ObservedObject var syncManager = SyncManager.shared
 
     @State private var showingBlackout = false
     @State private var showingSettings = false
@@ -23,6 +24,8 @@ struct ContentView: View {
     @State private var logoRotation: Double = 0
     @State private var showingOnboarding = false
     @State private var showingMore = false
+    @State private var showingSetupGuide = false
+    @State private var setupGuidePulsing = false
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
@@ -149,7 +152,45 @@ struct ContentView: View {
                     .listRowBackground(Color.clear)
                 }
 
+                // MARK: - Setup Guide (prominent when not hidden)
+                if !settings.setupGuideHidden {
+                    Section {
+                        Button {
+                            showingSetupGuide = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "sparkles")
+                                    .foregroundColor(Color(red: 0.72, green: 0.50, blue: 0.38))
+                                Text(String(localized: "Important for you."))
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Text(String(localized: "Setup Guide"))
+                                    .font(.subheadline)
+                                    .foregroundColor(Color(red: 0.72, green: 0.50, blue: 0.38))
+                                    .scaleEffect(setupGuidePulsing ? 1.05 : 0.95)
+                                    .opacity(setupGuidePulsing ? 1.0 : 0.7)
+                            }
+                        }
+                        .onAppear {
+                            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                                setupGuidePulsing = true
+                            }
+                        }
+                    }
+                }
+
                 if showingMore {
+                // MARK: - Setup Guide (inside burger menu when hidden from main screen)
+                if settings.setupGuideHidden {
+                    Section {
+                        Button {
+                            showingSetupGuide = true
+                        } label: {
+                            Label(String(localized: "Setup Guide"), systemImage: "questionmark.circle")
+                        }
+                    }
+                }
+
                 // MARK: - Status & Progress
                 Section {
                     // Status + next time row
@@ -168,6 +209,23 @@ struct ContentView: View {
                                 Text(formatTime(nextDate))
                             }
                             .foregroundColor(.secondary)
+                        }
+                    }
+
+                    // Sync status (shown when sync key is configured)
+                    if SyncKeyManager.shared.isConfigured {
+                        HStack(spacing: 6) {
+                            Image(systemName: "icloud")
+                                .font(.caption)
+                                .foregroundColor(syncManager.isSyncOnline ? .green : .gray)
+                            Text(String(localized: "Desktop Sync"))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(syncManager.isSyncOnline
+                                 ? String(localized: "Online")
+                                 : String(localized: "Offline"))
+                                .foregroundColor(syncManager.isSyncOnline ? .green : .secondary)
+                                .font(.caption)
                         }
                     }
 
@@ -386,6 +444,9 @@ struct ContentView: View {
             .fullScreenCover(isPresented: $showingOnboarding) {
                 OnboardingView()
             }
+            .fullScreenCover(isPresented: $showingSetupGuide) {
+                SetupGuideView()
+            }
             .task {
                 // Show onboarding on first launch
                 if !settings.hasLaunchedBefore {
@@ -410,6 +471,8 @@ struct ContentView: View {
 
                 // Pull desktop events from Supabase (one-way sync: desktop → iOS)
                 SyncManager.shared.pullAndIntegrate()
+                // Check Supabase connectivity for status indicator
+                SyncManager.shared.refreshConnectivityStatus()
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Re-check whenever app becomes active (e.g. returning from system Settings)
@@ -424,6 +487,9 @@ struct ContentView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .showSetupGuide)) { _ in
+                showingSetupGuide = true
             }
             .alert(String(localized: "Track Your Mindful Minutes?"), isPresented: $showHealthKitPrompt) {
                 Button(String(localized: "Enable")) {
@@ -557,6 +623,15 @@ struct ContentView: View {
         ReviewHelper.requestReviewIfEligible()
         // Sync desktop events after each local blackout
         SyncManager.shared.pullAndIntegrate()
+
+        // Show stage 2 onboarding (setup guide) after 3rd completed breath
+        if ProgressTracker.shared.lifetimeCompleted == 3 && !settings.stage2OnboardingShown {
+            settings.stage2OnboardingShown = true
+            // Small delay to let the blackout dismiss animation complete
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showingSetupGuide = true
+            }
+        }
     }
 }
 
@@ -565,6 +640,8 @@ struct ContentView: View {
 extension Notification.Name {
     /// Posted when the user taps a notification, triggering a blackout in the foreground
     static let showBlackout = Notification.Name("showBlackout")
+    /// Posted from SettingsView to show the Setup Guide after settings sheet dismisses
+    static let showSetupGuide = Notification.Name("showSetupGuide")
 }
 
 // MARK: - Card Background (aquarelle style)

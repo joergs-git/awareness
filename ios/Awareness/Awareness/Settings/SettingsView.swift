@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var showingRegenerateConfirmation = false
     /// Tracks the current sync passphrase for reactivity (SyncKeyManager is not observable)
     @State private var syncPassphrase: String? = SyncKeyManager.shared.passphrase
+    @ObservedObject private var syncManager = SyncManager.shared
 
     var body: some View {
         NavigationStack {
@@ -66,7 +67,31 @@ struct SettingsView: View {
                 } header: {
                     Label(String(localized: "Adaptive Scheduling"), systemImage: "brain.head.profile")
                 } footer: {
-                    Text(String(localized: "When enabled, the guru learns your rhythm and adjusts intervals and duration automatically."))
+                    Text(String(localized: "When enabled, the guru learns your rhythm and adjusts intervals and duration automatically. Anonymous practice data (timestamps, durations, scores — no personal info) is uploaded to help improve the algorithm."))
+                }
+
+                // MARK: - Setup Guide
+                Section {
+                    Button {
+                        dismiss()
+                        // Small delay to let settings sheet dismiss, then show guide
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            NotificationCenter.default.post(name: .showSetupGuide, object: nil)
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "sparkles")
+                                .foregroundColor(Color(red: 0.72, green: 0.50, blue: 0.38))
+                            Text(String(localized: "Important for you."))
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } footer: {
+                    Text(String(localized: "Tips to optimize your device for a focused mindfulness practice."))
                 }
 
                 // MARK: - Desktop Sync
@@ -75,6 +100,21 @@ struct SettingsView: View {
 
                     if settings.worksOnComputer {
                         if let phrase = syncPassphrase, !phrase.isEmpty {
+                            HStack {
+                                Text(String(localized: "Status"))
+                                Spacer()
+                                HStack(spacing: 4) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(syncManager.isSyncOnline ? .green : .gray)
+                                        .font(.caption)
+                                    Text(syncManager.isSyncOnline
+                                         ? String(localized: "Connected")
+                                         : String(localized: "Not connected"))
+                                        .font(.caption)
+                                        .foregroundColor(syncManager.isSyncOnline ? .green : .secondary)
+                                }
+                            }
+
                             HStack {
                                 Text(String(localized: "Sync Key"))
                                 Spacer()

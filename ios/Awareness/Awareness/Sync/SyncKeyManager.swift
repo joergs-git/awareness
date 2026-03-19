@@ -14,6 +14,7 @@ final class SyncKeyManager {
         static let syncPassphrase = "syncPassphrase"
         static let syncLastPullDate = "syncLastPullDate"
         static let syncProcessedEventIDs = "syncProcessedEventIDs"
+        static let deviceUUID = "syncDeviceUUID"
     }
 
     // MARK: - Passphrase
@@ -24,16 +25,36 @@ final class SyncKeyManager {
         set { defaults.set(newValue, forKey: Keys.syncPassphrase) }
     }
 
-    /// Whether a sync passphrase has been generated
+    /// Whether sync is configured — true if passphrase exists OR Smart Guru is enabled (device UUID fallback)
     var isConfigured: Bool {
-        guard let phrase = passphrase else { return false }
-        return !phrase.isEmpty
+        if let phrase = passphrase, !phrase.isEmpty { return true }
+        // When Smart Guru is enabled, always upload using device UUID
+        return SettingsManager.shared.smartGuruEnabled
     }
 
-    /// SHA-256 hex digest of the passphrase, used as the sync_key in Supabase
+    /// Auto-generated device UUID for anonymous Supabase uploads when no passphrase is set.
+    /// Persisted across app launches so the same device always gets the same sync_key.
+    var deviceUUID: String {
+        if let existing = defaults.string(forKey: Keys.deviceUUID), !existing.isEmpty {
+            return existing
+        }
+        let uuid = UUID().uuidString
+        defaults.set(uuid, forKey: Keys.deviceUUID)
+        return uuid
+    }
+
+    /// SHA-256 hex digest used as the sync_key in Supabase.
+    /// Uses passphrase when available (desktop sync), otherwise device UUID (anonymous upload).
     var hashedSyncKey: String? {
-        guard let phrase = passphrase, !phrase.isEmpty else { return nil }
-        let data = Data(phrase.lowercased().utf8)
+        let source: String
+        if let phrase = passphrase, !phrase.isEmpty {
+            source = phrase.lowercased()
+        } else if SettingsManager.shared.smartGuruEnabled {
+            source = deviceUUID
+        } else {
+            return nil
+        }
+        let data = Data(source.utf8)
         let hash = SHA256.hash(data: data)
         return hash.compactMap { String(format: "%02x", $0) }.joined()
     }

@@ -92,7 +92,8 @@ final class SupabaseClient {
         request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("return=minimal,resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
+        request.addValue("return=minimal", forHTTPHeaderField: "Prefer")
+        request.addValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
 
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(event)

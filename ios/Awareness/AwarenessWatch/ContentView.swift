@@ -117,7 +117,6 @@ struct ContentView: View {
                                         RoundedRectangle(cornerRadius: 6)
                                             .stroke(card.color.opacity(0.2), lineWidth: 0.5)
                                     )
-                                    .contentShape(Rectangle())
                                     .onTapGesture { showingCardDetail = true }
                             }
 
@@ -126,10 +125,12 @@ struct ContentView: View {
                                 showingBlackout = true
                             } label: {
                                 Label(String(localized: "Breathe now"), systemImage: "play.circle")
-                                    .font(.footnote)
+                                    .font(.callout)
                                     .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 4)
                             }
-                            .padding(.top, 4)
+                            .contentShape(Rectangle())
+                            .padding(.top, 12)
                         }
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
@@ -266,30 +267,12 @@ struct ContentView: View {
                 if showingAwarenessCheck {
                     ZStack {
                         Color.black.ignoresSafeArea()
-                        VStack(spacing: 8) {
-                            Text(String(localized: "Were you there?"))
-                                .font(.headline)
-                                .foregroundColor(.white.opacity(0.85))
-
-                            HStack {
-                                Text(String(localized: "No"))
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.white.opacity(0.5))
-                                Spacer()
-                                Text(String(localized: "Yes"))
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.white.opacity(0.5))
+                        WatchAwarenessBar(
+                            value: $overlaySliderValue,
+                            onSubmit: { score in
+                                handleOverlayAwarenessScore(score)
                             }
-                            .padding(.horizontal, 4)
-
-                            Slider(value: $overlaySliderValue, in: 0...100, step: 1) { editing in
-                                if !editing {
-                                    handleOverlayAwarenessScore(Int(overlaySliderValue))
-                                }
-                            }
-                            .tint(.white.opacity(0.6))
-                        }
-                        .padding(.horizontal, 8)
+                        )
                     }
                     .opacity(awarenessCheckOpacity)
                 }

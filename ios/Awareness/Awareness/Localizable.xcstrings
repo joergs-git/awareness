@@ -478,12 +478,32 @@
         }
       }
     },
+    "Choose \"Time Sensitive Delivery\" if available" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle \"Zeitkritische Mitteilungen\" falls verfügbar"
+          }
+        }
+      }
+    },
     "Choose Image" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bild auswählen"
+          }
+        }
+      }
+    },
+    "Choose small or medium size" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle klein oder mittel"
           }
         }
       }
@@ -544,6 +564,386 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verbunden"
+          }
+        }
+      }
+    },
+    "Add a Home Screen Widget" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home-Screen-Widget hinzufügen"
+          }
+        }
+      }
+    },
+    "Add a second complication in another slot" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge eine zweite Komplikation in einem anderen Platz hinzu"
+          }
+        }
+      }
+    },
+    "Add a Lock Screen Widget" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sperrbildschirm-Widget hinzufügen"
+          }
+        }
+      }
+    },
+    "Add the Atempause widget for a mindful first screen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge das Atempause-Widget für einen achtsamen Startbildschirm hinzu"
+          }
+        }
+      }
+    },
+    "Apple Watch Complications" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch Komplikationen"
+          }
+        }
+      }
+    },
+    "Clean Your Home Screen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Räum deinen Startbildschirm auf"
+          }
+        }
+      }
+    },
+    "Enable Atempause Notifications" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atempause-Mitteilungen aktivieren"
+          }
+        }
+      }
+    },
+    "Find \"Atempause\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finde \"Atempause\""
+          }
+        }
+      }
+    },
+    "Find WhatsApp, Instagram, Slack, etc." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finde WhatsApp, Instagram, Slack, etc."
+          }
+        }
+      }
+    },
+    "Focus Duration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusdauer"
+          }
+        }
+      }
+    },
+    "Got it" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verstanden"
+          }
+        }
+      }
+    },
+    "Hide from main screen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vom Hauptbildschirm ausblenden"
+          }
+        }
+      }
+    },
+    "Important for you." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wichtig für Dich."
+          }
+        }
+      }
+    },
+    "Tip: Create a new \"Simple\" watch face just for practice" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipp: Erstelle ein neues \"Schlicht\"-Zifferblatt nur für die Praxis"
+          }
+        }
+      }
+    },
+    "Tips to optimize your device for a focused mindfulness practice." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipps, um dein Gerät für eine fokussierte Achtsamkeitspraxis zu optimieren."
+          }
+        }
+      }
+    },
+    "A few simple changes to your device will make a big difference." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein paar einfache Änderungen an deinem Gerät machen einen großen Unterschied."
+          }
+        }
+      }
+    },
+    "Long-press your home screen → tap + → search \"Atempause\" → add the widget. See your next break at a glance." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte den Homescreen gedrückt → tippe + → suche \"Atempause\" → füge das Widget hinzu. Sieh deine nächste Pause auf einen Blick."
+          }
+        }
+      }
+    },
+    "Long-press your lock screen → Customize → add an Atempause widget. Every glance becomes a reminder to breathe." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte den Sperrbildschirm gedrückt → Anpassen → füge ein Atempause-Widget hinzu. Jeder Blick wird zur Erinnerung ans Atmen."
+          }
+        }
+      }
+    },
+    "On your watch, long-press the face → Edit → add two Atempause complications: a small one for your streak and a larger one for quick access. Create a dedicated mindfulness watch face layout." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte auf deiner Watch das Zifferblatt gedrückt → Bearbeiten → füge zwei Atempause-Komplikationen hinzu: eine kleine für deinen Streak und eine größere für schnellen Zugriff. Erstelle ein eigenes Achtsamkeits-Zifferblatt."
+          }
+        }
+      }
+    },
+    "Go to Settings → Notifications and turn off alerts from messengers (WhatsApp, Instagram, Slack, X, ...). They constantly pull you out of presence. Keep only truly important ones." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gehe zu Einstellungen → Mitteilungen und deaktiviere Benachrichtigungen von Messengern (WhatsApp, Instagram, Slack, X, ...). Sie reißen dich ständig aus der Gegenwart. Behalte nur die wirklich wichtigen."
+          }
+        }
+      }
+    },
+    "Make sure Atempause notifications are enabled so you receive gentle reminders even when the app is in the background." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stelle sicher, dass Atempause-Mitteilungen aktiviert sind, damit du sanfte Erinnerungen auch im Hintergrund erhältst."
+          }
+        }
+      }
+    },
+    "Move distracting apps to a second page or the App Library. Your first screen should only show what truly matters. Everything else: out of sight, out of mind." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschiebe ablenkende Apps auf eine zweite Seite oder in die App-Mediathek. Dein erster Bildschirm sollte nur zeigen, was wirklich zählt. Alles andere: aus den Augen, aus dem Sinn."
+          }
+        }
+      }
+    },
+    "Every notification, every app icon, every badge competes for your attention. Your phone is designed to grab it. Simplifying your device is not just a nice-to-have — it's the foundation for your practice. The less noise, the more presence." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jede Mitteilung, jedes App-Icon, jedes Badge kämpft um deine Aufmerksamkeit. Dein Handy ist darauf ausgelegt, sie zu fesseln. Dein Gerät zu vereinfachen ist kein Nice-to-have — es ist die Grundlage deiner Praxis. Weniger Rauschen, mehr Gegenwart."
+          }
+        }
+      }
+    },
+    "Median" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Median"
+          }
+        }
+      }
+    },
+    "Not connected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht verbunden"
+          }
+        }
+      }
+    },
+    "Offline" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline"
+          }
+        }
+      }
+    },
+    "Online" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Online"
+          }
+        }
+      }
+    },
+    "Optimize Your Practice" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optimiere deine Praxis"
+          }
+        }
+      }
+    },
+    "Setup Guide" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einrichtungshilfe"
+          }
+        }
+      }
+    },
+    "Refresh Your Notification Sounds" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benachrichtigungstöne auffrischen"
+          }
+        }
+      }
+    },
+    "You've probably become deaf to your current tones — your brain filters them out. Change them now so you actually notice when something matters." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du hast dich wahrscheinlich an deine aktuellen Töne gewöhnt — dein Gehirn filtert sie aus. Ändere sie jetzt, damit du wieder merkst, wenn etwas wirklich wichtig ist."
+          }
+        }
+      }
+    },
+    "On Apple Watch: Settings → Sounds & Haptics" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf der Apple Watch: Einstellungen → Töne & Haptik"
+          }
+        }
+      }
+    },
+    "Try \"Resonance\", \"Timer\", or \"Stunner\" as new tones" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probiere \"Resonanz\", \"Zeitmesser\" oder \"Knüller\" als neue Töne"
+          }
+        }
+      }
+    },
+    "On iPhone: Settings → Sounds & Haptics" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem iPhone: Einstellungen → Töne & Haptik"
+          }
+        }
+      }
+    },
+    "Change text tone and notification sound" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ändere Nachrichtenton und Hinweiston"
+          }
+        }
+      }
+    },
+    "Pick something you haven't used before" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle etwas, das du noch nie benutzt hast"
+          }
+        }
+      }
+    },
+    "Silence Distractions" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ablenkungen stummschalten"
+          }
+        }
+      }
+    },
+    "Why This Matters" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum das wichtig ist"
           }
         }
       }
@@ -648,6 +1048,16 @@
         }
       }
     },
+    "Drag distracting apps to the right (second page)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziehe ablenkende Apps nach rechts (zweite Seite)"
+          }
+        }
+      }
+    },
     "Duration" : {
 
     },
@@ -677,6 +1087,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktivieren"
+          }
+        }
+      }
+    },
+    "Enable \"Allow Notifications\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiviere \"Mitteilungen erlauben\""
           }
         }
       }
@@ -995,6 +1415,36 @@
         }
       }
     },
+    "Long-press on your home screen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte den Home-Bildschirm gedrückt"
+          }
+        }
+      }
+    },
+    "Long-press on your lock screen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte den Sperrbildschirm gedrückt"
+          }
+        }
+      }
+    },
+    "Long-press on your watch face" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte das Zifferblatt gedrückt"
+          }
+        }
+      }
+    },
     "Log mindful minutes to Health." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1002,6 +1452,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Achtsame Minuten in Health protokollieren."
+          }
+        }
+      }
+    },
+    "Keep only Phone, Messages, Calendar" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behalte nur Telefon, Nachrichten, Kalender"
+          }
+        }
+      }
+    },
+    "Keep only: Phone, Messages, Calendar, Atempause" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behalte nur: Telefon, Nachrichten, Kalender, Atempause"
           }
         }
       }
@@ -1240,6 +1710,26 @@
         }
       }
     },
+    "Open ⚙️ Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne ⚙️ Einstellungen"
+          }
+        }
+      }
+    },
+    "Or drag them down to remove from home screen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oder ziehe sie nach unten, um sie vom Home-Bildschirm zu entfernen"
+          }
+        }
+      }
+    },
     "Open Settings" : {
       "localizations" : {
         "de" : {
@@ -1378,6 +1868,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zeitplan"
+          }
+        }
+      }
+    },
+    "Search and add \"Atempause\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche und füge \"Atempause\" hinzu"
+          }
+        }
+      }
+    },
+    "Search for \"Atempause\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche nach \"Atempause\""
+          }
+        }
+      }
+    },
+    "Select the lock screen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den Sperrbildschirm"
           }
         }
       }
@@ -1593,6 +2113,16 @@
         }
       }
     },
+    "Swipe to the complications page" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wische zur Komplikationen-Seite"
+          }
+        }
+      }
+    },
     "Sync Your Desktop Breaks" : {
       "localizations" : {
         "de" : {
@@ -1649,6 +2179,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "geschafft"
+          }
+        }
+      }
+    },
+    "Tap \"Add Widget\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe \"Widget hinzufügen\""
+          }
+        }
+      }
+    },
+    "Tap \"Customize\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe \"Anpassen\""
+          }
+        }
+      }
+    },
+    "Tap \"Edit\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe \"Bearbeiten\""
+          }
+        }
+      }
+    },
+    "Tap \"Edit\" → \"Add Widget\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe \"Bearbeiten\" → \"Widget hinzufügen\""
+          }
+        }
+      }
+    },
+    "Tap \"Notifications\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe \"Mitteilungen\""
+          }
+        }
+      }
+    },
+    "Tap a slot → choose \"Atempause\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf einen Platz → wähle \"Atempause\""
+          }
+        }
+      }
+    },
+    "Tap the widget area below the clock" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf den Widget-Bereich unter der Uhr"
           }
         }
       }
@@ -1870,6 +2470,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ausgelöst"
+          }
+        }
+      }
+    },
+    "Turn off \"Allow Notifications\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deaktiviere \"Mitteilungen erlauben\""
           }
         }
       }

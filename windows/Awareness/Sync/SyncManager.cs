@@ -28,6 +28,16 @@ public class SyncManager
     /// </summary>
     public void RecordEvent(DateTime startedAt, double duration, bool completed, string? awareness)
     {
+        var formattedDate = SupabaseClient.FormatDate(startedAt);
+        RecordEventRaw(formattedDate, duration, completed, awareness);
+    }
+
+    /// <summary>
+    /// Record a blackout event using a pre-formatted ISO 8601 date string.
+    /// Use this when the same started_at must match an earlier upload (upsert).
+    /// </summary>
+    public void RecordEventRaw(string startedAt, double duration, bool completed, string? awareness)
+    {
         if (!SyncKeyManager.Shared.IsConfigured) return;
         var syncKeyHash = SyncKeyManager.Shared.HashedSyncKey;
         if (syncKeyHash == null) return;
@@ -35,7 +45,7 @@ public class SyncManager
         var ev = new PendingEvent
         {
             SyncKey = syncKeyHash,
-            StartedAt = SupabaseClient.FormatDate(startedAt),
+            StartedAt = startedAt,
             Duration = duration,
             Completed = completed,
             Awareness = awareness,

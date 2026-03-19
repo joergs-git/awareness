@@ -32,6 +32,10 @@ struct BlackoutView: View {
     @State private var displayText: String = ""
     /// Sync event start time (for Supabase upload — consistent across start/end upsert)
     @State private var syncEventStartTime: Date?
+    /// Pre-formatted ISO 8601 string for the start time — reused for end event to guarantee upsert match
+    @State private var syncFormattedStartDate: String?
+    /// Cached data for deferred MindfulEvent creation (completed blackouts wait for awareness score)
+    @State private var pendingEventInterval: Double?
 
     var body: some View {
         ZStack {
@@ -122,6 +126,8 @@ struct BlackoutView: View {
 
             sessionStart = Date()
             syncEventStartTime = sessionStart
+            // Format the start date ONCE and reuse for all upserts to guarantee matching started_at
+            syncFormattedStartDate = SupabaseClient.formatDate(sessionStart!)
             // Resolve breathing text once (random rotation for default, custom text otherwise)
             displayText = settings.resolvedBreathingText()
             // Use guru-adapted duration when Smart Guru is enabled
@@ -130,9 +136,9 @@ struct BlackoutView: View {
             GongPlayer.shared.playStartIfEnabled()
 
             // Upload sync event at START so other platforms know a break is in progress
-            if let start = syncEventStartTime {
-                SyncManager.shared.recordEvent(
-                    startedAt: start,
+            if let formattedDate = syncFormattedStartDate {
+                SyncManager.shared.recordEventRaw(
+                    startedAt: formattedDate,
                     duration: offeredDuration,
                     completed: false,
                     awareness: nil
@@ -180,20 +186,25 @@ struct BlackoutView: View {
             ProgressTracker.shared.recordCompleted()
         }
 
-        // Record event for Smart Guru analysis
-        let actualDuration = sessionStart.map { Date().timeIntervalSince($0) }
+        // Record event for Smart Guru analysis.
+        // For completed blackouts, defer to handleAwarenessScore() so the awareness score
+        // is captured in the MindfulEvent. For early dismissals, record immediately.
         let intervalFromPrev = EventStore.shared.lastEventTimestamp
             .map { Date().timeIntervalSince1970 - $0 }
-        let event = MindfulEvent.create(
-            outcome: completedFullDuration ? .completed : .dismissed,
-            durationOffered: offeredDuration,
-            durationActual: actualDuration,
-            intervalFromPrevious: intervalFromPrev
-        )
-        EventStore.shared.record(event: event)
+        pendingEventInterval = intervalFromPrev
 
-        // Let Smart Guru evaluate and potentially adjust scheduling
-        SmartGuru.shared.evaluateAfterEvent(event)
+        if !completedFullDuration {
+            let actualDuration = sessionStart.map { Date().timeIntervalSince($0) }
+            let event = MindfulEvent.create(
+                outcome: .dismissed,
+                durationOffered: offeredDuration,
+                durationActual: actualDuration,
+                intervalFromPrevious: intervalFromPrev,
+                awarenessScore: nil
+            )
+            EventStore.shared.record(event: event)
+            SmartGuru.shared.evaluateAfterEvent(event)
+        }
 
         GongPlayer.shared.playEndIfEnabled()
 
@@ -220,6 +231,12 @@ struct BlackoutView: View {
             }
         }
 
+        // Upload completed=true immediately (before awareness check) as fallback.
+        // The awareness score will upsert on top of this when the user submits.
+        if completedFullDuration {
+            uploadSyncEvent(completed: true, awareness: nil)
+        }
+
         // Delay fade-out when flash is active so the flash completes first
         let fadeDelay = settings.endFlashEnabled ? 1.3 : 0.0
         DispatchQueue.main.asyncAfter(deadline: .now() + fadeDelay) {
@@ -238,6 +255,16 @@ struct BlackoutView: View {
             } else {
                 // Early dismiss — upload final sync event (no awareness check)
                 uploadSyncEvent(completed: false, awareness: nil)
+                // Log dismissed event to local event store
+                if let start = syncEventStartTime {
+                    LocalEventLog.shared.recordFromBlackout(
+                        startedAt: start,
+                        duration: Date().timeIntervalSince(start),
+                        completed: false,
+                        awarenessScore: nil,
+                        source: "ios"
+                    )
+                }
                 // No awareness check, just fade out
                 withAnimation(.easeOut(duration: 1.0)) {
                     opacity = 0
@@ -250,11 +277,33 @@ struct BlackoutView: View {
         }
     }
 
-    /// Record awareness score and dismiss
+    /// Record awareness score, log event, run Smart Guru evaluation, and dismiss
     private func handleAwarenessScore(_ score: Int) {
         ProgressTracker.shared.recordAwarenessScore(score)
         // Upload final sync event with awareness score
         uploadSyncEvent(completed: true, awareness: "\(score)")
+        // Log to local event store for cross-platform analytics
+        if let start = syncEventStartTime {
+            LocalEventLog.shared.recordFromBlackout(
+                startedAt: start,
+                duration: Date().timeIntervalSince(start),
+                completed: completedFullDuration,
+                awarenessScore: score,
+                source: "ios"
+            )
+        }
+
+        // Create deferred MindfulEvent with awareness score for Smart Guru
+        let actualDuration = sessionStart.map { Date().timeIntervalSince($0) }
+        let event = MindfulEvent.create(
+            outcome: .completed,
+            durationOffered: offeredDuration,
+            durationActual: actualDuration,
+            intervalFromPrevious: pendingEventInterval,
+            awarenessScore: score
+        )
+        EventStore.shared.record(event: event)
+        SmartGuru.shared.evaluateAfterEvent(event)
         withAnimation(.easeOut(duration: 0.3)) {
             opacity = 0
         }
@@ -266,17 +315,18 @@ struct BlackoutView: View {
 
     // MARK: - Sync Upload
 
-    /// Upload the current blackout state to Supabase (upserts on sync_key + started_at + source)
+    /// Upload the current blackout state to Supabase (upserts on sync_key + started_at + source).
+    /// Uses the pre-formatted start date to guarantee the upsert matches the start event.
     private func uploadSyncEvent(completed: Bool, awareness: String?) {
-        guard let start = syncEventStartTime else { return }
+        guard let formattedDate = syncFormattedStartDate,
+              let start = syncEventStartTime else { return }
         let actualDuration = Date().timeIntervalSince(start)
-        SyncManager.shared.recordEvent(
-            startedAt: start,
+        SyncManager.shared.recordEventRaw(
+            startedAt: formattedDate,
             duration: actualDuration,
             completed: completed,
             awareness: awareness
         )
-        SyncManager.shared.flushPending()
     }
 
     // MARK: - Image Content

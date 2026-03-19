@@ -1,5 +1,23 @@
 # Lessons Learned
 
+## [2026-03-19] — Supabase PostgREST Prefer header must use separate addValue calls
+- **Mistake:** Used `setValue("return=minimal,resolution=merge-duplicates")` as a single combined header. Some PostgREST versions misparse this, silently ignoring `resolution=merge-duplicates`, causing upsert to fail as a conflicting INSERT.
+- **Root cause:** HTTP `Prefer` header with multiple values needs separate `addValue` calls or proper comma+space separation to be reliably parsed by all PostgREST versions.
+- **Rule:** Always use separate `addValue("return=minimal")` and `addValue("resolution=merge-duplicates")` calls for Supabase upsert requests.
+- **Applies to:** All platforms (macOS, Windows, iOS) SupabaseClient upload code
+
+## [2026-03-19] — flushPending() after recordEvent() creates race condition
+- **Mistake:** Called `flushPending()` immediately after `recordEvent()` in the upload path. If the START event was still in the pending queue, `flushPending` would re-upload it with `completed=false`, potentially overwriting the END event's `completed=true` update.
+- **Root cause:** `recordEvent()` spawns a fire-and-forget Task. `flushPending()` runs synchronously and may process stale queue entries before the Task completes.
+- **Rule:** Never call `flushPending()` immediately after `recordEvent()`. Let pending events flush on their own schedule (app launch, foreground return).
+- **Applies to:** All platforms SyncManager upload path
+
+## [2026-03-19] — Store formatted ISO 8601 date once, reuse for upsert
+- **Mistake:** Formatted the same Date object twice for start and end events, relying on ISO8601DateFormatter producing identical output each time.
+- **Root cause:** While theoretically deterministic, storing the formatted string once and reusing it eliminates any possibility of mismatch in the upsert's `on_conflict` matching.
+- **Rule:** For Supabase upsert patterns, format the `started_at` date string ONCE at start time, store it, and pass the same string to all subsequent upsert calls.
+- **Applies to:** All platforms BlackoutView/Controller sync event upload
+
 ## [2026-02-28] — watchOS DispatchSourceTimer + main.async breaks end signals
 - **Mistake:** Replaced repeating `Timer.scheduledTimer` (main RunLoop) with one-shot `DispatchSourceTimer` (background queue) that dispatched to `DispatchQueue.main.async` for dismiss. This made end haptics WORSE — they didn't fire until user physically tapped the app icon.
 - **Root cause:** `DispatchQueue.main.async` from a background queue does NOT execute when the main RunLoop is throttled (display dimmed on watchOS). The block just sits queued. A repeating Timer at least catches up on wrist-raise.

@@ -3,9 +3,12 @@ import Foundation
 /// Orchestrates bidirectional Supabase sync for iOS:
 /// - Pulls desktop/watchOS events and integrates into ProgressTracker + HealthKit
 /// - Uploads iOS blackout events so other platforms can coordinate triggers
-final class SyncManager {
+final class SyncManager: ObservableObject {
 
     static let shared = SyncManager()
+
+    /// Whether the last Supabase operation succeeded (for UI status indicator)
+    @Published private(set) var isSyncOnline: Bool = false
 
     /// Prevents concurrent pull operations
     private var isPulling = false
@@ -40,6 +43,7 @@ final class SyncManager {
                     excludeSources: ["ios", "watchos"]
                 )
 
+                await MainActor.run { isSyncOnline = true }
                 guard !events.isEmpty else { return }
 
                 var processedIDs = SyncKeyManager.shared.processedEventIDs
@@ -76,6 +80,15 @@ final class SyncManager {
                         date: dateKey,
                         completed: event.completed,
                         awarenessScore: awarenessScore
+                    )
+
+                    // Store in local event log for cross-platform analytics
+                    LocalEventLog.shared.recordFromBlackout(
+                        startedAt: startedAt,
+                        duration: event.duration,
+                        completed: event.completed,
+                        awarenessScore: awarenessScore,
+                        source: event.source
                     )
 
                     // Log to HealthKit if completed and enabled
@@ -136,7 +149,7 @@ final class SyncManager {
                     }
                 }
             } catch {
-                // Silently fail — best-effort sync, cursor ensures catch-up
+                await MainActor.run { isSyncOnline = false }
                 print("Awareness Sync: pull failed — \(error.localizedDescription)")
             }
         }
@@ -191,6 +204,21 @@ final class SyncManager {
         }
     }
 
+    // MARK: - Connectivity
+
+    /// Explicitly check Supabase connectivity and update isSyncOnline
+    func refreshConnectivityStatus() {
+        guard SyncKeyManager.shared.isConfigured,
+              let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else {
+            Task { @MainActor in isSyncOnline = false }
+            return
+        }
+        Task {
+            let online = await SupabaseClient.shared.checkConnectivity(syncKeyHash: syncKeyHash)
+            await MainActor.run { isSyncOnline = online }
+        }
+    }
+
     // MARK: - Upload & Pending Queue
 
     /// Record a blackout event from this device (or watchOS relay) and upload to Supabase.
@@ -202,12 +230,31 @@ final class SyncManager {
         awareness: String?,
         source: String = "ios"
     ) {
+        let formattedDate = SupabaseClient.formatDate(startedAt)
+        recordEventRaw(
+            startedAt: formattedDate,
+            duration: duration,
+            completed: completed,
+            awareness: awareness,
+            source: source
+        )
+    }
+
+    /// Record a blackout event using a pre-formatted ISO 8601 date string.
+    /// Use this when the same `started_at` must match an earlier upload (upsert).
+    func recordEventRaw(
+        startedAt: String,
+        duration: TimeInterval,
+        completed: Bool,
+        awareness: String?,
+        source: String = "ios"
+    ) {
         guard SyncKeyManager.shared.isConfigured,
               let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else { return }
 
         let event = PendingEvent(
             syncKey: syncKeyHash,
-            startedAt: SupabaseClient.formatDate(startedAt),
+            startedAt: startedAt,
             duration: duration,
             completed: completed,
             awareness: awareness,
@@ -218,8 +265,14 @@ final class SyncManager {
         Task {
             do {
                 try await uploadPendingEvent(event)
+                await MainActor.run { isSyncOnline = true }
             } catch {
-                print("Awareness Sync: upload failed, queuing — \(error.localizedDescription)")
+                let status = (error as? SupabaseClient.SyncError).flatMap {
+                    if case .httpError(let code) = $0 { return code }
+                    return nil
+                }
+                print("Awareness Sync: upload failed (HTTP \(status ?? 0)), queuing — \(error.localizedDescription)")
+                await MainActor.run { isSyncOnline = false }
                 appendToPendingQueue(event)
             }
         }

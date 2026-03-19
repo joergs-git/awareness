@@ -10,6 +10,12 @@ class WatchConnectivityManager: NSObject, ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    /// Whether an Apple Watch is paired to this iPhone
+    @Published private(set) var isPaired = false
+
+    /// Whether the Atempause watch app is installed
+    @Published private(set) var isWatchAppInstalled = false
+
     /// Whether the paired Apple Watch is reachable
     @Published private(set) var isReachable = false
 
@@ -119,6 +125,8 @@ extension WatchConnectivityManager: WCSessionDelegate {
         error: Error?
     ) {
         DispatchQueue.main.async {
+            self.isPaired = session.isPaired
+            self.isWatchAppInstalled = session.isWatchAppInstalled
             self.isReachable = session.isReachable
         }
     }
@@ -162,6 +170,8 @@ extension WatchConnectivityManager: WCSessionDelegate {
 
     func sessionReachabilityDidChange(_ session: WCSession) {
         DispatchQueue.main.async {
+            self.isPaired = session.isPaired
+            self.isWatchAppInstalled = session.isWatchAppInstalled
             self.isReachable = session.isReachable
         }
     }

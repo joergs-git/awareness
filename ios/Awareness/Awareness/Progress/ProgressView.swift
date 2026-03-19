@@ -271,7 +271,7 @@ struct ProgressView: View {
                     Rectangle()
                         .fill(Color.gray.opacity(0.4))
                         .frame(width: 1, height: 10)
-                    Text(String(localized: "range"))
+                    Text(String(localized: "Focus Duration"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -279,7 +279,7 @@ struct ProgressView: View {
                     Circle()
                         .fill(donutColor)
                         .frame(width: 5, height: 5)
-                    Text(String(localized: "median"))
+                    Text(String(localized: "Median"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }

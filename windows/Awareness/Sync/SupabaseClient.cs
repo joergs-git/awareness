@@ -56,7 +56,8 @@ public class SupabaseClient
 
         request.Headers.Add("apikey", SupabaseAnonKey);
         request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
-        request.Headers.Add("Prefer", "return=minimal,resolution=merge-duplicates");
+        request.Headers.Add("Prefer", "return=minimal");
+        request.Headers.Add("Prefer", "resolution=merge-duplicates");
 
         var response = await _http.SendAsync(request);
         response.EnsureSuccessStatusCode();

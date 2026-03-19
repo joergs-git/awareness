@@ -13,13 +13,15 @@ struct MindfulEvent: Codable, Identifiable {
     let durationOffered: Double      // Seconds offered to the user
     let durationActual: Double?      // Seconds actually spent (nil if ignored)
     let intervalFromPrevious: Double? // Seconds since last event (nil for first of day)
+    let awarenessScore: Int?         // 0-100 post-blackout awareness score (nil if dismissed/ignored)
 
     /// Create an event with current time context
     static func create(
         outcome: EventOutcome,
         durationOffered: Double,
         durationActual: Double?,
-        intervalFromPrevious: Double?
+        intervalFromPrevious: Double?,
+        awarenessScore: Int? = nil
     ) -> MindfulEvent {
         let now = Date()
         let calendar = Calendar.current
@@ -31,7 +33,8 @@ struct MindfulEvent: Codable, Identifiable {
             outcome: outcome,
             durationOffered: durationOffered,
             durationActual: durationActual,
-            intervalFromPrevious: intervalFromPrevious
+            intervalFromPrevious: intervalFromPrevious,
+            awarenessScore: awarenessScore
         )
     }
 }
@@ -59,6 +62,12 @@ struct AdaptiveState: Codable {
     var streakCompleted: Int
     var streakIgnored: Int
     var lastDurationIncreaseDate: String? // "yyyy-MM-dd" — prevents multiple increases per day
+
+    // Awareness-based duration adaptation
+    var consecutiveLowAwareness: Int?    // events where rolling avg < 50
+    var stableStreak: Int?               // breaths at stable/improving level
+    var holdUntilDate: String?           // "yyyy-MM-dd" for 2-day hold after decline
+    var awaitingLongerHold: Bool?        // true = holding for 2 days after decline before resuming increase
 }
 
 enum GuruPhase: String, Codable {

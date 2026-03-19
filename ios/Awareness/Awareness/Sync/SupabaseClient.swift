@@ -112,7 +112,9 @@ final class SupabaseClient {
         request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("return=minimal,resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
+        // Use separate addValue calls — some PostgREST versions misparse combined Prefer values
+        request.addValue("return=minimal", forHTTPHeaderField: "Prefer")
+        request.addValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
 
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(event)
@@ -141,6 +143,27 @@ final class SupabaseClient {
     /// Format a date as ISO 8601
     static func formatDate(_ date: Date) -> String {
         iso8601Formatter.string(from: date)
+    }
+
+    // MARK: - Connectivity Check
+
+    /// Lightweight connectivity check — fetches zero rows to verify Supabase is reachable.
+    func checkConnectivity(syncKeyHash: String) async -> Bool {
+        let urlString = "\(Self.supabaseURL)/rest/v1/blackout_events?sync_key=eq.\(syncKeyHash)&limit=0"
+        guard let url = URL(string: urlString) else { return false }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 5
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            return (response as? HTTPURLResponse).map { (200...299).contains($0.statusCode) } ?? false
+        } catch {
+            return false
+        }
     }
 
     enum SyncError: Error {

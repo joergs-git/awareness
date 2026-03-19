@@ -4,6 +4,53 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v4.0
+
+### Supabase Sync Fix (All Platforms)
+- **Fixed end record upload** — blackout completion with awareness score now reliably upserts to Supabase. Root cause: race condition in `flushPending()` and combined `Prefer` header parsing issue in PostgREST
+- **Pre-formatted ISO 8601 timestamps** — start date string stored once and reused for end event, guaranteeing upsert match
+- **Better error logging** — HTTP status codes logged on upload failures
+
+### Always-Upload to Supabase (iOS)
+- **Anonymous data upload** — iOS now uploads all events to Supabase even without desktop sync configured, using an auto-generated device UUID as fallback sync key
+- **Privacy-compliant consent** — upload tied to Smart Guru toggle; footer explains anonymous data collection
+
+### Supabase Online Status (iOS)
+- **Connectivity indicator** — green/gray cloud icon + "Online"/"Offline" text in ContentView status section and SettingsView Desktop Sync section
+- **Live check** — lightweight GET request to Supabase on app launch and foreground return
+
+### Smart Guru: Awareness-Based Duration Adaptation (iOS)
+- **Awareness score tracking** — `MindfulEvent` now captures the post-blackout awareness score for Smart Guru analysis
+- **Adaptive duration algorithm** — when awareness scores consistently below 50%: decrease duration by random 3–8s (floor 6s). When stable for 3–8 breaths: hold, then increase by 1s per breath. On decline: go back 3–5s, hold for 2 days, then resume increases
+- **Hourly awareness profiles** — EventStore tracks awareness scores per hour for future ML analysis
+- **Deferred MindfulEvent recording** — completed blackouts wait for awareness score before creating the event, enabling score-aware Smart Guru evaluation
+
+### Local Event Log (iOS)
+- **Cross-platform event store** — new `LocalEventLog` persists all events from all platforms (iOS, macOS, Windows, watchOS) locally on iOS
+- **90-day rolling window** — JSON file in documents directory with query methods for analytics
+
+### watchOS Awareness Check Redesign
+- **Volume-slider style bar** — replaces unusable Slider with a fillable horizontal bar supporting touch/drag and Digital Crown rotation
+- **Auto-save after 2s** — no Done button needed; score submitted automatically after 2 seconds of inactivity
+- **Applied to both paths** — in-view (BlackoutView) and alarm-overlay (ContentView)
+
+### watchOS UX Improvements
+- **Bigger "Breathe now" button** — increased font to `.callout`, more padding, fixed tap area collision with micro-task text
+
+### iOS Progress Chart
+- **Legend renamed** — "range"/"median" replaced with "Fokusdauer"/"Median" (multilingual EN/DE)
+
+### Setup Guide / Einrichtungshilfe (iOS)
+- **Two-stage onboarding** — brief intro on first launch (existing), detailed optimization guide after 3rd completed breath
+- **7 guide sections**: Home Screen Widget, Lock Screen Widget, Apple Watch Complications (shown only when paired), Silence Distractions, Enable Notifications, Clean Home Screen, Refresh Notification Sounds
+- **Cropped screenshots** — monochrome sepia-toned with soft blur, tap to expand numbered step-by-step navigation paths
+- **Fully multilingual** — all text and steps translated EN/DE
+- **Auto-hide after 2nd opening** — checkbox "Hide from main screen", moves to burger menu when hidden
+- **Reopenable** — from burger menu and Settings (below Smart Guru)
+- **Watch-aware** — Apple Watch section conditionally shown via `WCSession.isPaired`
+
+---
+
 ## v3.18
 
 ### Awareness Slider (All Platforms)
