@@ -149,6 +149,90 @@ public class SyncManager
         catch { /* best-effort */ }
     }
 
+    // MARK: - Pull Remote Events
+
+    private bool _isPulling;
+
+    /// <summary>
+    /// Pull events from other platforms and integrate them into local ProgressTracker.
+    /// Deduplicates via ProcessedEventIDs. Safe to call multiple times.
+    /// </summary>
+    public void PullAndIntegrate()
+    {
+        if (!SyncKeyManager.Shared.IsConfigured) return;
+        var syncKeyHash = SyncKeyManager.Shared.HashedSyncKey;
+        if (syncKeyHash == null) return;
+        if (_isPulling) return;
+        _isPulling = true;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                // Use LastPullDate or default to 30 days ago
+                var since = SyncKeyManager.Shared.LastPullDate
+                    ?? DateTime.UtcNow.AddDays(-30);
+
+                var events = await SupabaseClient.Shared.FetchEventsAsync(
+                    syncKeyHash, since, "windows");
+
+                if (events.Count == 0) return;
+
+                var processedIDs = SyncKeyManager.Shared.ProcessedEventIDs;
+                DateTime? latestCreatedAt = null;
+
+                foreach (var ev in events)
+                {
+                    // Deduplicate by event ID
+                    string eventID = ev.Id.HasValue
+                        ? ev.Id.Value.ToString()
+                        : $"{ev.StartedAt}_{ev.Source}";
+
+                    if (processedIDs.Contains(eventID)) continue;
+
+                    // Parse the event date
+                    var eventDate = SupabaseClient.ParseDate(ev.StartedAt);
+                    if (eventDate == null) continue;
+
+                    // Parse awareness string to int score
+                    int? awarenessScore = int.TryParse(ev.Awareness, out var score) ? score : null;
+
+                    // Dispatch to UI thread for ProgressTracker (INotifyPropertyChanged)
+                    System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                    {
+                        Progress.ProgressTracker.Shared.IntegrateRemoteEvent(
+                            eventDate.Value, ev.Completed ?? false, awarenessScore);
+                    });
+
+                    processedIDs.Add(eventID);
+
+                    // Track the latest created_at for cursor update
+                    if (ev.CreatedAt != null)
+                    {
+                        var createdAt = SupabaseClient.ParseDate(ev.CreatedAt);
+                        if (createdAt != null && (latestCreatedAt == null || createdAt > latestCreatedAt))
+                            latestCreatedAt = createdAt;
+                    }
+                }
+
+                // Persist dedup set and advance cursor
+                SyncKeyManager.Shared.ProcessedEventIDs = processedIDs;
+                if (latestCreatedAt.HasValue)
+                    SyncKeyManager.Shared.LastPullDate = latestCreatedAt.Value;
+
+                System.Diagnostics.Debug.WriteLine($"Awareness Sync: pulled {events.Count} remote events");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Awareness Sync: pull failed — {ex.Message}");
+            }
+            finally
+            {
+                _isPulling = false;
+            }
+        });
+    }
+
     // MARK: - Pre-Trigger Check
 
     /// <summary>

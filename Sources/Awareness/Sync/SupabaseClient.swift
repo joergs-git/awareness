@@ -32,16 +32,24 @@ final class SupabaseClient {
         }
     }
 
-    /// Minimal event received from Supabase (for pre-trigger check)
+    /// Event received from Supabase (used for pre-trigger check and pull sync)
     struct RemoteEvent: Codable {
+        let id: Int?
         let startedAt: String
         let duration: Double
+        let completed: Bool?
+        let awareness: String?
         let source: String
+        let createdAt: String?
 
         enum CodingKeys: String, CodingKey {
+            case id
             case startedAt = "started_at"
             case duration
+            case completed
+            case awareness
             case source
+            case createdAt = "created_at"
         }
     }
 
@@ -55,9 +63,40 @@ final class SupabaseClient {
             + "?sync_key=eq.\(syncKeyHash)"
             + "&source=neq.macos"
             + "&started_at=gt.\(iso)"
-            + "&select=started_at,duration,source"
+            + "&select=id,started_at,duration,completed,awareness,source,created_at"
             + "&order=started_at.desc"
             + "&limit=5") else {
+            throw SyncError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw SyncError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+
+        return try JSONDecoder().decode([RemoteEvent].self, from: data)
+    }
+
+    // MARK: - Fetch Events for Pull Sync
+
+    /// Fetch all events from other platforms since a given cursor date.
+    /// Used to pull remote events into local ProgressTracker for unified stats.
+    func fetchEvents(syncKeyHash: String, since: Date, excludeSource: String) async throws -> [RemoteEvent] {
+        let iso = Self.formatDate(since)
+        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/blackout_events"
+            + "?sync_key=eq.\(syncKeyHash)"
+            + "&source=neq.\(excludeSource)"
+            + "&created_at=gt.\(iso)"
+            + "&select=id,started_at,duration,completed,awareness,source,created_at"
+            + "&order=created_at.asc") else {
             throw SyncError.invalidURL
         }
 

@@ -63,17 +63,29 @@ public class SupabaseClient
         response.EnsureSuccessStatusCode();
     }
 
-    /// <summary>Minimal event received from Supabase (for pre-trigger check)</summary>
+    /// <summary>Event received from Supabase (used for pre-trigger check and pull sync)</summary>
     public class RemoteEvent
     {
+        [JsonPropertyName("id")]
+        public int? Id { get; set; }
+
         [JsonPropertyName("started_at")]
         public string StartedAt { get; set; } = "";
 
         [JsonPropertyName("duration")]
         public double Duration { get; set; }
 
+        [JsonPropertyName("completed")]
+        public bool? Completed { get; set; }
+
+        [JsonPropertyName("awareness")]
+        public string? Awareness { get; set; }
+
         [JsonPropertyName("source")]
         public string Source { get; set; } = "";
+
+        [JsonPropertyName("created_at")]
+        public string? CreatedAt { get; set; }
     }
 
     /// <summary>
@@ -87,9 +99,34 @@ public class SupabaseClient
             + $"?sync_key=eq.{syncKeyHash}"
             + "&source=neq.windows"
             + $"&started_at=gt.{iso}"
-            + "&select=started_at,duration,source"
+            + "&select=id,started_at,duration,completed,awareness,source,created_at"
             + "&order=started_at.desc"
             + "&limit=5";
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("apikey", SupabaseAnonKey);
+        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+
+        var response = await _http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<List<RemoteEvent>>(json) ?? new();
+    }
+
+    /// <summary>
+    /// Fetch all events from other platforms since a given cursor date.
+    /// Used to pull remote events into local ProgressTracker for unified stats.
+    /// </summary>
+    public async Task<List<RemoteEvent>> FetchEventsAsync(string syncKeyHash, DateTime since, string excludeSource)
+    {
+        var iso = FormatDate(since);
+        var url = $"{SupabaseUrl}/rest/v1/blackout_events"
+            + $"?sync_key=eq.{syncKeyHash}"
+            + $"&source=neq.{excludeSource}"
+            + $"&created_at=gt.{iso}"
+            + "&select=id,started_at,duration,completed,awareness,source,created_at"
+            + "&order=created_at.asc";
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("apikey", SupabaseAnonKey);

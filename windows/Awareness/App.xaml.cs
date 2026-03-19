@@ -71,6 +71,9 @@ public partial class App : Application
             // Flush any pending sync events from previous sessions
             Sync.SyncManager.Shared.FlushPending();
 
+            // Pull remote events from other platforms into local progress stats
+            Sync.SyncManager.Shared.PullAndIntegrate();
+
             // Show a welcome message on first launch
             ShowWelcomeIfFirstLaunch();
         }
@@ -126,6 +129,9 @@ public partial class App : Application
             {
                 _scheduler?.RescheduleIfRunning();
             }
+
+            // Pull remote events on wake
+            Sync.SyncManager.Shared.PullAndIntegrate();
         };
     }
 

@@ -30,6 +30,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Flush any pending sync events from previous sessions
         SyncManager.shared.flushPending()
 
+        // Pull remote events from other platforms into local progress stats
+        SyncManager.shared.pullAndIntegrate()
+
         // Show a welcome message on first launch
         showWelcomeIfFirstLaunch()
     }
@@ -68,6 +71,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 // Already running — just reschedule with a fresh random delay
                 self.scheduler?.rescheduleIfRunning()
             }
+
+            // Pull remote events on wake
+            SyncManager.shared.pullAndIntegrate()
         }
     }
 

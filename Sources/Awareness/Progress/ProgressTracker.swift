@@ -7,6 +7,7 @@ struct DayRecord: Codable, Identifiable {
     var triggered: Int
     var completed: Int
     var awarenessScores: [Int]  // Individual 0–100 scores for the day
+    var sessionDurations: [Double]  // Actual elapsed seconds per session (completed or interrupted)
 
     var id: String { date }
 
@@ -56,18 +57,21 @@ struct DayRecord: Codable, Identifiable {
             scores += Array(repeating: 0, count: no)
             awarenessScores = scores
         }
+
+        sessionDurations = try container.decodeIfPresent([Double].self, forKey: .sessionDurations) ?? []
     }
 
-    init(date: String, triggered: Int, completed: Int, awarenessScores: [Int] = []) {
+    init(date: String, triggered: Int, completed: Int, awarenessScores: [Int] = [], sessionDurations: [Double] = []) {
         self.date = date
         self.triggered = triggered
         self.completed = completed
         self.awarenessScores = awarenessScores
+        self.sessionDurations = sessionDurations
     }
 
     // Only encode the new fields (drop yes/somewhat/no)
     private enum CodingKeys: String, CodingKey {
-        case date, triggered, completed, awarenessScores
+        case date, triggered, completed, awarenessScores, sessionDurations
         // Legacy keys for decoding only
         case yes, somewhat, no
     }
@@ -78,6 +82,7 @@ struct DayRecord: Codable, Identifiable {
         try container.encode(triggered, forKey: .triggered)
         try container.encode(completed, forKey: .completed)
         try container.encode(awarenessScores, forKey: .awarenessScores)
+        try container.encode(sessionDurations, forKey: .sessionDurations)
     }
 }
 
@@ -190,6 +195,58 @@ final class ProgressTracker: ObservableObject {
         lifetimeAwarenessCount += 1
         updateTodayRecord { $0.awarenessScores.append(clamped) }
         save()
+    }
+
+    // MARK: - Session Duration
+
+    /// Record the actual elapsed duration (seconds) of a breathing session.
+    /// Called for both completed and early-dismissed sessions.
+    func recordSessionDuration(_ seconds: Double) {
+        guard seconds > 0 else { return }
+        updateTodayRecord { $0.sessionDurations.append(seconds) }
+        save()
+    }
+
+    /// All session durations from the last 14 days, flattened in chronological order (oldest first).
+    var recentSessionDurations: [Double] {
+        last14Days.flatMap { $0.sessionDurations }
+    }
+
+    // MARK: - Remote Event Integration
+
+    /// Integrate a remote event (from another platform via Supabase) into local stats.
+    /// Increments triggered count; if completed, also increments completed count.
+    /// If an awareness score string is provided, parses it and records it.
+    func integrateRemoteEvent(date: Date, completed: Bool, awarenessScore: Int?) {
+        lifetimeTriggered += 1
+        updateRecord(for: date) { $0.triggered += 1 }
+
+        if completed {
+            lifetimeCompleted += 1
+            updateRecord(for: date) { $0.completed += 1 }
+        }
+
+        if let score = awarenessScore {
+            let clamped = max(0, min(100, score))
+            lifetimeAwarenessSum += clamped
+            lifetimeAwarenessCount += 1
+            updateRecord(for: date) { $0.awarenessScores.append(clamped) }
+        }
+
+        save()
+    }
+
+    /// Get or create the record for a specific date and apply a mutation
+    private func updateRecord(for date: Date, mutation: (inout DayRecord) -> Void) {
+        let key = dateKey(for: date)
+        if let index = dailyRecords.firstIndex(where: { $0.date == key }) {
+            mutation(&dailyRecords[index])
+        } else {
+            var record = DayRecord(date: key, triggered: 0, completed: 0)
+            mutation(&record)
+            dailyRecords.append(record)
+        }
+        pruneOldRecords()
     }
 
     // MARK: - Review Prompt

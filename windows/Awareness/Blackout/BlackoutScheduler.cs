@@ -174,7 +174,12 @@ public class BlackoutScheduler
             customText: _settings.ResolvedBreathingText(),
             imagePath: _settings.CustomImagePath,
             videoPath: _settings.CustomVideoPath,
-            completion: () => ScheduleNext()
+            completion: () =>
+            {
+                ScheduleNext();
+                // Pull remote events after each blackout
+                Sync.SyncManager.Shared.PullAndIntegrate();
+            }
         );
     }
 

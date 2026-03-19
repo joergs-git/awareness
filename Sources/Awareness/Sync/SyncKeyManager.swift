@@ -12,6 +12,8 @@ final class SyncKeyManager {
 
     private enum Keys {
         static let syncPassphrase = "syncPassphrase"
+        static let lastPullDate = "syncLastPullDate"
+        static let processedEventIDs = "syncProcessedEventIDs"
     }
 
     /// The sync passphrase entered by the user (e.g. "lotus-ember-cedar-moonrise-42")
@@ -34,6 +36,30 @@ final class SyncKeyManager {
         let data = Data(normalized.utf8)
         let hash = SHA256.hash(data: data)
         return hash.compactMap { String(format: "%02x", $0) }.joined()
+    }
+
+    // MARK: - Pull Sync State
+
+    /// Last time events were pulled from Supabase
+    var lastPullDate: Date? {
+        get { defaults.object(forKey: Keys.lastPullDate) as? Date }
+        set { defaults.set(newValue, forKey: Keys.lastPullDate) }
+    }
+
+    /// IDs of events already integrated into ProgressTracker (dedup)
+    var processedEventIDs: Set<String> {
+        get {
+            let array = defaults.array(forKey: Keys.processedEventIDs) as? [String] ?? []
+            return Set(array)
+        }
+        set {
+            // Cap at 5000 entries to prevent unbounded growth
+            var ids = newValue
+            if ids.count > 5000 {
+                ids = Set(ids.sorted().suffix(5000))
+            }
+            defaults.set(Array(ids), forKey: Keys.processedEventIDs)
+        }
     }
 
     private init() {}

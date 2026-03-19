@@ -23,6 +23,10 @@ public class DayRecord
     [JsonPropertyName("awarenessScores")]
     public List<int> AwarenessScores { get; set; } = new();
 
+    /// <summary>Actual elapsed seconds per session (completed or interrupted)</summary>
+    [JsonPropertyName("sessionDurations")]
+    public List<double> SessionDurations { get; set; } = new();
+
     // Legacy fields for backward-compatible deserialization (not serialized)
     [JsonPropertyName("yes")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
@@ -222,6 +226,72 @@ public class ProgressTracker : INotifyPropertyChanged
         UpdateTodayRecord(r => r.AwarenessScores.Add(clamped));
         Save();
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TodayAwarenessScores)));
+    }
+
+    // MARK: - Session Duration
+
+    /// <summary>Record the actual elapsed duration (seconds) of a breathing session.
+    /// Called for both completed and early-dismissed sessions.</summary>
+    public void RecordSessionDuration(double seconds)
+    {
+        if (seconds <= 0) return;
+        UpdateTodayRecord(r => r.SessionDurations.Add(seconds));
+        Save();
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DailyRecords)));
+    }
+
+    /// <summary>All session durations from the last 14 days, flattened chronologically.</summary>
+    public List<double> RecentSessionDurations =>
+        Last14Days.SelectMany(r => r.SessionDurations).ToList();
+
+    // MARK: - Remote Event Integration
+
+    /// <summary>
+    /// Integrate a remote event (from another platform via Supabase) into local stats.
+    /// Increments triggered count; if completed, also increments completed count.
+    /// If an awareness score is provided, records it.
+    /// </summary>
+    public void IntegrateRemoteEvent(DateTime eventDate, bool completed, int? awarenessScore)
+    {
+        LifetimeTriggered++;
+        UpdateRecord(eventDate, r => r.Triggered++);
+
+        if (completed)
+        {
+            LifetimeCompleted++;
+            UpdateRecord(eventDate, r => r.Completed++);
+        }
+
+        if (awarenessScore.HasValue)
+        {
+            int clamped = Math.Clamp(awarenessScore.Value, 0, 100);
+            LifetimeAwarenessSum += clamped;
+            LifetimeAwarenessCount++;
+            UpdateRecord(eventDate, r => r.AwarenessScores.Add(clamped));
+        }
+
+        Save();
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TodayTriggered)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TodayCompleted)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SuccessRate)));
+    }
+
+    /// <summary>Get or create the record for a specific date and apply a mutation</summary>
+    private void UpdateRecord(DateTime date, Action<DayRecord> mutation)
+    {
+        var key = DateKey(date);
+        var existing = _dailyRecords.FirstOrDefault(r => r.Date == key);
+        if (existing != null)
+        {
+            mutation(existing);
+        }
+        else
+        {
+            var record = new DayRecord { Date = key, Triggered = 0, Completed = 0 };
+            mutation(record);
+            _dailyRecords.Add(record);
+        }
+        PruneOldRecords();
     }
 
     // MARK: - Private Helpers

@@ -44,6 +44,8 @@ public class SettingsManager : INotifyPropertyChanged
     private DateTime? _snoozeUntil = null;
     private bool _startclickConfirmation = true;
     private string _syncPassphrase = "";
+    private DateTime? _syncLastPullDate = null;
+    private HashSet<string> _syncProcessedEventIDs = new();
 
     // Practice Card & Micro-Task state (not persisted in SettingsData — uses separate keys in JSON)
     private string _todaysPracticeCardID = "";
@@ -203,6 +205,20 @@ public class SettingsManager : INotifyPropertyChanged
         set { if (SetField(ref _syncPassphrase, value)) ScheduleSave(); }
     }
 
+    /// <summary>Last time events were pulled from Supabase</summary>
+    public DateTime? SyncLastPullDate
+    {
+        get => _syncLastPullDate;
+        set { if (SetField(ref _syncLastPullDate, value)) ScheduleSave(); }
+    }
+
+    /// <summary>IDs of events already integrated into ProgressTracker (dedup, capped at 5000)</summary>
+    public HashSet<string> SyncProcessedEventIDs
+    {
+        get => _syncProcessedEventIDs;
+        set { _syncProcessedEventIDs = value; ScheduleSave(); }
+    }
+
     // MARK: - Computed Helpers
 
     /// <summary>The active time window as a TimeWindow model</summary>
@@ -222,7 +238,8 @@ public class SettingsManager : INotifyPropertyChanged
         Resources.Strings.BreathingPhrase2,
         Resources.Strings.BreathingPhrase3,
         Resources.Strings.BreathingPhrase4,
-        Resources.Strings.BreathingPhrase5
+        Resources.Strings.BreathingPhrase5,
+        Resources.Strings.BreathingPhrase6
     ];
 
     /// <summary>
@@ -388,6 +405,9 @@ public class SettingsManager : INotifyPropertyChanged
             _snoozeUntil = data.SnoozeUntil;
             _startclickConfirmation = data.StartclickConfirmation;
             _syncPassphrase = data.SyncPassphrase ?? "";
+            _syncLastPullDate = data.SyncLastPullDate;
+            _syncProcessedEventIDs = data.SyncProcessedEventIDs != null
+                ? new HashSet<string>(data.SyncProcessedEventIDs) : new();
 
             // Practice Card & Micro-Task state
             _todaysPracticeCardID = data.TodaysPracticeCardID ?? "";
@@ -430,6 +450,10 @@ public class SettingsManager : INotifyPropertyChanged
                 SnoozeUntil = _snoozeUntil,
                 StartclickConfirmation = _startclickConfirmation,
                 SyncPassphrase = _syncPassphrase,
+                SyncLastPullDate = _syncLastPullDate,
+                SyncProcessedEventIDs = _syncProcessedEventIDs.Count <= 5000
+                    ? _syncProcessedEventIDs.ToList()
+                    : _syncProcessedEventIDs.OrderBy(x => x).TakeLast(5000).ToList(),
                 TodaysPracticeCardID = _todaysPracticeCardID,
                 PracticeCardDate = _practiceCardDate,
                 YesterdaysCardID = _yesterdaysCardID,
@@ -525,6 +549,12 @@ public class SettingsManager : INotifyPropertyChanged
 
         [JsonPropertyName("syncPassphrase")]
         public string? SyncPassphrase { get; set; } = "";
+
+        [JsonPropertyName("syncLastPullDate")]
+        public DateTime? SyncLastPullDate { get; set; }
+
+        [JsonPropertyName("syncProcessedEventIDs")]
+        public List<string>? SyncProcessedEventIDs { get; set; } = new();
 
         // Practice Card & Micro-Task state
         [JsonPropertyName("todaysPracticeCardID")]

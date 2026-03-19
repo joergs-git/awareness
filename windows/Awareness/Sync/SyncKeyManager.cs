@@ -44,5 +44,21 @@ public class SyncKeyManager
         }
     }
 
+    // Pull sync state — persisted in settings JSON via SettingsManager
+
+    /// <summary>Last time events were pulled from Supabase</summary>
+    public DateTime? LastPullDate
+    {
+        get => Settings.SettingsManager.Shared.SyncLastPullDate;
+        set { Settings.SettingsManager.Shared.SyncLastPullDate = value; }
+    }
+
+    /// <summary>IDs of events already integrated into ProgressTracker (dedup)</summary>
+    public HashSet<string> ProcessedEventIDs
+    {
+        get => Settings.SettingsManager.Shared.SyncProcessedEventIDs;
+        set { Settings.SettingsManager.Shared.SyncProcessedEventIDs = value; }
+    }
+
     private SyncKeyManager() { }
 }

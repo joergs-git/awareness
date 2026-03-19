@@ -144,6 +144,8 @@ class BlackoutScheduler {
                 ) { [weak self] in
                     // After blackout ends, schedule the next one
                     self?.scheduleNext()
+                    // Pull remote events after each blackout
+                    SyncManager.shared.pullAndIntegrate()
                 }
             }
         }

@@ -128,6 +128,84 @@ final class SyncManager {
         }
     }
 
+    // MARK: - Pull Remote Events
+
+    private var isPulling = false
+
+    /// Pull events from other platforms and integrate them into local ProgressTracker.
+    /// Deduplicates via processedEventIDs. Safe to call multiple times.
+    func pullAndIntegrate() {
+        guard SyncKeyManager.shared.isConfigured,
+              let syncKeyHash = SyncKeyManager.shared.hashedSyncKey else { return }
+        guard !isPulling else { return }
+        isPulling = true
+
+        Task {
+            defer { isPulling = false }
+
+            do {
+                // Use lastPullDate or default to 30 days ago
+                let since = SyncKeyManager.shared.lastPullDate
+                    ?? Date().addingTimeInterval(-30 * 86400)
+
+                let events = try await SupabaseClient.shared.fetchEvents(
+                    syncKeyHash: syncKeyHash,
+                    since: since,
+                    excludeSource: "macos"
+                )
+
+                guard !events.isEmpty else { return }
+
+                var processedIDs = SyncKeyManager.shared.processedEventIDs
+                var latestCreatedAt: Date?
+
+                for event in events {
+                    // Deduplicate by event ID
+                    let eventID: String
+                    if let id = event.id {
+                        eventID = String(id)
+                    } else {
+                        // Fallback: use started_at + source as dedup key
+                        eventID = "\(event.startedAt)_\(event.source)"
+                    }
+
+                    guard !processedIDs.contains(eventID) else { continue }
+
+                    // Parse the event date to determine which day record to update
+                    guard let eventDate = SupabaseClient.parseDate(event.startedAt) else { continue }
+
+                    // Parse awareness string to Int score (e.g. "75" → 75)
+                    let awarenessScore: Int? = event.awareness.flatMap { Int($0) }
+
+                    ProgressTracker.shared.integrateRemoteEvent(
+                        date: eventDate,
+                        completed: event.completed ?? false,
+                        awarenessScore: awarenessScore
+                    )
+
+                    processedIDs.insert(eventID)
+
+                    // Track the latest created_at for cursor update
+                    if let createdAt = event.createdAt.flatMap({ SupabaseClient.parseDate($0) }) {
+                        if latestCreatedAt == nil || createdAt > latestCreatedAt! {
+                            latestCreatedAt = createdAt
+                        }
+                    }
+                }
+
+                // Persist dedup set and advance cursor
+                SyncKeyManager.shared.processedEventIDs = processedIDs
+                if let latest = latestCreatedAt {
+                    SyncKeyManager.shared.lastPullDate = latest
+                }
+
+                print("Awareness Sync: pulled \(events.count) remote events")
+            } catch {
+                print("Awareness Sync: pull failed — \(error.localizedDescription)")
+            }
+        }
+    }
+
     // MARK: - Pre-Trigger Check
 
     /// Quick check: was there a recent break on any other device that should prevent macOS
