@@ -1,14 +1,14 @@
 # Awareness reminder — Privacy Policy
 
-**Last updated:** February 26, 2026
+**Last updated:** March 19, 2026
 
 ## Overview
 
-Awareness reminder is a mindfulness timer that blacks out your screen at random intervals, reminding you to pause and breathe. Your privacy is important — Awareness reminder is designed to work entirely on your device with no data collection whatsoever.
+Awareness reminder (Atempause) is a mindfulness timer that blacks out your screen at random intervals, reminding you to pause and breathe. Your privacy is important — Awareness reminder is designed to minimize data collection and keep your information safe.
 
 ## Data Collection
 
-**Awareness reminder does not collect, store, or transmit any personal data.** There are no user accounts, no cloud services, no analytics, and no tracking of any kind.
+**Awareness reminder does not collect any personally identifiable information.** There are no user accounts, no ad networks, and no tracking of any kind.
 
 ## Apple Health
 
@@ -29,13 +29,32 @@ No settings data is sent to any server.
 
 When you use Awareness reminder on both iPhone and Apple Watch, settings and progress data are synced directly between the two devices using Apple's WatchConnectivity framework. This is a device-to-device transfer over Bluetooth or local Wi-Fi — no data passes through any external server.
 
+## Cross-Device Sync (Supabase)
+
+If you enable Desktop Sync (by generating a sync key on iOS and entering it on macOS/Windows), your break events (timestamp, duration, completion status, and awareness score) are uploaded to a Supabase database to synchronize across your devices. Events are identified by a SHA-256 hash of your sync passphrase — **no account, email, or personal information is required or transmitted.**
+
+## Smart Guru — Anonymous Practice Data
+
+When you enable the Smart Guru adaptive scheduling feature (iOS), anonymous practice data is uploaded to help improve the algorithm. This includes:
+
+- **Timestamps** of when breaks occurred
+- **Duration** of each break (in seconds)
+- **Completion status** (whether you completed the full break)
+- **Awareness score** (your 0–100 self-assessment after each break)
+
+This data is **fully anonymous**: it is identified only by a randomly generated device UUID (not linked to your Apple ID, name, or any personal information). You can opt out at any time by disabling Smart Guru in Settings. No data is uploaded when Smart Guru is off.
+
 ## Analytics & Tracking
 
-Awareness reminder contains **no analytics SDKs, no crash reporting services, no ad networks, and no tracking pixels**. The app makes no network requests except for an optional check for new versions on GitHub (a public API call that sends no personal information).
+Awareness reminder contains **no analytics SDKs, no crash reporting services, no ad networks, and no tracking pixels**. Network requests are limited to:
+
+- **Update checker** — queries the public GitHub Releases API (`api.github.com`) to check for new versions. No personal data is included.
+- **Supabase sync** — only when Desktop Sync or Smart Guru is enabled (see sections above).
 
 ## Third-Party Services
 
-Awareness reminder uses no third-party services. The only external network call is the optional update checker, which queries the public GitHub Releases API (`api.github.com`) to check if a newer version is available. No personal data is included in this request.
+- **Supabase** (supabase.co) — used for cross-device sync and anonymous Smart Guru data. Row Level Security (RLS) ensures each user's data is isolated by their sync key hash. No personal data is stored.
+- **GitHub API** — used for the optional update checker. No personal data is sent.
 
 ## Children's Privacy
 

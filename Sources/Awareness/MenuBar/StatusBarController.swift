@@ -9,6 +9,7 @@ class StatusBarController: NSObject {
     private let scheduler: BlackoutScheduler
     private let settingsWindowController = SettingsWindowController()
     private let progressWindowController = ProgressWindowController()
+    private let setupGuideWindowController = SetupGuideWindowController()
     private var tooltipTimer: Timer?
     private var snoozeCheckTimer: Timer?
 
@@ -198,6 +199,11 @@ class StatusBarController: NSObject {
         helpItem.target = self
         menu.addItem(helpItem)
 
+        // iPhone Setup Guide
+        let guideItem = NSMenuItem(title: String(localized: "iPhone Setup Guide..."), action: #selector(showSetupGuide), keyEquivalent: "")
+        guideItem.target = self
+        menu.addItem(guideItem)
+
         // About
         let aboutItem = NSMenuItem(title: String(localized: "About Atempause..."), action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
@@ -293,6 +299,10 @@ class StatusBarController: NSObject {
 
     @objc private func openSettings() {
         settingsWindowController.showSettings()
+    }
+
+    @objc private func showSetupGuide() {
+        setupGuideWindowController.showGuide()
     }
 
     @objc private func showHelp() {
