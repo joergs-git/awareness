@@ -710,7 +710,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to range.
+        ///   Looks up a localized string similar to Focus Duration.
         /// </summary>
         public static string Range {
             get {
@@ -719,7 +719,7 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to median.
+        ///   Looks up a localized string similar to Median.
         /// </summary>
         public static string Median {
             get {

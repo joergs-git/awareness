@@ -161,7 +161,7 @@ Du kannst alles über das Symbol im Infobereich → Einstellungen anpassen.</val
   <data name="ClickAnywhere" xml:space="preserve"><value>Klicke irgendwo um fortzufahren</value></data>
   <data name="Overall" xml:space="preserve"><value>Gesamt</value></data>
   <data name="AwarenessLabel" xml:space="preserve"><value>Achtsamkeit</value></data>
-  <data name="Range" xml:space="preserve"><value>Bereich</value></data>
+  <data name="Range" xml:space="preserve"><value>Fokusdauer</value></data>
   <data name="Median" xml:space="preserve"><value>Median</value></data>
 
   <!-- Desktop Sync -->
