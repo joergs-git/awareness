@@ -87,6 +87,27 @@
                            FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
 
+            <Separator x:Name="DurationSeparator" Margin="0,4" Visibility="Collapsed" />
+
+            <!-- Duration Trend Chart -->
+            <Canvas x:Name="DurationTrendCanvas" Height="100"
+                    HorizontalAlignment="Stretch" Margin="0,12,0,4" Visibility="Collapsed" />
+
+            <!-- Duration Legend -->
+            <StackPanel x:Name="DurationLegend" Orientation="Horizontal" HorizontalAlignment="Center"
+                        Margin="0,8,0,0" Visibility="Collapsed">
+                <Ellipse Width="4" Height="4" Fill="#59B88061" />
+                <TextBlock Text="{x:Static res:Strings.Session}" Foreground="Gray"
+                           FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
+                <Rectangle Width="12" Height="2" Fill="#B88061" RadiusX="1" RadiusY="1" />
+                <TextBlock Text="{x:Static res:Strings.DurationAvg}" Foreground="Gray"
+                           FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <TextBlock x:Name="DurationLabel" Text="{x:Static res:Strings.DurationTrend}"
+                       FontSize="10" Foreground="Gray" HorizontalAlignment="Center"
+                       Margin="0,4,0,0" Visibility="Collapsed" />
+
         </StackPanel>
     </ScrollViewer>
 </Window>

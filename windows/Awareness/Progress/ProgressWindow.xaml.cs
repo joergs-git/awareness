@@ -66,6 +66,7 @@ public partial class ProgressWindow : Window
         DrawBrushDonut(LifetimeDonutCanvas, tracker.SuccessRate, tracker.LifetimeTriggered > 0);
         DrawBarChart(tracker);
         DrawAwarenessChart(tracker);
+        DrawDurationTrendChart(tracker);
     }
 
     // MARK: - Brush-Stroke Donut
@@ -351,6 +352,91 @@ public partial class ProgressWindow : Window
                 StrokeThickness = 1
             };
             AwarenessChartCanvas.Children.Add(trendLine);
+        }
+    }
+
+    // MARK: - Duration Trend Chart
+
+    /// <summary>
+    /// Draw individual session dots and a rolling 20-session moving average line.
+    /// Shows how session durations evolve over time.
+    /// </summary>
+    private void DrawDurationTrendChart(ProgressTracker tracker)
+    {
+        DurationTrendCanvas.Children.Clear();
+
+        var sessions = tracker.RecentSessionDurations;
+        if (sessions.Count == 0)
+        {
+            DurationSeparator.Visibility = Visibility.Collapsed;
+            DurationTrendCanvas.Visibility = Visibility.Collapsed;
+            DurationLegend.Visibility = Visibility.Collapsed;
+            DurationLabel.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        DurationSeparator.Visibility = Visibility.Visible;
+        DurationTrendCanvas.Visibility = Visibility.Visible;
+        DurationLegend.Visibility = Visibility.Visible;
+        DurationLabel.Visibility = Visibility.Visible;
+
+        double chartWidth = DurationTrendCanvas.ActualWidth > 0 ? DurationTrendCanvas.ActualWidth : 320;
+        double chartHeight = 100;
+        double maxDuration = sessions.Max();
+        if (maxDuration <= 0) maxDuration = 1;
+        double yScale = chartHeight / maxDuration;
+
+        // Individual session dots
+        for (int i = 0; i < sessions.Count; i++)
+        {
+            double x = sessions.Count > 1
+                ? chartWidth * i / (sessions.Count - 1)
+                : chartWidth / 2;
+            double y = chartHeight - sessions[i] * yScale;
+
+            var dot = new Ellipse
+            {
+                Width = 5,
+                Height = 5,
+                Fill = new SolidColorBrush(Color.FromArgb(90, 184, 128, 97))
+            };
+            Canvas.SetLeft(dot, x - 2.5);
+            Canvas.SetTop(dot, y - 2.5);
+            DurationTrendCanvas.Children.Add(dot);
+        }
+
+        // Rolling 20-session moving average line
+        if (sessions.Count >= 2)
+        {
+            var points = new List<Point>();
+            for (int i = 0; i < sessions.Count; i++)
+            {
+                int windowStart = Math.Max(0, i - 19);
+                double sum = 0;
+                for (int j = windowStart; j <= i; j++)
+                    sum += sessions[j];
+                double avg = sum / (i - windowStart + 1);
+
+                double x = chartWidth * i / (sessions.Count - 1);
+                double y = chartHeight - avg * yScale;
+                points.Add(new Point(x, y));
+            }
+
+            var figure = new PathFigure { StartPoint = points[0], IsClosed = false };
+            for (int i = 1; i < points.Count; i++)
+            {
+                figure.Segments.Add(new LineSegment(points[i], true));
+            }
+            var geometry = new PathGeometry();
+            geometry.Figures.Add(figure);
+
+            var trendLine = new System.Windows.Shapes.Path
+            {
+                Data = geometry,
+                Stroke = EarthyBrush,
+                StrokeThickness = 1.5
+            };
+            DurationTrendCanvas.Children.Add(trendLine);
         }
     }
 }

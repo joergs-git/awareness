@@ -79,7 +79,17 @@ struct ProgressView: View {
             // MARK: - 14-Day Awareness Candlestick Chart
             awarenessChart
                 .padding(.horizontal, 16)
-                .padding(.bottom, 12)
+
+            // MARK: - Duration Trend Chart
+            if !tracker.recentSessionDurations.isEmpty {
+                Divider()
+                    .padding(.horizontal, 16)
+
+                durationTrendChart
+                    .padding(.horizontal, 16)
+            }
+
+            Spacer().frame(height: 12)
         }
         .frame(width: 300)
     }
@@ -276,6 +286,74 @@ struct ProgressView: View {
         }
     }
 
+    // MARK: - Duration Trend Chart
+
+    @ViewBuilder
+    private var durationTrendChart: some View {
+        let sessions = tracker.recentSessionDurations
+        let chartHeight: CGFloat = 50
+
+        VStack(spacing: 4) {
+            ZStack(alignment: .bottomLeading) {
+                GeometryReader { geo in
+                    let width = geo.size.width
+                    let count = sessions.count
+                    let maxDuration = sessions.max() ?? 1
+                    let yScale = maxDuration > 0 ? chartHeight / maxDuration : 1
+
+                    // Individual session dots
+                    ForEach(Array(sessions.enumerated()), id: \.offset) { index, duration in
+                        let x = count > 1
+                            ? width * CGFloat(index) / CGFloat(count - 1)
+                            : width / 2
+                        let y = chartHeight - duration * yScale
+
+                        Circle()
+                            .fill(donutColor.opacity(0.35))
+                            .frame(width: 4, height: 4)
+                            .position(x: x, y: y)
+                    }
+
+                    // Rolling 20-session moving average line
+                    DurationTrendLine(
+                        sessions: sessions,
+                        chartHeight: chartHeight,
+                        color: donutColor,
+                        maxDuration: maxDuration,
+                        windowSize: 20
+                    )
+                }
+                .frame(height: chartHeight)
+            }
+
+            // Legend
+            HStack(spacing: 10) {
+                HStack(spacing: 3) {
+                    Circle()
+                        .fill(donutColor.opacity(0.35))
+                        .frame(width: 4, height: 4)
+                    Text(String(localized: "session"))
+                        .font(.system(size: 8))
+                        .foregroundColor(.secondary)
+                }
+                HStack(spacing: 3) {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(donutColor)
+                        .frame(width: 12, height: 1.5)
+                    Text(String(localized: "20-session avg"))
+                        .font(.system(size: 8))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.top, 2)
+
+            // Label
+            Text(String(localized: "Duration Trend"))
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+        }
+    }
+
     // MARK: - Helpers
 
     /// Calculate bar height proportional to max value (minimum 2pt for non-zero values)
@@ -303,6 +381,47 @@ struct ProgressView: View {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         let todayString = formatter.string(from: Date())
         return dateString == todayString
+    }
+}
+
+// MARK: - Duration Trend Line
+
+/// Draws a rolling moving average line over session duration data points.
+struct DurationTrendLine: View {
+    let sessions: [Double]
+    let chartHeight: CGFloat
+    let color: Color
+    let maxDuration: Double
+    let windowSize: Int
+
+    var body: some View {
+        GeometryReader { geo in
+            let width = geo.size.width
+            let count = sessions.count
+            let yScale = maxDuration > 0 ? chartHeight / maxDuration : 1
+
+            Path { path in
+                guard count >= 2 else { return }
+                var started = false
+
+                for i in 0..<count {
+                    let windowStart = max(0, i - windowSize + 1)
+                    let window = Array(sessions[windowStart...i])
+                    let avg = window.reduce(0, +) / Double(window.count)
+
+                    let x = width * CGFloat(i) / CGFloat(count - 1)
+                    let y = chartHeight - avg * yScale
+
+                    if !started {
+                        path.move(to: CGPoint(x: x, y: y))
+                        started = true
+                    } else {
+                        path.addLine(to: CGPoint(x: x, y: y))
+                    }
+                }
+            }
+            .stroke(color, lineWidth: 1.5)
+        }
     }
 }
 

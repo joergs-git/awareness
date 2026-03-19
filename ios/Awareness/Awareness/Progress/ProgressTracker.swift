@@ -7,6 +7,7 @@ struct DayRecord: Codable, Identifiable {
     var triggered: Int
     var completed: Int
     var awarenessScores: [Int]  // Individual 0–100 scores for the day
+    var sessionDurations: [Double]  // Actual elapsed seconds per session (completed or interrupted)
 
     var id: String { date }
 
@@ -56,18 +57,21 @@ struct DayRecord: Codable, Identifiable {
             scores += Array(repeating: 0, count: no)
             awarenessScores = scores
         }
+
+        sessionDurations = try container.decodeIfPresent([Double].self, forKey: .sessionDurations) ?? []
     }
 
-    init(date: String, triggered: Int, completed: Int, awarenessScores: [Int] = []) {
+    init(date: String, triggered: Int, completed: Int, awarenessScores: [Int] = [], sessionDurations: [Double] = []) {
         self.date = date
         self.triggered = triggered
         self.completed = completed
         self.awarenessScores = awarenessScores
+        self.sessionDurations = sessionDurations
     }
 
     // Only encode the new fields (drop yes/somewhat/no)
     private enum CodingKeys: String, CodingKey {
-        case date, triggered, completed, awarenessScores
+        case date, triggered, completed, awarenessScores, sessionDurations
         // Legacy keys for decoding only
         case yes, somewhat, no
     }
@@ -78,6 +82,7 @@ struct DayRecord: Codable, Identifiable {
         try container.encode(triggered, forKey: .triggered)
         try container.encode(completed, forKey: .completed)
         try container.encode(awarenessScores, forKey: .awarenessScores)
+        try container.encode(sessionDurations, forKey: .sessionDurations)
     }
 }
 
@@ -193,6 +198,21 @@ final class ProgressTracker: ObservableObject {
         save()
     }
 
+    // MARK: - Session Duration
+
+    /// Record the actual elapsed duration (seconds) of a breathing session.
+    /// Called for both completed and early-dismissed sessions.
+    func recordSessionDuration(_ seconds: Double) {
+        guard seconds > 0 else { return }
+        updateTodayRecord { $0.sessionDurations.append(seconds) }
+        save()
+    }
+
+    /// All session durations from the last 14 days, flattened in chronological order (oldest first).
+    var recentSessionDurations: [Double] {
+        last14Days.flatMap { $0.sessionDurations }
+    }
+
     // MARK: - Remote Event Integration (Desktop Sync)
 
     /// Integrate a single remote desktop event into daily records and lifetime counters.
@@ -292,11 +312,14 @@ final class ProgressTracker: ObservableObject {
                 // For awareness scores, use the longer array (more scores = more data)
                 let mergedScores = existing.awarenessScores.count >= remote.awarenessScores.count
                     ? existing.awarenessScores : remote.awarenessScores
+                let mergedDurations = existing.sessionDurations.count >= remote.sessionDurations.count
+                    ? existing.sessionDurations : remote.sessionDurations
                 mergedByDate[remote.date] = DayRecord(
                     date: remote.date,
                     triggered: max(existing.triggered, remote.triggered),
                     completed: max(existing.completed, remote.completed),
-                    awarenessScores: mergedScores
+                    awarenessScores: mergedScores,
+                    sessionDurations: mergedDurations
                 )
             } else {
                 mergedByDate[remote.date] = remote

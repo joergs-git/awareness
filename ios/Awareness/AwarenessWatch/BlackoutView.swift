@@ -178,6 +178,11 @@ struct BlackoutView: View {
         // Stop breathing animation
         isBreathing = false
 
+        // Record actual elapsed duration for the trend chart
+        if let start = sessionStart {
+            ProgressTracker.shared.recordSessionDuration(Date().timeIntervalSince(start))
+        }
+
         // Record completion only if the blackout ran its full duration
         if completedFullDuration {
             ProgressTracker.shared.recordCompleted()
