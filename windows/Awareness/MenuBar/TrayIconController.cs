@@ -224,6 +224,11 @@ public class TrayIconController : IDisposable
         helpItem.Click += (_, _) => ShowHelp();
         menu.Items.Add(helpItem);
 
+        // Learn More (wiki)
+        var learnMoreItem = new MenuItem { Header = Strings.LearnMore };
+        learnMoreItem.Click += (_, _) => OpenWiki();
+        menu.Items.Add(learnMoreItem);
+
         // About
         var aboutItem = new MenuItem { Header = Strings.AboutMenu };
         aboutItem.Click += (_, _) => ShowAbout();
@@ -362,6 +367,15 @@ public class TrayIconController : IDisposable
         {
             UseShellExecute = true
         });
+    }
+
+    private void OpenWiki()
+    {
+        var lang = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        var url = lang == "de"
+            ? "https://github.com/joergs-git/awareness/wiki/Home-Awareness-Reminder-%E2%80%90-german"
+            : "https://github.com/joergs-git/awareness/wiki/Home-%E2%80%90-Awareness-Reminder";
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
     }
 
     private void ShowAbout()

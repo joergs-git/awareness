@@ -90,7 +90,7 @@ final class SettingsManager: ObservableObject {
             Keys.handcuffsMode:       false,
             Keys.visualType:          BlackoutVisualType.text.rawValue,
             Keys.customText:          "Breathe.",
-            Keys.healthKitEnabled:    false,
+            Keys.healthKitEnabled:    true,
             Keys.healthKitPromptShown: false,
             Keys.smartGuruEnabled:    true,
             Keys.practiceCardNotificationHour: 7

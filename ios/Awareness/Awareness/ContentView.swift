@@ -27,6 +27,14 @@ struct ContentView: View {
     @State private var showingSetupGuide = false
     @State private var setupGuidePulsing = false
 
+    /// Wiki URL based on device language (DE or EN)
+    private var wikiURL: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "en"
+        return lang == "de"
+            ? "https://github.com/joergs-git/awareness/wiki/Home-Awareness-Reminder-%E2%80%90-german"
+            : "https://github.com/joergs-git/awareness/wiki/Home-%E2%80%90-Awareness-Reminder"
+    }
+
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
 
@@ -382,6 +390,15 @@ struct ContentView: View {
                         Spacer()
                         Text("joergsflow")
                             .foregroundColor(.secondary)
+                    }
+
+                    Link(destination: URL(string: wikiURL)!) {
+                        HStack {
+                            Text(String(localized: "Learn More"))
+                            Spacer()
+                            Image(systemName: "book")
+                                .foregroundColor(.secondary)
+                        }
                     }
 
                     Link(destination: URL(string: "https://github.com/joergs-git/awareness")!) {

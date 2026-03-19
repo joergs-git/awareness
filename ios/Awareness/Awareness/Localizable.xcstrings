@@ -991,6 +991,16 @@
         }
       }
     },
+    "Learn More" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr erfahren"
+          }
+        }
+      }
+    },
     "GitHub" : {
       "localizations" : {
         "de" : {

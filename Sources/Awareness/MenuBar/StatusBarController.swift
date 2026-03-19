@@ -323,12 +323,22 @@ class StatusBarController: NSObject {
         alert.informativeText = String(localized: "A mindfulness timer for your Mac.\nRandomly pauses your screen to help you breathe.\n\nThe goal of this app is to not need it anymore a little bit later.\n\nby joergsflow\nVersion \(version)\n\ngithub.com/joergs-git/awareness")
         alert.alertStyle = .informational
         alert.addButton(withTitle: String(localized: "OK"))
+        alert.addButton(withTitle: String(localized: "Learn More"))
         alert.addButton(withTitle: String(localized: "View on GitHub"))
         alert.icon = NSImage(named: NSImage.applicationIconName)
 
         NSApp.activate(ignoringOtherApps: true)
         let response = alert.runModal()
         if response == .alertSecondButtonReturn {
+            // "Learn More" opens the wiki in the user's language
+            let lang = Locale.current.language.languageCode?.identifier ?? "en"
+            let wikiPage = lang == "de"
+                ? "https://github.com/joergs-git/awareness/wiki/Home-Awareness-Reminder-%E2%80%90-german"
+                : "https://github.com/joergs-git/awareness/wiki/Home-%E2%80%90-Awareness-Reminder"
+            if let url = URL(string: wikiPage) {
+                NSWorkspace.shared.open(url)
+            }
+        } else if response == .alertThirdButtonReturn {
             if let url = URL(string: "https://github.com/joergs-git/awareness") {
                 NSWorkspace.shared.open(url)
             }

@@ -605,7 +605,16 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to About Awareness reminder....
+        ///   Looks up a localized string similar to Learn More....
+        /// </summary>
+        public static string LearnMore {
+            get {
+                return ResourceManager.GetString("LearnMore", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to About Atempause....
         /// </summary>
         public static string AboutMenu {
             get {

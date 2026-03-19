@@ -52,6 +52,7 @@
   <data name="LaunchAtLogin" xml:space="preserve"><value>Beim Anmelden starten</value></data>
   <data name="SettingsMenu" xml:space="preserve"><value>Einstellungen...</value></data>
   <data name="HowToUseMenu" xml:space="preserve"><value>Anleitung...</value></data>
+  <data name="LearnMore" xml:space="preserve"><value>Mehr erfahren...</value></data>
   <data name="AboutMenu" xml:space="preserve"><value>Über Atempause...</value></data>
   <data name="UpdateAvailable" xml:space="preserve"><value>Update verfügbar (v{0})</value></data>
   <data name="QuitAwareness" xml:space="preserve"><value>Atempause beenden</value></data>
