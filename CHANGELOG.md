@@ -4,6 +4,31 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v4.1
+
+### Cross-Platform Pull Sync (macOS/Windows)
+- **Desktop pulls remote events** — macOS and Windows now download blackout events from other platforms (iOS, watchOS) and integrate them into local progress statistics
+- **Pull triggers** — app launch, wake from sleep, after each blackout
+- **Deduplication** — processedEventIDs set (capped 5000) + lastPullDate cursor prevent double-counting
+- **Unified stats** — progress view now reflects all devices, not just local activity
+
+### Duration Trend Chart (All Platforms)
+- **Session duration tracking** — records actual elapsed time for both completed and interrupted sessions
+- **New chart** — dots for individual sessions + rolling 20-session moving average line in warm earthy palette
+- **macOS/iOS**: SwiftUI chart in Progress view
+- **Windows**: WPF Canvas-based chart in Progress window
+- **watchOS**: duration data recorded and synced (compact display on small screen)
+- **Backward-compatible** — old data without sessionDurations loads without issues
+
+### Startclick Decline Sync Fix (macOS/Windows)
+- **Declined confirmations now upload to Supabase** — "Not now" responses are recorded as completed=false so other platforms see the attempt
+- **Root cause** — syncEventStartTimeISO was only set on confirm, not on show
+
+### New Breathing Phrase (All Platforms)
+- **"Slow down."** / **"Entdecke Langsamkeit."** — 6th rotating phrase added to the text-mode breathing break pool
+
+---
+
 ## v4.0.2
 
 ### Supabase Sync Fix (All Platforms)
