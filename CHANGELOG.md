@@ -4,7 +4,7 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
-## v4.0
+## v4.0.2
 
 ### Supabase Sync Fix (All Platforms)
 - **Fixed end record upload** — blackout completion with awareness score now reliably upserts to Supabase. Root cause: race condition in `flushPending()` and combined `Prefer` header parsing issue in PostgREST
