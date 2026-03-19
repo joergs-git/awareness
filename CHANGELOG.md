@@ -4,6 +4,24 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v4.1.1
+
+### "Learn More" Wiki Link (All Platforms)
+- **In-app wiki access** — "Learn More" button/link opens the project wiki in the user's language (EN or DE)
+- **macOS**: third button in About dialog
+- **iOS**: new row in About section with book icon
+- **Windows**: new tray menu item "Learn More..." / "Mehr erfahren..."
+
+### Localization Fixes (macOS/Windows)
+- **Chart labels aligned** — awareness chart legend now uses "Focus Duration" / "Median" on all platforms (previously "range" / "median" on macOS/Windows, inconsistent with iOS)
+- **5 missing German translations** added to macOS: "click anywhere to continue", "Startclick confirmation", startclick description, "Focus Duration", "Median"
+- **Windows**: "range" → "Focus Duration" / "Bereich" → "Fokusdauer"
+
+### Apple Health Default On (iOS/watchOS)
+- **Fresh installs** now have Apple Health logging enabled by default
+
+---
+
 ## v4.1
 
 ### Cross-Platform Pull Sync (macOS/Windows)
