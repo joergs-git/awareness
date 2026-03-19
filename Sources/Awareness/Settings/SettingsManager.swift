@@ -189,7 +189,8 @@ final class SettingsManager: ObservableObject {
         String(localized: "You are here."),
         String(localized: "Nothing to do."),
         String(localized: "Just breathe."),
-        String(localized: "This moment.")
+        String(localized: "This moment."),
+        String(localized: "Slow down.")
     ]
 
     /// Returns the text to display during a text-mode breathing break.

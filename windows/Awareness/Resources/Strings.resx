@@ -134,6 +134,11 @@ Until then: Breathe.</value></data>
   <data name="BreathingPhrase3" xml:space="preserve"><value>Nothing to do.</value></data>
   <data name="BreathingPhrase4" xml:space="preserve"><value>Just breathe.</value></data>
   <data name="BreathingPhrase5" xml:space="preserve"><value>This moment.</value></data>
+  <data name="BreathingPhrase6" xml:space="preserve"><value>Slow down.</value></data>
+
+  <data name="DurationTrend" xml:space="preserve"><value>Duration Trend</value></data>
+  <data name="Session" xml:space="preserve"><value>session</value></data>
+  <data name="DurationAvg" xml:space="preserve"><value>20-session avg</value></data>
 
   <data name="WelcomeText" xml:space="preserve"><value>Atempause is now running in your system tray.
 

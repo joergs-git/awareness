@@ -134,6 +134,11 @@ Bis dahin: Atme.</value></data>
   <data name="BreathingPhrase3" xml:space="preserve"><value>Nichts zu tun.</value></data>
   <data name="BreathingPhrase4" xml:space="preserve"><value>Nur atmen.</value></data>
   <data name="BreathingPhrase5" xml:space="preserve"><value>Dieser Moment.</value></data>
+  <data name="BreathingPhrase6" xml:space="preserve"><value>Entdecke Langsamkeit.</value></data>
+
+  <data name="DurationTrend" xml:space="preserve"><value>Dauer-Trend</value></data>
+  <data name="Session" xml:space="preserve"><value>Sitzung</value></data>
+  <data name="DurationAvg" xml:space="preserve"><value>20-Sitzungen Ø</value></data>
 
   <data name="WelcomeText" xml:space="preserve"><value>Atempause läuft jetzt im Infobereich.
 

@@ -782,6 +782,42 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Slow down..
+        /// </summary>
+        public static string BreathingPhrase6 {
+            get {
+                return ResourceManager.GetString("BreathingPhrase6", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Duration Trend.
+        /// </summary>
+        public static string DurationTrend {
+            get {
+                return ResourceManager.GetString("DurationTrend", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to session.
+        /// </summary>
+        public static string Session {
+            get {
+                return ResourceManager.GetString("Session", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 20-session avg.
+        /// </summary>
+        public static string DurationAvg {
+            get {
+                return ResourceManager.GetString("DurationAvg", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Startclick confirmation.
         /// </summary>
         public static string StartclickConfirmation {

@@ -849,6 +849,46 @@
           }
         }
       }
+    },
+    "Slow down." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entdecke Langsamkeit."
+          }
+        }
+      }
+    },
+    "Duration Trend" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dauer-Trend"
+          }
+        }
+      }
+    },
+    "session" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitzung"
+          }
+        }
+      }
+    },
+    "20-session avg" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "20-Sitzungen Ø"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
