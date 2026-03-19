@@ -169,12 +169,14 @@ struct ContentView: View {
                                     .foregroundColor(Color(red: 0.72, green: 0.50, blue: 0.38))
                                     .scaleEffect(setupGuidePulsing ? 1.05 : 0.95)
                                     .opacity(setupGuidePulsing ? 1.0 : 0.7)
+                                    .animation(
+                                        .easeInOut(duration: 2.0).repeatForever(autoreverses: true),
+                                        value: setupGuidePulsing
+                                    )
                             }
                         }
-                        .onAppear {
-                            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                                setupGuidePulsing = true
-                            }
+                        .task {
+                            setupGuidePulsing = true
                         }
                     }
                 }
