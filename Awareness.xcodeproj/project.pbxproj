@@ -36,6 +36,8 @@
 		A20023 /* SyncKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20023; };
 		A20024 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20024; };
 		A20025 /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20025; };
+		A20026 /* SetupGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20026; };
+		A20027 /* SetupGuideWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20027; };
 		B2F00001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A2F00001; };
 /* End PBXBuildFile section */
 
@@ -71,6 +73,8 @@
 		B20023 /* SyncKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncKeyManager.swift; sourceTree = "<group>"; };
 		B20024 /* SupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClient.swift; sourceTree = "<group>"; };
 		B20025 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
+		B20026 /* SetupGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupGuideView.swift; sourceTree = "<group>"; };
+		B20027 /* SetupGuideWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupGuideWindowController.swift; sourceTree = "<group>"; };
 		B20099 /* Awareness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Awareness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2F00001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -149,6 +153,8 @@
 				B20009 /* SettingsManager.swift */,
 				B20010 /* SettingsWindowController.swift */,
 				B20011 /* SettingsView.swift */,
+				B20026 /* SetupGuideView.swift */,
+				B20027 /* SetupGuideWindowController.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -320,6 +326,8 @@
 				A20023 /* SyncKeyManager.swift in Sources */,
 				A20024 /* SupabaseClient.swift in Sources */,
 				A20025 /* SyncManager.swift in Sources */,
+				A20026 /* SetupGuideView.swift in Sources */,
+				A20027 /* SetupGuideWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
