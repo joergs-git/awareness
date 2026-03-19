@@ -40,6 +40,9 @@ class BlackoutWindowController {
     private var syncEventCompleted = false
     private var syncEventAwareness: String?
 
+    /// Tracks when the actual breathing phase started, for recording elapsed duration
+    private var breathingStartDate: Date?
+
     // MARK: - Startclick Confirmation State
 
     /// Whether we're currently showing the "Ready to breathe?" confirmation screen
@@ -115,6 +118,15 @@ class BlackoutWindowController {
     private func showConfirmation() {
         isInConfirmationPhase = true
 
+        // Track sync event start time now so both confirm and decline can upload
+        syncEventStartTimeISO = SupabaseClient.formatDate(Date())
+        syncEventDuration = pendingDuration
+        syncEventCompleted = false
+        syncEventAwareness = nil
+
+        // Upload initial event so other platforms see a break is happening
+        uploadSyncEvent()
+
         // Record that a blackout was triggered (whether user accepts or declines)
         ProgressTracker.shared.recordTriggered()
 
@@ -158,6 +170,9 @@ class BlackoutWindowController {
         syncEventCompleted = false
         syncEventAwareness = nil
 
+        // Track breathing start for duration measurement
+        breathingStartDate = Date()
+
         // Upload immediately so iOS knows a desktop break just started
         uploadSyncEvent()
 
@@ -196,6 +211,10 @@ class BlackoutWindowController {
         // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
+            // Record actual elapsed duration for the trend chart
+            if let start = self?.breathingStartDate {
+                ProgressTracker.shared.recordSessionDuration(Date().timeIntervalSince(start))
+            }
             self?.syncEventCompleted = true
             // Prompt for App Store review at milestone completions (sandbox/App Store builds only)
             if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil,
@@ -231,6 +250,9 @@ class BlackoutWindowController {
         syncEventDuration = duration
         syncEventCompleted = false
         syncEventAwareness = nil
+
+        // Track breathing start for duration measurement
+        breathingStartDate = Date()
 
         // Upload immediately so iOS knows a desktop break just started
         uploadSyncEvent()
@@ -292,6 +314,10 @@ class BlackoutWindowController {
         // Schedule transition to post-blackout phase after breathing completes
         let work = DispatchWorkItem { [weak self] in
             ProgressTracker.shared.recordCompleted()
+            // Record actual elapsed duration for the trend chart
+            if let start = self?.breathingStartDate {
+                ProgressTracker.shared.recordSessionDuration(Date().timeIntervalSince(start))
+            }
             self?.syncEventCompleted = true
             // Prompt for App Store review at milestone completions (sandbox/App Store builds only)
             if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil,
@@ -391,6 +417,13 @@ class BlackoutWindowController {
     /// Pass `silent: true` when dismissing due to system idle (sleep/lock/screensaver)
     /// to avoid playing sounds while the user isn't at the screen.
     func dismiss(silent: Bool = false) {
+        // Record elapsed duration for early dismissals (not post-blackout phase,
+        // because completed sessions already recorded duration in the timer callback)
+        if !isInPostBlackoutPhase, let start = breathingStartDate {
+            ProgressTracker.shared.recordSessionDuration(Date().timeIntervalSince(start))
+        }
+        breathingStartDate = nil
+
         // Upload sync event if not already uploaded (early dismiss, system idle, etc.)
         uploadSyncEvent()
 

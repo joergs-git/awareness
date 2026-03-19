@@ -42,6 +42,9 @@ public class BlackoutWindowController : IDisposable
     private bool _syncEventCompleted;
     private string? _syncEventAwareness;
 
+    // Tracks when the actual breathing phase started, for recording elapsed duration
+    private DateTime? _breathingStartTime;
+
     /// <summary>Whether a blackout (or confirmation/post-blackout phase) is currently being displayed</summary>
     public bool IsActive => _windows.Count > 0;
 
@@ -97,6 +100,12 @@ public class BlackoutWindowController : IDisposable
     {
         _isInConfirmationPhase = true;
 
+        // Track sync event start time now so both confirm and decline can upload
+        _syncEventStartTimeISO = SupabaseClient.FormatDate(DateTime.UtcNow);
+        _syncEventDuration = _pendingDuration;
+        _syncEventCompleted = false;
+        _syncEventAwareness = null;
+
         foreach (var screen in GetAllScreenBounds())
         {
             var window = new BlackoutOverlayWindow();
@@ -119,6 +128,9 @@ public class BlackoutWindowController : IDisposable
         _keyboardHook.SuppressAll = true;
         _keyboardHook.Install();
 
+        // Upload initial event so other platforms see a break is happening
+        UploadSyncEvent();
+
         // Record triggered immediately (matches macOS behavior)
         ProgressTracker.Shared.RecordTriggered();
     }
@@ -132,6 +144,9 @@ public class BlackoutWindowController : IDisposable
         _syncEventDuration = _pendingDuration;
         _syncEventCompleted = false;
         _syncEventAwareness = null;
+
+        // Track breathing start for duration measurement
+        _breathingStartTime = DateTime.UtcNow;
 
         // Upload immediately so iOS knows a desktop break just started
         UploadSyncEvent();
@@ -198,6 +213,9 @@ public class BlackoutWindowController : IDisposable
         _syncEventCompleted = false;
         _syncEventAwareness = null;
 
+        // Track breathing start for duration measurement
+        _breathingStartTime = DateTime.UtcNow;
+
         // Upload immediately so iOS knows a desktop break just started
         UploadSyncEvent();
 
@@ -240,6 +258,9 @@ public class BlackoutWindowController : IDisposable
         {
             _dismissTimer?.Stop();
             ProgressTracker.Shared.RecordCompleted();
+            // Record actual elapsed duration for the trend chart
+            if (_breathingStartTime.HasValue)
+                ProgressTracker.Shared.RecordSessionDuration((DateTime.UtcNow - _breathingStartTime.Value).TotalSeconds);
             _syncEventCompleted = true;
             BeginPostBlackoutPhase();
         };
@@ -314,6 +335,12 @@ public class BlackoutWindowController : IDisposable
     /// </summary>
     public void Dismiss(bool silent = false)
     {
+        // Record elapsed duration for early dismissals (not post-blackout phase,
+        // because completed sessions already recorded duration in the timer callback)
+        if (!_isInPostBlackoutPhase && _breathingStartTime.HasValue)
+            ProgressTracker.Shared.RecordSessionDuration((DateTime.UtcNow - _breathingStartTime.Value).TotalSeconds);
+        _breathingStartTime = null;
+
         // Upload sync event if not already uploaded (early dismiss, system idle, etc.)
         UploadSyncEvent();
 
