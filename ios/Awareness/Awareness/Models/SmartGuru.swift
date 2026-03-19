@@ -187,10 +187,11 @@ class SmartGuru {
 
     /// Awareness window size for rolling average
     private let awarenessWindowSize: Int = 5
-    /// Threshold below which awareness is considered "low"
-    private let awarenessLowThreshold: Double = 50.0
-    /// High awareness threshold for slow increases
-    private let awarenessHighThreshold: Double = 50.0
+    /// Below this threshold awareness is considered "low" (decline → shorten)
+    private let awarenessLowThreshold: Double = 45.0
+    /// Above this threshold awareness is considered "stable/good" (hold → increase)
+    private let awarenessHighThreshold: Double = 55.0
+    // 45–55 is a neutral dead zone where no duration changes are triggered
 
     /// Adjusts duration based on awareness score trends.
     /// Algorithm:
@@ -227,8 +228,8 @@ class SmartGuru {
             state.consecutiveLowAwareness = lowCount
             state.stableStreak = 0
             return true
-        } else {
-            // Awareness stable or improving
+        } else if currentAvg >= awarenessHighThreshold {
+            // Awareness stable or improving (above 55%)
             lowCount = 0
             stable += 1
 
@@ -262,6 +263,10 @@ class SmartGuru {
                 }
             }
 
+            return false
+        } else {
+            // Neutral zone (45–55%) — no duration change, just maintain streaks
+            state.consecutiveLowAwareness = 0
             return false
         }
     }
