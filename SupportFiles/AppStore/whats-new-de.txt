@@ -1,6 +1,8 @@
-Neu in Version 3.18:
+Neu in Version 5.0:
 
-- Achtsamkeits-Slider: Ja/Ansatzweise/Nein-Buttons durch einen fließenden 0–100 Schieberegler für differenziertere Selbsteinschätzung ersetzt
-- Candlestick-Diagramm: neue börsenartige Achtsamkeits-Visualisierung mit Min–Max-Bereich, Median-Punkten und Trendlinie
-- watchOS: kompakte Median-Anzeige mit 7-Tage-Sparkline
-- Bestehende Daten werden automatisch migriert
+- Komplett neues lila Farbdesign auf allen Plattformen
+- Neue lila Yin-Yang App-Symbole
+- Sanfte Lavendel-Hintergründe (Hell-Modus) und tiefes Lila (Dunkel-Modus)
+- Lila Akzentfarben für Donut-Diagramme, Buttons und UI-Elemente
+- Aktualisiertes macOS Menüleisten-Symbol (farbig, größer)
+- Optimiert für Lesbarkeit in Hell- und Dunkel-Modus

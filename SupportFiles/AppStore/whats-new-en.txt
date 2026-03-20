@@ -1,6 +1,8 @@
-What's New in v3.18:
+What's New in v5.0:
 
-- Awareness slider: replaced Yes/Somewhat/No buttons with a smooth 0–100 slider for more nuanced self-assessment
-- Candlestick chart: new stock-chart-style awareness visualization with min–max range, median dots, and trend line
-- watchOS: compact median display with 7-day sparkline
-- Existing data migrated automatically
+- Complete purple color redesign across all platforms
+- New purple yin-yang app icons
+- Soft lavender backgrounds (light mode) and deep purple (dark mode)
+- Purple accent colors for donut charts, buttons, and UI elements
+- Updated macOS menu bar icon (colored, larger)
+- Optimized for readability in both light and dark mode

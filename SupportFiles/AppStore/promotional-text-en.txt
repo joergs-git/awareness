@@ -1,1 +1,1 @@
-v3.13: New name — Atempause. A gentle reminder to pause, breathe, and observe. Cross-platform: macOS, Windows, iOS, watchOS.
+v5.0 — Fresh purple redesign! New look, same mindful pause. Your screen goes dark. You remember to breathe.

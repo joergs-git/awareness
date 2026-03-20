@@ -19,10 +19,10 @@ let outputDir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let width: CGFloat = 2560
 let height: CGFloat = 1600
 
-// Chinese sunrise palette
-let donutColor = NSColor(red: 0.72, green: 0.50, blue: 0.38, alpha: 1.0)
-let warmBgTop = NSColor(red: 0.98, green: 0.92, blue: 0.84, alpha: 1.0)
-let warmBgBottom = NSColor(red: 0.93, green: 0.85, blue: 0.78, alpha: 1.0)
+// Purple palette
+let donutColor = NSColor(red: 0.55, green: 0.38, blue: 0.72, alpha: 1.0)
+let warmBgTop = NSColor(red: 0.94, green: 0.91, blue: 0.98, alpha: 1.0)
+let warmBgBottom = NSColor(red: 0.88, green: 0.84, blue: 0.94, alpha: 1.0)
 
 // Localized strings
 struct Strings {
