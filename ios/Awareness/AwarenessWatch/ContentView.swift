@@ -50,6 +50,10 @@ struct ContentView: View {
                                             .font(.system(size: 11))
                                             .foregroundColor(.orange)
                                     }
+                                } else if let sleepUntil = settings.activeTimeWindow.nextWindowStart() {
+                                    Text(String(localized: "zzz \(formatTime(sleepUntil))"))
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.secondary)
                                 } else if let nextDate = scheduler.nextNotificationDate {
                                     Text(formatTime(nextDate))
                                         .font(.system(size: 11))
@@ -152,6 +156,8 @@ struct ContentView: View {
                                     } else {
                                         Text(String(localized: "Paused")).font(.system(size: 11)).foregroundColor(.orange)
                                     }
+                                } else if let sleepUntil = settings.activeTimeWindow.nextWindowStart() {
+                                    Text(String(localized: "zzz \(formatTime(sleepUntil))")).font(.system(size: 11)).foregroundColor(.secondary)
                                 } else if let nextDate = scheduler.nextNotificationDate {
                                     Text(formatTime(nextDate)).font(.system(size: 11)).foregroundColor(.secondary)
                                 }

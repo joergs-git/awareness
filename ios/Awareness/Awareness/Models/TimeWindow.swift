@@ -17,4 +17,42 @@ struct TimeWindow: Equatable {
             return hour >= startHour || hour < endHour
         }
     }
+
+    /// Check whether a specific date falls within this window
+    func isActive(at date: Date) -> Bool {
+        let hour = Calendar.current.component(.hour, from: date)
+        if startHour <= endHour {
+            return hour >= startHour && hour < endHour
+        } else {
+            return hour >= startHour || hour < endHour
+        }
+    }
+
+    /// The next time the active window starts, relative to now.
+    /// Returns nil if the window is currently active.
+    func nextWindowStart() -> Date? {
+        guard !isCurrentlyActive() else { return nil }
+        let calendar = Calendar.current
+        let now = Date()
+        let hour = calendar.component(.hour, from: now)
+
+        if startHour <= endHour {
+            // Normal range: if before startHour today, return today's start; otherwise tomorrow's
+            if hour < startHour {
+                return calendar.date(bySettingHour: startHour, minute: 0, second: 0, of: now)
+            } else {
+                let tomorrow = calendar.date(byAdding: .day, value: 1, to: now)!
+                return calendar.date(bySettingHour: startHour, minute: 0, second: 0, of: tomorrow)
+            }
+        } else {
+            // Overnight range: start is always today's startHour if we're before it
+            if hour < startHour {
+                return calendar.date(bySettingHour: startHour, minute: 0, second: 0, of: now)
+            } else {
+                // Should not happen (isCurrentlyActive would be true), but fallback
+                let tomorrow = calendar.date(byAdding: .day, value: 1, to: now)!
+                return calendar.date(bySettingHour: startHour, minute: 0, second: 0, of: tomorrow)
+            }
+        }
+    }
 }

@@ -211,14 +211,24 @@ struct ContentView: View {
                         Text(statusText)
                             .foregroundColor(.secondary)
                         Spacer()
-                        if let nextDate = nextScheduledDate, !settings.isSnoozed {
-                            HStack(spacing: 4) {
-                                Image(systemName: "clock")
-                                    .font(.caption)
-                                Text(String(localized: "Next"))
-                                Text(formatTime(nextDate))
+                        if !settings.isSnoozed {
+                            if let sleepUntil = settings.activeTimeWindow.nextWindowStart() {
+                                // Outside active time window — show sleeping state
+                                HStack(spacing: 4) {
+                                    Image(systemName: "moon.zzz")
+                                        .font(.caption)
+                                    Text(String(localized: "Sleeping until \(formatTime(sleepUntil))"))
+                                }
+                                .foregroundColor(.secondary)
+                            } else if let nextDate = nextScheduledDate {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "clock")
+                                        .font(.caption)
+                                    Text(String(localized: "Next"))
+                                    Text(formatTime(nextDate))
+                                }
+                                .foregroundColor(.secondary)
                             }
-                            .foregroundColor(.secondary)
                         }
                     }
 

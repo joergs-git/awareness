@@ -1996,6 +1996,26 @@
         }
       }
     },
+    "Sleeping until %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlafend bis %@"
+          }
+        }
+      }
+    },
+    "zzz %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zzz %@"
+          }
+        }
+      }
+    },
     "Snooze" : {
       "localizations" : {
         "de" : {

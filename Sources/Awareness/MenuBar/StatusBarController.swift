@@ -71,7 +71,12 @@ class StatusBarController: NSObject {
         }
 
         guard let nextDate = scheduler.nextBlackoutDate else {
-            button.toolTip = "Atempause"
+            // Outside active window — show sleeping state
+            if let sleepUntil = SettingsManager.shared.activeTimeWindow.nextWindowStart() {
+                button.toolTip = String(localized: "Atempause — Sleeping until \(formatTime(sleepUntil))")
+            } else {
+                button.toolTip = "Atempause"
+            }
             return
         }
 

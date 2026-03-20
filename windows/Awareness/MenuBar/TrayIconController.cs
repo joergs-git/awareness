@@ -102,6 +102,14 @@ public class TrayIconController : IDisposable
             return;
         }
 
+        // Outside active window — show sleeping state
+        var sleepUntil = settings.ActiveTimeWindow.NextWindowStart();
+        if (sleepUntil.HasValue)
+        {
+            _trayIcon.ToolTipText = string.Format(Strings.SleepingUntil, sleepUntil.Value.ToString("t"));
+            return;
+        }
+
         _trayIcon.ToolTipText = Strings.Awareness;
     }
 
@@ -153,6 +161,10 @@ public class TrayIconController : IDisposable
         else if (_scheduler.NextBlackoutDate.HasValue)
         {
             statusText = string.Format(Strings.NextBlackoutIn, FormatRemainingTime(_scheduler.NextBlackoutDate.Value));
+        }
+        else if (settings.ActiveTimeWindow.NextWindowStart() is { } menuSleepUntil)
+        {
+            statusText = string.Format(Strings.SleepingUntil, menuSleepUntil.ToString("t"));
         }
         else
         {

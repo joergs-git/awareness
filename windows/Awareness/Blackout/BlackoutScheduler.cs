@@ -110,7 +110,34 @@ public class BlackoutScheduler
         if (!_isRunning) return;
 
         var delay = RandomDelay();
-        NextBlackoutDate = DateTime.Now.Add(delay);
+        var fireDate = DateTime.Now.Add(delay);
+        var window = _settings.ActiveTimeWindow;
+
+        // If the computed fire date falls outside the active window,
+        // schedule to re-check when the window opens instead
+        if (!window.IsActive(fireDate))
+        {
+            NextBlackoutDate = null;
+            OnNextDateChanged?.Invoke(null);
+
+            var windowStart = window.NextWindowStart();
+            if (windowStart.HasValue)
+            {
+                var sleepDelay = windowStart.Value - DateTime.Now;
+                if (sleepDelay.TotalSeconds < 1) sleepDelay = TimeSpan.FromSeconds(1);
+
+                _timer = new DispatcherTimer { Interval = sleepDelay };
+                _timer.Tick += (_, _) =>
+                {
+                    _timer?.Stop();
+                    ScheduleNext();
+                };
+                _timer.Start();
+            }
+            return;
+        }
+
+        NextBlackoutDate = fireDate;
         OnNextDateChanged?.Invoke(NextBlackoutDate);
 
         _timer = new DispatcherTimer { Interval = delay };

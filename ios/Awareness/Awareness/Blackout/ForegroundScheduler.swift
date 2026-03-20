@@ -97,6 +97,23 @@ class ForegroundScheduler: ObservableObject {
 
         let delay = randomDelay()
         let fireDate = Date().addingTimeInterval(delay)
+
+        // If the computed fire date falls outside the active window,
+        // schedule the timer for the next window start but don't advertise
+        // a misleading "next" time — ContentView will show "Sleeping until"
+        let window = settings.activeTimeWindow
+        if !window.isActive(at: fireDate) {
+            nextBlackoutDate = nil
+            // Schedule to re-check when the window opens
+            if let windowStart = window.nextWindowStart() {
+                let sleepDelay = max(1, windowStart.timeIntervalSinceNow)
+                timer = Timer.scheduledTimer(withTimeInterval: sleepDelay, repeats: false) { [weak self] _ in
+                    self?.scheduleNext()
+                }
+            }
+            return
+        }
+
         nextBlackoutDate = fireDate
 
         // Use Timer.scheduledTimer on the main RunLoop for reliable foreground firing

@@ -80,7 +80,28 @@ class BlackoutScheduler {
         guard isRunning else { return }
 
         let delay = randomDelay()
-        nextBlackoutDate = Date().addingTimeInterval(delay)
+        let fireDate = Date().addingTimeInterval(delay)
+        let window = settings.activeTimeWindow
+
+        // If the computed fire date falls outside the active window,
+        // schedule to re-check when the window opens instead
+        if !window.isActive(at: fireDate) {
+            nextBlackoutDate = nil
+            onNextDateChanged?(nil)
+            if let windowStart = window.nextWindowStart() {
+                let sleepDelay = max(1, windowStart.timeIntervalSinceNow)
+                let timer = DispatchSource.makeTimerSource(queue: .main)
+                timer.schedule(deadline: .now() + sleepDelay)
+                timer.setEventHandler { [weak self] in
+                    self?.scheduleNext()
+                }
+                timer.resume()
+                self.timer = timer
+            }
+            return
+        }
+
+        nextBlackoutDate = fireDate
         onNextDateChanged?(nextBlackoutDate)
 
         let timer = DispatchSource.makeTimerSource(queue: .main)

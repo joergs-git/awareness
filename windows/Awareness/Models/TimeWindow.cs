@@ -34,4 +34,56 @@ public class TimeWindow
             return hour >= StartHour || hour < EndHour;
         }
     }
+
+    /// <summary>
+    /// Check whether a specific DateTime falls within this window.
+    /// </summary>
+    public bool IsActive(DateTime dateTime)
+    {
+        int hour = dateTime.Hour;
+
+        if (StartHour <= EndHour)
+        {
+            return hour >= StartHour && hour < EndHour;
+        }
+        else
+        {
+            return hour >= StartHour || hour < EndHour;
+        }
+    }
+
+    /// <summary>
+    /// The next time the active window starts, relative to now.
+    /// Returns null if the window is currently active.
+    /// </summary>
+    public DateTime? NextWindowStart()
+    {
+        if (IsCurrentlyActive()) return null;
+
+        var now = DateTime.Now;
+        int hour = now.Hour;
+
+        if (StartHour <= EndHour)
+        {
+            if (hour < StartHour)
+            {
+                return now.Date.AddHours(StartHour);
+            }
+            else
+            {
+                return now.Date.AddDays(1).AddHours(StartHour);
+            }
+        }
+        else
+        {
+            if (hour < StartHour)
+            {
+                return now.Date.AddHours(StartHour);
+            }
+            else
+            {
+                return now.Date.AddDays(1).AddHours(StartHour);
+            }
+        }
+    }
 }

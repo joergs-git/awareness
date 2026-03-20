@@ -41,6 +41,7 @@
   <data name="TooltipSnoozedUntil" xml:space="preserve"><value>Atempause — Snoozed until {0}</value></data>
   <data name="TooltipSnoozedIndefinitely" xml:space="preserve"><value>Atempause — Snoozed indefinitely</value></data>
   <data name="NextBlackoutIn" xml:space="preserve"><value>Next break in {0}</value></data>
+  <data name="SleepingUntil" xml:space="preserve"><value>Sleeping until {0}</value></data>
   <data name="Scheduling" xml:space="preserve"><value>Scheduling...</value></data>
   <data name="TestBlackout" xml:space="preserve"><value>Breathe now</value></data>
   <data name="Resume" xml:space="preserve"><value>Resume</value></data>

@@ -396,6 +396,15 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Sleeping until {0}.
+        /// </summary>
+        public static string SleepingUntil {
+            get {
+                return ResourceManager.GetString("SleepingUntil", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Settings....
         /// </summary>
         public static string SettingsMenu {

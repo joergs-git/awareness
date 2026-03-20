@@ -4,6 +4,16 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v4.1.2
+
+### "Sleeping until" Display Fix (All Platforms)
+- **Fixed misleading "next" time** — when the current time is outside the active time window, the app no longer displays a next break time that would never trigger
+- **New "Sleeping until" indicator** — shows when the next active window starts (e.g. "Sleeping until 6:00 AM"), with moon icon on iOS and tooltip on macOS/Windows
+- **Scheduler fix** — ForegroundScheduler (iOS) and BlackoutScheduler (macOS/Windows) no longer compute fire dates outside the active window; instead they sleep until the window reopens
+- Localized in English and German on all platforms
+
+---
+
 ## v4.1.1
 
 ### "Learn More" Wiki Link (All Platforms)
