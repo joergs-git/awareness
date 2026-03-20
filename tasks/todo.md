@@ -57,3 +57,16 @@
 
 ## Results
 All tasks completed. macOS SPM, iOS (+ watchOS + widget) all build successfully.
+
+---
+
+# Future Tasks
+
+## Android Version
+- [ ] Kotlin + Jetpack Compose, mirror iOS architecture
+- [ ] Foreground timer (Handler.postDelayed) + 30 pre-scheduled notifications (AlarmManager)
+- [ ] Full-screen blackout Activity (no system overlay)
+- [ ] Settings, progress tracking, practice cards, localization (EN/DE)
+- [ ] Health Connect integration (mindful minutes)
+- [ ] Supabase sync (Kotlin SDK)
+- [ ] Notification actions: "Start Breathing" + "Snooze 30 min"
