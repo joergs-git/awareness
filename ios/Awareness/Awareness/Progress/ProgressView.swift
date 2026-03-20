@@ -7,8 +7,8 @@ struct ProgressView: View {
 
     @ObservedObject var tracker = ProgressTracker.shared
 
-    /// Warm earthy color for donut arcs (Chinese sunrise palette)
-    private let donutColor = Color(red: 0.72, green: 0.50, blue: 0.38)
+    /// Purple accent color for donut arcs
+    private let donutColor = Color(red: 0.55, green: 0.38, blue: 0.72)
 
     var body: some View {
         List {

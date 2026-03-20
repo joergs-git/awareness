@@ -4,6 +4,21 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.0
+
+### Purple Color Redesign (All Platforms)
+- **Complete visual overhaul** — new purple color scheme replacing the previous warm/earthy Chinese sunrise palette
+- **Purple yin-yang icons** — app icons, logos, tray icons all updated to deep purple / soft lavender tones
+- **Adaptive backgrounds** — light mode: soft lavender gradient, dark mode: deep purple gradient
+- **Updated accent colors** — donut charts, buttons, links, setup guide accents all use purple palette
+- **Aquarelle backgrounds** — watercolor blobs updated to violet/lavender/plum tones
+- **macOS menu bar** — custom colored purple yin-yang icon (larger, non-template)
+- **Windows dark mode** — purple-tinted controls, borders, and backgrounds
+- **AccentColor** set to purple in all iOS/watchOS/widget asset catalogs
+- Readable in both light and dark mode across all platforms
+
+---
+
 ## v4.1.2
 
 ### "Sleeping until" Display Fix (All Platforms)

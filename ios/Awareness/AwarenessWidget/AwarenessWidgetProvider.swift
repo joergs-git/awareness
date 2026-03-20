@@ -181,10 +181,10 @@ private struct WidgetWarmBackground: View {
     var body: some View {
         LinearGradient(
             colors: colorScheme == .dark
-                ? [Color(red: 0.14, green: 0.12, blue: 0.11),
-                   Color(red: 0.10, green: 0.09, blue: 0.08)]
-                : [Color(red: 0.98, green: 0.92, blue: 0.84),
-                   Color(red: 0.93, green: 0.85, blue: 0.78)],
+                ? [Color(red: 0.14, green: 0.10, blue: 0.20),
+                   Color(red: 0.09, green: 0.07, blue: 0.14)]
+                : [Color(red: 0.94, green: 0.91, blue: 0.98),
+                   Color(red: 0.88, green: 0.84, blue: 0.94)],
             startPoint: .top,
             endPoint: .bottom
         )

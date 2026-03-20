@@ -59,12 +59,12 @@ public partial class SettingsWindow : Window
 
         if (isDark)
         {
-            TopGradientStop.Color = Color.FromRgb(36, 31, 28);    // (0.14, 0.12, 0.11)
-            BottomGradientStop.Color = Color.FromRgb(26, 23, 20); // (0.10, 0.09, 0.08)
+            TopGradientStop.Color = Color.FromRgb(36, 26, 51);     // (0.14, 0.10, 0.20)
+            BottomGradientStop.Color = Color.FromRgb(23, 18, 36); // (0.09, 0.07, 0.14)
 
             // Set all text to light colors for dark background contrast
-            var lightBrush = new SolidColorBrush(Color.FromRgb(230, 225, 220)); // warm white
-            var dimBrush = new SolidColorBrush(Color.FromRgb(160, 155, 148));   // warm gray
+            var lightBrush = new SolidColorBrush(Color.FromRgb(228, 222, 235)); // cool white
+            var dimBrush = new SolidColorBrush(Color.FromRgb(155, 148, 165));   // cool gray
             Resources[SystemColors.WindowTextBrushKey] = lightBrush;
             Resources[SystemColors.ControlTextBrushKey] = lightBrush;
             Foreground = lightBrush;
@@ -72,7 +72,7 @@ public partial class SettingsWindow : Window
             // Style GroupBox headers and borders
             var gbStyle = new Style(typeof(GroupBox));
             gbStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
-            gbStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(60, 52, 46))));
+            gbStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(52, 42, 66))));
             Resources[typeof(GroupBox)] = gbStyle;
 
             // Style text controls
@@ -92,21 +92,21 @@ public partial class SettingsWindow : Window
             // Style ComboBox
             var comboStyle = new Style(typeof(System.Windows.Controls.ComboBox));
             comboStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
-            comboStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(45, 40, 36))));
+            comboStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(40, 34, 50))));
             Resources[typeof(System.Windows.Controls.ComboBox)] = comboStyle;
 
             // Style TextBox
             var textBoxStyle = new Style(typeof(System.Windows.Controls.TextBox));
             textBoxStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
-            textBoxStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(45, 40, 36))));
-            textBoxStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(60, 52, 46))));
+            textBoxStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(40, 34, 50))));
+            textBoxStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(52, 42, 66))));
             Resources[typeof(System.Windows.Controls.TextBox)] = textBoxStyle;
 
             // Style Buttons
             var btnStyle = new Style(typeof(System.Windows.Controls.Button));
             btnStyle.Setters.Add(new Setter(ForegroundProperty, lightBrush));
-            btnStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(50, 44, 40))));
-            btnStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(70, 62, 56))));
+            btnStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(44, 38, 54))));
+            btnStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Color.FromRgb(62, 52, 76))));
             Resources[typeof(System.Windows.Controls.Button)] = btnStyle;
         }
     }

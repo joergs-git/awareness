@@ -4,7 +4,7 @@ import SwiftUI
 /// Shows optimization tips for the iOS device, opened from the macOS Settings window.
 struct SetupGuideView: View {
 
-    private let accent = Color(red: 0.72, green: 0.50, blue: 0.38)
+    private let accent = Color(red: 0.55, green: 0.38, blue: 0.72)
 
     var body: some View {
         ScrollView {

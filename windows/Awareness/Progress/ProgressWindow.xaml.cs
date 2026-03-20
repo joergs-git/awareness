@@ -15,8 +15,8 @@ namespace Awareness.Progress;
 /// </summary>
 public partial class ProgressWindow : Window
 {
-    // Warm earthy color matching the macOS/iOS donut charts: (0.72, 0.50, 0.38)
-    private static readonly Color EarthyColor = Color.FromRgb(184, 128, 97); // #B88061
+    // Purple accent color matching the macOS/iOS donut charts: (0.55, 0.38, 0.72)
+    private static readonly Color EarthyColor = Color.FromRgb(140, 97, 184); // #8C61B8
     private static readonly Brush EarthyBrush = new SolidColorBrush(EarthyColor);
 
     public ProgressWindow()
@@ -42,11 +42,11 @@ public partial class ProgressWindow : Window
 
         if (isDark)
         {
-            TopGradientStop.Color = Color.FromRgb(36, 31, 28);    // (0.14, 0.12, 0.11)
-            BottomGradientStop.Color = Color.FromRgb(26, 23, 20); // (0.10, 0.09, 0.08)
+            TopGradientStop.Color = Color.FromRgb(36, 26, 51);     // (0.14, 0.10, 0.20)
+            BottomGradientStop.Color = Color.FromRgb(23, 18, 36); // (0.09, 0.07, 0.14)
 
             // Light text for dark background
-            var lightBrush = new SolidColorBrush(Color.FromRgb(230, 225, 220));
+            var lightBrush = new SolidColorBrush(Color.FromRgb(228, 222, 235));
             Foreground = lightBrush;
             var tbStyle = new Style(typeof(System.Windows.Controls.TextBlock));
             tbStyle.Setters.Add(new Setter(System.Windows.Controls.TextBlock.ForegroundProperty, lightBrush));

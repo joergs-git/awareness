@@ -11,8 +11,8 @@
 
     <Window.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-            <GradientStop x:Name="TopGradientStop" Color="#FFF9EBD7" Offset="0" />
-            <GradientStop x:Name="BottomGradientStop" Color="#FFEDD9C7" Offset="1" />
+            <GradientStop x:Name="TopGradientStop" Color="#FFF0E8FA" Offset="0" />
+            <GradientStop x:Name="BottomGradientStop" Color="#FFE0D7F0" Offset="1" />
         </LinearGradientBrush>
     </Window.Background>
 
@@ -22,7 +22,7 @@
             <!-- Header -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
                 <TextBlock Text="☯" FontSize="26" VerticalAlignment="Center" Margin="0,0,10,0"
-                           Foreground="#B88061" />
+                           Foreground="#8C61B8" />
                 <TextBlock Text="{x:Static res:Strings.AwarenessSettings}" FontSize="22" FontWeight="Light"
                            VerticalAlignment="Center" />
             </StackPanel>
@@ -65,10 +65,10 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                         <TextBlock x:Name="MinIntervalLabel" Width="55" TextAlignment="Right"
-                                   Foreground="#B88061" FontFamily="Consolas" />
+                                   Foreground="#8C61B8" FontFamily="Consolas" />
                         <TextBlock Text=" – " Foreground="Gray" />
                         <TextBlock x:Name="MaxIntervalLabel" Width="55"
-                                   Foreground="#B88061" FontFamily="Consolas" />
+                                   Foreground="#8C61B8" FontFamily="Consolas" />
                     </StackPanel>
                     <settings:RangeSlider x:Name="IntervalSlider"
                                           Minimum="1" Maximum="120" Step="1"
@@ -81,10 +81,10 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                         <TextBlock x:Name="MinDurationLabel" Width="40" TextAlignment="Right"
-                                   Foreground="#B88061" FontFamily="Consolas" />
+                                   Foreground="#8C61B8" FontFamily="Consolas" />
                         <TextBlock Text=" – " Foreground="Gray" />
                         <TextBlock x:Name="MaxDurationLabel" Width="40"
-                                   Foreground="#B88061" FontFamily="Consolas" />
+                                   Foreground="#8C61B8" FontFamily="Consolas" />
                     </StackPanel>
                     <settings:RangeSlider x:Name="DurationSlider"
                                           Minimum="3" Maximum="120" Step="1"

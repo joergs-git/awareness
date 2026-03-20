@@ -38,7 +38,12 @@ class StatusBarController: NSObject {
     private func configureButton() {
         guard let button = statusItem.button else { return }
 
-        if #available(macOS 14.0, *),
+        // Use custom purple yin-yang icon (colored, not template)
+        if let image = Bundle.main.image(forResource: "menubar-icon") {
+            image.isTemplate = false
+            image.size = NSSize(width: 22, height: 22)
+            button.image = image
+        } else if #available(macOS 14.0, *),
            let image = NSImage(systemSymbolName: "yinyang", accessibilityDescription: "Awareness") {
             image.isTemplate = true
             button.image = image

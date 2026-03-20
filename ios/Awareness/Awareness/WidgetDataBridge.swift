@@ -103,7 +103,7 @@ final class WidgetDataBridge {
         case "intentionlessness":    return (0.56, 0.49, 0.67)
         case "presence-daily-life":  return (0.71, 0.45, 0.35)
         case "silence":              return (0.42, 0.50, 0.56)
-        default:                     return (0.72, 0.50, 0.38)
+        default:                     return (0.55, 0.38, 0.72)
         }
     }
 }

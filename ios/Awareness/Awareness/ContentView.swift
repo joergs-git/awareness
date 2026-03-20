@@ -47,7 +47,6 @@ struct ContentView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 72, height: 72)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .shadow(color: .primary.opacity(0.15), radius: 4, y: 2)
                         .scaleEffect(breathePulsing ? 1.06 : 0.94)
                         .rotationEffect(.degrees(logoRotation))
@@ -168,13 +167,13 @@ struct ContentView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "sparkles")
-                                    .foregroundColor(Color(red: 0.72, green: 0.50, blue: 0.38))
+                                    .foregroundColor(Color(red: 0.55, green: 0.38, blue: 0.72))
                                 Text(String(localized: "Important for you."))
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Text(String(localized: "Setup Guide"))
                                     .font(.subheadline)
-                                    .foregroundColor(Color(red: 0.72, green: 0.50, blue: 0.38))
+                                    .foregroundColor(Color(red: 0.55, green: 0.38, blue: 0.72))
                                     .scaleEffect(setupGuidePulsing ? 1.05 : 0.95)
                                     .opacity(setupGuidePulsing ? 1.0 : 0.7)
                                     .animation(
@@ -557,8 +556,8 @@ struct ContentView: View {
 
     // MARK: - Mini Donut (inline progress indicator)
 
-    /// Warm earthy color matching the full ProgressView donuts
-    private let donutColor = Color(red: 0.72, green: 0.50, blue: 0.38)
+    /// Purple accent color matching the full ProgressView donuts
+    private let donutColor = Color(red: 0.55, green: 0.38, blue: 0.72)
 
     /// Today's success rate for the mini donut
     private var todayRate: Double {
@@ -691,7 +690,7 @@ struct CardBackground: View {
                 .blur(radius: 30)
 
             Circle()
-                .fill(Color(red: 1.0, green: 0.97, blue: 0.92).opacity(0.2))
+                .fill(Color(red: 0.92, green: 0.88, blue: 0.98).opacity(0.2))
                 .frame(width: 120, height: 120)
                 .offset(x: 80, y: 10)
                 .blur(radius: 25)
@@ -722,33 +721,33 @@ private struct CompactSectionSpacingModifier: ViewModifier {
 // MARK: - Aquarelle Background
 
 /// Soft watercolor-style background using layered blurred shapes.
-/// Creates an organic, contemplative feel with warm Chinese sunrise tones.
+/// Creates an organic, contemplative feel with deep purple tones.
 struct AquarelleBackground: View {
     var body: some View {
         ZStack {
             Color.black
 
-            // Warm sunrise watercolor blobs — amber, peach, dusty rose, warm gold
+            // Purple watercolor blobs — deep violet, lavender, plum, amethyst
             Ellipse()
-                .fill(Color(red: 0.76, green: 0.52, blue: 0.32).opacity(0.4))
+                .fill(Color(red: 0.35, green: 0.20, blue: 0.55).opacity(0.4))
                 .frame(width: 300, height: 200)
                 .offset(x: -50, y: -100)
                 .blur(radius: 70)
 
             Circle()
-                .fill(Color(red: 0.85, green: 0.62, blue: 0.45).opacity(0.3))
+                .fill(Color(red: 0.50, green: 0.32, blue: 0.68).opacity(0.3))
                 .frame(width: 250, height: 250)
                 .offset(x: 80, y: 50)
                 .blur(radius: 80)
 
             Ellipse()
-                .fill(Color(red: 0.72, green: 0.48, blue: 0.52).opacity(0.25))
+                .fill(Color(red: 0.42, green: 0.25, blue: 0.58).opacity(0.25))
                 .frame(width: 200, height: 300)
                 .offset(x: -30, y: 120)
                 .blur(radius: 65)
 
             Circle()
-                .fill(Color(red: 0.82, green: 0.68, blue: 0.42).opacity(0.2))
+                .fill(Color(red: 0.55, green: 0.38, blue: 0.72).opacity(0.2))
                 .frame(width: 180, height: 180)
                 .offset(x: 60, y: -150)
                 .blur(radius: 60)

@@ -9,8 +9,8 @@
 
     <Window.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-            <GradientStop x:Name="TopGradientStop" Color="#FFF9EBD7" Offset="0" />
-            <GradientStop x:Name="BottomGradientStop" Color="#FFEDD9C7" Offset="1" />
+            <GradientStop x:Name="TopGradientStop" Color="#FFF0E8FA" Offset="0" />
+            <GradientStop x:Name="BottomGradientStop" Color="#FFE0D7F0" Offset="1" />
         </LinearGradientBrush>
     </Window.Background>
 
@@ -66,7 +66,7 @@
                 <Rectangle Width="8" Height="8" Fill="#66808080" RadiusX="1" RadiusY="1" />
                 <TextBlock Text="{x:Static res:Strings.Triggered}" Foreground="Gray"
                            FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
-                <Rectangle Width="8" Height="8" Fill="#B88061" RadiusX="1" RadiusY="1" />
+                <Rectangle Width="8" Height="8" Fill="#8C61B8" RadiusX="1" RadiusY="1" />
                 <TextBlock Text="{x:Static res:Strings.Completed}" Foreground="Gray"
                            FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
@@ -82,7 +82,7 @@
                 <Rectangle Width="1" Height="10" Fill="#66808080" />
                 <TextBlock Text="{x:Static res:Strings.Range}" Foreground="Gray"
                            FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
-                <Ellipse Width="5" Height="5" Fill="#B88061" />
+                <Ellipse Width="5" Height="5" Fill="#8C61B8" />
                 <TextBlock Text="{x:Static res:Strings.Median}" Foreground="Gray"
                            FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
@@ -96,10 +96,10 @@
             <!-- Duration Legend -->
             <StackPanel x:Name="DurationLegend" Orientation="Horizontal" HorizontalAlignment="Center"
                         Margin="0,8,0,0" Visibility="Collapsed">
-                <Ellipse Width="4" Height="4" Fill="#59B88061" />
+                <Ellipse Width="4" Height="4" Fill="#598C61B8" />
                 <TextBlock Text="{x:Static res:Strings.Session}" Foreground="Gray"
                            FontSize="10" Margin="4,0,12,0" VerticalAlignment="Center" />
-                <Rectangle Width="12" Height="2" Fill="#B88061" RadiusX="1" RadiusY="1" />
+                <Rectangle Width="12" Height="2" Fill="#8C61B8" RadiusX="1" RadiusY="1" />
                 <TextBlock Text="{x:Static res:Strings.DurationAvg}" Foreground="Gray"
                            FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center" />
             </StackPanel>

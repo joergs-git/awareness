@@ -81,7 +81,7 @@ struct SettingsView: View {
                     } label: {
                         HStack {
                             Image(systemName: "sparkles")
-                                .foregroundColor(Color(red: 0.72, green: 0.50, blue: 0.38))
+                                .foregroundColor(Color(red: 0.55, green: 0.38, blue: 0.72))
                             Text(String(localized: "Important for you."))
                                 .foregroundColor(.primary)
                             Spacer()
