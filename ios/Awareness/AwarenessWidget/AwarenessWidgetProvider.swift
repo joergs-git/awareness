@@ -39,7 +39,7 @@ struct AwarenessWidgetEntry: TimelineEntry {
         date: Date(),
         cardTitle: "Exercise of Letting Go",
         cardShortTitle: "Letting Go",
-        cardColor: Color(red: 0.77, green: 0.58, blue: 0.42),
+        cardColor: Color(red: 0.65, green: 0.42, blue: 0.58),
         microTaskText: "Notice the urge to check for a reply. Don't check. Just notice.",
         nextBlackoutDate: Date().addingTimeInterval(900),
         todayTriggered: 5,

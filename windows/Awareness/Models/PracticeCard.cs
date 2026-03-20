@@ -110,7 +110,7 @@ public class PracticeCard
                 "pass like a cloud.",
             promptDE: "Beobachte heute den Impuls, Ergebnisse festzuhalten — und lass los.",
             promptEN: "Today, observe the impulse to hold on to outcomes — and let go.",
-            color: Color.FromRgb(196, 149, 106) // 0.77, 0.58, 0.42
+            color: Color.FromRgb(166, 107, 148) // soft plum
         ),
 
         // 2. Non-Intervention — Sage green (#7A9E7E)
@@ -132,7 +132,7 @@ public class PracticeCard
                 "rather than the corrector.",
             promptDE: "Beobachte heute den Impuls, korrigieren zu wollen — und greife nicht ein.",
             promptEN: "Today, notice the urge to correct — and don't intervene.",
-            color: Color.FromRgb(122, 158, 126) // 0.48, 0.62, 0.49
+            color: Color.FromRgb(122, 133, 173) // cool lavender
         ),
 
         // 3. Undivided Perception — Deep blue (#5B7BA5)
@@ -154,7 +154,7 @@ public class PracticeCard
                 "uni-tasking. One thing. Completely.",
             promptDE: "Schenke heute einer alltäglichen Handlung deine volle, ungeteilte Aufmerksamkeit.",
             promptEN: "Today, give one ordinary activity your full, undivided attention.",
-            color: Color.FromRgb(92, 122, 166) // 0.36, 0.48, 0.65
+            color: Color.FromRgb(102, 97, 184) // deep indigo
         ),
 
         // 4. Unhurried Response — Dusty rose (#B07D8E)
@@ -175,7 +175,7 @@ public class PracticeCard
                 "impulse to respond and the response itself. Not slowness, but awareness.",
             promptDE: "Finde heute den Raum zwischen Impuls und Reaktion.",
             promptEN: "Today, find the space between impulse and response.",
-            color: Color.FromRgb(176, 125, 143) // 0.69, 0.49, 0.56
+            color: Color.FromRgb(158, 107, 158) // mauve
         ),
 
         // 5. Intentionlessness — Soft violet (#8E7EAA)
@@ -196,7 +196,7 @@ public class PracticeCard
                 "separating an action from its purpose. Do something just to do it.",
             promptDE: "Tu heute etwas nur um des Tuns willen — ohne Ziel, ohne Zweck.",
             promptEN: "Today, do something just for the sake of doing it — no goal, no purpose.",
-            color: Color.FromRgb(143, 125, 170) // 0.56, 0.49, 0.67
+            color: Color.FromRgb(143, 115, 179) // soft violet
         ),
 
         // 6. Presence in Daily Life — Earthy terracotta (#B5735A)
@@ -218,7 +218,7 @@ public class PracticeCard
                 "it is everywhere.",
             promptDE: "Sei heute in einem gewöhnlichen Moment vollständig anwesend.",
             promptEN: "Today, be fully present in one ordinary moment.",
-            color: Color.FromRgb(181, 115, 90) // 0.71, 0.45, 0.35
+            color: Color.FromRgb(148, 97, 140) // warm violet
         ),
 
         // 7. Silence — Muted slate (#6B7F8E)
@@ -239,7 +239,7 @@ public class PracticeCard
                 "between words. Not silence as discipline, but silence as discovery.",
             promptDE: "Finde heute die Stille zwischen den Worten und in den Pausen.",
             promptEN: "Today, find the silence between words and in the pauses.",
-            color: Color.FromRgb(107, 127, 142) // 0.42, 0.50, 0.56
+            color: Color.FromRgb(122, 117, 158) // cool purple-gray
         )
     ];
 

@@ -63,7 +63,7 @@ extension PracticeCard {
                 """,
             promptDE: "Beobachte heute den Impuls, Ergebnisse festzuhalten — und lass los.",
             promptEN: "Today, observe the impulse to hold on to outcomes — and let go.",
-            color: Color(red: 0.77, green: 0.58, blue: 0.42) // #C4956A warm amber
+            color: Color(red: 0.65, green: 0.42, blue: 0.58) // soft plum
         ),
 
         // 2. Non-Intervention — Sage green
@@ -87,7 +87,7 @@ extension PracticeCard {
                 """,
             promptDE: "Beobachte heute den Impuls, korrigieren zu wollen — und greife nicht ein.",
             promptEN: "Today, notice the urge to correct — and don't intervene.",
-            color: Color(red: 0.48, green: 0.62, blue: 0.49) // #7A9E7E sage green
+            color: Color(red: 0.48, green: 0.52, blue: 0.68) // cool lavender
         ),
 
         // 3. Undivided Perception — Deep blue
@@ -111,7 +111,7 @@ extension PracticeCard {
                 """,
             promptDE: "Schenke heute einer alltäglichen Handlung deine volle, ungeteilte Aufmerksamkeit.",
             promptEN: "Today, give one ordinary activity your full, undivided attention.",
-            color: Color(red: 0.36, green: 0.48, blue: 0.65) // #5B7BA5 deep blue
+            color: Color(red: 0.40, green: 0.38, blue: 0.72) // deep indigo
         ),
 
         // 4. Unhurried Response — Dusty rose
@@ -134,7 +134,7 @@ extension PracticeCard {
                 """,
             promptDE: "Finde heute den Raum zwischen Impuls und Reaktion.",
             promptEN: "Today, find the space between impulse and response.",
-            color: Color(red: 0.69, green: 0.49, blue: 0.56) // #B07D8E dusty rose
+            color: Color(red: 0.62, green: 0.42, blue: 0.62) // mauve
         ),
 
         // 5. Intentionlessness — Soft violet
@@ -157,7 +157,7 @@ extension PracticeCard {
                 """,
             promptDE: "Tu heute etwas nur um des Tuns willen — ohne Ziel, ohne Zweck.",
             promptEN: "Today, do something just for the sake of doing it — no goal, no purpose.",
-            color: Color(red: 0.56, green: 0.49, blue: 0.67) // #8E7EAA soft violet
+            color: Color(red: 0.56, green: 0.45, blue: 0.70) // soft violet
         ),
 
         // 6. Presence in Daily Life — Earthy terracotta
@@ -181,7 +181,7 @@ extension PracticeCard {
                 """,
             promptDE: "Sei heute in einem gewöhnlichen Moment vollständig anwesend.",
             promptEN: "Today, be fully present in one ordinary moment.",
-            color: Color(red: 0.71, green: 0.45, blue: 0.35) // #B5735A earthy terracotta
+            color: Color(red: 0.58, green: 0.38, blue: 0.55) // warm violet
         ),
 
         // 7. Silence — Muted slate
@@ -204,7 +204,7 @@ extension PracticeCard {
                 """,
             promptDE: "Finde heute die Stille zwischen den Worten und in den Pausen.",
             promptEN: "Today, find the silence between words and in the pauses.",
-            color: Color(red: 0.42, green: 0.50, blue: 0.56) // #6B7F8E muted slate
+            color: Color(red: 0.48, green: 0.46, blue: 0.62) // cool purple-gray
         )
     ]
 

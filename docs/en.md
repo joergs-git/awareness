@@ -6,19 +6,21 @@
 
 ## The Problem
 
-You sit down at your computer. Hours pass. Your shoulders creep up. Your breath becomes shallow. Your mind locks into a tunnel of tasks, notifications, and deadlines.
+The world moves fast. AI writes your emails. Algorithms decide what you see. Notifications pull you in twelve directions. You scroll, you react, you perform — and somewhere in all of this, you stop being present.
 
-By the time you stand up, you've forgotten you have a body.
+You feel it. That vague sense that life is happening *to* you, not *through* you. That the days blur together. That you're always busy but rarely *here*.
 
-**This happens to all of us. Every single day.**
+**This isn't a screen problem. It's a consciousness problem. And it affects virtually everyone.**
 
 ---
 
 ## The Solution
 
-**Atempause** gently interrupts your screen at random intervals. For a few seconds, everything goes dark. There's nothing to do — just breathe, notice your posture, feel your body.
+**Atempause** gently interrupts your screen at random intervals. For a few seconds, everything goes dark. There's nothing to do — just breathe, notice your body, feel what's actually happening right now.
 
-Then the screen returns. You continue your work — but with a moment of clarity you wouldn't have had otherwise.
+Then the screen returns. You continue — but with a gap of clarity you wouldn't have had otherwise.
+
+It's not about doing less. It's about being *present* while you do what you do.
 
 > *"The goal of this app is to not need it anymore a little bit later."*
 
@@ -26,17 +28,20 @@ Then the screen returns. You continue your work — but with a moment of clarity
 
 ## Why You Need This
 
-### You already know you should take breaks.
-But you don't. Because there's always one more email, one more task, one more scroll. Atempause doesn't wait for you to remember — it reminds you.
+### The world is pulling you out of yourself.
+AI is accelerating everything. Feeds are engineered to consume your attention. You can feel it — the constant low-level drift away from presence. Atempause is the counter-movement. A gentle anchor back to *now*.
 
-### It's not a productivity timer.
-Pomodoro tells you when to work. Atempause tells you when to **exist**. There's a difference.
+### You already know you should be more mindful.
+But you don't do it. Because there's always one more notification, one more task, one more scroll. Atempause doesn't wait for you to remember — it interrupts you. That's the whole point.
+
+### It's not a productivity tool. It's a presence tool.
+Pomodoro tells you when to work. Atempause tells you when to **exist**. There's a difference. Whether you're a developer, a parent, a student, a CEO, or someone who simply feels the world is moving too fast — this is for you.
 
 ### Micro-pauses change everything.
-Research shows that brief mindfulness interruptions reduce stress, improve focus, and increase body awareness. Not 20-minute meditations — just 20 seconds of conscious breathing, sprinkled throughout your day.
+Research shows that brief mindfulness interruptions reduce stress, improve focus, and increase body awareness. Not 20-minute meditations — just 20 seconds of conscious breathing, sprinkled throughout your day. Small gaps that add up to a different quality of life.
 
 ### It works because it's random.
-Fixed timers become background noise. Random intervals keep you present — you never know when the next pause is coming, so you can't tune it out.
+Fixed timers become background noise. Random intervals keep you honest — you never know when the next pause is coming, so you can't tune it out. Like a gentle tap on the shoulder from reality.
 
 ---
 
@@ -48,12 +53,12 @@ Fixed timers become background noise. Random intervals keep you present — you 
 - **Smart detection** — automatically skips during video calls, presentations, and screen sharing
 - **Handcuffs mode** — can't dismiss early? Good. That's the point
 - **Progress tracking** — see your discipline rate, daily streaks, and 14-day trends
-- **Practice cards** — daily mindfulness themes with contemplative micro-tasks
+- **Practice cards** — 7 daily mindfulness themes with contemplative micro-tasks
 - **Apple Health** — your pauses count as Mindful Minutes
 
 ---
 
-## Available Everywhere You Work
+## Available Everywhere
 
 | Platform | How It Runs |
 |----------|------------|
@@ -62,29 +67,29 @@ Fixed timers become background noise. Random intervals keep you present — you 
 | **iPhone / iPad** | Gentle notification reminders |
 | **Apple Watch** | Haptic tap on your wrist |
 
-All platforms sync. Your practice follows you.
+All platforms sync. Your practice follows you — from desk to pocket to wrist.
 
 ---
 
 ## Cross-Platform Sync
 
-Use Atempause on your Mac at work and your iPhone at home? Your desktop breaks sync automatically to your iPhone — no account needed, completely anonymous. Generate a sync key, enter it on your desktop, done.
+Use Atempause on your Mac at work and your iPhone on the go? Your desktop breaks sync automatically to your iPhone — no account needed, completely anonymous. Generate a sync key, enter it on your desktop, done.
 
 ---
 
-## What Users Say
+## What People Say
 
-> *"I didn't realize how rarely I actually breathe deeply during work until this app started interrupting me."*
+> *"I didn't realize how rarely I actually breathe deeply until this app started interrupting me."*
 
 > *"The random timing is genius. With a fixed timer I'd just ignore it after a week."*
 
-> *"Handcuffs mode is brutal but honestly it's the only thing that works for me."*
+> *"In a world where everything fights for my attention, this is the one app that fights for my awareness."*
 
 ---
 
 ## Free & Open Source
 
-Atempause is completely free, open source (MIT License), and contains no ads, no tracking, no subscriptions. Your mindfulness data stays on your device.
+Atempause is completely free, open source (MIT License), and contains no ads, no tracking, no subscriptions. Your mindfulness data stays on your device. Always.
 
 [View Source Code on GitHub](https://github.com/joergs-git/awareness)
 

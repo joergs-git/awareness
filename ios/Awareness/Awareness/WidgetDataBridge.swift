@@ -96,13 +96,13 @@ final class WidgetDataBridge {
     /// Returns RGB components for a card ID (hardcoded to avoid importing SwiftUI in the bridge)
     private func cardColorComponents(_ cardID: String) -> (Double, Double, Double) {
         switch cardID {
-        case "letting-go":           return (0.77, 0.58, 0.42)
-        case "non-intervention":     return (0.48, 0.62, 0.49)
-        case "undivided-perception": return (0.36, 0.48, 0.65)
-        case "unhurried-response":   return (0.69, 0.49, 0.56)
-        case "intentionlessness":    return (0.56, 0.49, 0.67)
-        case "presence-daily-life":  return (0.71, 0.45, 0.35)
-        case "silence":              return (0.42, 0.50, 0.56)
+        case "letting-go":           return (0.65, 0.42, 0.58)
+        case "non-intervention":     return (0.48, 0.52, 0.68)
+        case "undivided-perception": return (0.40, 0.38, 0.72)
+        case "unhurried-response":   return (0.62, 0.42, 0.62)
+        case "intentionlessness":    return (0.56, 0.45, 0.70)
+        case "presence-daily-life":  return (0.58, 0.38, 0.55)
+        case "silence":              return (0.48, 0.46, 0.62)
         default:                     return (0.55, 0.38, 0.72)
         }
     }

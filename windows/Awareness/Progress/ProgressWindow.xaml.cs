@@ -398,7 +398,7 @@ public partial class ProgressWindow : Window
             {
                 Width = 5,
                 Height = 5,
-                Fill = new SolidColorBrush(Color.FromArgb(90, 184, 128, 97))
+                Fill = new SolidColorBrush(Color.FromArgb(90, 140, 97, 184))
             };
             Canvas.SetLeft(dot, x - 2.5);
             Canvas.SetTop(dot, y - 2.5);
