@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.0.1
+
+### watchOS Complication Fix
+- **Fixed white circle complication** — watchOS yin-yang complication was rendering as a solid white circle due to `"original"` rendering intent; restored to `"template"` so the system renders a proper monochrome silhouette
+
+---
+
 ## v5.0
 
 ### Purple Color Redesign (All Platforms)
