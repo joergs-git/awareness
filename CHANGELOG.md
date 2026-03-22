@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.0.2
+
+### watchOS Complication Fix
+- **Purple yin-yang complication** — watchOS complication now shows a proper two-tone purple yin-yang instead of monochrome; uses original rendering mode with purple-tinted transparent-background PNG
+
+---
+
 ## v5.0.1
 
 ### watchOS Complication Fix

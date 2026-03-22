@@ -1,8 +1,3 @@
-Neu in Version 5.0:
+Neu in Version 5.0.2:
 
-- Komplett neues lila Farbdesign auf allen Plattformen
-- Neue lila Yin-Yang App-Symbole
-- Sanfte Lavendel-Hintergründe (Hell-Modus) und tiefes Lila (Dunkel-Modus)
-- Lila Akzentfarben für Donut-Diagramme, Buttons und UI-Elemente
-- Aktualisiertes macOS Menüleisten-Symbol (farbig, größer)
-- Optimiert für Lesbarkeit in Hell- und Dunkel-Modus
+- watchOS Komplikation zeigt jetzt lila Yin-Yang statt Schwarz-Weiß

@@ -1,8 +1,3 @@
-What's New in v5.0:
+What's New in v5.0.2:
 
-- Complete purple color redesign across all platforms
-- New purple yin-yang app icons
-- Soft lavender backgrounds (light mode) and deep purple (dark mode)
-- Purple accent colors for donut charts, buttons, and UI elements
-- Updated macOS menu bar icon (colored, larger)
-- Optimized for readability in both light and dark mode
+- watchOS complication now shows purple yin-yang instead of monochrome
