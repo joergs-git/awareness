@@ -71,6 +71,7 @@ struct AccessoryCircularView: View {
         ZStack {
             AccessoryWidgetBackground()
             Image("YinYang")
+                .renderingMode(.original)
                 .resizable()
                 .scaledToFit()
                 .clipShape(Circle())
