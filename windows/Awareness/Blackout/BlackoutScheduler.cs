@@ -183,6 +183,21 @@ public class BlackoutScheduler
             return;
         }
 
+        // Skip if user has been idle (no mouse/keyboard input) for 5+ minutes
+        var lastInput = new Interop.NativeMethods.LASTINPUTINFO
+        {
+            cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Interop.NativeMethods.LASTINPUTINFO>()
+        };
+        if (Interop.NativeMethods.GetLastInputInfo(ref lastInput))
+        {
+            uint idleMs = (uint)Environment.TickCount - lastInput.dwTime;
+            if (idleMs >= 300_000) // 5 minutes
+            {
+                ScheduleNext();
+                return;
+            }
+        }
+
         // Pre-trigger: check Supabase for recent breaks from other platforms
         bool shouldDefer = await Sync.SyncManager.Shared.ShouldDeferToRecentBreakAsync();
         if (!_isRunning) return; // re-check after async call

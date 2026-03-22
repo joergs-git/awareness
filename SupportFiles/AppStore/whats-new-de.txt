@@ -1,3 +1,4 @@
-Neu in Version 5.0.2:
+Neu in Version 5.0.3:
 
-- watchOS Komplikation zeigt jetzt lila Yin-Yang statt Schwarz-Weiß
+- Pausen werden übersprungen wenn du nicht am Rechner bist — keine Auslöser nach 5 Minuten Inaktivität
+- watchOS Komplikation zeigt jetzt lila Yin-Yang

@@ -4,10 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
-## v5.0.2
+## v5.0.3
+
+### User Idle Detection (macOS + Windows)
+- **Skip breaks when away** — if no mouse/keyboard input for 5 minutes, blackout triggers are silently skipped (user is not at the screen)
 
 ### watchOS Complication Fix
-- **Purple yin-yang complication** — watchOS complication now shows a proper two-tone purple yin-yang instead of monochrome; uses original rendering mode with purple-tinted transparent-background PNG
+- **Purple yin-yang complication** — watchOS complication now shows a proper two-tone purple yin-yang instead of monochrome
 
 ---
 

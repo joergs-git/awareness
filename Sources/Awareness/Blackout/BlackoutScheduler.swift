@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CoreGraphics
 
 /// Schedules blackouts at random intervals within the configured range.
 /// Respects the active time window and media usage detection.
@@ -138,6 +139,13 @@ class BlackoutScheduler {
 
         // Skip if system is idle (sleeping, display off, locked, or screensaver)
         if SystemStateDetector.shared.isSystemIdle() {
+            scheduleNext()
+            return
+        }
+
+        // Skip if user has been idle (no mouse/keyboard input) for 5+ minutes
+        let userIdleSeconds = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .null)
+        if userIdleSeconds >= 300 {
             scheduleNext()
             return
         }

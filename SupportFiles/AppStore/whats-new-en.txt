@@ -1,3 +1,4 @@
-What's New in v5.0.2:
+What's New in v5.0.3:
 
-- watchOS complication now shows purple yin-yang instead of monochrome
+- Skip breaks when you're away — no more triggers after 5 minutes of inactivity
+- watchOS complication now shows purple yin-yang
