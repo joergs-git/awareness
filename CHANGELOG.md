@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.0.4
+
+### watchOS Complication Fix
+- **High-contrast yin-yang** — replaced low-contrast purple-on-purple complication icon with high-contrast dark purple / light lavender version so the yin-yang shape remains visible on real Apple Watch faces (vibrant rendering mode desaturates to monochrome)
+
+---
+
 ## v5.0.3
 
 ### User Idle Detection (macOS + Windows)
