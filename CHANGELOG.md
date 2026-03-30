@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1.2
+
+### Release Build
+- Version bump for App Store and direct distribution release
+
+---
+
 ## v5.1.1
 
 ### watchOS Complication Fix
