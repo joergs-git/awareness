@@ -143,8 +143,13 @@ class BlackoutScheduler {
             return
         }
 
-        // Skip if user has been idle (no mouse/keyboard input) for 5+ minutes
-        let userIdleSeconds = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .null)
+        // Skip if user has been idle (no mouse/keyboard input) for 5+ minutes.
+        // Note: .null event type is broken on macOS 15 (Sequoia) — always returns a large
+        // value regardless of actual input. Check specific event types and take the minimum.
+        let mouseIdle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .mouseMoved)
+        let keyIdle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .keyDown)
+        let clickIdle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .leftMouseDown)
+        let userIdleSeconds = min(mouseIdle, keyIdle, clickIdle)
         if userIdleSeconds >= 300 {
             scheduleNext()
             return

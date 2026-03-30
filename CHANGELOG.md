@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1.4
+
+### Critical Bug Fix
+- **Fixed blackouts never triggering on macOS 15 (Sequoia)** — `CGEventSource.secondsSinceLastEventType(.null)` is broken on macOS 15, always returning ~9600s regardless of actual user input. The user idle detection (added in v5.0.3) was skipping every blackout because macOS falsely reported the user as idle. Fixed by checking specific event types (mouseMoved, keyDown, leftMouseDown) and taking the minimum
+
+---
+
 ## v5.1.3
 
 ### Bug Fix

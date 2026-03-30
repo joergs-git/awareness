@@ -7,9 +7,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.joergsflow.awareness.ios</string>
     <key>CFBundleVersion</key>
-    <string>3</string>
+    <string>4</string>
     <key>CFBundleShortVersionString</key>
-    <string>5.1.3</string>
+    <string>5.1.4</string>
     <key>CFBundleExecutable</key>
     <string>Atempause</string>
     <key>CFBundleIconFile</key>
