@@ -101,23 +101,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Checks required system permissions on every launch.
     /// Accessibility is needed for keyboard suppression during breaks (direct distribution only).
+    /// Uses the system's built-in prompt (non-blocking) to avoid interfering with the scheduler.
     private func checkPermissions() {
         // Skip in sandbox — CGEvent tap is disabled there, so Accessibility is not needed
         if ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil { return }
 
-        if !AXIsProcessTrusted() {
-            let alert = NSAlert()
-            alert.messageText = String(localized: "Accessibility Permission Needed")
-            alert.informativeText = String(localized: "Atempause needs Accessibility permission to suppress keyboard input during breathing breaks.\n\nWithout it, keystrokes may reach background apps while the screen is dimmed.\n\nGo to System Settings → Privacy & Security → Accessibility and add Atempause.")
-            alert.alertStyle = .informational
-            alert.addButton(withTitle: String(localized: "Open System Settings"))
-            alert.addButton(withTitle: String(localized: "Later"))
-            NSApp.activate(ignoringOtherApps: true)
-
-            let response = alert.runModal()
-            if response == .alertFirstButtonReturn {
-                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
-            }
-        }
+        // Non-blocking: shows the system accessibility prompt if not already trusted
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        AXIsProcessTrustedWithOptions(options)
     }
 }
