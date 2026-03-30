@@ -131,8 +131,8 @@ class BlackoutScheduler {
             return
         }
 
-        // Skip if camera or microphone is actively in use
-        if MediaUsageDetector.shared.isMediaInUse() {
+        // Skip if camera or microphone is actively in use (only when setting is enabled)
+        if settings.skipDuringMediaUse && MediaUsageDetector.shared.isMediaInUse() {
             scheduleNext()
             return
         }

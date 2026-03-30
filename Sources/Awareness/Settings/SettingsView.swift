@@ -172,6 +172,13 @@ struct SettingsView: View {
                     Text(String(localized: "Shows \"Ready to breathe?\" before each break. Decline to skip without affecting your statistics."))
                         .font(.caption)
                         .foregroundColor(.secondary)
+
+                    Divider()
+
+                    Toggle(String(localized: "Skip breaks during audio/video calls"), isOn: $settings.skipDuringMediaUse)
+                    Text(String(localized: "When on, breaks won't interrupt while camera or microphone is active."))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 } header: {
                     Label(String(localized: "Behavior"), systemImage: "lock")
                 }

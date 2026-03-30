@@ -1,4 +1,4 @@
-APP_NAME = Awareness
+APP_NAME = Atempause
 BUILD_DIR = .build
 BUNDLE_DIR = build/$(APP_NAME).app
 CONTENTS_DIR = $(BUNDLE_DIR)/Contents
@@ -45,8 +45,8 @@ bundle-signed: build
 
 # Create notarized release ZIP for direct distribution
 release-direct: bundle-signed
-	ditto -c -k --keepParent $(BUNDLE_DIR) build/Awareness.zip
-	xcrun notarytool submit build/Awareness.zip \
+	ditto -c -k --keepParent $(BUNDLE_DIR) build/$(APP_NAME).zip
+	xcrun notarytool submit build/$(APP_NAME).zip \
 		--keychain-profile "notarytool" --wait
 	xcrun stapler staple $(BUNDLE_DIR)
 	@echo "Notarized and stapled $(BUNDLE_DIR)"

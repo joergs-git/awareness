@@ -29,6 +29,7 @@ final class SettingsManager: ObservableObject {
         static let customVideoBookmark = "customVideoBookmark"
         static let snoozeUntil              = "snoozeUntil"
         static let startclickConfirmation   = "startclickConfirmation"
+        static let skipDuringMediaUse       = "skipDuringMediaUse"
 
         // Desktop Sync
         static let syncPassphrase        = "syncPassphrase"
@@ -59,6 +60,7 @@ final class SettingsManager: ObservableObject {
         Keys.customImagePath:  "",
         Keys.customVideoPath:  "",
         Keys.startclickConfirmation: true,
+        Keys.skipDuringMediaUse: false,
         Keys.syncPassphrase: ""
     ]
 
@@ -156,6 +158,11 @@ final class SettingsManager: ObservableObject {
     /// When on, a "Ready to breathe?" prompt appears before each blackout
     @Published var startclickConfirmation: Bool {
         didSet { defaults.set(startclickConfirmation, forKey: Keys.startclickConfirmation) }
+    }
+
+    /// When on, breaks are skipped while the camera or microphone is active
+    @Published var skipDuringMediaUse: Bool {
+        didSet { defaults.set(skipDuringMediaUse, forKey: Keys.skipDuringMediaUse) }
     }
 
     /// Sync passphrase entered by the user (from iOS app)
@@ -378,6 +385,7 @@ final class SettingsManager: ObservableObject {
         customImagePath  = defaults.string(forKey: Keys.customImagePath) ?? ""
         customVideoPath  = defaults.string(forKey: Keys.customVideoPath) ?? ""
         startclickConfirmation = defaults.bool(forKey: Keys.startclickConfirmation)
+        skipDuringMediaUse = defaults.bool(forKey: Keys.skipDuringMediaUse)
         syncPassphrase   = defaults.string(forKey: Keys.syncPassphrase) ?? ""
         snoozeUntil      = defaults.object(forKey: Keys.snoozeUntil) as? Date
 

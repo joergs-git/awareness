@@ -4,6 +4,20 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1
+
+### macOS Binary Renamed to "Atempause"
+- **Product name change** — the macOS binary, app bundle, and Makefile output are now "Atempause" (matching the user-facing name already shown in menus and tooltips). Bundle identifier unchanged — no App Store impact
+
+### New Setting: Skip Breaks During Audio/Video Calls (macOS)
+- **Optional call detection** — new toggle "Skip breaks during audio/video calls" in Settings → Behavior. When enabled, breaks are suppressed while camera or microphone is active (e.g. during Zoom, FaceTime, Teams calls)
+- **Default: off** — breaks interrupt regardless of media state, preserving the mindfulness-first philosophy. Users who want uninterrupted calls can opt in
+
+### Startup Permission Check (macOS)
+- **Accessibility prompt** — on every launch (direct distribution only), the app checks if Accessibility permission is granted. If not, a dialog explains why it's needed (keyboard suppression during breaks) and offers to open System Settings directly. Skipped in App Sandbox builds where the feature is disabled
+
+---
+
 ## v5.0.4
 
 ### watchOS Complication Fix

@@ -7,6 +7,9 @@ let package = Package(
     platforms: [
         .macOS(.v13)
     ],
+    products: [
+        .executable(name: "Atempause", targets: ["Awareness"]),
+    ],
     targets: [
         .executableTarget(
             name: "Awareness",
