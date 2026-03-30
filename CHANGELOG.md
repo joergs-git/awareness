@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1.3
+
+### Bug Fix
+- **Fixed blackout scheduling** — replaced blocking permission dialog with non-blocking system prompt. The modal alert could prevent the scheduler's timer from firing
+
+---
+
 ## v5.1.2
 
 ### Release Build
