@@ -38,7 +38,7 @@ bundle-signed: build
 	@cp Sources/Awareness/Resources/awareness-gong-end.aiff $(RESOURCES_DIR)/
 	@cp Sources/Awareness/Resources/default-blackout.png $(RESOURCES_DIR)/
 	codesign --force --options runtime \
-		--sign $(DEVELOPER_ID) \
+		--sign "$(DEVELOPER_ID)" \
 		--entitlements SupportFiles/Awareness-Direct.entitlements \
 		$(BUNDLE_DIR)
 	@echo "Signed $(BUNDLE_DIR) with Developer ID"
