@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1.1
+
+### watchOS Complication Fix
+- **Black/white yin-yang** — replaced purple yin-yang complication icon with pure black/white version. Purple was washing out to plain white under the vibrant rendering mode on real watch faces; black/white provides maximum contrast that cannot desaturate further
+
+---
+
 ## v5.1
 
 ### macOS Binary Renamed to "Atempause"
