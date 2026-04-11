@@ -63,84 +63,67 @@ struct AwarenessEntry: TimelineEntry {
 
 // MARK: - Yin-Yang Symbol
 
-/// Shape for the bright (right) half of the yin-yang S-curve.
-/// Draws the right semicircle of the outer circle connected by two
-/// small semicircles that form the characteristic S-curve boundary.
-private struct YinYangHalf: Shape {
-    func path(in rect: CGRect) -> Path {
-        let cx = rect.midX
-        let cy = rect.midY
-        let r = min(rect.width, rect.height) / 2
-        var path = Path()
-
-        // Right semicircle of outer circle (top to bottom)
-        path.addArc(center: CGPoint(x: cx, y: cy), radius: r,
-                    startAngle: .degrees(-90), endAngle: .degrees(90),
-                    clockwise: false)
-
-        // Left semicircle of bottom small circle (bottom to center)
-        path.addArc(center: CGPoint(x: cx, y: cy + r / 2), radius: r / 2,
-                    startAngle: .degrees(90), endAngle: .degrees(270),
-                    clockwise: true)
-
-        // Right semicircle of top small circle (center to top)
-        path.addArc(center: CGPoint(x: cx, y: cy - r / 2), radius: r / 2,
-                    startAngle: .degrees(90), endAngle: .degrees(270),
-                    clockwise: false)
-
-        return path
-    }
-}
-
 /// SwiftUI-drawn yin-yang that renders correctly in all WidgetKit rendering modes.
-/// The PNG bitmap approach fails in vibrant mode because black pixels become
-/// invisible, making the icon appear as a plain white circle on physical watch faces.
 ///
-/// Key insight for the dark dot: it must be an OPAQUE gray, not semi-transparent white.
-/// `Color.white.opacity(0.35)` composited over white = still white (transparent white
-/// adds nothing to an already-white surface). `Color(white: 0.35)` is fully opaque dark
-/// gray — it overwrites the white beneath, and vibrancy renders it at 35% brightness,
-/// creating visible contrast against the bright surroundings.
+/// In watchOS vibrant mode, ONLY the alpha channel determines brightness — RGB values
+/// are completely ignored. All fully-opaque pixels render at the same brightness.
+/// Therefore the dark dot cannot be created by overlaying any color on top of the
+/// opaque white half (the result is always alpha 1.0 = bright).
+///
+/// Solution: use a Canvas to clip the bright half so the dot area is never drawn,
+/// letting the 0.35-alpha dark background show through as a visibly dimmer dot.
 private struct YinYangSymbol: View {
     @Environment(\.widgetRenderingMode) var renderingMode
 
     var body: some View {
-        GeometryReader { geo in
-            let size = min(geo.size.width, geo.size.height)
-            let r = size / 2
-            let dotSize = size * 0.22
+        let darkFill: Color = renderingMode == .fullColor ? .black : .white.opacity(0.35)
+        let brightFill: Color = .white
 
-            ZStack {
-                // Full circle background (dark half)
-                Circle().fill(darkColor)
+        Canvas { context, size in
+            let dim = min(size.width, size.height)
+            let r = dim / 2
+            let cx = size.width / 2
+            let cy = size.height / 2
+            let dotR = dim * 0.12
 
-                // S-curve right half (bright)
-                YinYangHalf().fill(brightColor)
+            // Rects for the two dots
+            let darkDotRect = CGRect(x: cx - dotR, y: cy + r / 2 - dotR,
+                                     width: dotR * 2, height: dotR * 2)
+            let brightDotRect = CGRect(x: cx - dotR, y: cy - r / 2 - dotR,
+                                       width: dotR * 2, height: dotR * 2)
+            let outerRect = CGRect(x: cx - r, y: cy - r, width: dim, height: dim)
 
-                // Dark dot in bright half's head — opaque gray overwrites the white
-                Circle().fill(darkColor)
-                    .frame(width: dotSize, height: dotSize)
-                    .offset(y: r / 2)
+            // 1. Dark background circle (alpha 0.35 in vibrant mode)
+            context.fill(Path(ellipseIn: outerRect), with: .color(darkFill))
 
-                // Bright dot in dark half's head
-                Circle().fill(brightColor)
-                    .frame(width: dotSize, height: dotSize)
-                    .offset(y: -r / 2)
+            // 2. Bright S-curve half, clipped to EXCLUDE the dark dot area.
+            //    The clip uses a full rect with the dot circle subtracted via even-odd fill.
+            //    This way the dot area is never painted white — the dark background shows through.
+            context.drawLayer { ctx in
+                var clipPath = Path()
+                clipPath.addRect(CGRect(origin: .zero, size: size))
+                clipPath.addEllipse(in: darkDotRect)
+                ctx.clip(to: clipPath, style: FillStyle(eoFill: true))
+
+                var halfPath = Path()
+                halfPath.addArc(center: CGPoint(x: cx, y: cy), radius: r,
+                                startAngle: .degrees(-90), endAngle: .degrees(90),
+                                clockwise: false)
+                halfPath.addArc(center: CGPoint(x: cx, y: cy + r / 2), radius: r / 2,
+                                startAngle: .degrees(90), endAngle: .degrees(270),
+                                clockwise: true)
+                halfPath.addArc(center: CGPoint(x: cx, y: cy - r / 2), radius: r / 2,
+                                startAngle: .degrees(90), endAngle: .degrees(270),
+                                clockwise: false)
+                halfPath.closeSubpath()
+                ctx.fill(halfPath, with: .color(brightFill))
             }
-            .clipShape(Circle())
-            .frame(width: size, height: size)
-            .position(x: geo.size.width / 2, y: geo.size.height / 2)
+
+            // 3. Bright dot in dark half's head (alpha 1.0 on alpha 0.35 = visible)
+            context.fill(Path(ellipseIn: brightDotRect), with: .color(brightFill))
         }
+        .clipShape(Circle())
         .aspectRatio(1, contentMode: .fit)
-    }
-
-    private var brightColor: Color { .white }
-
-    // Opaque gray (not semi-transparent white) — fully opaque so it overwrites
-    // white when drawn on top. In vibrancy, 0.35 luminance reads as moderately
-    // bright, creating visible contrast against the bright white half.
-    private var darkColor: Color {
-        renderingMode == .fullColor ? .black : Color(white: 0.35)
     }
 }
 
