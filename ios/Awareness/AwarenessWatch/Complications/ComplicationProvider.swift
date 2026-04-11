@@ -61,83 +61,22 @@ struct AwarenessEntry: TimelineEntry {
     let todayTriggered: Int
 }
 
-// MARK: - Yin-Yang Symbol
-
-/// Shape for the bright (right) half of the yin-yang S-curve.
-private struct YinYangHalf: Shape {
-    func path(in rect: CGRect) -> Path {
-        let cx = rect.midX
-        let cy = rect.midY
-        let r = min(rect.width, rect.height) / 2
-        var path = Path()
-        path.addArc(center: CGPoint(x: cx, y: cy), radius: r,
-                    startAngle: .degrees(-90), endAngle: .degrees(90),
-                    clockwise: false)
-        path.addArc(center: CGPoint(x: cx, y: cy + r / 2), radius: r / 2,
-                    startAngle: .degrees(90), endAngle: .degrees(270),
-                    clockwise: true)
-        path.addArc(center: CGPoint(x: cx, y: cy - r / 2), radius: r / 2,
-                    startAngle: .degrees(90), endAngle: .degrees(270),
-                    clockwise: false)
-        return path
-    }
-}
-
-/// SwiftUI-drawn yin-yang using template-style rendering — the same approach that
-/// worked with the original PNG complication image.
-///
-/// Only the BRIGHT half + bright dot are drawn as opaque white shapes. Everything
-/// else (dark half, dark dot) is left fully transparent. The `AccessoryWidgetBackground()`
-/// behind provides the contrast for the transparent areas. The system's vibrant/accented
-/// rendering handles tinting automatically — no custom colors or alpha tricks needed.
-///
-/// The dark dot is achieved by masking the bright half to exclude the dot circle.
-/// Where the mask is black, the bright half becomes transparent, letting the
-/// AccessoryWidgetBackground show through — same visual as the dark half.
-private struct YinYangSymbol: View {
-
-    var body: some View {
-        GeometryReader { geo in
-            let size = min(geo.size.width, geo.size.height)
-            let r = size / 2
-            let dotSize = size * 0.24
-
-            ZStack {
-                // Bright S-curve half, masked to exclude the dark dot area
-                YinYangHalf()
-                    .fill(.white)
-                    .mask(
-                        ZStack {
-                            Color.white
-                            Circle()
-                                .fill(Color.black)
-                                .frame(width: dotSize, height: dotSize)
-                                .offset(y: r / 2)
-                        }
-                    )
-
-                // Bright dot in dark half's head
-                Circle().fill(.white)
-                    .frame(width: dotSize, height: dotSize)
-                    .offset(y: -r / 2)
-            }
-            .frame(width: size, height: size)
-            .position(x: geo.size.width / 2, y: geo.size.height / 2)
-        }
-        .aspectRatio(1, contentMode: .fit)
-    }
-}
-
 // MARK: - Complication Views
 
-/// Circular complication — yin-yang icon with today's progress counter overlay
+/// Circular complication — yin-yang template image with today's progress counter overlay.
+/// Uses a template PNG where the bright half + bright dot are opaque white and the
+/// dark half + dark dot are fully transparent. The system's vibrant/accented rendering
+/// tints opaque pixels and AccessoryWidgetBackground provides contrast for transparent areas.
 struct AccessoryCircularView: View {
     let entry: AwarenessEntry
 
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
-            YinYangSymbol()
+            Image("YinYang")
+                .resizable()
+                .scaledToFit()
+                .clipShape(Circle())
                 .opacity(entry.todayTriggered > 0 ? 0.5 : 1.0)
 
             // Progress counter overlay (e.g. "2/5")
