@@ -14,6 +14,8 @@ struct WatchAwarenessBar: View {
     @State private var debounceTimer: Timer?
     /// Whether the crown is currently being rotated (focus state)
     @State private var isCrownActive: Bool = false
+    /// Whether the initial grace period has elapsed (prevents premature auto-dismiss)
+    @State private var graceElapsed: Bool = false
 
     var body: some View {
         VStack(spacing: 10) {
@@ -78,8 +80,11 @@ struct WatchAwarenessBar: View {
             resetDebounceTimer()
         })
         .onAppear {
-            // Start auto-save timer on first appearance
-            resetDebounceTimer()
+            // 2s grace period so the slider doesn't vanish before the user can react
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                graceElapsed = true
+                resetDebounceTimer()
+            }
         }
         .onDisappear {
             debounceTimer?.invalidate()
@@ -88,7 +93,10 @@ struct WatchAwarenessBar: View {
     }
 
     /// Reset the 2-second debounce timer. When it fires, the score is auto-submitted.
+    /// During the initial 2s grace period, only user interactions (drag/crown) trigger
+    /// the debounce — the timer won't start on its own until the grace period elapses.
     private func resetDebounceTimer() {
+        guard graceElapsed else { return }
         debounceTimer?.invalidate()
         debounceTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
             onSubmit(Int(value))

@@ -63,36 +63,30 @@ struct AwarenessEntry: TimelineEntry {
 
 // MARK: - Yin-Yang Symbol
 
-/// Shape for the bright (right) half of the yin-yang S-curve, with a circular
-/// cutout for the dark dot. Uses even-odd fill so the dot area becomes a hole
-/// that reveals the dark background behind it — necessary because drawing a
-/// translucent-white dot ON TOP of a white surface produces no visible contrast.
-private struct YinYangBrightHalf: Shape {
+/// Shape for the bright (right) half of the yin-yang S-curve.
+/// Draws the right semicircle of the outer circle connected by two
+/// small semicircles that form the characteristic S-curve boundary.
+private struct YinYangHalf: Shape {
     func path(in rect: CGRect) -> Path {
         let cx = rect.midX
         let cy = rect.midY
         let r = min(rect.width, rect.height) / 2
-        let dotR = r * 0.18
         var path = Path()
 
-        // S-curve boundary (right/bright half of yin-yang)
+        // Right semicircle of outer circle (top to bottom)
         path.addArc(center: CGPoint(x: cx, y: cy), radius: r,
                     startAngle: .degrees(-90), endAngle: .degrees(90),
                     clockwise: false)
+
+        // Left semicircle of bottom small circle (bottom to center)
         path.addArc(center: CGPoint(x: cx, y: cy + r / 2), radius: r / 2,
                     startAngle: .degrees(90), endAngle: .degrees(270),
                     clockwise: true)
+
+        // Right semicircle of top small circle (center to top)
         path.addArc(center: CGPoint(x: cx, y: cy - r / 2), radius: r / 2,
                     startAngle: .degrees(90), endAngle: .degrees(270),
                     clockwise: false)
-
-        // Dark dot cutout in bright half's head (even-odd fill makes this a hole)
-        path.addEllipse(in: CGRect(
-            x: cx - dotR,
-            y: cy + r / 2 - dotR,
-            width: dotR * 2,
-            height: dotR * 2
-        ))
 
         return path
     }
@@ -101,8 +95,9 @@ private struct YinYangBrightHalf: Shape {
 /// SwiftUI-drawn yin-yang that renders correctly in all WidgetKit rendering modes.
 /// The PNG bitmap approach fails in vibrant mode because black pixels become
 /// invisible, making the icon appear as a plain white circle on physical watch faces.
-/// Uses white + translucent white (not black) so both halves stay visible under vibrancy.
-/// The dark dot in the bright half is achieved via even-odd fill cutout, not overlay.
+/// Uses white + translucent white for the two halves. The dark dot in the bright half
+/// uses Color.black — fully opaque black covers the white beneath, then vibrancy
+/// turns it into a transparent "porthole" to the watch face, which reads as a dark spot.
 private struct YinYangSymbol: View {
     @Environment(\.widgetRenderingMode) var renderingMode
 
@@ -116,11 +111,16 @@ private struct YinYangSymbol: View {
                 // Full circle background (dark half)
                 Circle().fill(darkColor)
 
-                // S-curve right half (bright) with dark dot punched out
-                YinYangBrightHalf()
-                    .fill(brightColor, style: FillStyle(eoFill: true))
+                // S-curve right half (bright)
+                YinYangHalf().fill(brightColor)
 
-                // Dot in dark half's head at top (bright colored)
+                // Dark dot in bright half's head — Color.black is fully opaque so it
+                // covers the white, then vibrancy makes it transparent = visible dark spot
+                Circle().fill(Color.black)
+                    .frame(width: dotSize, height: dotSize)
+                    .offset(y: r / 2)
+
+                // Bright dot in dark half's head
                 Circle().fill(brightColor)
                     .frame(width: dotSize, height: dotSize)
                     .offset(y: -r / 2)
