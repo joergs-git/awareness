@@ -95,9 +95,12 @@ private struct YinYangHalf: Shape {
 /// SwiftUI-drawn yin-yang that renders correctly in all WidgetKit rendering modes.
 /// The PNG bitmap approach fails in vibrant mode because black pixels become
 /// invisible, making the icon appear as a plain white circle on physical watch faces.
-/// Uses white + translucent white for the two halves. The dark dot in the bright half
-/// uses Color.black — fully opaque black covers the white beneath, then vibrancy
-/// turns it into a transparent "porthole" to the watch face, which reads as a dark spot.
+///
+/// Key insight for the dark dot: it must be an OPAQUE gray, not semi-transparent white.
+/// `Color.white.opacity(0.35)` composited over white = still white (transparent white
+/// adds nothing to an already-white surface). `Color(white: 0.35)` is fully opaque dark
+/// gray — it overwrites the white beneath, and vibrancy renders it at 35% brightness,
+/// creating visible contrast against the bright surroundings.
 private struct YinYangSymbol: View {
     @Environment(\.widgetRenderingMode) var renderingMode
 
@@ -105,7 +108,7 @@ private struct YinYangSymbol: View {
         GeometryReader { geo in
             let size = min(geo.size.width, geo.size.height)
             let r = size / 2
-            let dotSize = size * 0.18
+            let dotSize = size * 0.22
 
             ZStack {
                 // Full circle background (dark half)
@@ -114,9 +117,8 @@ private struct YinYangSymbol: View {
                 // S-curve right half (bright)
                 YinYangHalf().fill(brightColor)
 
-                // Dark dot in bright half's head — Color.black is fully opaque so it
-                // covers the white, then vibrancy makes it transparent = visible dark spot
-                Circle().fill(Color.black)
+                // Dark dot in bright half's head — opaque gray overwrites the white
+                Circle().fill(darkColor)
                     .frame(width: dotSize, height: dotSize)
                     .offset(y: r / 2)
 
@@ -134,10 +136,11 @@ private struct YinYangSymbol: View {
 
     private var brightColor: Color { .white }
 
-    // Full-color watch faces can show true black; vibrant/accented
-    // modes make black invisible, so use translucent white instead
+    // Opaque gray (not semi-transparent white) — fully opaque so it overwrites
+    // white when drawn on top. In vibrancy, 0.35 luminance reads as moderately
+    // bright, creating visible contrast against the bright white half.
     private var darkColor: Color {
-        renderingMode == .fullColor ? .black : Color.white.opacity(0.35)
+        renderingMode == .fullColor ? .black : Color(white: 0.35)
     }
 }
 
