@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1.5
+
+### watchOS Complication Fix
+- **Fixed yin-yang icon showing as white circle on physical Apple Watch** — replaced PNG bitmap with SwiftUI-drawn yin-yang symbol. The PNG approach failed because WidgetKit's vibrant rendering mode makes black pixels invisible. The new implementation uses `@Environment(\.widgetRenderingMode)` to adapt colors: true black/white on full-color watch faces, white/translucent-white on vibrant/accented faces
+
+---
+
 ## v5.1.4
 
 ### Critical Bug Fix

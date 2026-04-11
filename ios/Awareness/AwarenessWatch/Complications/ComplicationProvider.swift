@@ -61,6 +61,83 @@ struct AwarenessEntry: TimelineEntry {
     let todayTriggered: Int
 }
 
+// MARK: - Yin-Yang Symbol
+
+/// Shape for one half of the yin-yang S-curve (the right/bright side).
+/// Draws the right semicircle of the outer circle connected by two
+/// small semicircles that form the characteristic S-curve boundary.
+private struct YinYangHalf: Shape {
+    func path(in rect: CGRect) -> Path {
+        let cx = rect.midX
+        let cy = rect.midY
+        let r = min(rect.width, rect.height) / 2
+        var path = Path()
+
+        // Right semicircle of outer circle (top to bottom)
+        path.addArc(center: CGPoint(x: cx, y: cy), radius: r,
+                    startAngle: .degrees(-90), endAngle: .degrees(90),
+                    clockwise: false)
+
+        // Left semicircle of bottom small circle (bottom to center)
+        path.addArc(center: CGPoint(x: cx, y: cy + r / 2), radius: r / 2,
+                    startAngle: .degrees(90), endAngle: .degrees(270),
+                    clockwise: true)
+
+        // Right semicircle of top small circle (center to top)
+        path.addArc(center: CGPoint(x: cx, y: cy - r / 2), radius: r / 2,
+                    startAngle: .degrees(90), endAngle: .degrees(270),
+                    clockwise: false)
+
+        return path
+    }
+}
+
+/// SwiftUI-drawn yin-yang that renders correctly in all WidgetKit rendering modes.
+/// The PNG bitmap approach fails in vibrant mode because black pixels become
+/// invisible, making the icon appear as a plain white circle on physical watch faces.
+/// Uses white + translucent white (not black) so both halves stay visible under vibrancy.
+private struct YinYangSymbol: View {
+    @Environment(\.widgetRenderingMode) var renderingMode
+
+    var body: some View {
+        GeometryReader { geo in
+            let size = min(geo.size.width, geo.size.height)
+            let r = size / 2
+            let dotSize = size * 0.18
+
+            ZStack {
+                // Full circle background (dark half)
+                Circle().fill(darkColor)
+
+                // S-curve right half (bright)
+                YinYangHalf().fill(brightColor)
+
+                // Dot in bright half's head at bottom (dark colored)
+                Circle().fill(darkColor)
+                    .frame(width: dotSize, height: dotSize)
+                    .offset(y: r / 2)
+
+                // Dot in dark half's head at top (bright colored)
+                Circle().fill(brightColor)
+                    .frame(width: dotSize, height: dotSize)
+                    .offset(y: -r / 2)
+            }
+            .clipShape(Circle())
+            .frame(width: size, height: size)
+            .position(x: geo.size.width / 2, y: geo.size.height / 2)
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+
+    private var brightColor: Color { .white }
+
+    // Full-color watch faces can show true black; vibrant/accented
+    // modes make black invisible, so use translucent white instead
+    private var darkColor: Color {
+        renderingMode == .fullColor ? .black : Color.white.opacity(0.35)
+    }
+}
+
 // MARK: - Complication Views
 
 /// Circular complication — yin-yang icon with today's progress counter overlay
@@ -69,12 +146,7 @@ struct AccessoryCircularView: View {
 
     var body: some View {
         ZStack {
-            AccessoryWidgetBackground()
-            Image("YinYang")
-                .renderingMode(.original)
-                .resizable()
-                .scaledToFit()
-                .clipShape(Circle())
+            YinYangSymbol()
                 .opacity(entry.todayTriggered > 0 ? 0.5 : 1.0)
 
             // Progress counter overlay (e.g. "2/5")
