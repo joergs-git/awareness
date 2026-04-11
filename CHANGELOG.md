@@ -4,7 +4,7 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
-## v5.1.5
+## v5.1.6
 
 ### watchOS Complication Fix
 - **Fixed yin-yang icon on physical Apple Watch** — regenerated the YinYang template PNG as an RGBA alpha-mask image. In watchOS vibrant rendering mode, only the alpha channel determines brightness (RGB is ignored). The bright half + bright dot use alpha 255 (full brightness), the dark half + dark dot use alpha 90 (~35% brightness). Template rendering mode in the asset catalog lets the system handle vibrant/accented tinting automatically
