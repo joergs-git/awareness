@@ -7,7 +7,10 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 ## v5.1.5
 
 ### watchOS Complication Fix
-- **Fixed yin-yang icon showing as white circle on physical Apple Watch** — replaced PNG bitmap with SwiftUI-drawn yin-yang symbol. The PNG approach failed because WidgetKit's vibrant rendering mode makes black pixels invisible. The new implementation uses `@Environment(\.widgetRenderingMode)` to adapt colors: true black/white on full-color watch faces, white/translucent-white on vibrant/accented faces
+- **Fixed yin-yang icon on physical Apple Watch** — regenerated the YinYang template PNG as an RGBA alpha-mask image. In watchOS vibrant rendering mode, only the alpha channel determines brightness (RGB is ignored). The bright half + bright dot use alpha 255 (full brightness), the dark half + dark dot use alpha 90 (~35% brightness). Template rendering mode in the asset catalog lets the system handle vibrant/accented tinting automatically
+
+### watchOS Awareness Slider
+- **Added 2-second grace period to the post-blackout awareness slider** — the auto-submit countdown no longer starts immediately, giving the user time to see and interact with the slider before it auto-dismisses
 
 ---
 
