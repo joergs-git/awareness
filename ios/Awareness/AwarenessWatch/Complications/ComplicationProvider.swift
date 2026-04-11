@@ -63,66 +63,67 @@ struct AwarenessEntry: TimelineEntry {
 
 // MARK: - Yin-Yang Symbol
 
-/// SwiftUI-drawn yin-yang that renders correctly in all WidgetKit rendering modes.
+/// Shape for the bright (right) half of the yin-yang S-curve.
+private struct YinYangHalf: Shape {
+    func path(in rect: CGRect) -> Path {
+        let cx = rect.midX
+        let cy = rect.midY
+        let r = min(rect.width, rect.height) / 2
+        var path = Path()
+        path.addArc(center: CGPoint(x: cx, y: cy), radius: r,
+                    startAngle: .degrees(-90), endAngle: .degrees(90),
+                    clockwise: false)
+        path.addArc(center: CGPoint(x: cx, y: cy + r / 2), radius: r / 2,
+                    startAngle: .degrees(90), endAngle: .degrees(270),
+                    clockwise: true)
+        path.addArc(center: CGPoint(x: cx, y: cy - r / 2), radius: r / 2,
+                    startAngle: .degrees(90), endAngle: .degrees(270),
+                    clockwise: false)
+        return path
+    }
+}
+
+/// SwiftUI-drawn yin-yang using template-style rendering — the same approach that
+/// worked with the original PNG complication image.
 ///
-/// In watchOS vibrant mode, ONLY the alpha channel determines brightness — RGB values
-/// are completely ignored. All fully-opaque pixels render at the same brightness.
-/// Therefore the dark dot cannot be created by overlaying any color on top of the
-/// opaque white half (the result is always alpha 1.0 = bright).
+/// Only the BRIGHT half + bright dot are drawn as opaque white shapes. Everything
+/// else (dark half, dark dot) is left fully transparent. The `AccessoryWidgetBackground()`
+/// behind provides the contrast for the transparent areas. The system's vibrant/accented
+/// rendering handles tinting automatically — no custom colors or alpha tricks needed.
 ///
-/// Solution: use a Canvas to clip the bright half so the dot area is never drawn,
-/// letting the 0.35-alpha dark background show through as a visibly dimmer dot.
+/// The dark dot is achieved by masking the bright half to exclude the dot circle.
+/// Where the mask is black, the bright half becomes transparent, letting the
+/// AccessoryWidgetBackground show through — same visual as the dark half.
 private struct YinYangSymbol: View {
-    @Environment(\.widgetRenderingMode) var renderingMode
 
     var body: some View {
-        let darkFill: Color = renderingMode == .fullColor ? .black : .white.opacity(0.35)
-        let brightFill: Color = .white
+        GeometryReader { geo in
+            let size = min(geo.size.width, geo.size.height)
+            let r = size / 2
+            let dotSize = size * 0.24
 
-        Canvas { context, size in
-            let dim = min(size.width, size.height)
-            let r = dim / 2
-            let cx = size.width / 2
-            let cy = size.height / 2
-            let dotR = dim * 0.12
+            ZStack {
+                // Bright S-curve half, masked to exclude the dark dot area
+                YinYangHalf()
+                    .fill(.white)
+                    .mask(
+                        ZStack {
+                            Color.white
+                            Circle()
+                                .fill(Color.black)
+                                .frame(width: dotSize, height: dotSize)
+                                .offset(y: r / 2)
+                        }
+                    )
 
-            // Rects for the two dots
-            let darkDotRect = CGRect(x: cx - dotR, y: cy + r / 2 - dotR,
-                                     width: dotR * 2, height: dotR * 2)
-            let brightDotRect = CGRect(x: cx - dotR, y: cy - r / 2 - dotR,
-                                       width: dotR * 2, height: dotR * 2)
-            let outerRect = CGRect(x: cx - r, y: cy - r, width: dim, height: dim)
-
-            // 1. Dark background circle (alpha 0.35 in vibrant mode)
-            context.fill(Path(ellipseIn: outerRect), with: .color(darkFill))
-
-            // 2. Bright S-curve half, clipped to EXCLUDE the dark dot area.
-            //    The clip uses a full rect with the dot circle subtracted via even-odd fill.
-            //    This way the dot area is never painted white — the dark background shows through.
-            context.drawLayer { ctx in
-                var clipPath = Path()
-                clipPath.addRect(CGRect(origin: .zero, size: size))
-                clipPath.addEllipse(in: darkDotRect)
-                ctx.clip(to: clipPath, style: FillStyle(eoFill: true))
-
-                var halfPath = Path()
-                halfPath.addArc(center: CGPoint(x: cx, y: cy), radius: r,
-                                startAngle: .degrees(-90), endAngle: .degrees(90),
-                                clockwise: false)
-                halfPath.addArc(center: CGPoint(x: cx, y: cy + r / 2), radius: r / 2,
-                                startAngle: .degrees(90), endAngle: .degrees(270),
-                                clockwise: true)
-                halfPath.addArc(center: CGPoint(x: cx, y: cy - r / 2), radius: r / 2,
-                                startAngle: .degrees(90), endAngle: .degrees(270),
-                                clockwise: false)
-                halfPath.closeSubpath()
-                ctx.fill(halfPath, with: .color(brightFill))
+                // Bright dot in dark half's head
+                Circle().fill(.white)
+                    .frame(width: dotSize, height: dotSize)
+                    .offset(y: -r / 2)
             }
-
-            // 3. Bright dot in dark half's head (alpha 1.0 on alpha 0.35 = visible)
-            context.fill(Path(ellipseIn: brightDotRect), with: .color(brightFill))
+            .frame(width: size, height: size)
+            .position(x: geo.size.width / 2, y: geo.size.height / 2)
         }
-        .clipShape(Circle())
         .aspectRatio(1, contentMode: .fit)
     }
 }
@@ -135,6 +136,7 @@ struct AccessoryCircularView: View {
 
     var body: some View {
         ZStack {
+            AccessoryWidgetBackground()
             YinYangSymbol()
                 .opacity(entry.todayTriggered > 0 ? 0.5 : 1.0)
 
