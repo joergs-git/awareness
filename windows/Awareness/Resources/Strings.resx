@@ -153,6 +153,8 @@ You can configure everything from the tray icon → Settings.</value></data>
   <!-- Startclick Confirmation -->
   <data name="StartclickConfirmation" xml:space="preserve"><value>Startclick confirmation</value></data>
   <data name="StartclickDescription" xml:space="preserve"><value>Shows "Ready to breathe?" before each break.</value></data>
+  <data name="SkipDuringMediaUse" xml:space="preserve"><value>Skip breaks during audio/video calls</value></data>
+  <data name="SkipDuringMediaUseDescription" xml:space="preserve"><value>When on, breaks won't interrupt while camera or microphone is active.</value></data>
   <data name="ReadyToBreathe" xml:space="preserve"><value>Ready to breathe?</value></data>
   <data name="Yes" xml:space="preserve"><value>Yes</value></data>
   <data name="No" xml:space="preserve"><value>No</value></data>

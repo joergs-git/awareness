@@ -4,6 +4,14 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1.7
+
+### Windows Feature Parity
+- **Added "Skip breaks during audio/video calls" setting to Windows** — Windows now has the same toggleable camera/microphone skip detection as macOS. Previously Windows always skipped breaks during media use with no option to disable it. Default: off (matching macOS)
+- **Version sync** — all platforms aligned to v5.1.7
+
+---
+
 ## v5.1.6
 
 ### watchOS Complication Fix

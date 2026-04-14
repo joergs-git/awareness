@@ -169,8 +169,8 @@ public class BlackoutScheduler
             return;
         }
 
-        // Skip if camera or microphone is actively in use
-        if (MediaUsageDetector.Shared.IsMediaInUse())
+        // Skip if camera or microphone is actively in use (when enabled)
+        if (_settings.SkipDuringMediaUse && MediaUsageDetector.Shared.IsMediaInUse())
         {
             ScheduleNext();
             return;

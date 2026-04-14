@@ -854,6 +854,24 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Skip breaks during audio/video calls.
+        /// </summary>
+        public static string SkipDuringMediaUse {
+            get {
+                return ResourceManager.GetString("SkipDuringMediaUse", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to When on, breaks won't interrupt while camera or microphone is active..
+        /// </summary>
+        public static string SkipDuringMediaUseDescription {
+            get {
+                return ResourceManager.GetString("SkipDuringMediaUseDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Desktop Sync.
         /// </summary>
         public static string DesktopSync {

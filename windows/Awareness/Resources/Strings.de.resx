@@ -153,6 +153,8 @@ Du kannst alles über das Symbol im Infobereich → Einstellungen anpassen.</val
   <!-- Startclick Confirmation -->
   <data name="StartclickConfirmation" xml:space="preserve"><value>Startklick-Bestätigung</value></data>
   <data name="StartclickDescription" xml:space="preserve"><value>Zeigt „Bereit zu atmen?" vor jeder Atempause.</value></data>
+  <data name="SkipDuringMediaUse" xml:space="preserve"><value>Pausen bei Audio-/Videoanrufen überspringen</value></data>
+  <data name="SkipDuringMediaUseDescription" xml:space="preserve"><value>Wenn aktiviert, werden Pausen nicht ausgelöst, solange Kamera oder Mikrofon aktiv sind.</value></data>
   <data name="ReadyToBreathe" xml:space="preserve"><value>Bereit zu atmen?</value></data>
   <data name="Yes" xml:space="preserve"><value>Ja</value></data>
   <data name="No" xml:space="preserve"><value>Nein</value></data>

@@ -231,6 +231,7 @@ public partial class SettingsWindow : Window
         // Behavior
         HandcuffsCheck.IsChecked = _settings.HandcuffsMode;
         StartclickCheck.IsChecked = _settings.StartclickConfirmation;
+        SkipMediaCheck.IsChecked = _settings.SkipDuringMediaUse;
 
         // Desktop Sync
         SyncKeyInput.Text = _settings.SyncPassphrase;
@@ -395,6 +396,12 @@ public partial class SettingsWindow : Window
     {
         if (_isLoading) return;
         _settings.StartclickConfirmation = StartclickCheck.IsChecked == true;
+    }
+
+    private void OnSkipMediaChanged(object sender, RoutedEventArgs e)
+    {
+        if (_isLoading) return;
+        _settings.SkipDuringMediaUse = SkipMediaCheck.IsChecked == true;
     }
 
     // MARK: - Desktop Sync

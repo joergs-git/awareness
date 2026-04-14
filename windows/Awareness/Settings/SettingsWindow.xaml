@@ -165,6 +165,10 @@
                     <CheckBox x:Name="StartclickCheck" Content="{x:Static res:Strings.StartclickConfirmation}"
                               Margin="0,4,0,4" Checked="OnStartclickChanged" Unchecked="OnStartclickChanged" />
                     <TextBlock Text="{x:Static res:Strings.StartclickDescription}"
+                               FontSize="11" Foreground="Gray" Margin="22,0,0,10" TextWrapping="Wrap" />
+                    <CheckBox x:Name="SkipMediaCheck" Content="{x:Static res:Strings.SkipDuringMediaUse}"
+                              Margin="0,4,0,4" Checked="OnSkipMediaChanged" Unchecked="OnSkipMediaChanged" />
+                    <TextBlock Text="{x:Static res:Strings.SkipDuringMediaUseDescription}"
                                FontSize="11" Foreground="Gray" Margin="22,0,0,0" TextWrapping="Wrap" />
                 </StackPanel>
             </GroupBox>

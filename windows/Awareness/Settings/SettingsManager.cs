@@ -43,6 +43,7 @@ public class SettingsManager : INotifyPropertyChanged
     private string _customVideoPath = "";
     private DateTime? _snoozeUntil = null;
     private bool _startclickConfirmation = true;
+    private bool _skipDuringMediaUse = false;
     private string _syncPassphrase = "";
     private DateTime? _syncLastPullDate = null;
     private HashSet<string> _syncProcessedEventIDs = new();
@@ -196,6 +197,13 @@ public class SettingsManager : INotifyPropertyChanged
     {
         get => _startclickConfirmation;
         set { if (SetField(ref _startclickConfirmation, value)) ScheduleSave(); }
+    }
+
+    /// <summary>When on, breaks are skipped while camera or microphone is active (default: off)</summary>
+    public bool SkipDuringMediaUse
+    {
+        get => _skipDuringMediaUse;
+        set { if (SetField(ref _skipDuringMediaUse, value)) ScheduleSave(); }
     }
 
     /// <summary>Sync passphrase entered by the user (from iOS app)</summary>
@@ -404,6 +412,7 @@ public class SettingsManager : INotifyPropertyChanged
             _customVideoPath = data.CustomVideoPath ?? "";
             _snoozeUntil = data.SnoozeUntil;
             _startclickConfirmation = data.StartclickConfirmation;
+            _skipDuringMediaUse = data.SkipDuringMediaUse;
             _syncPassphrase = data.SyncPassphrase ?? "";
             _syncLastPullDate = data.SyncLastPullDate;
             _syncProcessedEventIDs = data.SyncProcessedEventIDs != null
@@ -449,6 +458,7 @@ public class SettingsManager : INotifyPropertyChanged
                 CustomVideoPath = _customVideoPath,
                 SnoozeUntil = _snoozeUntil,
                 StartclickConfirmation = _startclickConfirmation,
+                SkipDuringMediaUse = _skipDuringMediaUse,
                 SyncPassphrase = _syncPassphrase,
                 SyncLastPullDate = _syncLastPullDate,
                 SyncProcessedEventIDs = _syncProcessedEventIDs.Count <= 5000
@@ -546,6 +556,9 @@ public class SettingsManager : INotifyPropertyChanged
 
         [JsonPropertyName("startclickConfirmation")]
         public bool StartclickConfirmation { get; set; } = true;
+
+        [JsonPropertyName("skipDuringMediaUse")]
+        public bool SkipDuringMediaUse { get; set; } = false;
 
         [JsonPropertyName("syncPassphrase")]
         public string? SyncPassphrase { get; set; } = "";
