@@ -1,5 +1,11 @@
 # Lessons Learned
 
+## [2026-05-01] — CGEventSource idle gate must fail open, not closed
+- **Mistake:** User-idle gate in `BlackoutScheduler.timerFired()` skipped every blackout on macOS 26 (Tahoe) because `CGEventSource.secondsSinceLastEventType` returns huge sentinel values for *all* event types when Input Monitoring is unavailable (sandboxed App Store build). Symptom: app starts, menu bar icon shows, never blacks out. Same bug shape as v5.1.4's Sequoia fix, recurring on a new OS.
+- **Root cause:** Treated the gate as authoritative. Apple keeps tightening privacy on input-monitoring APIs every macOS major; specific event types worked on Sequoia but not on Tahoe sandbox builds.
+- **Rule:** When an OS API is privacy-gated and may silently degrade, design gates to **fail open**, not closed. For idle/availability checks, filter out impossible values (e.g. > 1 day) and proceed when no signal is available — never let an unavailable signal indefinitely suppress the app's primary function.
+- **Applies to:** Any CGEventSource / TCC-gated detection (idle, media use, accessibility) where the alternative to "we don't know" should be "do the thing", not "skip the thing".
+
 ## [2026-03-19] — CFBundleVersion must be build number, not marketing version
 - **Mistake:** Set `CFBundleVersion` in Info.plist to `4.0.2` (same as `CFBundleShortVersionString`). App Store Connect rejected it for review because it interpreted the build as "202" instead of "1".
 - **Root cause:** `CFBundleVersion` is the build number (integer or simple dotted integer), NOT the marketing version. `CFBundleShortVersionString` is the marketing version (e.g. `4.0.2`). They serve different purposes.

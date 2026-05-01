@@ -4,6 +4,13 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.1.8
+
+### macOS Tahoe Compatibility Fix
+- **Fixed blackouts never triggering on macOS 26 (Tahoe)** — `CGEventSource.secondsSinceLastEventType` returns huge sentinel values for every event type when the process lacks Input Monitoring (sandboxed Mac App Store build on Tahoe). The user-idle gate (added in v5.0.3, partially fixed in v5.1.4 for Sequoia) was again suppressing every blackout. Fixed by ignoring values > 1 day and failing open: when idle info is unavailable, the blackout proceeds instead of being skipped indefinitely. macOS-only release; iOS / watchOS / Windows unchanged at 5.1.7
+
+---
+
 ## v5.1.7
 
 ### Windows Feature Parity

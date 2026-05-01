@@ -60,6 +60,28 @@ All tasks completed. macOS SPM, iOS (+ watchOS + widget) all build successfully.
 
 ---
 
+# v5.1.8 — macOS Tahoe Compatibility Hotfix (2026-05-01)
+
+## CGEventSource idle-gate fix
+- [x] Diagnose: idle gate suppresses every blackout on macOS 26 (Tahoe) sandbox build
+- [x] Patch `BlackoutScheduler.timerFired()` to fail open on sentinel/unavailable values
+- [x] Bump macOS version 5.1.7 → 5.1.8, build → 1
+- [x] CHANGELOG.md entry
+- [x] tasks/lessons.md entry (fail-open rule)
+- [x] Verify `swift build` succeeds
+- [x] Commit + push
+- [x] `make release-direct` — notarize + staple
+- [x] GitHub release with notarized ZIP
+
+## Open
+- [ ] Mac App Store: Xcode archive + upload to App Store Connect (needs interactive Xcode or app-specific password)
+- [ ] Verify on a Tahoe machine when one is available
+
+## Results
+macOS-only release. iOS / watchOS / Windows intentionally not bumped — they aren't affected by this regression.
+
+---
+
 # Future Tasks
 
 ## Android Version

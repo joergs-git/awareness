@@ -144,13 +144,20 @@ class BlackoutScheduler {
         }
 
         // Skip if user has been idle (no mouse/keyboard input) for 5+ minutes.
-        // Note: .null event type is broken on macOS 15 (Sequoia) — always returns a large
-        // value regardless of actual input. Check specific event types and take the minimum.
-        let mouseIdle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .mouseMoved)
-        let keyIdle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .keyDown)
-        let clickIdle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .leftMouseDown)
-        let userIdleSeconds = min(mouseIdle, keyIdle, clickIdle)
-        if userIdleSeconds >= 300 {
+        // CGEventSource.secondsSinceLastEventType is fragile across macOS versions:
+        //   - macOS 15 (Sequoia): .null returns ~9600s regardless of input (handled in v5.1.4
+        //     by querying specific event types).
+        //   - macOS 26 (Tahoe): all event types return huge sentinel values when the process
+        //     lacks Input Monitoring (sandboxed Mac App Store build), making the gate fire
+        //     forever and the scheduler never blackout.
+        // Treat any value > 1 day as "unknown" and fail open — proceed with the blackout
+        // rather than suppress it indefinitely.
+        let candidates = [
+            CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .mouseMoved),
+            CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .keyDown),
+            CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .leftMouseDown)
+        ].filter { $0.isFinite && $0 < 86_400 }
+        if let userIdleSeconds = candidates.min(), userIdleSeconds >= 300 {
             scheduleNext()
             return
         }
