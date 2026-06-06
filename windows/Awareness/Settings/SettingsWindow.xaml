@@ -145,6 +145,18 @@
                 </StackPanel>
             </GroupBox>
 
+            <!-- Daily Card -->
+            <GroupBox x:Name="DailyCardGroup" Header="{x:Static res:Strings.DailyCard}" Margin="0,0,0,14" Padding="12">
+                <StackPanel>
+                    <CheckBox x:Name="ManualCardCheck" Content="{x:Static res:Strings.ChooseCardManually}"
+                              Margin="0,4,0,6" Checked="OnManualCardChanged" Unchecked="OnManualCardChanged" />
+                    <ComboBox x:Name="ManualCardCombo" Margin="0,0,0,6"
+                              Visibility="Collapsed" SelectionChanged="OnManualCardSelected" />
+                    <TextBlock x:Name="DailyCardHint" FontSize="11" Foreground="Gray"
+                               Margin="0,0,0,2" TextWrapping="Wrap" />
+                </StackPanel>
+            </GroupBox>
+
             <!-- Sound -->
             <GroupBox x:Name="SoundGroup" Margin="0,0,0,14" Padding="12">
                 <StackPanel>

@@ -155,6 +155,10 @@ You can configure everything from the tray icon → Settings.</value></data>
   <data name="StartclickDescription" xml:space="preserve"><value>Shows "Ready to breathe?" before each break.</value></data>
   <data name="SkipDuringMediaUse" xml:space="preserve"><value>Skip breaks during audio/video calls</value></data>
   <data name="SkipDuringMediaUseDescription" xml:space="preserve"><value>When on, breaks won't interrupt while camera or microphone is active.</value></data>
+  <data name="DailyCard" xml:space="preserve"><value>Daily Card</value></data>
+  <data name="ChooseCardManually" xml:space="preserve"><value>Choose today's card manually</value></data>
+  <data name="DailyCardManualHint" xml:space="preserve"><value>The chosen card stays fixed — keep it in sync with the physical card you're working with.</value></data>
+  <data name="DailyCardRotationHint" xml:space="preserve"><value>A different card rotates in automatically each day, the same on all your devices.</value></data>
   <data name="ReadyToBreathe" xml:space="preserve"><value>Ready to breathe?</value></data>
   <data name="Yes" xml:space="preserve"><value>Yes</value></data>
   <data name="No" xml:space="preserve"><value>No</value></data>

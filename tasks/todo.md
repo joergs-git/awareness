@@ -1,3 +1,33 @@
+# v5.2 — Smart Guru Re-Aim, Manual Daily Card, Per-Card Photos
+
+## (a) Smart Guru — fix goal misalignment (iOS only)
+- [x] A1: `.ignored` out of frequency signal — add `EventStore.engagedSuccessRate`, hold when no engaged events
+- [x] A1: stop counting `.ignored` into hourProfile (record)
+- [x] A2: unify two duration controllers → single `adjustDuration` (one step max, no stacking)
+- [x] A3: low awareness HOLDS (no shrink); shrink only on ≥3 consecutive dismissals; floor 6s→12s
+- [x] A4: remove down-bias; add gentle goal-directed upward drift in comfort zone; status text shows lengthening
+- [x] A5: interval floor 5→8 min
+- [x] A6: remove dead code (weekdayProfile, hourAwarenessProfile, streakIgnored + awareness-spiral state fields)
+- [x] Parse-check Swift clean (full iOS build blocked: iOS 26.5 platform not installed in this env)
+
+## (b) Manual daily card + cross-device consistency
+- [x] B1: deterministic date-seeded rotation (index = daysSinceEpoch % 7) — iOS/macOS/Windows
+- [x] B2: manualCardSelectionEnabled + manualCardID settings + 7-card picker UI (iOS/macOS/Windows)
+- [x] B3 (partial): iOS↔watch connectivityContext carries manual selection; full desktop sync rides C2 manifest
+- [x] macOS verified via `swift build`; iOS parse-clean; Windows can't build in this env (WPF)
+
+## (c) Per-card photos (front/back) + Supabase Storage opt-in
+- [ ] C1: per-card front/back photo storage (all platforms)
+- [ ] C2: Supabase Storage bucket card-assets (private, RLS by sync_key prefix) + manifest + cardPhotoSyncEnabled + client up/download
+- [ ] C3: cardPhoto visual mode + end-of-break CardFlipView (page-turn 3D, tap flip, X top-left close); fallback to phrase; watchOS text-only
+
+## Finalize
+- [ ] Version bump (all 4 files) + CHANGELOG.md
+- [ ] Builds (iOS/macOS/Windows on a configured machine), security/privacy review
+- [ ] Commit on feature/guru-cards-photos
+
+---
+
 # v4.0 — Supabase Fix, Smart Guru Awareness, Setup Guide, Always-Upload
 
 ## (b) Fix End Record Upload (All Platforms)

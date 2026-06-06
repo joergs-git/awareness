@@ -151,6 +151,42 @@ struct SettingsView: View {
                     Label(String(localized: "Break Visual"), systemImage: "paintbrush")
                 }
 
+                // MARK: - Daily Card
+                Section {
+                    Toggle(String(localized: "Choose today's card manually"), isOn: $settings.manualCardSelectionEnabled)
+
+                    if settings.manualCardSelectionEnabled {
+                        ForEach(PracticeCard.allCards) { card in
+                            Button {
+                                settings.manualCardID = card.id
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Circle()
+                                        .fill(card.color)
+                                        .frame(width: 12, height: 12)
+                                    Text(card.localizedTitle)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if settings.manualCardID == card.id {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(card.color)
+                                    }
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    Text(settings.manualCardSelectionEnabled
+                         ? String(localized: "The chosen card stays fixed — keep it in sync with the physical card you're working with.")
+                         : String(localized: "A different card rotates in automatically each day, the same on all your devices."))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } header: {
+                    Label(String(localized: "Daily Card"), systemImage: "rectangle.portrait.on.rectangle.portrait")
+                }
+
                 // MARK: - Sound
                 Section {
                     Toggle(String(localized: "Start gong (begin of break)"), isOn: $settings.startGongEnabled)

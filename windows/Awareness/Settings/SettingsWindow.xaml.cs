@@ -233,11 +233,53 @@ public partial class SettingsWindow : Window
         StartclickCheck.IsChecked = _settings.StartclickConfirmation;
         SkipMediaCheck.IsChecked = _settings.SkipDuringMediaUse;
 
+        // Daily Card
+        foreach (var card in PracticeCard.AllCards)
+            ManualCardCombo.Items.Add(new ComboBoxItem { Content = card.LocalizedTitle, Tag = card.Id, Foreground = comboTextBrush });
+        if (_isDarkMode)
+        {
+            ManualCardCombo.Foreground = comboTextBrush;
+            ManualCardCombo.Background = new SolidColorBrush(Color.FromRgb(45, 40, 36));
+        }
+        ManualCardCheck.IsChecked = _settings.ManualCardSelectionEnabled;
+        int cardIdx = Array.FindIndex(PracticeCard.AllCards, c => c.Id == _settings.ManualCardID);
+        ManualCardCombo.SelectedIndex = cardIdx >= 0 ? cardIdx : 0;
+        UpdateDailyCardUI();
+
         // Desktop Sync
         SyncKeyInput.Text = _settings.SyncPassphrase;
         bool hasSyncKey = !string.IsNullOrWhiteSpace(_settings.SyncPassphrase);
         WorksOnPhoneCheck.IsChecked = hasSyncKey;
         SyncKeyPanel.Visibility = hasSyncKey ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // MARK: - Daily Card
+
+    private void OnManualCardChanged(object sender, RoutedEventArgs e)
+    {
+        if (_isLoading) return;
+        _settings.ManualCardSelectionEnabled = ManualCardCheck.IsChecked == true;
+        // Make sure a card id is stored when enabling manual selection
+        if (_settings.ManualCardSelectionEnabled
+            && string.IsNullOrEmpty(_settings.ManualCardID)
+            && ManualCardCombo.SelectedItem is ComboBoxItem item)
+        {
+            _settings.ManualCardID = (string)item.Tag;
+        }
+        UpdateDailyCardUI();
+    }
+
+    private void OnManualCardSelected(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isLoading || ManualCardCombo.SelectedItem is not ComboBoxItem item) return;
+        _settings.ManualCardID = (string)item.Tag;
+    }
+
+    private void UpdateDailyCardUI()
+    {
+        bool manual = ManualCardCheck.IsChecked == true;
+        ManualCardCombo.Visibility = manual ? Visibility.Visible : Visibility.Collapsed;
+        DailyCardHint.Text = manual ? Strings.DailyCardManualHint : Strings.DailyCardRotationHint;
     }
 
     // MARK: - Active Hours

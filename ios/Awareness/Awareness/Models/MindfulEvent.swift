@@ -59,15 +59,8 @@ struct AdaptiveState: Codable {
     var currentMaxDuration: Double     // Seconds
     var lastAdjustmentDate: TimeInterval?
     var adjustmentCount: Int
-    var streakCompleted: Int
-    var streakIgnored: Int
+    var streakCompleted: Int           // consecutive completed breaks (drives "earned" lengthening)
     var lastDurationIncreaseDate: String? // "yyyy-MM-dd" — prevents multiple increases per day
-
-    // Awareness-based duration adaptation
-    var consecutiveLowAwareness: Int?    // events where rolling avg < 50
-    var stableStreak: Int?               // breaths at stable/improving level
-    var holdUntilDate: String?           // "yyyy-MM-dd" for 2-day hold after decline
-    var awaitingLongerHold: Bool?        // true = holding for 2 days after decline before resuming increase
 }
 
 enum GuruPhase: String, Codable {

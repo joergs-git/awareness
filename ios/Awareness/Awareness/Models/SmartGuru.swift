@@ -14,8 +14,10 @@ class SmartGuru {
     /// Minimum hours between adjustments
     private let adjustmentCooldownHours: Double = 6
 
-    /// Minimum interval floor (minutes)
-    private let minIntervalFloor: Double = 5
+    /// Minimum interval floor (minutes). Raised from 5 → 8: a break every ~5 min is
+    /// counterproductive and risks the user disabling the app. "More often" is still the
+    /// goal, just with a saner lower bound.
+    private let minIntervalFloor: Double = 8
 
     /// Maximum interval ceiling (minutes)
     private let maxIntervalCeiling: Double = 180
@@ -23,8 +25,9 @@ class SmartGuru {
     /// Minimum spread between min and max interval (minutes)
     private let minIntervalSpread: Double = 5
 
-    /// Minimum blackout duration floor (seconds) — awareness adaptation never goes below 6s
-    private let minDurationFloor: Double = 6
+    /// Minimum meaningful blackout duration (seconds). Raised from 6 → 12: a 6-second
+    /// blackout is too short to actually land as a pause, so duration never drops below this.
+    private let minDurationFloor: Double = 12
 
     /// Maximum blackout duration ceiling (seconds)
     private let maxDurationCeiling: Double = 120
@@ -32,14 +35,17 @@ class SmartGuru {
     /// Minimum spread between min and max duration (seconds)
     private let minDurationSpread: Double = 5
 
-    /// How many consecutive dismissals before reducing duration
+    /// How many consecutive dismissals (active aborts) before shortening duration
     private let dismissalTrendThreshold: Int = 3
 
-    /// Duration decrease per adaptation step (seconds)
-    private let durationDecreaseStep: Double = 5
-
-    /// Duration increase per day of consistent completion (seconds)
+    /// Duration increase per qualifying day (seconds) — slow, goal-directed lengthening
     private let durationIncreaseStep: Double = 1
+
+    /// Awareness window size for the rolling average
+    private let awarenessWindowSize: Int = 5
+
+    /// Rolling awareness at/above this (%) is considered strong enough to earn longer breaks
+    private let awarenessHighThreshold: Double = 55.0
 
     /// Minimum days of baseline data collection
     private let baselineDays: Int = 3
@@ -72,70 +78,23 @@ class SmartGuru {
             }
         }
 
-        // Rate-limit: skip if less than cooldown since last adjustment
-        if let lastAdj = state.lastAdjustmentDate {
-            let hoursSince = (Date().timeIntervalSince1970 - lastAdj) / 3600
-            if hoursSince < adjustmentCooldownHours {
-                settings.guruAdaptiveState = state
-                return false
-            }
-        }
-
-        // Compute blended success rate
-        let recentRate = store.successRate(days: 3)
-        let hourRate = store.hourlySuccessRate(hour: event.hourOfDay)
-        let hourDataSufficient = store.hourProfileTotal(hour: event.hourOfDay) >= 10
-
-        let blendedRate: Double
-        if hourDataSufficient, let hr = hourRate {
-            blendedRate = 0.7 * recentRate + 0.3 * hr
-        } else {
-            blendedRate = recentRate
-        }
+        // Rate-limit: skip adjustments if less than cooldown since the last one.
+        // Streaks are still updated below so they stay current between adjustments.
+        let cooldownActive: Bool = {
+            guard let lastAdj = state.lastAdjustmentDate else { return false }
+            return (Date().timeIntervalSince1970 - lastAdj) / 3600 < adjustmentCooldownHours
+        }()
 
         var adjusted = false
-
-        // --- Interval adaptation ---
-        if blendedRate >= 0.80 && state.streakCompleted >= 3 {
-            // Thriving: decrease intervals (more frequent)
-            state.currentMinInterval *= 0.90
-            state.currentMaxInterval *= 0.90
-
-            // Enforce floors and spread
-            state.currentMinInterval = max(state.currentMinInterval, minIntervalFloor)
-            state.currentMaxInterval = max(state.currentMaxInterval, state.currentMinInterval + minIntervalSpread)
-
-            adjusted = true
-        } else if blendedRate < 0.50 {
-            // Struggling: increase intervals (less frequent)
-            state.currentMinInterval *= 1.10
-            state.currentMaxInterval *= 1.10
-
-            // Enforce ceiling
-            state.currentMinInterval = min(state.currentMinInterval, maxIntervalCeiling - minIntervalSpread)
-            state.currentMaxInterval = min(state.currentMaxInterval, maxIntervalCeiling)
-
-            adjusted = true
+        if !cooldownActive {
+            // Interval and duration are driven by ONE controller each — no stacking.
+            adjusted = adjustInterval(&state, event: event) || adjusted
+            adjusted = adjustDuration(&state) || adjusted
         }
-        // 0.50 <= blendedRate < 0.80: sweet spot, hold steady
 
-        // --- Duration adaptation (dismissal-based) ---
-        let durationAdjusted = evaluateDurationAdaptation(&state)
-        adjusted = adjusted || durationAdjusted
-
-        // --- Duration adaptation (awareness-based) ---
-        let awarenessAdjusted = evaluateAwarenessDurationAdaptation(&state)
-        adjusted = adjusted || awarenessAdjusted
-
-        // Update streak tracking
-        switch event.outcome {
-        case .completed:
-            state.streakCompleted += 1
-            state.streakIgnored = 0
-        case .dismissed, .ignored:
-            state.streakIgnored += 1
-            state.streakCompleted = 0
-        }
+        // Update completion streak (drives "earned" lengthening). Any non-completion
+        // (dismissed or ignored) resets it.
+        state.streakCompleted = (event.outcome == .completed) ? state.streakCompleted + 1 : 0
 
         if adjusted {
             state.lastAdjustmentDate = Date().timeIntervalSince1970
@@ -146,138 +105,85 @@ class SmartGuru {
         return adjusted
     }
 
-    // MARK: - Duration Adaptation
+    // MARK: - Interval Adaptation
 
-    /// Adjusts blackout duration based on dismissal trends and completion streaks.
+    /// Adjusts intervals from the *engaged* success rate (ignores are excluded upstream).
+    /// Thriving → more frequent; struggling → less frequent; sweet spot → hold.
     /// Returns true if an adjustment was made.
-    private func evaluateDurationAdaptation(_ state: inout AdaptiveState) -> Bool {
-        let consecutiveDismissals = store.consecutiveOutcome(.dismissed)
+    private func adjustInterval(_ state: inout AdaptiveState, event: MindfulEvent) -> Bool {
+        // Engaged-only rate. No engaged events in the window ⇒ hold (don't let an idle
+        // device push intervals to the ceiling and mute the guru).
+        guard let recentRate = store.engagedSuccessRate(days: 3) else { return false }
 
-        // Trend of 3+ consecutive dismissals: reduce duration
-        if consecutiveDismissals >= dismissalTrendThreshold {
-            let newMin = state.currentMinDuration - durationDecreaseStep
-            let newMax = state.currentMaxDuration - durationDecreaseStep
+        // Blend with the time-of-day engaged rate once enough samples exist.
+        let blendedRate: Double
+        if store.hourProfileTotal(hour: event.hourOfDay) >= 10,
+           let hourRate = store.hourlySuccessRate(hour: event.hourOfDay) {
+            blendedRate = 0.7 * recentRate + 0.3 * hourRate
+        } else {
+            blendedRate = recentRate
+        }
 
-            // Enforce floors and spread
-            state.currentMinDuration = max(newMin, minDurationFloor)
-            state.currentMaxDuration = max(newMax, state.currentMinDuration + minDurationSpread)
+        if blendedRate >= 0.80 && state.streakCompleted >= 3 {
+            // Thriving: more frequent
+            state.currentMinInterval = max(state.currentMinInterval * 0.90, minIntervalFloor)
+            state.currentMaxInterval = max(state.currentMaxInterval * 0.90, state.currentMinInterval + minIntervalSpread)
+            return true
+        } else if blendedRate < 0.50 {
+            // Struggling: less frequent
+            state.currentMinInterval = min(state.currentMinInterval * 1.10, maxIntervalCeiling - minIntervalSpread)
+            state.currentMaxInterval = min(state.currentMaxInterval * 1.10, maxIntervalCeiling)
+            return true
+        }
+        // 0.50 ≤ blendedRate < 0.80: sweet spot, hold steady
+        return false
+    }
+
+    // MARK: - Duration Adaptation (single unified controller)
+
+    /// One controller for blackout duration — emits AT MOST ONE step per evaluation,
+    /// so signals can never stack into a large drop. Direction priority:
+    ///   1. Active rejection (≥3 consecutive dismissals) → shorten (safety brake).
+    ///   2. Sustained high awareness + completion → lengthen (earned).
+    ///   3. Comfort zone (engaged 0.5–0.8, no dismissals) → gentle goal-directed drift up.
+    /// Low awareness on its own NEVER shortens: for a mindfulness pause, a shorter break
+    /// only lands less. We hold and let behaviour (dismissals) be the brake — this removes
+    /// the old downward "awareness death-spiral". Deliberate jitter is kept in the step size
+    /// to prevent habituation to a fixed duration.
+    private func adjustDuration(_ state: inout AdaptiveState) -> Bool {
+        // 1. Behavioural brake — the user is actively bailing out.
+        if store.consecutiveOutcome(.dismissed) >= dismissalTrendThreshold {
+            let step = Double.random(in: 3...8) // jitter: anti-habituation, single step only
+            state.currentMinDuration = max(state.currentMinDuration - step, minDurationFloor)
+            state.currentMaxDuration = max(state.currentMaxDuration - step, state.currentMinDuration + minDurationSpread)
             return true
         }
 
-        // Consistent completion over last 7 days: slow increase (~1s/day equivalent)
-        // Only when streak is strong (5+ completions in a row)
-        if state.streakCompleted >= 5 {
-            let sevenDayRate = store.successRate(days: 7)
-            if sevenDayRate >= 0.85 {
-                // Check if we haven't already increased today
-                let today = todayString()
-                if state.lastDurationIncreaseDate != today {
-                    state.currentMinDuration = min(state.currentMinDuration + durationIncreaseStep, maxDurationCeiling - minDurationSpread)
-                    state.currentMaxDuration = min(state.currentMaxDuration + durationIncreaseStep, maxDurationCeiling)
-                    state.lastDurationIncreaseDate = today
-                    return true
-                }
-            }
+        // Lengthening is capped to once per day.
+        let today = todayString()
+        guard state.lastDurationIncreaseDate != today else { return false }
+
+        // 2. Earned lengthening: awareness consistently strong AND breaks completed.
+        if let avg = store.rollingAwarenessAverage(last: awarenessWindowSize),
+           avg >= awarenessHighThreshold, state.streakCompleted >= 3 {
+            return increaseDuration(&state, today: today)
+        }
+
+        // 3. Gentle goal-directed drift while comfortable (pursues "longer" actively).
+        if let rate = store.engagedSuccessRate(days: 3), rate >= 0.50, rate < 0.80,
+           store.consecutiveOutcome(.dismissed) == 0, state.streakCompleted >= 2 {
+            return increaseDuration(&state, today: today)
         }
 
         return false
     }
 
-    // MARK: - Awareness-Based Duration Adaptation
-
-    /// Awareness window size for rolling average
-    private let awarenessWindowSize: Int = 5
-    /// Below this threshold awareness is considered "low" (decline → shorten)
-    private let awarenessLowThreshold: Double = 45.0
-    /// Above this threshold awareness is considered "stable/good" (hold → increase)
-    private let awarenessHighThreshold: Double = 55.0
-    // 45–55 is a neutral dead zone where no duration changes are triggered
-
-    /// Adjusts duration based on awareness score trends.
-    /// Algorithm:
-    /// - Below 50% consistently → decrease by random 3-8s (floor 6s)
-    /// - Stable/improving for 3-8 breaths → hold, then increase by 1s per breath
-    /// - When decline starts → go back 3-5s, hold for 2 days before resuming increases
-    private func evaluateAwarenessDurationAdaptation(_ state: inout AdaptiveState) -> Bool {
-        guard let currentAvg = store.rollingAwarenessAverage(last: awarenessWindowSize) else {
-            return false
-        }
-
-        var lowCount = state.consecutiveLowAwareness ?? 0
-        var stable = state.stableStreak ?? 0
-        let holdActive = state.awaitingLongerHold ?? false
-
-        if currentAvg < awarenessLowThreshold {
-            // Awareness declining — shorten duration
-            lowCount += 1
-            stable = 0
-
-            let decrease = Double.random(in: 3...8)
-            state.currentMinDuration = max(state.currentMinDuration - decrease, minDurationFloor)
-            state.currentMaxDuration = max(state.currentMaxDuration - decrease, state.currentMinDuration + minDurationSpread)
-
-            // If this is a new decline (transition from good to bad), activate longer hold
-            if !holdActive && lowCount == 1 {
-                let goBack = Double.random(in: 3...5)
-                state.currentMinDuration = max(state.currentMinDuration - goBack, minDurationFloor)
-                state.currentMaxDuration = max(state.currentMaxDuration - goBack, state.currentMinDuration + minDurationSpread)
-                state.awaitingLongerHold = true
-                state.holdUntilDate = todayString()
-            }
-
-            state.consecutiveLowAwareness = lowCount
-            state.stableStreak = 0
-            return true
-        } else if currentAvg >= awarenessHighThreshold {
-            // Awareness stable or improving (above 55%)
-            lowCount = 0
-            stable += 1
-
-            state.consecutiveLowAwareness = 0
-            state.stableStreak = stable
-
-            // If in longer hold period, check if 2 days have passed
-            if holdActive {
-                if let holdDate = state.holdUntilDate {
-                    let daysSinceHold = daysBetween(holdDate, todayString())
-                    if daysSinceHold >= 2 {
-                        // 2 days of steadiness — exit hold, resume increases
-                        state.awaitingLongerHold = false
-                        state.holdUntilDate = nil
-                    } else {
-                        // Still in hold period — don't change duration
-                        return false
-                    }
-                }
-            }
-
-            // After 3-8 breaths of stability, start increasing by 1s per breath
-            let stabilityThreshold = Int.random(in: 3...8)
-            if stable >= stabilityThreshold {
-                let today = todayString()
-                if state.lastDurationIncreaseDate != today {
-                    state.currentMinDuration = min(state.currentMinDuration + 1, maxDurationCeiling - minDurationSpread)
-                    state.currentMaxDuration = min(state.currentMaxDuration + 1, maxDurationCeiling)
-                    state.lastDurationIncreaseDate = today
-                    return true
-                }
-            }
-
-            return false
-        } else {
-            // Neutral zone (45–55%) — no duration change, just maintain streaks
-            state.consecutiveLowAwareness = 0
-            return false
-        }
-    }
-
-    /// Calculate days between two "yyyy-MM-dd" date strings
-    private func daysBetween(_ from: String, _ to: String) -> Int {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        guard let fromDate = formatter.date(from: from),
-              let toDate = formatter.date(from: to) else { return 0 }
-        return Calendar.current.dateComponents([.day], from: fromDate, to: toDate).day ?? 0
+    /// Slow, bounded duration increase (one step), respecting ceiling and spread.
+    private func increaseDuration(_ state: inout AdaptiveState, today: String) -> Bool {
+        state.currentMinDuration = min(state.currentMinDuration + durationIncreaseStep, maxDurationCeiling - minDurationSpread)
+        state.currentMaxDuration = min(state.currentMaxDuration + durationIncreaseStep, maxDurationCeiling)
+        state.lastDurationIncreaseDate = today
+        return true
     }
 
     // MARK: - State Management
@@ -294,7 +200,6 @@ class SmartGuru {
             lastAdjustmentDate: nil,
             adjustmentCount: 0,
             streakCompleted: 0,
-            streakIgnored: 0,
             lastDurationIncreaseDate: nil
         )
     }
@@ -323,8 +228,13 @@ class SmartGuru {
             let daysSince = Int((Date().timeIntervalSince1970 - state.baselineStartDate) / 86400) + 1
             return String(localized: "Learning your rhythm (Day \(daysSince) of \(baselineDays))")
         case .adapting:
-            let rate = Int(store.successRate(days: 3) * 100)
-            return String(localized: "Adapting — \(rate)% discipline (3-day)")
+            // Engaged rate (ignored breaks excluded) — honest reflection of real discipline.
+            let rate = Int((store.engagedSuccessRate(days: 3) ?? 0) * 100)
+            // Surface goal-directed lengthening when the guru has grown breaks past the baseline.
+            if state.currentMaxDuration > SettingsManager.shared.maxBlackoutDuration {
+                return String(localized: "Adapting — \(rate)% engaged · gently lengthening your pauses")
+            }
+            return String(localized: "Adapting — \(rate)% engaged (3-day)")
         }
     }
 

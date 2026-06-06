@@ -46,6 +46,9 @@ final class SettingsManager: ObservableObject {
         static let todaysPracticeCardID  = "todaysPracticeCardID"
         static let practiceCardDate      = "practiceCardDate"
         static let yesterdaysCardID      = "yesterdaysCardID"
+        // Manual daily-card selection (pick one fixed card to match a physical card)
+        static let manualCardSelectionEnabled = "manualCardSelectionEnabled"
+        static let manualCardID                = "manualCardID"
         static let currentMicroTaskID    = "currentMicroTaskID"
         static let microTaskDate         = "microTaskDate"
         static let lastMicroTaskIDs      = "lastMicroTaskIDs"
@@ -93,7 +96,9 @@ final class SettingsManager: ObservableObject {
             Keys.healthKitEnabled:    true,
             Keys.healthKitPromptShown: false,
             Keys.smartGuruEnabled:    true,
-            Keys.practiceCardNotificationHour: 7
+            Keys.practiceCardNotificationHour: 7,
+            Keys.manualCardSelectionEnabled: false,
+            Keys.manualCardID:        ""
         ]
 
         #if !os(watchOS)
@@ -195,6 +200,19 @@ final class SettingsManager: ObservableObject {
     /// Whether the HealthKit encouragement prompt has been shown (only ask once)
     @Published var healthKitPromptShown: Bool {
         didSet { defaults.set(healthKitPromptShown, forKey: Keys.healthKitPromptShown) }
+    }
+
+    // MARK: - Daily Card Selection
+
+    /// When on, the daily card is the user-chosen `manualCardID` instead of the
+    /// automatic date-based rotation — lets the digital card mirror a physical card in hand.
+    @Published var manualCardSelectionEnabled: Bool {
+        didSet { defaults.set(manualCardSelectionEnabled, forKey: Keys.manualCardSelectionEnabled) }
+    }
+
+    /// The card chosen when manual selection is on (one of PracticeCard.allCards ids)
+    @Published var manualCardID: String {
+        didSet { defaults.set(manualCardID, forKey: Keys.manualCardID) }
     }
 
     // MARK: - Smart Guru Properties
@@ -299,30 +317,56 @@ final class SettingsManager: ObservableObject {
         return PracticeCard.card(withID: cardID)
     }
 
-    /// Get today's practice card, assigning a new one if needed
+    /// Deterministic index into `PracticeCard.allCards` for the current local day.
+    /// Days since the local 1970 epoch, mod 7 — identical formula on iOS/macOS/Windows,
+    /// so every device shows the SAME card on a given day without any network sync.
+    func deterministicCardIndex() -> Int {
+        let cal = Calendar.current
+        let epoch = cal.startOfDay(for: Date(timeIntervalSince1970: 0))
+        let today = cal.startOfDay(for: Date())
+        let days = cal.dateComponents([.day], from: epoch, to: today).day ?? 0
+        let count = PracticeCard.allCards.count
+        guard count > 0 else { return 0 }
+        return ((days % count) + count) % count
+    }
+
+    /// Get today's practice card. Manual selection wins; otherwise a deterministic
+    /// date-based rotation (same card on every device, no randomness, no sync needed).
     func todaysPracticeCard() -> PracticeCard? {
         let today = todayString()
-        let storedDate = defaults.string(forKey: Keys.practiceCardDate)
 
-        if storedDate == today, let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) {
+        // 1. Manual override — the user pinned a specific card to match their physical card.
+        if manualCardSelectionEnabled, let card = PracticeCard.card(withID: manualCardID) {
+            persistDailyCard(card.id, date: today)
+            return card
+        }
+
+        // 2. Already resolved for today — return the stored card.
+        if defaults.string(forKey: Keys.practiceCardDate) == today,
+           let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) {
             return PracticeCard.card(withID: cardID)
         }
 
-        // New day — assign a random card (avoid yesterday's)
-        let yesterdayID = defaults.string(forKey: Keys.todaysPracticeCardID)
-        defaults.set(yesterdayID, forKey: Keys.yesterdaysCardID)
+        // 3. New day — deterministic rotation through all cards.
+        let card = PracticeCard.allCards[deterministicCardIndex()]
+        persistDailyCard(card.id, date: today)
+        return card
+    }
 
-        let candidates = PracticeCard.allCards.filter { $0.id != yesterdayID }
-        guard let newCard = candidates.randomElement() else { return nil }
+    /// Persist today's card id/date. Resets micro-task state only when the card actually
+    /// changes, so repeated calls (e.g. manual override) don't churn the daily task.
+    private func persistDailyCard(_ cardID: String, date: String) {
+        let previousID = defaults.string(forKey: Keys.todaysPracticeCardID)
+        let previousDate = defaults.string(forKey: Keys.practiceCardDate)
+        guard previousID != cardID || previousDate != date else { return }
 
-        defaults.set(newCard.id, forKey: Keys.todaysPracticeCardID)
-        defaults.set(today, forKey: Keys.practiceCardDate)
+        defaults.set(previousID, forKey: Keys.yesterdaysCardID)
+        defaults.set(cardID, forKey: Keys.todaysPracticeCardID)
+        defaults.set(date, forKey: Keys.practiceCardDate)
 
-        // Reset micro-task state for new day
+        // New card for the day — reset micro-task state.
         defaults.removeObject(forKey: Keys.currentMicroTaskID)
         defaults.set(false, forKey: Keys.microTaskShownToday)
-
-        return newCard
     }
 
     /// Get the current micro-task, auto-assigning one from today's card pool if none exists yet.
@@ -577,6 +621,10 @@ final class SettingsManager: ObservableObject {
             context["practiceCardDate"] = cardDate
         }
 
+        // Sync manual card selection so the watch honors the same pinned card
+        context["manualCardSelectionEnabled"] = manualCardSelectionEnabled
+        context["manualCardID"] = manualCardID
+
         // Sync micro-task so the watch complication can display it
         if let taskID = defaults.string(forKey: Keys.currentMicroTaskID),
            let taskDate = defaults.string(forKey: Keys.microTaskDate) {
@@ -612,6 +660,10 @@ final class SettingsManager: ObservableObject {
         if let v = context["guruAdaptiveState"] as? Data {
             defaults.set(v, forKey: Keys.guruAdaptiveState)
         }
+
+        // Apply synced manual card selection (iOS is leader)
+        if let v = context["manualCardSelectionEnabled"] as? Bool { manualCardSelectionEnabled = v }
+        if let v = context["manualCardID"] as? String { manualCardID = v }
 
         // Apply synced practice card (iOS is leader — watchOS adopts the card)
         if let cardID = context["todaysPracticeCardID"] as? String,
@@ -679,6 +731,8 @@ final class SettingsManager: ObservableObject {
         smartGuruEnabled    = defaults.bool(forKey: Keys.smartGuruEnabled)
         setupGuideHidden    = defaults.bool(forKey: Keys.setupGuideHidden)
         practiceCardNotificationHour = defaults.integer(forKey: Keys.practiceCardNotificationHour)
+        manualCardSelectionEnabled = defaults.bool(forKey: Keys.manualCardSelectionEnabled)
+        manualCardID        = defaults.string(forKey: Keys.manualCardID) ?? ""
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue
         visualType = BlackoutVisualType(rawValue: typeRaw) ?? .text

@@ -863,6 +863,42 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Daily Card.
+        /// </summary>
+        public static string DailyCard {
+            get {
+                return ResourceManager.GetString("DailyCard", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose today's card manually.
+        /// </summary>
+        public static string ChooseCardManually {
+            get {
+                return ResourceManager.GetString("ChooseCardManually", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The chosen card stays fixed....
+        /// </summary>
+        public static string DailyCardManualHint {
+            get {
+                return ResourceManager.GetString("DailyCardManualHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to A different card rotates in automatically each day....
+        /// </summary>
+        public static string DailyCardRotationHint {
+            get {
+                return ResourceManager.GetString("DailyCardRotationHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to When on, breaks won't interrupt while camera or microphone is active..
         /// </summary>
         public static string SkipDuringMediaUseDescription {
