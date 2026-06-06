@@ -110,5 +110,41 @@
 
         </Grid>
 
+        <!-- ============================================================
+             Card-Photo Phase: full-screen user photo of the practice card.
+             Front shows first; click flips to back (PlaneProjection); the
+             ✕ button (top-left) closes and returns to the normal screen.
+             ============================================================ -->
+        <Grid x:Name="CardPhotoPanel"
+              Opacity="0"
+              Visibility="Collapsed"
+              Background="Transparent">
+
+            <Image x:Name="CardPhotoImage"
+                   Stretch="Uniform"
+                   Margin="40"
+                   Cursor="Hand"
+                   RenderTransformOrigin="0.5,0.5"
+                   MouseLeftButtonDown="OnCardPhotoClicked">
+                <Image.Projection>
+                    <PlaneProjection x:Name="CardPhotoProjection" RotationY="0" />
+                </Image.Projection>
+            </Image>
+
+            <!-- Close button (top-left) -->
+            <Button x:Name="CardPhotoCloseButton"
+                    Content="✕"
+                    Width="36" Height="36"
+                    FontSize="16"
+                    Foreground="#D9FFFFFF"
+                    Background="#1FFFFFFF"
+                    BorderThickness="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="20"
+                    Cursor="Hand"
+                    Click="OnCardPhotoCloseClicked" />
+        </Grid>
+
     </Grid>
 </UserControl>

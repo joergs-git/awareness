@@ -17,14 +17,21 @@
 - [x] macOS verified via `swift build`; iOS parse-clean; Windows can't build in this env (WPF)
 
 ## (c) Per-card photos (front/back) + Supabase Storage opt-in
-- [ ] C1: per-card front/back photo storage (all platforms)
-- [ ] C2: Supabase Storage bucket card-assets (private, RLS by sync_key prefix) + manifest + cardPhotoSyncEnabled + client up/download
-- [ ] C3: cardPhoto visual mode + end-of-break CardFlipView (page-turn 3D, tap flip, X top-left close); fallback to phrase; watchOS text-only
+- [x] C1: per-card front/back photo storage (iOS Documents, macOS App Support, Windows %APPDATA%)
+- [x] C2: Storage client up/download/list + CardAssetSync (push union model + pull) + cardPhotoSyncEnabled opt-in; SQL migration in supabase/card-assets-bucket.sql (user runs in Supabase web console)
+- [x] C3: cardPhoto visual mode + end-of-break CardFlipView (page-turn 3D, tap flip, ✕ top-left close); phrase fallback; watchOS text-only (no exhaustive switch — unaffected)
+- [x] macOS verified via swift build; iOS parse-clean; Windows via GitHub Actions
 
 ## Finalize
-- [ ] Version bump (all 4 files) + CHANGELOG.md
-- [ ] Builds (iOS/macOS/Windows on a configured machine), security/privacy review
+- [x] Version bump → 5.2 (macOS Info.plist+pbxproj, iOS pbxproj ×8, Windows 5.2.0) + CHANGELOG.md
+- [x] Security/privacy review (no secrets, opt-in default off, private bucket, no stray files)
 - [ ] Commit on feature/guru-cards-photos
+- [ ] iOS/Windows builds on a configured machine; run supabase/card-assets-bucket.sql; Apple archive/notarize per policy
+
+## Results
+- Phase A (Smart Guru) + B (manual card/rotation) fully implemented; macOS swift build passes, iOS parse-clean.
+- Phase C (card photos + opt-in Supabase Storage sync) implemented on iOS/macOS/Windows; macOS verified.
+- Env limits: iOS 26.5 platform not installed here (no iOS build); WPF not buildable on macOS (Windows via CI). Supabase bucket must be created by the user via supabase/card-assets-bucket.sql (the MCP-connected Supabase account does not include the awareness project).
 
 ---
 

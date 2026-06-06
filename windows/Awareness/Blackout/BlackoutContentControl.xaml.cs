@@ -40,7 +40,9 @@ public partial class BlackoutContentControl : UserControl
         switch (visualType)
         {
             case BlackoutVisualType.PlainBlack:
-                // Subtle breathing circle as minimal visual anchor
+            case BlackoutVisualType.CardPhoto:
+                // Subtle breathing circle as minimal visual anchor.
+                // For CardPhoto the card image is shown afterwards, at the break end.
                 BreathingCircle.Visibility = Visibility.Visible;
                 StartBreathingAnimation(BreathingCircle, CircleScale, 0.015, 0.08);
                 break;

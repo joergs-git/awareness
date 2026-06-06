@@ -1,6 +1,12 @@
 import Foundation
 import Combine
 
+/// Which face of a practice card a user-supplied photo represents.
+enum CardPhotoSide: String, CaseIterable {
+    case front
+    case back
+}
+
 /// Central settings store backed by UserDefaults.
 /// Published properties allow SwiftUI views to react to changes automatically.
 final class SettingsManager: ObservableObject {
@@ -41,6 +47,8 @@ final class SettingsManager: ObservableObject {
         // Manual daily-card selection (pick one fixed card to match a physical card)
         static let manualCardSelectionEnabled = "manualCardSelectionEnabled"
         static let manualCardID                = "manualCardID"
+        // Opt-in: sync user card photos across devices via Supabase Storage
+        static let cardPhotoSyncEnabled        = "cardPhotoSyncEnabled"
         static let currentMicroTaskID    = "currentMicroTaskID"
         static let microTaskDate         = "microTaskDate"
         static let lastMicroTaskIDs      = "lastMicroTaskIDs"
@@ -66,7 +74,8 @@ final class SettingsManager: ObservableObject {
         Keys.skipDuringMediaUse: false,
         Keys.syncPassphrase: "",
         Keys.manualCardSelectionEnabled: false,
-        Keys.manualCardID: ""
+        Keys.manualCardID: "",
+        Keys.cardPhotoSyncEnabled: false
     ]
 
     // MARK: - Published Properties
@@ -181,6 +190,11 @@ final class SettingsManager: ObservableObject {
     /// The card chosen when manual selection is on (one of PracticeCard.allCards ids)
     @Published var manualCardID: String {
         didSet { defaults.set(manualCardID, forKey: Keys.manualCardID) }
+    }
+
+    /// Opt-in: upload/download user card photos across devices via Supabase Storage.
+    @Published var cardPhotoSyncEnabled: Bool {
+        didSet { defaults.set(cardPhotoSyncEnabled, forKey: Keys.cardPhotoSyncEnabled) }
     }
 
     /// Sync passphrase entered by the user (from iOS app)
@@ -332,6 +346,55 @@ final class SettingsManager: ObservableObject {
         return card
     }
 
+    // MARK: - Per-Card Photos
+
+    /// Directory holding user-supplied card photos (front/back), inside the app container.
+    /// Photos are copied in at pick time so the app owns them (no security-scoped bookmarks
+    /// needed afterwards, and Supabase upload is a plain file read).
+    func cardPhotosDirectory() -> URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("Awareness/card-photos", isDirectory: true)
+        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        return base
+    }
+
+    /// Local file URL for a card photo (the file may not exist yet).
+    func cardPhotoURL(cardID: String, side: CardPhotoSide) -> URL {
+        cardPhotosDirectory().appendingPathComponent("card-\(cardID)-\(side.rawValue).png")
+    }
+
+    /// Whether a stored photo exists for the given card + side.
+    func hasCardPhoto(cardID: String, side: CardPhotoSide) -> Bool {
+        FileManager.default.fileExists(atPath: cardPhotoURL(cardID: cardID, side: side).path)
+    }
+
+    /// Copy a user-picked image file into the card-photo store (security-scoped safe).
+    @discardableResult
+    func importCardPhoto(cardID: String, side: CardPhotoSide, from sourceURL: URL) -> Bool {
+        let scoped = sourceURL.startAccessingSecurityScopedResource()
+        defer { if scoped { sourceURL.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: sourceURL) else { return false }
+        return writeCardPhoto(cardID: cardID, side: side, data: data)
+    }
+
+    /// Write raw image data into the card-photo store (used by picker and Supabase download).
+    @discardableResult
+    func writeCardPhoto(cardID: String, side: CardPhotoSide, data: Data) -> Bool {
+        do {
+            try data.write(to: cardPhotoURL(cardID: cardID, side: side))
+            objectWillChange.send()
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Remove a stored card photo.
+    func clearCardPhoto(cardID: String, side: CardPhotoSide) {
+        try? FileManager.default.removeItem(at: cardPhotoURL(cardID: cardID, side: side))
+        objectWillChange.send()
+    }
+
     /// Persist today's card id/date, resetting micro-task state only when the card changes.
     private func persistDailyCard(_ cardID: String, date: String) {
         let previousID = defaults.string(forKey: Keys.todaysPracticeCardID)
@@ -430,6 +493,7 @@ final class SettingsManager: ObservableObject {
         syncPassphrase   = defaults.string(forKey: Keys.syncPassphrase) ?? ""
         manualCardSelectionEnabled = defaults.bool(forKey: Keys.manualCardSelectionEnabled)
         manualCardID     = defaults.string(forKey: Keys.manualCardID) ?? ""
+        cardPhotoSyncEnabled = defaults.bool(forKey: Keys.cardPhotoSyncEnabled)
         snoozeUntil      = defaults.object(forKey: Keys.snoozeUntil) as? Date
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue

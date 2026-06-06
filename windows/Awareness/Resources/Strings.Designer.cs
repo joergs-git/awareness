@@ -899,6 +899,42 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Sync card photos across devices.
+        /// </summary>
+        public static string SyncCardPhotos {
+            get {
+                return ResourceManager.GetString("SyncCardPhotos", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Front.
+        /// </summary>
+        public static string PhotoFront {
+            get {
+                return ResourceManager.GetString("PhotoFront", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Back.
+        /// </summary>
+        public static string PhotoBack {
+            get {
+                return ResourceManager.GetString("PhotoBack", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string RemovePhoto {
+            get {
+                return ResourceManager.GetString("RemovePhoto", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to When on, breaks won't interrupt while camera or microphone is active..
         /// </summary>
         public static string SkipDuringMediaUseDescription {

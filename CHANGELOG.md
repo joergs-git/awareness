@@ -4,6 +4,26 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.2
+
+### Smart Guru re-aimed at the real goal (iOS)
+- **Re-aligned the adaptive scheduler to "breathe more often AND longer"** instead of optimizing for comfort. Several behaviours that worked against the goal were fixed:
+  - **Ignored notifications no longer poison the signal** — a phone left unattended (delivered-but-untapped breaks) no longer drags the success rate down and mutes the guru. Frequency now adapts from the *engaged* rate (completed vs dismissed); with no engaged events it holds instead of pushing intervals to the ceiling.
+  - **One duration controller instead of two** — the dismissal-based and awareness-based duration adjusters were merged into a single step-limited controller, so signals can no longer stack into a large sudden drop.
+  - **No more awareness death-spiral** — low self-rated awareness now *holds* the break length (a shorter pause only lands less); breaks shorten only on an active behavioural reject (≥3 consecutive dismissals). The meaningful minimum break was raised from 6s to 12s.
+  - **Breaks now trend longer** — a gentle goal-directed upward drift lengthens pauses while the user is comfortable; the interval floor was raised from 5 to 8 minutes.
+  - The deliberate randomness that prevents habituation to fixed timers/durations was kept by design. Dead code removed.
+
+### Manual daily card + cross-device consistency (all platforms)
+- **Pick the day's card manually** to keep it in sync with the physical card in your hand, or let it rotate automatically.
+- **Same card on every device** — the automatic daily card is now chosen by a deterministic date-based rotation, so iPhone, Mac and Windows show the same card on the same day (previously each device picked at random independently).
+
+### Card photos (front/back) — your own metaphor images
+- **Attach a front and back photo to each of the 7 practice cards.** In card-photo mode the day's card photo appears full-screen at the end of a break instead of the text phrase — front first, tap to flip to the back with a page-turn effect, ✕ (top-left) to close.
+- **Optional cross-device transfer via Supabase Storage** (off by default). When enabled, your card photos upload to your private sync space and download on your other devices, using the same sync key as event sync. Photos leave the device only with this turned on.
+
+---
+
 ## v5.1.8
 
 ### macOS Tahoe Compatibility Fix

@@ -9,7 +9,9 @@ public enum BlackoutVisualType
     PlainBlack,
     Text,
     Image,
-    Video
+    Video,
+    /// <summary>Shows the current practice card's user-supplied photo (front/back) at the break end.</summary>
+    CardPhoto
 }
 
 public static class BlackoutVisualTypeExtensions
@@ -20,6 +22,7 @@ public static class BlackoutVisualTypeExtensions
         BlackoutVisualType.Text => "Custom Text",
         BlackoutVisualType.Image => "Image",
         BlackoutVisualType.Video => "Video",
+        BlackoutVisualType.CardPhoto => "Card",
         _ => type.ToString()
     };
 
@@ -32,6 +35,7 @@ public static class BlackoutVisualTypeExtensions
         BlackoutVisualType.Text => "text",
         BlackoutVisualType.Image => "image",
         BlackoutVisualType.Video => "video",
+        BlackoutVisualType.CardPhoto => "cardPhoto",
         _ => "text"
     };
 
@@ -44,6 +48,7 @@ public static class BlackoutVisualTypeExtensions
         "text" => BlackoutVisualType.Text,
         "image" => BlackoutVisualType.Image,
         "video" => BlackoutVisualType.Video,
+        "cardPhoto" => BlackoutVisualType.CardPhoto,
         _ => BlackoutVisualType.Text
     };
 }

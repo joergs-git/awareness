@@ -166,10 +166,173 @@ final class SupabaseClient {
         }
     }
 
+    // MARK: - Storage (card photos)
+    // Opt-in card-photo sync. Objects live under "{sync_key_hash}/..." in a private bucket;
+    // RLS restricts each anon client to its own prefix (same trust model as blackout_events).
+
+    static let cardBucket = "card-assets"
+
+    /// A single object returned by the Storage list endpoint.
+    struct StorageObject: Codable {
+        let name: String
+        let metadata: Meta?
+        struct Meta: Codable { let size: Int? }
+    }
+
+    /// Upload (upsert) raw bytes to the card-assets bucket at the given path.
+    func uploadStorageObject(path: String, data: Data, contentType: String) async throws {
+        guard let url = URL(string: "\(Self.supabaseURL)/storage/v1/object/\(Self.cardBucket)/\(path)") else {
+            throw SyncError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        request.setValue("true", forHTTPHeaderField: "x-upsert")
+        request.httpBody = data
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw SyncError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+    }
+
+    /// Download an object's bytes. Returns nil when the object is absent (404).
+    func downloadStorageObject(path: String) async throws -> Data? {
+        guard let url = URL(string: "\(Self.supabaseURL)/storage/v1/object/\(Self.cardBucket)/\(path)") else {
+            throw SyncError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw SyncError.httpError(0) }
+        if http.statusCode == 404 { return nil }
+        guard (200...299).contains(http.statusCode) else { throw SyncError.httpError(http.statusCode) }
+        return data
+    }
+
+    /// List objects under a prefix (e.g. "{hash}/") in the card-assets bucket.
+    func listStorageObjects(prefix: String) async throws -> [StorageObject] {
+        guard let url = URL(string: "\(Self.supabaseURL)/storage/v1/object/list/\(Self.cardBucket)") else {
+            throw SyncError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["prefix": prefix, "limit": 100])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw SyncError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        return (try? JSONDecoder().decode([StorageObject].self, from: data)) ?? []
+    }
+
     enum SyncError: Error {
         case invalidURL
         case httpError(Int)
     }
 
     private init() {}
+}
+
+// MARK: - Card Asset Sync (uploader + downloader)
+
+/// Syncs user card photos + manual card selection via Supabase Storage. Opt-in
+/// (`cardPhotoSyncEnabled`). iOS is the typical author (photos picked here), but the
+/// model is symmetric: every device uploads its own photos (upsert, never deleting
+/// remote — union) and downloads the rest. Uses the same sync key as event sync, so the
+/// user must have linked their devices via the sync passphrase for cross-device transfer.
+final class CardAssetSync {
+
+    static let shared = CardAssetSync()
+    private init() {}
+
+    private var isPushing = false
+    private var isSyncing = false
+
+    private struct Manifest: Codable { var manualCardID: String? }
+
+    /// Upload every local card photo (upsert) plus a manifest carrying the manual selection.
+    func pushIfEnabled() {
+        let settings = SettingsManager.shared
+        guard settings.cardPhotoSyncEnabled,
+              let hash = SyncKeyManager.shared.hashedSyncKey,
+              !isPushing else { return }
+        isPushing = true
+
+        Task {
+            defer { isPushing = false }
+            do {
+                for card in PracticeCard.allCards {
+                    for side in CardPhotoSide.allCases {
+                        guard settings.hasCardPhoto(cardID: card.id, side: side),
+                              let data = try? Data(contentsOf: settings.cardPhotoURL(cardID: card.id, side: side)) else { continue }
+                        try await SupabaseClient.shared.uploadStorageObject(
+                            path: "\(hash)/card-\(card.id)-\(side.rawValue).png",
+                            data: data,
+                            contentType: "image/png")
+                    }
+                }
+                let manualID = settings.manualCardSelectionEnabled ? settings.manualCardID : ""
+                let manifest = try JSONEncoder().encode(Manifest(manualCardID: manualID))
+                try await SupabaseClient.shared.uploadStorageObject(
+                    path: "\(hash)/manifest.json",
+                    data: manifest,
+                    contentType: "application/json")
+            } catch {
+                // Non-fatal — retry on next change/launch.
+            }
+        }
+    }
+
+    /// Download card photos + manual selection from Supabase into the local store.
+    func pullIfEnabled() {
+        let settings = SettingsManager.shared
+        guard settings.cardPhotoSyncEnabled,
+              let hash = SyncKeyManager.shared.hashedSyncKey,
+              !isSyncing else { return }
+        isSyncing = true
+
+        Task { @MainActor in
+            defer { isSyncing = false }
+            do {
+                let objects = try await SupabaseClient.shared.listStorageObjects(prefix: "\(hash)/")
+                for obj in objects {
+                    guard let (cardID, side) = Self.parse(fileName: obj.name) else { continue }
+                    let localURL = settings.cardPhotoURL(cardID: cardID, side: side)
+                    let attrs = try? FileManager.default.attributesOfItem(atPath: localURL.path)
+                    let localSize = attrs?[.size] as? Int
+                    if localSize == nil || localSize != obj.metadata?.size {
+                        if let data = try await SupabaseClient.shared.downloadStorageObject(path: "\(hash)/\(obj.name)") {
+                            settings.writeCardPhoto(cardID: cardID, side: side, data: data)
+                        }
+                    }
+                }
+                if let mData = try await SupabaseClient.shared.downloadStorageObject(path: "\(hash)/manifest.json"),
+                   let manifest = try? JSONDecoder().decode(Manifest.self, from: mData),
+                   let manualID = manifest.manualCardID, !manualID.isEmpty {
+                    settings.manualCardSelectionEnabled = true
+                    settings.manualCardID = manualID
+                }
+            } catch {
+                // Non-fatal — retry on next launch.
+            }
+        }
+    }
+
+    /// Parse "card-<id>-<side>.png" (id may contain hyphens) into (cardID, side).
+    private static func parse(fileName: String) -> (String, CardPhotoSide)? {
+        guard fileName.hasPrefix("card-"), fileName.hasSuffix(".png") else { return nil }
+        let core = String(fileName.dropFirst("card-".count).dropLast(".png".count))
+        if core.hasSuffix("-front") { return (String(core.dropLast("-front".count)), .front) }
+        if core.hasSuffix("-back") { return (String(core.dropLast("-back".count)), .back) }
+        return nil
+    }
 }

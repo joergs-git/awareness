@@ -2,7 +2,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using Awareness.Models;
 
 namespace Awareness.Blackout;
 
@@ -139,6 +142,91 @@ public partial class PostBlackoutControl : UserControl
         };
 
         AwarenessPanel.BeginAnimation(OpacityProperty, fadeOut);
+    }
+
+    // MARK: - Card-Photo Phase
+
+    private string? _cardPhotoCardId;
+    private bool _showingBack;
+
+    /// <summary>
+    /// Cross-fade from the awareness check to the full-screen card photo (front).
+    /// Click flips to the back; the ✕ button closes.
+    /// </summary>
+    public void ShowCardPhoto(string cardId)
+    {
+        IsInAwarenessPhase = false;
+        _cardPhotoCardId = cardId;
+        _showingBack = false;
+        CardPhotoProjection.RotationY = 0;
+        LoadCardPhotoFace(CardPhotoSide.Front);
+
+        var fadeOut = new DoubleAnimation(1, 0, TransitionDuration)
+        {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        };
+        fadeOut.Completed += (_, _) =>
+        {
+            AwarenessPanel.Visibility = Visibility.Collapsed;
+            CardPhotoPanel.Visibility = Visibility.Visible;
+            CardPhotoPanel.Opacity = 0;
+
+            var fadeIn = new DoubleAnimation(0, 1, TransitionDuration)
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+            CardPhotoPanel.BeginAnimation(OpacityProperty, fadeIn);
+        };
+        AwarenessPanel.BeginAnimation(OpacityProperty, fadeOut);
+    }
+
+    private void LoadCardPhotoFace(CardPhotoSide side)
+    {
+        if (_cardPhotoCardId == null) return;
+        if (!Settings.SettingsManager.Shared.HasCardPhoto(_cardPhotoCardId, side))
+        {
+            CardPhotoImage.Source = null;
+            return;
+        }
+        var bmp = new BitmapImage();
+        bmp.BeginInit();
+        bmp.UriSource = new Uri(Settings.SettingsManager.Shared.CardPhotoPath(_cardPhotoCardId, side), UriKind.Absolute);
+        bmp.CacheOption = BitmapCacheOption.OnLoad;
+        bmp.EndInit();
+        CardPhotoImage.Source = bmp;
+    }
+
+    private void OnCardPhotoClicked(object sender, MouseButtonEventArgs e)
+    {
+        if (_cardPhotoCardId == null) return;
+        var otherSide = _showingBack ? CardPhotoSide.Front : CardPhotoSide.Back;
+        // Flip only when the other face exists.
+        if (!Settings.SettingsManager.Shared.HasCardPhoto(_cardPhotoCardId, otherSide)) return;
+
+        var dur = new Duration(TimeSpan.FromSeconds(0.275));
+        var toEdge = new DoubleAnimation(0, 90, dur) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn } };
+        toEdge.Completed += (_, _) =>
+        {
+            // Detach so we can hard-set the rotation to the opposite edge (invisible jump).
+            CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, null);
+            _showingBack = !_showingBack;
+            LoadCardPhotoFace(_showingBack ? CardPhotoSide.Back : CardPhotoSide.Front);
+            CardPhotoProjection.RotationY = -90;
+
+            var toFlat = new DoubleAnimation(-90, 0, dur) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+            toFlat.Completed += (_, _) =>
+            {
+                CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, null);
+                CardPhotoProjection.RotationY = 0;
+            };
+            CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, toFlat);
+        };
+        CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, toEdge);
+    }
+
+    private void OnCardPhotoCloseClicked(object sender, RoutedEventArgs e)
+    {
+        OnDismissRequested?.Invoke();
     }
 
     // MARK: - Slider Handler

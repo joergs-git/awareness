@@ -74,6 +74,10 @@ public partial class App : Application
             // Pull remote events from other platforms into local progress stats
             Sync.SyncManager.Shared.PullAndIntegrate();
 
+            // Card-photo sync (opt-in): publish local photos, then pull any from other devices
+            _ = Sync.CardAssetSync.Shared.PushIfEnabledAsync();
+            _ = Sync.CardAssetSync.Shared.PullIfEnabledAsync();
+
             // Show a welcome message on first launch
             ShowWelcomeIfFirstLaunch();
         }

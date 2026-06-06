@@ -501,6 +501,9 @@ struct ContentView: View {
                 SyncManager.shared.pullAndIntegrate()
                 // Check Supabase connectivity for status indicator
                 SyncManager.shared.refreshConnectivityStatus()
+                // Card-photo sync (opt-in): publish local photos, then pull others'
+                CardAssetSync.shared.pushIfEnabled()
+                CardAssetSync.shared.pullIfEnabled()
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                 // Re-check whenever app becomes active (e.g. returning from system Settings)
@@ -512,6 +515,9 @@ struct ContentView: View {
                 WidgetDataBridge.shared.updateWidget()
                 // Sync desktop events on foreground return
                 SyncManager.shared.pullAndIntegrate()
+                // Card-photo sync on foreground return (opt-in)
+                CardAssetSync.shared.pushIfEnabled()
+                CardAssetSync.shared.pullIfEnabled()
             }
             .onReceive(NotificationCenter.default.publisher(for: .showBlackout)) { _ in
                 showingBlackout = true

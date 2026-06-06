@@ -159,6 +159,10 @@ You can configure everything from the tray icon → Settings.</value></data>
   <data name="ChooseCardManually" xml:space="preserve"><value>Choose today's card manually</value></data>
   <data name="DailyCardManualHint" xml:space="preserve"><value>The chosen card stays fixed — keep it in sync with the physical card you're working with.</value></data>
   <data name="DailyCardRotationHint" xml:space="preserve"><value>A different card rotates in automatically each day, the same on all your devices.</value></data>
+  <data name="SyncCardPhotos" xml:space="preserve"><value>Sync card photos across devices</value></data>
+  <data name="PhotoFront" xml:space="preserve"><value>Front</value></data>
+  <data name="PhotoBack" xml:space="preserve"><value>Back</value></data>
+  <data name="RemovePhoto" xml:space="preserve"><value>Remove</value></data>
   <data name="ReadyToBreathe" xml:space="preserve"><value>Ready to breathe?</value></data>
   <data name="Yes" xml:space="preserve"><value>Yes</value></data>
   <data name="No" xml:space="preserve"><value>No</value></data>

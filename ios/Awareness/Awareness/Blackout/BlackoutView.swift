@@ -22,6 +22,8 @@ struct BlackoutView: View {
     @State private var completedFullDuration = false
     /// Whether to show the awareness check after blackout ends
     @State private var showingAwarenessCheck = false
+    /// Whether to show the card-photo flip (card-photo mode) after the awareness check
+    @State private var showingCardPhoto = false
     /// Awareness slider value (0–100, default at center)
     @State private var sliderValue: Double = 50
     /// Controls the breathing animation — toggled on after fade-in to start pulsing
@@ -41,10 +43,11 @@ struct BlackoutView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            // Breathing content — hidden once awareness check appears
-            if !showingAwarenessCheck {
+            // Breathing content — hidden once the awareness check or card photo appears
+            if !showingAwarenessCheck && !showingCardPhoto {
                 switch settings.visualType {
-                case .plainBlack:
+                case .plainBlack, .cardPhoto:
+                    // Minimal anchor while breathing; card photo is shown at the break end.
                     Circle()
                         .fill(Color.white.opacity(isBreathing ? 0.08 : 0.015))
                         .frame(width: isBreathing ? 20 : 12, height: isBreathing ? 20 : 12)
@@ -109,13 +112,21 @@ struct BlackoutView: View {
                 }
                 .transition(.opacity)
             }
+
+            // Card-photo flip — shown at the break end instead of a phrase (card-photo mode)
+            if showingCardPhoto, let card = todaysCard {
+                CardFlipView(cardID: card.id, accent: card.color) {
+                    closeBlackout()
+                }
+                .transition(.opacity)
+            }
         }
         .opacity(opacity)
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
         .onTapGesture {
-            // Don't dismiss during awareness check — buttons handle interaction
-            guard !showingAwarenessCheck else { return }
+            // Don't dismiss during awareness check or card photo — they handle their own taps
+            guard !showingAwarenessCheck, !showingCardPhoto else { return }
             // Tap to dismiss early (disabled in handcuffs mode)
             guard !settings.handcuffsMode else { return }
             dismissBlackout()
@@ -309,6 +320,32 @@ struct BlackoutView: View {
         )
         EventStore.shared.record(event: event)
         SmartGuru.shared.evaluateAfterEvent(event)
+
+        // Card-photo mode: after the awareness check, reveal the card photo (front, tap to
+        // flip, ✕ to close) instead of dismissing straight away.
+        if shouldShowCardPhoto {
+            withAnimation(.easeOut(duration: 0.3)) { opacity = 0 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                showingAwarenessCheck = false
+                showingCardPhoto = true
+                withAnimation(.easeIn(duration: 0.3)) { opacity = 1.0 }
+            }
+        } else {
+            closeBlackout()
+        }
+    }
+
+    /// Today's practice card (cached per day by SettingsManager).
+    private var todaysCard: PracticeCard? { settings.todaysPracticeCard() }
+
+    /// True when card-photo mode is active and today's card has a front photo to show.
+    private var shouldShowCardPhoto: Bool {
+        guard settings.visualType == .cardPhoto, let card = todaysCard else { return false }
+        return settings.hasCardPhoto(cardID: card.id, side: .front)
+    }
+
+    /// Fade out and dismiss the blackout.
+    private func closeBlackout() {
         withAnimation(.easeOut(duration: 0.3)) {
             opacity = 0
         }
@@ -389,6 +426,79 @@ struct BlackoutView: View {
                 .foregroundColor(.white.opacity(0.3))
                 .font(.title2)
         }
+    }
+}
+
+// MARK: - Card Flip View
+
+/// Full-screen flip card showing a practice card's user-supplied photo.
+/// Front shows first; tapping flips to the back (and back again) with a page-turn 3D
+/// effect; a small ✕ in the top-left corner closes and returns to the normal screen.
+struct CardFlipView: View {
+
+    let cardID: String
+    let accent: Color
+    let onClose: () -> Void
+
+    @State private var showingBack = false
+
+    private var frontImage: UIImage? { loadImage(side: .front) }
+    private var backImage: UIImage? { loadImage(side: .back) }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Color.black.ignoresSafeArea()
+
+            // Flip card — front and pre-rotated back stacked, container rotates on tap.
+            ZStack {
+                cardFace(frontImage, placeholder: "")
+                    .opacity(showingBack ? 0 : 1)
+                cardFace(backImage, placeholder: String(localized: "No back photo"))
+                    .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                    .opacity(showingBack ? 1 : 0)
+            }
+            .shadow(color: accent.opacity(0.3), radius: 20)
+            .rotation3DEffect(.degrees(showingBack ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+            .animation(.easeInOut(duration: 0.55), value: showingBack)
+            .padding(24)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                // Flip only when a back photo exists; otherwise stay on the front.
+                if backImage != nil { showingBack.toggle() }
+            }
+
+            // Close button (top-left) — returns to the normal screen.
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.85))
+                    .padding(10)
+                    .background(Color.white.opacity(0.12))
+                    .clipShape(Circle())
+            }
+            .padding(20)
+        }
+    }
+
+    @ViewBuilder
+    private func cardFace(_ image: UIImage?, placeholder: String) -> some View {
+        if let image = image {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+        } else {
+            Text(placeholder)
+                .foregroundColor(.white.opacity(0.4))
+                .font(.title3)
+        }
+    }
+
+    private func loadImage(side: CardPhotoSide) -> UIImage? {
+        guard SettingsManager.shared.hasCardPhoto(cardID: cardID, side: side),
+              let data = try? Data(contentsOf: SettingsManager.shared.cardPhotoURL(cardID: cardID, side: side)) else {
+            return nil
+        }
+        return UIImage(data: data)
     }
 }
 

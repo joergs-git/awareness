@@ -155,28 +155,15 @@ struct SettingsView: View {
                 Section {
                     Toggle(String(localized: "Choose today's card manually"), isOn: $settings.manualCardSelectionEnabled)
 
-                    if settings.manualCardSelectionEnabled {
-                        ForEach(PracticeCard.allCards) { card in
-                            Button {
-                                settings.manualCardID = card.id
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Circle()
-                                        .fill(card.color)
-                                        .frame(width: 12, height: 12)
-                                    Text(card.localizedTitle)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    if settings.manualCardID == card.id {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(card.color)
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
+                    // Per-card rows: pick the manual card and attach front/back photos.
+                    ForEach(PracticeCard.allCards) { card in
+                        CardRowView(card: card, settings: settings)
                     }
+
+                    Toggle(String(localized: "Sync card photos across devices"), isOn: $settings.cardPhotoSyncEnabled)
+                    Text(String(localized: "When on, your card photos are uploaded to your private sync space and downloaded on your other devices. They leave this device only with this enabled."))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
 
                     Text(settings.manualCardSelectionEnabled
                          ? String(localized: "The chosen card stays fixed — keep it in sync with the physical card you're working with.")
@@ -386,6 +373,94 @@ struct FilePickerRow: View {
         if panel.runModal() == .OK, let url = panel.url {
             onSelect?(url)
             path = url.path
+        }
+    }
+}
+
+// MARK: - Daily Card Row
+
+/// One practice-card row: tap the title to pick it as the manual card, and attach
+/// front/back photos that show full-screen (with flip) at the end of a break.
+struct CardRowView: View {
+
+    let card: PracticeCard
+    @ObservedObject var settings: SettingsManager
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Button {
+                if settings.manualCardSelectionEnabled { settings.manualCardID = card.id }
+            } label: {
+                HStack(spacing: 10) {
+                    Circle()
+                        .fill(card.color)
+                        .frame(width: 12, height: 12)
+                    Text(card.localizedTitle)
+                        .foregroundColor(.primary)
+                    if settings.manualCardSelectionEnabled && settings.manualCardID == card.id {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(card.color)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            CardPhotoButton(card: card, side: .front, settings: settings)
+            CardPhotoButton(card: card, side: .back, settings: settings)
+        }
+    }
+}
+
+/// A small button that picks (or clears) a card's front/back photo via NSOpenPanel.
+struct CardPhotoButton: View {
+
+    let card: PracticeCard
+    let side: CardPhotoSide
+    @ObservedObject var settings: SettingsManager
+
+    private var hasPhoto: Bool { settings.hasCardPhoto(cardID: card.id, side: side) }
+    private var label: String {
+        side == .front ? String(localized: "Front") : String(localized: "Back")
+    }
+
+    var body: some View {
+        Button {
+            choose()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: hasPhoto ? "checkmark.circle.fill" : "photo")
+                    .foregroundColor(hasPhoto ? card.color : .secondary)
+                Text(label).font(.caption)
+            }
+        }
+        .buttonStyle(.bordered)
+        .help(hasPhoto ? String(localized: "Right-click to remove") : String(localized: "Choose a photo"))
+        .contextMenu {
+            if hasPhoto {
+                Button(role: .destructive) {
+                    settings.clearCardPhoto(cardID: card.id, side: side)
+                    CardAssetSync.shared.pushIfEnabled()
+                } label: {
+                    Label(String(localized: "Remove"), systemImage: "trash")
+                }
+            }
+        }
+    }
+
+    private func choose() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = ["png", "jpg", "jpeg", "heic", "tiff", "gif"].compactMap {
+            UTType(filenameExtension: $0)
+        }
+        if panel.runModal() == .OK, let url = panel.url {
+            settings.importCardPhoto(cardID: card.id, side: side, from: url)
+            CardAssetSync.shared.pushIfEnabled()
         }
     }
 }

@@ -1,6 +1,12 @@
 import Foundation
 import Combine
 
+/// Which face of a practice card a user-supplied photo represents.
+enum CardPhotoSide: String, CaseIterable {
+    case front
+    case back
+}
+
 /// Central settings store backed by UserDefaults.
 /// Published properties allow SwiftUI views to react to changes automatically.
 /// Shared between iOS and watchOS targets via #if os() guards.
@@ -69,6 +75,7 @@ final class SettingsManager: ObservableObject {
         static let skipDuringCalls      = "skipDuringCalls"
         static let syncPassphrase       = "syncPassphrase"
         static let desktopSyncUsesComputer = "desktopSyncWorksOnComputer"
+        static let cardPhotoSyncEnabled = "cardPhotoSyncEnabled"
         #endif
 
         #if os(watchOS)
@@ -109,6 +116,7 @@ final class SettingsManager: ObservableObject {
         values[Keys.vibrationEnabled]  = true
         values[Keys.endFlashEnabled]   = true
         values[Keys.skipDuringCalls]   = true
+        values[Keys.cardPhotoSyncEnabled] = false
         #endif
 
         #if os(watchOS)
@@ -369,6 +377,46 @@ final class SettingsManager: ObservableObject {
         defaults.set(false, forKey: Keys.microTaskShownToday)
     }
 
+    #if !os(watchOS)
+    // MARK: - Per-Card Photos
+
+    /// Directory holding user-supplied card photos (front/back), inside the app sandbox.
+    func cardPhotosDirectory() -> URL {
+        let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("card-photos", isDirectory: true)
+        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        return base
+    }
+
+    /// Local file URL for a card photo (the file may not exist yet).
+    func cardPhotoURL(cardID: String, side: CardPhotoSide) -> URL {
+        cardPhotosDirectory().appendingPathComponent("card-\(cardID)-\(side.rawValue).png")
+    }
+
+    /// Whether a stored photo exists for the given card + side.
+    func hasCardPhoto(cardID: String, side: CardPhotoSide) -> Bool {
+        FileManager.default.fileExists(atPath: cardPhotoURL(cardID: cardID, side: side).path)
+    }
+
+    /// Write raw image data into the card-photo store (used by PhotosPicker and Supabase download).
+    @discardableResult
+    func writeCardPhoto(cardID: String, side: CardPhotoSide, data: Data) -> Bool {
+        do {
+            try data.write(to: cardPhotoURL(cardID: cardID, side: side))
+            objectWillChange.send()
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Remove a stored card photo.
+    func clearCardPhoto(cardID: String, side: CardPhotoSide) {
+        try? FileManager.default.removeItem(at: cardPhotoURL(cardID: cardID, side: side))
+        objectWillChange.send()
+    }
+    #endif
+
     /// Get the current micro-task, auto-assigning one from today's card pool if none exists yet.
     /// This ensures a micro-task is visible from app launch, not just after the first blackout.
     func currentMicroTask() -> MicroTask? {
@@ -462,6 +510,11 @@ final class SettingsManager: ObservableObject {
     /// Whether to skip breaks when the user is on a phone or video call
     @Published var skipDuringCalls: Bool {
         didSet { defaults.set(skipDuringCalls, forKey: Keys.skipDuringCalls) }
+    }
+
+    /// Opt-in: upload/download user card photos across devices via Supabase Storage.
+    @Published var cardPhotoSyncEnabled: Bool {
+        didSet { defaults.set(cardPhotoSyncEnabled, forKey: Keys.cardPhotoSyncEnabled) }
     }
     #endif
 
@@ -745,6 +798,7 @@ final class SettingsManager: ObservableObject {
         vibrationEnabled    = defaults.bool(forKey: Keys.vibrationEnabled)
         endFlashEnabled     = defaults.bool(forKey: Keys.endFlashEnabled)
         skipDuringCalls     = defaults.bool(forKey: Keys.skipDuringCalls)
+        cardPhotoSyncEnabled = defaults.bool(forKey: Keys.cardPhotoSyncEnabled)
         #endif
 
         #if os(watchOS)

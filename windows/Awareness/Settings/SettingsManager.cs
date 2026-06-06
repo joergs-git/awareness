@@ -54,6 +54,7 @@ public class SettingsManager : INotifyPropertyChanged
     private string _yesterdaysCardID = "";
     private bool _manualCardSelectionEnabled = false;
     private string _manualCardID = "";
+    private bool _cardPhotoSyncEnabled = false;
     private string _currentMicroTaskID = "";
     private string _microTaskDate = "";
     private List<string> _lastMicroTaskIDs = new();
@@ -221,6 +222,51 @@ public class SettingsManager : INotifyPropertyChanged
     {
         get => _manualCardID;
         set { if (SetField(ref _manualCardID, value)) ScheduleSave(); }
+    }
+
+    /// <summary>Opt-in: upload/download user card photos across devices via Supabase Storage.</summary>
+    public bool CardPhotoSyncEnabled
+    {
+        get => _cardPhotoSyncEnabled;
+        set { if (SetField(ref _cardPhotoSyncEnabled, value)) ScheduleSave(); }
+    }
+
+    // MARK: - Per-Card Photos
+
+    /// <summary>Directory holding user-supplied card photos (front/back), in %APPDATA%.</summary>
+    public string CardPhotosDirectory()
+    {
+        var dir = Path.Combine(SettingsDirectory, "card-photos");
+        Directory.CreateDirectory(dir);
+        return dir;
+    }
+
+    /// <summary>Local file path for a card photo (the file may not exist yet).</summary>
+    public string CardPhotoPath(string cardId, CardPhotoSide side) =>
+        Path.Combine(CardPhotosDirectory(), $"card-{cardId}-{side.FileToken()}.png");
+
+    /// <summary>Whether a stored photo exists for the given card + side.</summary>
+    public bool HasCardPhoto(string cardId, CardPhotoSide side) =>
+        File.Exists(CardPhotoPath(cardId, side));
+
+    /// <summary>Copy a user-picked image file into the card-photo store.</summary>
+    public bool ImportCardPhoto(string cardId, CardPhotoSide side, string sourcePath)
+    {
+        try { File.Copy(sourcePath, CardPhotoPath(cardId, side), overwrite: true); return true; }
+        catch { return false; }
+    }
+
+    /// <summary>Write raw image bytes into the card-photo store (used by Supabase download).</summary>
+    public bool WriteCardPhoto(string cardId, CardPhotoSide side, byte[] data)
+    {
+        try { File.WriteAllBytes(CardPhotoPath(cardId, side), data); return true; }
+        catch { return false; }
+    }
+
+    /// <summary>Remove a stored card photo.</summary>
+    public void ClearCardPhoto(string cardId, CardPhotoSide side)
+    {
+        try { File.Delete(CardPhotoPath(cardId, side)); } catch { /* ignore */ }
     }
 
     /// <summary>Sync passphrase entered by the user (from iOS app)</summary>
@@ -469,6 +515,7 @@ public class SettingsManager : INotifyPropertyChanged
             _yesterdaysCardID = data.YesterdaysCardID ?? "";
             _manualCardSelectionEnabled = data.ManualCardSelectionEnabled;
             _manualCardID = data.ManualCardID ?? "";
+            _cardPhotoSyncEnabled = data.CardPhotoSyncEnabled;
             _currentMicroTaskID = data.CurrentMicroTaskID ?? "";
             _microTaskDate = data.MicroTaskDate ?? "";
             _lastMicroTaskIDs = data.LastMicroTaskIDs ?? new List<string>();
@@ -516,6 +563,7 @@ public class SettingsManager : INotifyPropertyChanged
                 YesterdaysCardID = _yesterdaysCardID,
                 ManualCardSelectionEnabled = _manualCardSelectionEnabled,
                 ManualCardID = _manualCardID,
+                CardPhotoSyncEnabled = _cardPhotoSyncEnabled,
                 CurrentMicroTaskID = _currentMicroTaskID,
                 MicroTaskDate = _microTaskDate,
                 LastMicroTaskIDs = _lastMicroTaskIDs
@@ -633,6 +681,9 @@ public class SettingsManager : INotifyPropertyChanged
 
         [JsonPropertyName("manualCardID")]
         public string? ManualCardID { get; set; } = "";
+
+        [JsonPropertyName("cardPhotoSyncEnabled")]
+        public bool CardPhotoSyncEnabled { get; set; } = false;
 
         [JsonPropertyName("currentMicroTaskID")]
         public string? CurrentMicroTaskID { get; set; } = "";
