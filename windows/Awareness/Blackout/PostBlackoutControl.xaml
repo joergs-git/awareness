@@ -126,9 +126,10 @@
                    Cursor="Hand"
                    RenderTransformOrigin="0.5,0.5"
                    MouseLeftButtonDown="OnCardPhotoClicked">
-                <Image.Projection>
-                    <PlaneProjection x:Name="CardPhotoProjection" RotationY="0" />
-                </Image.Projection>
+                <!-- WPF has no PlaneProjection; a horizontal ScaleX flip gives the page-turn feel -->
+                <Image.RenderTransform>
+                    <ScaleTransform x:Name="CardPhotoScale" ScaleX="1" ScaleY="1" />
+                </Image.RenderTransform>
             </Image>
 
             <!-- Close button (top-left) -->

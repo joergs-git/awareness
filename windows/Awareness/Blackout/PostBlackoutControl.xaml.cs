@@ -158,7 +158,7 @@ public partial class PostBlackoutControl : UserControl
         IsInAwarenessPhase = false;
         _cardPhotoCardId = cardId;
         _showingBack = false;
-        CardPhotoProjection.RotationY = 0;
+        CardPhotoScale.ScaleX = 1;
         LoadCardPhotoFace(CardPhotoSide.Front);
 
         var fadeOut = new DoubleAnimation(1, 0, TransitionDuration)
@@ -204,24 +204,24 @@ public partial class PostBlackoutControl : UserControl
         if (!Settings.SettingsManager.Shared.HasCardPhoto(_cardPhotoCardId, otherSide)) return;
 
         var dur = new Duration(TimeSpan.FromSeconds(0.275));
-        var toEdge = new DoubleAnimation(0, 90, dur) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn } };
+        // Squash to a vertical edge (ScaleX 1→0), swap the face, then expand back (0→1).
+        var toEdge = new DoubleAnimation(1, 0, dur) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn } };
         toEdge.Completed += (_, _) =>
         {
-            // Detach so we can hard-set the rotation to the opposite edge (invisible jump).
-            CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, null);
+            CardPhotoScale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
             _showingBack = !_showingBack;
             LoadCardPhotoFace(_showingBack ? CardPhotoSide.Back : CardPhotoSide.Front);
-            CardPhotoProjection.RotationY = -90;
+            CardPhotoScale.ScaleX = 0;
 
-            var toFlat = new DoubleAnimation(-90, 0, dur) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
-            toFlat.Completed += (_, _) =>
+            var toFull = new DoubleAnimation(0, 1, dur) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+            toFull.Completed += (_, _) =>
             {
-                CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, null);
-                CardPhotoProjection.RotationY = 0;
+                CardPhotoScale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                CardPhotoScale.ScaleX = 1;
             };
-            CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, toFlat);
+            CardPhotoScale.BeginAnimation(ScaleTransform.ScaleXProperty, toFull);
         };
-        CardPhotoProjection.BeginAnimation(PlaneProjection.RotationYProperty, toEdge);
+        CardPhotoScale.BeginAnimation(ScaleTransform.ScaleXProperty, toEdge);
     }
 
     private void OnCardPhotoCloseClicked(object sender, RoutedEventArgs e)
