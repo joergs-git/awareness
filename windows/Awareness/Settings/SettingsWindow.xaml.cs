@@ -219,6 +219,7 @@ public partial class SettingsWindow : Window
             case BlackoutVisualType.Text: RadioText.IsChecked = true; break;
             case BlackoutVisualType.Image: RadioImage.IsChecked = true; break;
             case BlackoutVisualType.Video: RadioVideo.IsChecked = true; break;
+            case BlackoutVisualType.CardPhoto: RadioCardPhoto.IsChecked = true; break;
         }
         CustomTextBox.Text = _settings.CustomText;
         UpdateVisualTypeUI();
@@ -233,11 +234,141 @@ public partial class SettingsWindow : Window
         StartclickCheck.IsChecked = _settings.StartclickConfirmation;
         SkipMediaCheck.IsChecked = _settings.SkipDuringMediaUse;
 
+        // Daily Card
+        foreach (var card in PracticeCard.AllCards)
+            ManualCardCombo.Items.Add(new ComboBoxItem { Content = card.LocalizedTitle, Tag = card.Id, Foreground = comboTextBrush });
+        if (_isDarkMode)
+        {
+            ManualCardCombo.Foreground = comboTextBrush;
+            ManualCardCombo.Background = new SolidColorBrush(Color.FromRgb(45, 40, 36));
+        }
+        ManualCardCheck.IsChecked = _settings.ManualCardSelectionEnabled;
+        int cardIdx = Array.FindIndex(PracticeCard.AllCards, c => c.Id == _settings.ManualCardID);
+        ManualCardCombo.SelectedIndex = cardIdx >= 0 ? cardIdx : 0;
+        CardPhotoSyncCheck.IsChecked = _settings.CardPhotoSyncEnabled;
+        BuildCardPhotoRows();
+        UpdateDailyCardUI();
+
         // Desktop Sync
         SyncKeyInput.Text = _settings.SyncPassphrase;
         bool hasSyncKey = !string.IsNullOrWhiteSpace(_settings.SyncPassphrase);
         WorksOnPhoneCheck.IsChecked = hasSyncKey;
         SyncKeyPanel.Visibility = hasSyncKey ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // MARK: - Daily Card
+
+    private void OnManualCardChanged(object sender, RoutedEventArgs e)
+    {
+        if (_isLoading) return;
+        _settings.ManualCardSelectionEnabled = ManualCardCheck.IsChecked == true;
+        // Make sure a card id is stored when enabling manual selection
+        if (_settings.ManualCardSelectionEnabled
+            && string.IsNullOrEmpty(_settings.ManualCardID)
+            && ManualCardCombo.SelectedItem is ComboBoxItem item)
+        {
+            _settings.ManualCardID = (string)item.Tag;
+        }
+        UpdateDailyCardUI();
+    }
+
+    private void OnManualCardSelected(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isLoading || ManualCardCombo.SelectedItem is not ComboBoxItem item) return;
+        _settings.ManualCardID = (string)item.Tag;
+    }
+
+    private void UpdateDailyCardUI()
+    {
+        bool manual = ManualCardCheck.IsChecked == true;
+        ManualCardCombo.Visibility = manual ? Visibility.Visible : Visibility.Collapsed;
+        DailyCardHint.Text = manual ? Strings.DailyCardManualHint : Strings.DailyCardRotationHint;
+    }
+
+    private void OnCardPhotoSyncChanged(object sender, RoutedEventArgs e)
+    {
+        if (_isLoading) return;
+        _settings.CardPhotoSyncEnabled = CardPhotoSyncCheck.IsChecked == true;
+    }
+
+    private Brush ComboTextBrush() => _isDarkMode
+        ? new SolidColorBrush(Color.FromRgb(230, 225, 220))
+        : System.Windows.Media.Brushes.Black;
+
+    /// <summary>Build one row per card with front/back photo buttons (rebuilt on change).</summary>
+    private void BuildCardPhotoRows()
+    {
+        CardPhotoPanel.Children.Clear();
+        var textBrush = ComboTextBrush();
+
+        foreach (var card in PracticeCard.AllCards)
+        {
+            var row = new DockPanel { Margin = new Thickness(0, 2, 0, 2) };
+
+            var backBtn = MakePhotoButton(card, CardPhotoSide.Back);
+            DockPanel.SetDock(backBtn, Dock.Right);
+            var frontBtn = MakePhotoButton(card, CardPhotoSide.Front);
+            DockPanel.SetDock(frontBtn, Dock.Right);
+
+            var title = new TextBlock
+            {
+                Text = card.LocalizedTitle,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = textBrush,
+                TextTrimming = TextTrimming.CharacterEllipsis
+            };
+
+            row.Children.Add(backBtn);
+            row.Children.Add(frontBtn);
+            row.Children.Add(title);
+            CardPhotoPanel.Children.Add(row);
+        }
+    }
+
+    private Button MakePhotoButton(PracticeCard card, CardPhotoSide side)
+    {
+        bool has = _settings.HasCardPhoto(card.Id, side);
+        string label = side == CardPhotoSide.Front ? Strings.PhotoFront : Strings.PhotoBack;
+        var btn = new Button
+        {
+            Content = has ? $"✓ {label}" : label,
+            Margin = new Thickness(6, 0, 0, 0),
+            Padding = new Thickness(8, 2, 8, 2),
+            Tag = (card, side)
+        };
+        btn.Click += OnCardPhotoButtonClick;
+
+        if (has)
+        {
+            var menu = new ContextMenu();
+            var remove = new MenuItem { Header = Strings.RemovePhoto };
+            remove.Click += (_, _) =>
+            {
+                _settings.ClearCardPhoto(card.Id, side);
+                _ = Awareness.Sync.CardAssetSync.Shared.PushIfEnabledAsync();
+                BuildCardPhotoRows();
+            };
+            menu.Items.Add(remove);
+            btn.ContextMenu = menu;
+        }
+        return btn;
+    }
+
+    private void OnCardPhotoButtonClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.Tag is not (PracticeCard card, CardPhotoSide side)) return;
+
+        var dialog = new OpenFileDialog
+        {
+            Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.tiff;*.gif|All Files|*.*",
+            Title = card.LocalizedTitle
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            _settings.ImportCardPhoto(card.Id, side, dialog.FileName);
+            _ = Awareness.Sync.CardAssetSync.Shared.PushIfEnabledAsync();
+            BuildCardPhotoRows();
+        }
     }
 
     // MARK: - Active Hours
@@ -282,6 +413,7 @@ public partial class SettingsWindow : Window
         else if (RadioText.IsChecked == true) _settings.VisualType = BlackoutVisualType.Text;
         else if (RadioImage.IsChecked == true) _settings.VisualType = BlackoutVisualType.Image;
         else if (RadioVideo.IsChecked == true) _settings.VisualType = BlackoutVisualType.Video;
+        else if (RadioCardPhoto.IsChecked == true) _settings.VisualType = BlackoutVisualType.CardPhoto;
 
         UpdateVisualTypeUI();
     }

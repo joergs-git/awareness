@@ -34,6 +34,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Pull remote events from other platforms into local progress stats
         SyncManager.shared.pullAndIntegrate()
 
+        // Card-photo sync (opt-in): publish local photos, then pull any from other devices
+        CardAssetSync.shared.pushIfEnabled()
+        CardAssetSync.shared.pullIfEnabled()
+
         // Deferred startup: welcome dialog first, then permission check
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.showWelcomeIfFirstLaunch()
@@ -78,6 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             // Pull remote events on wake
             SyncManager.shared.pullAndIntegrate()
+            CardAssetSync.shared.pullIfEnabled()
         }
     }
 

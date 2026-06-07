@@ -278,6 +278,26 @@ struct SettingsView: View {
                     Label(String(localized: "Break Visual"), systemImage: "paintbrush")
                 }
 
+                // MARK: - Daily Card
+                Section {
+                    Toggle(String(localized: "Choose today's card manually"), isOn: $settings.manualCardSelectionEnabled)
+
+                    // Per-card rows: pick the manual card and attach front/back photos.
+                    ForEach(PracticeCard.allCards) { card in
+                        CardPhotoRow(card: card, settings: settings)
+                    }
+
+                    Toggle(String(localized: "Sync card photos across devices"), isOn: $settings.cardPhotoSyncEnabled)
+                } header: {
+                    Label(String(localized: "Daily Card"), systemImage: "rectangle.portrait.on.rectangle.portrait")
+                } footer: {
+                    Text(settings.cardPhotoSyncEnabled
+                         ? String(localized: "Your card photos are uploaded to your private sync space and downloaded on your other devices. They leave this device only with this enabled.")
+                         : (settings.manualCardSelectionEnabled
+                            ? String(localized: "The chosen card stays fixed — keep it in sync with the physical card you're working with.")
+                            : String(localized: "A different card rotates in automatically each day, the same on all your devices.")))
+                }
+
                 // MARK: - Feedback
                 Section {
                     Toggle(String(localized: "Start gong (begin of break)"), isOn: $settings.startGongEnabled)
@@ -366,6 +386,80 @@ struct SettingsView: View {
                 try? data.write(to: fileURL)
                 DispatchQueue.main.async {
                     settings.customImagePath = fileURL.path
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Daily Card Row (iOS)
+
+/// One practice-card row: tap the title to pick it as the manual card, and attach
+/// front/back photos (via PhotosPicker) that show full-screen with a flip at the break end.
+struct CardPhotoRow: View {
+
+    let card: PracticeCard
+    @ObservedObject var settings: SettingsManager
+
+    @State private var frontItem: PhotosPickerItem?
+    @State private var backItem: PhotosPickerItem?
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button {
+                if settings.manualCardSelectionEnabled { settings.manualCardID = card.id }
+            } label: {
+                HStack(spacing: 10) {
+                    Circle()
+                        .fill(card.color)
+                        .frame(width: 14, height: 14)
+                    Text(card.localizedTitle)
+                        .foregroundColor(.primary)
+                    if settings.manualCardSelectionEnabled && settings.manualCardID == card.id {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(card.color)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            photoPicker(side: .front, item: $frontItem)
+            photoPicker(side: .back, item: $backItem)
+        }
+    }
+
+    @ViewBuilder
+    private func photoPicker(side: CardPhotoSide, item: Binding<PhotosPickerItem?>) -> some View {
+        let has = settings.hasCardPhoto(cardID: card.id, side: side)
+        PhotosPicker(selection: item, matching: .images, photoLibrary: .shared()) {
+            Image(systemName: has ? "checkmark.circle.fill" : "photo")
+                .foregroundColor(has ? card.color : .secondary)
+        }
+        .onChange(of: item.wrappedValue, perform: { newValue in
+            loadPhoto(newValue, side: side)
+        })
+        .contextMenu {
+            if has {
+                Button(role: .destructive) {
+                    settings.clearCardPhoto(cardID: card.id, side: side)
+                    CardAssetSync.shared.pushIfEnabled()
+                } label: {
+                    Label(String(localized: "Remove \(side == .front ? "front" : "back") photo"), systemImage: "trash")
+                }
+            }
+        }
+    }
+
+    private func loadPhoto(_ item: PhotosPickerItem?, side: CardPhotoSide) {
+        guard let item = item else { return }
+        item.loadTransferable(type: Data.self) { result in
+            if case .success(let data) = result, let data = data {
+                DispatchQueue.main.async {
+                    settings.writeCardPhoto(cardID: card.id, side: side, data: data)
+                    CardAssetSync.shared.pushIfEnabled()
                 }
             }
         }

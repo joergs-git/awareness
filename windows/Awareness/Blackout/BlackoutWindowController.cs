@@ -296,10 +296,20 @@ public class BlackoutWindowController : IDisposable
 
             if (card != null)
             {
-                // Show practice card phase
-                postBlackout.ShowPracticeCard(
-                    card.LocalizedTitle,
-                    task?.LocalizedText);
+                // Card-photo mode: show the user's card photo (front, tap to flip, ✕ to close)
+                // instead of the text phrase, when a front photo exists for the day's card.
+                if (SettingsManager.Shared.VisualType == BlackoutVisualType.CardPhoto
+                    && SettingsManager.Shared.HasCardPhoto(card.Id, CardPhotoSide.Front))
+                {
+                    postBlackout.ShowCardPhoto(card.Id);
+                }
+                else
+                {
+                    // Show practice card phase
+                    postBlackout.ShowPracticeCard(
+                        card.LocalizedTitle,
+                        task?.LocalizedText);
+                }
             }
             else
             {

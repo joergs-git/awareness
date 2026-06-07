@@ -1,3 +1,40 @@
+# v5.2 — Smart Guru Re-Aim, Manual Daily Card, Per-Card Photos
+
+## (a) Smart Guru — fix goal misalignment (iOS only)
+- [x] A1: `.ignored` out of frequency signal — add `EventStore.engagedSuccessRate`, hold when no engaged events
+- [x] A1: stop counting `.ignored` into hourProfile (record)
+- [x] A2: unify two duration controllers → single `adjustDuration` (one step max, no stacking)
+- [x] A3: low awareness HOLDS (no shrink); shrink only on ≥3 consecutive dismissals; floor 6s→12s
+- [x] A4: remove down-bias; add gentle goal-directed upward drift in comfort zone; status text shows lengthening
+- [x] A5: interval floor 5→8 min
+- [x] A6: remove dead code (weekdayProfile, hourAwarenessProfile, streakIgnored + awareness-spiral state fields)
+- [x] Parse-check Swift clean (full iOS build blocked: iOS 26.5 platform not installed in this env)
+
+## (b) Manual daily card + cross-device consistency
+- [x] B1: deterministic date-seeded rotation (index = daysSinceEpoch % 7) — iOS/macOS/Windows
+- [x] B2: manualCardSelectionEnabled + manualCardID settings + 7-card picker UI (iOS/macOS/Windows)
+- [x] B3 (partial): iOS↔watch connectivityContext carries manual selection; full desktop sync rides C2 manifest
+- [x] macOS verified via `swift build`; iOS parse-clean; Windows can't build in this env (WPF)
+
+## (c) Per-card photos (front/back) + Supabase Storage opt-in
+- [x] C1: per-card front/back photo storage (iOS Documents, macOS App Support, Windows %APPDATA%)
+- [x] C2: Storage client up/download/list + CardAssetSync (push union model + pull) + cardPhotoSyncEnabled opt-in; SQL migration in supabase/card-assets-bucket.sql (user runs in Supabase web console)
+- [x] C3: cardPhoto visual mode + end-of-break CardFlipView (page-turn 3D, tap flip, ✕ top-left close); phrase fallback; watchOS text-only (no exhaustive switch — unaffected)
+- [x] macOS verified via swift build; iOS parse-clean; Windows via GitHub Actions
+
+## Finalize
+- [x] Version bump → 5.2 (macOS Info.plist+pbxproj, iOS pbxproj ×8, Windows 5.2.0) + CHANGELOG.md
+- [x] Security/privacy review (no secrets, opt-in default off, private bucket, no stray files)
+- [ ] Commit on feature/guru-cards-photos
+- [ ] iOS/Windows builds on a configured machine; run supabase/card-assets-bucket.sql; Apple archive/notarize per policy
+
+## Results
+- Phase A (Smart Guru) + B (manual card/rotation) + C (card photos + opt-in Supabase Storage sync) implemented on iOS/macOS/Windows.
+- Build-verified: macOS `swift build` ✓; full iOS scheme (iOS + watchOS + widgets, OS 26.5) **BUILD SUCCEEDED** ✓; watchOS scheme (OS 26.4) **BUILD SUCCEEDED** ✓. No fixes were needed. Windows builds via GitHub Actions.
+- User-side remaining: create the Supabase bucket via supabase/card-assets-bucket.sql (the MCP-connected Supabase account does not include the awareness project); push/merge; Apple archive + notarize per policy.
+
+---
+
 # v4.0 — Supabase Fix, Smart Guru Awareness, Setup Guide, Always-Upload
 
 ## (b) Fix End Record Upload (All Platforms)

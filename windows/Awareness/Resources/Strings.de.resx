@@ -155,6 +155,14 @@ Du kannst alles über das Symbol im Infobereich → Einstellungen anpassen.</val
   <data name="StartclickDescription" xml:space="preserve"><value>Zeigt „Bereit zu atmen?" vor jeder Atempause.</value></data>
   <data name="SkipDuringMediaUse" xml:space="preserve"><value>Pausen bei Audio-/Videoanrufen überspringen</value></data>
   <data name="SkipDuringMediaUseDescription" xml:space="preserve"><value>Wenn aktiviert, werden Pausen nicht ausgelöst, solange Kamera oder Mikrofon aktiv sind.</value></data>
+  <data name="DailyCard" xml:space="preserve"><value>Tageskarte</value></data>
+  <data name="ChooseCardManually" xml:space="preserve"><value>Tageskarte manuell wählen</value></data>
+  <data name="DailyCardManualHint" xml:space="preserve"><value>Die gewählte Karte bleibt fest — so passt sie zur physischen Karte, mit der du arbeitest.</value></data>
+  <data name="DailyCardRotationHint" xml:space="preserve"><value>Jeden Tag rotiert automatisch eine andere Karte ein — auf allen Geräten dieselbe.</value></data>
+  <data name="SyncCardPhotos" xml:space="preserve"><value>Kartenfotos zwischen Geräten synchronisieren</value></data>
+  <data name="PhotoFront" xml:space="preserve"><value>Vorderseite</value></data>
+  <data name="PhotoBack" xml:space="preserve"><value>Rückseite</value></data>
+  <data name="RemovePhoto" xml:space="preserve"><value>Entfernen</value></data>
   <data name="ReadyToBreathe" xml:space="preserve"><value>Bereit zu atmen?</value></data>
   <data name="Yes" xml:space="preserve"><value>Ja</value></data>
   <data name="No" xml:space="preserve"><value>Nein</value></data>

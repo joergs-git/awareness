@@ -139,6 +139,70 @@ public class SupabaseClient
         return JsonSerializer.Deserialize<List<RemoteEvent>>(json) ?? new();
     }
 
+    // MARK: - Storage (card photos)
+    // Opt-in card-photo sync. Objects live under "{sync_key_hash}/..." in a private bucket;
+    // RLS restricts each anon client to its own prefix (same trust model as blackout_events).
+
+    private const string CardBucket = "card-assets";
+
+    /// <summary>A single object returned by the Storage list endpoint.</summary>
+    public class StorageObject
+    {
+        [JsonPropertyName("name")] public string Name { get; set; } = "";
+        [JsonPropertyName("metadata")] public StorageMeta? Metadata { get; set; }
+    }
+
+    public class StorageMeta
+    {
+        [JsonPropertyName("size")] public long? Size { get; set; }
+    }
+
+    /// <summary>Upload (upsert) raw bytes to the card-assets bucket at the given path.</summary>
+    public async Task UploadStorageObjectAsync(string path, byte[] data, string contentType)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{SupabaseUrl}/storage/v1/object/{CardBucket}/{path}")
+        {
+            Content = new ByteArrayContent(data)
+        };
+        request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+        request.Headers.Add("apikey", SupabaseAnonKey);
+        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+        request.Headers.Add("x-upsert", "true");
+
+        var response = await _http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>Download an object's bytes. Returns null when the object is absent (404).</summary>
+    public async Task<byte[]?> DownloadStorageObjectAsync(string path)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{SupabaseUrl}/storage/v1/object/{CardBucket}/{path}");
+        request.Headers.Add("apikey", SupabaseAnonKey);
+        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+
+        var response = await _http.SendAsync(request);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsByteArrayAsync();
+    }
+
+    /// <summary>List objects under a prefix (e.g. "{hash}/") in the card-assets bucket.</summary>
+    public async Task<List<StorageObject>> ListStorageObjectsAsync(string prefix)
+    {
+        var body = JsonSerializer.Serialize(new { prefix, limit = 100 });
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{SupabaseUrl}/storage/v1/object/list/{CardBucket}")
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json")
+        };
+        request.Headers.Add("apikey", SupabaseAnonKey);
+        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+
+        var response = await _http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<List<StorageObject>>(json) ?? new();
+    }
+
     /// <summary>Format a DateTime as ISO 8601 with fractional seconds</summary>
     public static string FormatDate(DateTime date)
     {

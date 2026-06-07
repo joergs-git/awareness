@@ -52,6 +52,9 @@ public class SettingsManager : INotifyPropertyChanged
     private string _todaysPracticeCardID = "";
     private string _practiceCardDate = "";
     private string _yesterdaysCardID = "";
+    private bool _manualCardSelectionEnabled = false;
+    private string _manualCardID = "";
+    private bool _cardPhotoSyncEnabled = false;
     private string _currentMicroTaskID = "";
     private string _microTaskDate = "";
     private List<string> _lastMicroTaskIDs = new();
@@ -206,6 +209,66 @@ public class SettingsManager : INotifyPropertyChanged
         set { if (SetField(ref _skipDuringMediaUse, value)) ScheduleSave(); }
     }
 
+    /// <summary>When on, the daily card is the user-chosen card instead of the automatic
+    /// date-based rotation — lets the digital card mirror a physical card in hand.</summary>
+    public bool ManualCardSelectionEnabled
+    {
+        get => _manualCardSelectionEnabled;
+        set { if (SetField(ref _manualCardSelectionEnabled, value)) ScheduleSave(); }
+    }
+
+    /// <summary>The card chosen when manual selection is on (one of PracticeCard.AllCards ids)</summary>
+    public string ManualCardID
+    {
+        get => _manualCardID;
+        set { if (SetField(ref _manualCardID, value)) ScheduleSave(); }
+    }
+
+    /// <summary>Opt-in: upload/download user card photos across devices via Supabase Storage.</summary>
+    public bool CardPhotoSyncEnabled
+    {
+        get => _cardPhotoSyncEnabled;
+        set { if (SetField(ref _cardPhotoSyncEnabled, value)) ScheduleSave(); }
+    }
+
+    // MARK: - Per-Card Photos
+
+    /// <summary>Directory holding user-supplied card photos (front/back), in %APPDATA%.</summary>
+    public string CardPhotosDirectory()
+    {
+        var dir = Path.Combine(SettingsDirectory, "card-photos");
+        Directory.CreateDirectory(dir);
+        return dir;
+    }
+
+    /// <summary>Local file path for a card photo (the file may not exist yet).</summary>
+    public string CardPhotoPath(string cardId, CardPhotoSide side) =>
+        Path.Combine(CardPhotosDirectory(), $"card-{cardId}-{side.FileToken()}.png");
+
+    /// <summary>Whether a stored photo exists for the given card + side.</summary>
+    public bool HasCardPhoto(string cardId, CardPhotoSide side) =>
+        File.Exists(CardPhotoPath(cardId, side));
+
+    /// <summary>Copy a user-picked image file into the card-photo store.</summary>
+    public bool ImportCardPhoto(string cardId, CardPhotoSide side, string sourcePath)
+    {
+        try { File.Copy(sourcePath, CardPhotoPath(cardId, side), overwrite: true); return true; }
+        catch { return false; }
+    }
+
+    /// <summary>Write raw image bytes into the card-photo store (used by Supabase download).</summary>
+    public bool WriteCardPhoto(string cardId, CardPhotoSide side, byte[] data)
+    {
+        try { File.WriteAllBytes(CardPhotoPath(cardId, side), data); return true; }
+        catch { return false; }
+    }
+
+    /// <summary>Remove a stored card photo.</summary>
+    public void ClearCardPhoto(string cardId, CardPhotoSide side)
+    {
+        try { File.Delete(CardPhotoPath(cardId, side)); } catch { /* ignore */ }
+    }
+
     /// <summary>Sync passphrase entered by the user (from iOS app)</summary>
     public string SyncPassphrase
     {
@@ -279,33 +342,61 @@ public class SettingsManager : INotifyPropertyChanged
     /// Get today's practice card, assigning a new one if the day changed.
     /// Avoids repeating yesterday's card.
     /// </summary>
+    /// <summary>
+    /// Deterministic index into PracticeCard.AllCards for the current local day.
+    /// Days since the local 1970 epoch, mod card count — identical formula on
+    /// iOS/macOS/Windows, so every device shows the SAME card on a given day with no sync.
+    /// </summary>
+    private static int DeterministicCardIndex()
+    {
+        var epoch = DateTimeOffset.FromUnixTimeSeconds(0).LocalDateTime.Date;
+        int days = (DateTime.Today - epoch).Days;
+        int count = PracticeCard.AllCards.Length;
+        if (count == 0) return 0;
+        return ((days % count) + count) % count;
+    }
+
     public PracticeCard? TodaysPracticeCard()
     {
         string today = TodayString();
 
-        // Same day — return stored card
+        // 1. Manual override — the user pinned a specific card to match their physical card.
+        if (_manualCardSelectionEnabled)
+        {
+            var pinned = PracticeCard.CardWithId(_manualCardID);
+            if (pinned != null)
+            {
+                PersistDailyCard(pinned.Id, today);
+                return pinned;
+            }
+        }
+
+        // 2. Already resolved for today — return the stored card.
         if (_practiceCardDate == today && !string.IsNullOrEmpty(_todaysPracticeCardID))
             return PracticeCard.CardWithId(_todaysPracticeCardID);
 
-        // New day — assign a random card (avoid yesterday's)
+        // 3. New day — deterministic rotation through all cards.
+        var card = PracticeCard.AllCards[DeterministicCardIndex()];
+        PersistDailyCard(card.Id, today);
+        return card;
+    }
+
+    /// <summary>
+    /// Persist today's card id/date, resetting micro-task state only when the card changes.
+    /// </summary>
+    private void PersistDailyCard(string cardId, string date)
+    {
+        if (_todaysPracticeCardID == cardId && _practiceCardDate == date) return;
+
         _yesterdaysCardID = _todaysPracticeCardID;
+        _todaysPracticeCardID = cardId;
+        _practiceCardDate = date;
 
-        var candidates = PracticeCard.AllCards
-            .Where(c => c.Id != _yesterdaysCardID)
-            .ToArray();
-
-        if (candidates.Length == 0) return null;
-
-        var newCard = candidates[Random.Shared.Next(candidates.Length)];
-        _todaysPracticeCardID = newCard.Id;
-        _practiceCardDate = today;
-
-        // Reset micro-task state for new day
+        // New card for the day — reset micro-task state.
         _currentMicroTaskID = "";
         _microTaskDate = "";
 
         ScheduleSave();
-        return newCard;
     }
 
     /// <summary>
@@ -422,6 +513,9 @@ public class SettingsManager : INotifyPropertyChanged
             _todaysPracticeCardID = data.TodaysPracticeCardID ?? "";
             _practiceCardDate = data.PracticeCardDate ?? "";
             _yesterdaysCardID = data.YesterdaysCardID ?? "";
+            _manualCardSelectionEnabled = data.ManualCardSelectionEnabled;
+            _manualCardID = data.ManualCardID ?? "";
+            _cardPhotoSyncEnabled = data.CardPhotoSyncEnabled;
             _currentMicroTaskID = data.CurrentMicroTaskID ?? "";
             _microTaskDate = data.MicroTaskDate ?? "";
             _lastMicroTaskIDs = data.LastMicroTaskIDs ?? new List<string>();
@@ -467,6 +561,9 @@ public class SettingsManager : INotifyPropertyChanged
                 TodaysPracticeCardID = _todaysPracticeCardID,
                 PracticeCardDate = _practiceCardDate,
                 YesterdaysCardID = _yesterdaysCardID,
+                ManualCardSelectionEnabled = _manualCardSelectionEnabled,
+                ManualCardID = _manualCardID,
+                CardPhotoSyncEnabled = _cardPhotoSyncEnabled,
                 CurrentMicroTaskID = _currentMicroTaskID,
                 MicroTaskDate = _microTaskDate,
                 LastMicroTaskIDs = _lastMicroTaskIDs
@@ -578,6 +675,15 @@ public class SettingsManager : INotifyPropertyChanged
 
         [JsonPropertyName("yesterdaysCardID")]
         public string? YesterdaysCardID { get; set; } = "";
+
+        [JsonPropertyName("manualCardSelectionEnabled")]
+        public bool ManualCardSelectionEnabled { get; set; } = false;
+
+        [JsonPropertyName("manualCardID")]
+        public string? ManualCardID { get; set; } = "";
+
+        [JsonPropertyName("cardPhotoSyncEnabled")]
+        public bool CardPhotoSyncEnabled { get; set; } = false;
 
         [JsonPropertyName("currentMicroTaskID")]
         public string? CurrentMicroTaskID { get; set; } = "";

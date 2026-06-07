@@ -31,8 +31,9 @@ struct BlackoutContentView: View {
             Color.black.ignoresSafeArea()
 
             switch visualType {
-            case .plainBlack:
-                // Subtle breathing circle as a minimal visual anchor
+            case .plainBlack, .cardPhoto:
+                // Subtle breathing circle as a minimal visual anchor.
+                // For .cardPhoto the card image is shown afterwards, at the break end.
                 Circle()
                     .fill(Color.white.opacity(isBreathing ? 0.08 : 0.015))
                     .frame(width: isBreathing ? 20 : 12, height: isBreathing ? 20 : 12)
@@ -192,47 +193,138 @@ struct PostBlackoutView: View {
                 }
 
             case .practiceCard:
-                VStack(spacing: 20) {
-                    if let card = state.practiceCard {
-                        Text(card.localizedTitle)
-                            .font(.system(size: 28, weight: .light))
-                            .foregroundColor(card.color)
-                            .multilineTextAlignment(.center)
-
-                        // Divider line in card color
-                        Rectangle()
-                            .fill(card.color.opacity(0.4))
-                            .frame(width: 120, height: 1)
+                if showCardPhoto, let card = state.practiceCard {
+                    // Card-photo mode: show the user's physical-card photo instead of the
+                    // text phrase. Front first; tap flips to back; X (top-left) closes.
+                    CardFlipView(cardID: card.id, accent: card.color) {
+                        state.onDismissRequest?()
                     }
-
-                    if let task = state.microTask {
-                        Text(task.localizedText)
-                            .font(.system(size: 18, weight: .light).italic())
-                            .foregroundColor(.white.opacity(0.75))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 60)
+                    .opacity(cardOpacity)
+                    .onAppear {
+                        withAnimation(.easeIn(duration: 0.5)) { cardOpacity = 1.0 }
                     }
+                } else {
+                    VStack(spacing: 20) {
+                        if let card = state.practiceCard {
+                            Text(card.localizedTitle)
+                                .font(.system(size: 28, weight: .light))
+                                .foregroundColor(card.color)
+                                .multilineTextAlignment(.center)
 
-                    Spacer().frame(height: 40)
+                            // Divider line in card color
+                            Rectangle()
+                                .fill(card.color.opacity(0.4))
+                                .frame(width: 120, height: 1)
+                        }
 
-                    Text(String(localized: "click anywhere to continue"))
-                        .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.25))
-                }
-                .opacity(cardOpacity)
-                .onAppear {
-                    withAnimation(.easeIn(duration: 0.5)) {
-                        cardOpacity = 1.0
+                        if let task = state.microTask {
+                            Text(task.localizedText)
+                                .font(.system(size: 18, weight: .light).italic())
+                                .foregroundColor(.white.opacity(0.75))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 60)
+                        }
+
+                        Spacer().frame(height: 40)
+
+                        Text(String(localized: "click anywhere to continue"))
+                            .font(.system(size: 12))
+                            .foregroundColor(.white.opacity(0.25))
+                    }
+                    .opacity(cardOpacity)
+                    .onAppear {
+                        withAnimation(.easeIn(duration: 0.5)) {
+                            cardOpacity = 1.0
+                        }
                     }
                 }
             }
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if state.phase == .practiceCard {
+            // In card-photo mode the flip view handles its own taps (flip + close).
+            if state.phase == .practiceCard && !showCardPhoto {
                 state.onDismissRequest?()
             }
         }
+    }
+
+    /// True when the user picked card-photo mode and the day's card actually has a front photo.
+    private var showCardPhoto: Bool {
+        guard SettingsManager.shared.visualType == .cardPhoto,
+              let card = state.practiceCard else { return false }
+        return SettingsManager.shared.hasCardPhoto(cardID: card.id, side: .front)
+    }
+}
+
+// MARK: - Card Flip View
+
+/// Full-screen flip card showing a practice card's user-supplied photo.
+/// Front shows first; tapping flips to the back (and back again) with a page-turn 3D
+/// effect; a small ✕ in the top-left corner closes and returns to the normal screen.
+struct CardFlipView: View {
+
+    let cardID: String
+    let accent: Color
+    let onClose: () -> Void
+
+    @State private var showingBack = false
+
+    private var frontImage: NSImage? { loadImage(side: .front) }
+    private var backImage: NSImage? { loadImage(side: .back) }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Color.black.ignoresSafeArea()
+
+            // Flip card — front and pre-rotated back stacked, container rotates on tap.
+            ZStack {
+                cardFace(frontImage, placeholder: "")
+                    .opacity(showingBack ? 0 : 1)
+                cardFace(backImage, placeholder: String(localized: "No back photo"))
+                    .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                    .opacity(showingBack ? 1 : 0)
+            }
+            .shadow(color: accent.opacity(0.3), radius: 20)
+            .rotation3DEffect(.degrees(showingBack ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+            .animation(.easeInOut(duration: 0.55), value: showingBack)
+            .padding(40)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                // Flip only when a back photo exists; otherwise stay on the front.
+                if backImage != nil { showingBack.toggle() }
+            }
+
+            // Close button (top-left) — returns to the normal screen.
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.85))
+                    .padding(10)
+                    .background(Color.white.opacity(0.12))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(20)
+        }
+    }
+
+    @ViewBuilder
+    private func cardFace(_ image: NSImage?, placeholder: String) -> some View {
+        if let image = image {
+            Image(nsImage: image)
+                .resizable()
+                .scaledToFit()
+        } else {
+            Text(placeholder)
+                .foregroundColor(.white.opacity(0.4))
+                .font(.title3)
+        }
+    }
+
+    private func loadImage(side: CardPhotoSide) -> NSImage? {
+        guard SettingsManager.shared.hasCardPhoto(cardID: cardID, side: side) else { return nil }
+        return NSImage(contentsOf: SettingsManager.shared.cardPhotoURL(cardID: cardID, side: side))
     }
 }
 

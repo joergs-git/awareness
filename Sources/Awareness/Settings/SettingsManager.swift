@@ -1,6 +1,12 @@
 import Foundation
 import Combine
 
+/// Which face of a practice card a user-supplied photo represents.
+enum CardPhotoSide: String, CaseIterable {
+    case front
+    case back
+}
+
 /// Central settings store backed by UserDefaults.
 /// Published properties allow SwiftUI views to react to changes automatically.
 final class SettingsManager: ObservableObject {
@@ -38,6 +44,11 @@ final class SettingsManager: ObservableObject {
         static let todaysPracticeCardID  = "todaysPracticeCardID"
         static let practiceCardDate      = "practiceCardDate"
         static let yesterdaysCardID      = "yesterdaysCardID"
+        // Manual daily-card selection (pick one fixed card to match a physical card)
+        static let manualCardSelectionEnabled = "manualCardSelectionEnabled"
+        static let manualCardID                = "manualCardID"
+        // Opt-in: sync user card photos across devices via Supabase Storage
+        static let cardPhotoSyncEnabled        = "cardPhotoSyncEnabled"
         static let currentMicroTaskID    = "currentMicroTaskID"
         static let microTaskDate         = "microTaskDate"
         static let lastMicroTaskIDs      = "lastMicroTaskIDs"
@@ -61,7 +72,10 @@ final class SettingsManager: ObservableObject {
         Keys.customVideoPath:  "",
         Keys.startclickConfirmation: true,
         Keys.skipDuringMediaUse: false,
-        Keys.syncPassphrase: ""
+        Keys.syncPassphrase: "",
+        Keys.manualCardSelectionEnabled: false,
+        Keys.manualCardID: "",
+        Keys.cardPhotoSyncEnabled: false
     ]
 
     // MARK: - Published Properties
@@ -163,6 +177,24 @@ final class SettingsManager: ObservableObject {
     /// When on, breaks are skipped while the camera or microphone is active
     @Published var skipDuringMediaUse: Bool {
         didSet { defaults.set(skipDuringMediaUse, forKey: Keys.skipDuringMediaUse) }
+    }
+
+    // MARK: - Daily Card Selection
+
+    /// When on, the daily card is the user-chosen `manualCardID` instead of the
+    /// automatic date-based rotation — lets the digital card mirror a physical card in hand.
+    @Published var manualCardSelectionEnabled: Bool {
+        didSet { defaults.set(manualCardSelectionEnabled, forKey: Keys.manualCardSelectionEnabled) }
+    }
+
+    /// The card chosen when manual selection is on (one of PracticeCard.allCards ids)
+    @Published var manualCardID: String {
+        didSet { defaults.set(manualCardID, forKey: Keys.manualCardID) }
+    }
+
+    /// Opt-in: upload/download user card photos across devices via Supabase Storage.
+    @Published var cardPhotoSyncEnabled: Bool {
+        didSet { defaults.set(cardPhotoSyncEnabled, forKey: Keys.cardPhotoSyncEnabled) }
     }
 
     /// Sync passphrase entered by the user (from iOS app)
@@ -278,32 +310,104 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Practice Card & Micro-Task
 
-    /// Get today's practice card, assigning a new one if the day changed.
-    /// Avoids repeating yesterday's card.
+    /// Deterministic index into `PracticeCard.allCards` for the current local day.
+    /// Days since the local 1970 epoch, mod card count — identical formula on
+    /// iOS/macOS/Windows, so every device shows the SAME card on a given day with no sync.
+    func deterministicCardIndex() -> Int {
+        let cal = Calendar.current
+        let epoch = cal.startOfDay(for: Date(timeIntervalSince1970: 0))
+        let today = cal.startOfDay(for: Date())
+        let days = cal.dateComponents([.day], from: epoch, to: today).day ?? 0
+        let count = PracticeCard.allCards.count
+        guard count > 0 else { return 0 }
+        return ((days % count) + count) % count
+    }
+
+    /// Get today's practice card. Manual selection wins; otherwise a deterministic
+    /// date-based rotation (same card on every device, no randomness, no sync needed).
     func todaysPracticeCard() -> PracticeCard? {
         let today = todayString()
-        let storedDate = defaults.string(forKey: Keys.practiceCardDate)
 
-        // Same day — return stored card
-        if storedDate == today, let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) {
+        // 1. Manual override — the user pinned a specific card to match their physical card.
+        if manualCardSelectionEnabled, let card = PracticeCard.card(withID: manualCardID) {
+            persistDailyCard(card.id, date: today)
+            return card
+        }
+
+        // 2. Already resolved for today — return the stored card.
+        if defaults.string(forKey: Keys.practiceCardDate) == today,
+           let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) {
             return PracticeCard.card(withID: cardID)
         }
 
-        // New day — assign a random card (avoid yesterday's)
-        let yesterdayID = defaults.string(forKey: Keys.todaysPracticeCardID)
-        defaults.set(yesterdayID, forKey: Keys.yesterdaysCardID)
+        // 3. New day — deterministic rotation through all cards.
+        let card = PracticeCard.allCards[deterministicCardIndex()]
+        persistDailyCard(card.id, date: today)
+        return card
+    }
 
-        let candidates = PracticeCard.allCards.filter { $0.id != yesterdayID }
-        guard let newCard = candidates.randomElement() else { return nil }
+    // MARK: - Per-Card Photos
 
-        defaults.set(newCard.id, forKey: Keys.todaysPracticeCardID)
-        defaults.set(today, forKey: Keys.practiceCardDate)
+    /// Directory holding user-supplied card photos (front/back), inside the app container.
+    /// Photos are copied in at pick time so the app owns them (no security-scoped bookmarks
+    /// needed afterwards, and Supabase upload is a plain file read).
+    func cardPhotosDirectory() -> URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("Awareness/card-photos", isDirectory: true)
+        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        return base
+    }
 
-        // Reset micro-task state for new day
+    /// Local file URL for a card photo (the file may not exist yet).
+    func cardPhotoURL(cardID: String, side: CardPhotoSide) -> URL {
+        cardPhotosDirectory().appendingPathComponent("card-\(cardID)-\(side.rawValue).png")
+    }
+
+    /// Whether a stored photo exists for the given card + side.
+    func hasCardPhoto(cardID: String, side: CardPhotoSide) -> Bool {
+        FileManager.default.fileExists(atPath: cardPhotoURL(cardID: cardID, side: side).path)
+    }
+
+    /// Copy a user-picked image file into the card-photo store (security-scoped safe).
+    @discardableResult
+    func importCardPhoto(cardID: String, side: CardPhotoSide, from sourceURL: URL) -> Bool {
+        let scoped = sourceURL.startAccessingSecurityScopedResource()
+        defer { if scoped { sourceURL.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: sourceURL) else { return false }
+        return writeCardPhoto(cardID: cardID, side: side, data: data)
+    }
+
+    /// Write raw image data into the card-photo store (used by picker and Supabase download).
+    @discardableResult
+    func writeCardPhoto(cardID: String, side: CardPhotoSide, data: Data) -> Bool {
+        do {
+            try data.write(to: cardPhotoURL(cardID: cardID, side: side))
+            objectWillChange.send()
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Remove a stored card photo.
+    func clearCardPhoto(cardID: String, side: CardPhotoSide) {
+        try? FileManager.default.removeItem(at: cardPhotoURL(cardID: cardID, side: side))
+        objectWillChange.send()
+    }
+
+    /// Persist today's card id/date, resetting micro-task state only when the card changes.
+    private func persistDailyCard(_ cardID: String, date: String) {
+        let previousID = defaults.string(forKey: Keys.todaysPracticeCardID)
+        let previousDate = defaults.string(forKey: Keys.practiceCardDate)
+        guard previousID != cardID || previousDate != date else { return }
+
+        defaults.set(previousID, forKey: Keys.yesterdaysCardID)
+        defaults.set(cardID, forKey: Keys.todaysPracticeCardID)
+        defaults.set(date, forKey: Keys.practiceCardDate)
+
+        // New card for the day — reset micro-task state.
         defaults.removeObject(forKey: Keys.currentMicroTaskID)
         defaults.removeObject(forKey: Keys.microTaskDate)
-
-        return newCard
     }
 
     /// Pick a new random micro-task from today's card pool.
@@ -387,6 +491,9 @@ final class SettingsManager: ObservableObject {
         startclickConfirmation = defaults.bool(forKey: Keys.startclickConfirmation)
         skipDuringMediaUse = defaults.bool(forKey: Keys.skipDuringMediaUse)
         syncPassphrase   = defaults.string(forKey: Keys.syncPassphrase) ?? ""
+        manualCardSelectionEnabled = defaults.bool(forKey: Keys.manualCardSelectionEnabled)
+        manualCardID     = defaults.string(forKey: Keys.manualCardID) ?? ""
+        cardPhotoSyncEnabled = defaults.bool(forKey: Keys.cardPhotoSyncEnabled)
         snoozeUntil      = defaults.object(forKey: Keys.snoozeUntil) as? Date
 
         let typeRaw = defaults.string(forKey: Keys.visualType) ?? BlackoutVisualType.text.rawValue
