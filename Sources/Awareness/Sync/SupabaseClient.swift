@@ -317,7 +317,10 @@ final class CardAssetSync {
                     }
                 }
                 // Apply the synced manual card selection, if any.
-                if let mData = try await SupabaseClient.shared.downloadStorageObject(path: "\(hash)/manifest.json"),
+                // Only adopt the synced manual selection when this device has none pinned —
+                // never clobber an active local choice the user just made.
+                if !settings.manualCardSelectionEnabled,
+                   let mData = try await SupabaseClient.shared.downloadStorageObject(path: "\(hash)/manifest.json"),
                    let manifest = try? JSONDecoder().decode(Manifest.self, from: mData),
                    let manualID = manifest.manualCardID, !manualID.isEmpty {
                     settings.manualCardSelectionEnabled = true

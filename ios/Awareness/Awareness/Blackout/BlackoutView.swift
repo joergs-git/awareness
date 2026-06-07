@@ -338,9 +338,11 @@ struct BlackoutView: View {
     /// Today's practice card (cached per day by SettingsManager).
     private var todaysCard: PracticeCard? { settings.todaysPracticeCard() }
 
-    /// True when card-photo mode is active and today's card has a front photo to show.
+    /// True when today's card has a front photo to show at the break end.
+    /// Independent of the breathing visual mode — if you gave the day's card a photo,
+    /// you see it (front, tap to flip, ✕ to close) instead of just dismissing.
     private var shouldShowCardPhoto: Bool {
-        guard settings.visualType == .cardPhoto, let card = todaysCard else { return false }
+        guard let card = todaysCard else { return false }
         return settings.hasCardPhoto(cardID: card.id, side: .front)
     }
 

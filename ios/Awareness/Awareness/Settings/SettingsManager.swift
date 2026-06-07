@@ -714,11 +714,15 @@ final class SettingsManager: ObservableObject {
             defaults.set(v, forKey: Keys.guruAdaptiveState)
         }
 
-        // Apply synced manual card selection (iOS is leader)
+        // iOS is the LEADER for the daily card, manual selection and micro-task: only the
+        // watch adopts these from the context. Guarding with os(watchOS) prevents the watch's
+        // defaults (manual=false) from clobbering the user's pinned card on iPhone after a sync.
+        #if os(watchOS)
+        // Apply synced manual card selection
         if let v = context["manualCardSelectionEnabled"] as? Bool { manualCardSelectionEnabled = v }
         if let v = context["manualCardID"] as? String { manualCardID = v }
 
-        // Apply synced practice card (iOS is leader — watchOS adopts the card)
+        // Apply synced practice card (watchOS adopts the card)
         if let cardID = context["todaysPracticeCardID"] as? String,
            let cardDate = context["practiceCardDate"] as? String {
             let localCardID = defaults.string(forKey: Keys.todaysPracticeCardID)
@@ -736,6 +740,7 @@ final class SettingsManager: ObservableObject {
             defaults.set(taskID, forKey: Keys.currentMicroTaskID)
             defaults.set(taskDate, forKey: Keys.microTaskDate)
         }
+        #endif
     }
 
     // MARK: - Init

@@ -78,14 +78,19 @@ public class CardAssetSync
                 }
             }
 
-            var mData = await SupabaseClient.Shared.DownloadStorageObjectAsync($"{hash}/manifest.json");
-            if (mData != null)
+            // Only adopt the synced manual selection when this device has none pinned —
+            // never clobber an active local choice the user just made.
+            if (!settings.ManualCardSelectionEnabled)
             {
-                var manifest = JsonSerializer.Deserialize<Manifest>(mData);
-                if (!string.IsNullOrEmpty(manifest?.ManualCardID))
+                var mData = await SupabaseClient.Shared.DownloadStorageObjectAsync($"{hash}/manifest.json");
+                if (mData != null)
                 {
-                    settings.ManualCardSelectionEnabled = true;
-                    settings.ManualCardID = manifest.ManualCardID;
+                    var manifest = JsonSerializer.Deserialize<Manifest>(mData);
+                    if (!string.IsNullOrEmpty(manifest?.ManualCardID))
+                    {
+                        settings.ManualCardSelectionEnabled = true;
+                        settings.ManualCardID = manifest.ManualCardID;
+                    }
                 }
             }
         }

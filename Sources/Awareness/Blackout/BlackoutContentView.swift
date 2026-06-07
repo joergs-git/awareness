@@ -249,10 +249,10 @@ struct PostBlackoutView: View {
         }
     }
 
-    /// True when the user picked card-photo mode and the day's card actually has a front photo.
+    /// True when the day's card has a front photo to show at the break end —
+    /// independent of the breathing visual mode.
     private var showCardPhoto: Bool {
-        guard SettingsManager.shared.visualType == .cardPhoto,
-              let card = state.practiceCard else { return false }
+        guard let card = state.practiceCard else { return false }
         return SettingsManager.shared.hasCardPhoto(cardID: card.id, side: .front)
     }
 }

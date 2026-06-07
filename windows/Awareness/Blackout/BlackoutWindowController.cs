@@ -296,10 +296,10 @@ public class BlackoutWindowController : IDisposable
 
             if (card != null)
             {
-                // Card-photo mode: show the user's card photo (front, tap to flip, ✕ to close)
-                // instead of the text phrase, when a front photo exists for the day's card.
-                if (SettingsManager.Shared.VisualType == BlackoutVisualType.CardPhoto
-                    && SettingsManager.Shared.HasCardPhoto(card.Id, CardPhotoSide.Front))
+                // Show the user's card photo (front, tap to flip, ✕ to close) instead of the
+                // text phrase whenever a front photo exists for the day's card — independent
+                // of the breathing visual mode.
+                if (SettingsManager.Shared.HasCardPhoto(card.Id, CardPhotoSide.Front))
                 {
                     postBlackout.ShowCardPhoto(card.Id);
                 }
