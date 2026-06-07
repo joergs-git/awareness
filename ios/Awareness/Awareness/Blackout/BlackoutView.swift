@@ -452,6 +452,7 @@ struct CardFlipView: View {
             Color.black.ignoresSafeArea()
 
             // Flip card — front and pre-rotated back stacked, container rotates on tap.
+            // Edge-to-edge, aspect-fit (no crop): fills the screen as much as possible.
             ZStack {
                 cardFace(frontImage, placeholder: "")
                     .opacity(showingBack ? 0 : 1)
@@ -459,10 +460,10 @@ struct CardFlipView: View {
                     .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                     .opacity(showingBack ? 1 : 0)
             }
-            .shadow(color: accent.opacity(0.3), radius: 20)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .rotation3DEffect(.degrees(showingBack ? 180 : 0), axis: (x: 0, y: 1, z: 0))
             .animation(.easeInOut(duration: 0.55), value: showingBack)
-            .padding(24)
+            .ignoresSafeArea()
             .contentShape(Rectangle())
             .onTapGesture {
                 // Flip only when a back photo exists; otherwise stay on the front.
