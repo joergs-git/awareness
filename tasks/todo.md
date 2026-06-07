@@ -29,9 +29,9 @@
 - [ ] iOS/Windows builds on a configured machine; run supabase/card-assets-bucket.sql; Apple archive/notarize per policy
 
 ## Results
-- Phase A (Smart Guru) + B (manual card/rotation) fully implemented; macOS swift build passes, iOS parse-clean.
-- Phase C (card photos + opt-in Supabase Storage sync) implemented on iOS/macOS/Windows; macOS verified.
-- Env limits: iOS 26.5 platform not installed here (no iOS build); WPF not buildable on macOS (Windows via CI). Supabase bucket must be created by the user via supabase/card-assets-bucket.sql (the MCP-connected Supabase account does not include the awareness project).
+- Phase A (Smart Guru) + B (manual card/rotation) + C (card photos + opt-in Supabase Storage sync) implemented on iOS/macOS/Windows.
+- Build-verified: macOS `swift build` ✓; full iOS scheme (iOS + watchOS + widgets, OS 26.5) **BUILD SUCCEEDED** ✓; watchOS scheme (OS 26.4) **BUILD SUCCEEDED** ✓. No fixes were needed. Windows builds via GitHub Actions.
+- User-side remaining: create the Supabase bucket via supabase/card-assets-bucket.sql (the MCP-connected Supabase account does not include the awareness project); push/merge; Apple archive + notarize per policy.
 
 ---
 
