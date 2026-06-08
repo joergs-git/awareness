@@ -91,7 +91,7 @@ struct ContentView: View {
                                 // since the title itself now starts a break.
                                 HomeCardPhotoView(cardID: card.id, accent: card.color)
                                     .padding(.top, 12)
-                                    .padding(.horizontal, 16)
+                                    .padding(.horizontal, 10)
                             } else {
 
                             // Micro-task connected below the card with thin colored bridge
@@ -935,8 +935,9 @@ struct HomeCardPhotoView: View {
         }
         .rotation3DEffect(.degrees(showingBack ? 180 : 0), axis: (x: 0, y: 1, z: 0))
         .animation(.easeInOut(duration: 0.55), value: showingBack)
+        // Fill the available width (≈10px from each screen edge via the parent padding);
+        // height follows the photo's aspect ratio so the card is as large as possible.
         .frame(maxWidth: .infinity)
-        .frame(maxHeight: 320)
         .contentShape(Rectangle())
         .onTapGesture {
             // Flip only when a back photo exists; otherwise stay on the front.
