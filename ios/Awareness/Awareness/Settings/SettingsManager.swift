@@ -380,12 +380,43 @@ final class SettingsManager: ObservableObject {
     #if !os(watchOS)
     // MARK: - Per-Card Photos
 
-    /// Directory holding user-supplied card photos (front/back), inside the app sandbox.
+    /// App Group identifier shared between the iOS app and its home-screen widget.
+    private static let cardPhotoAppGroupID = "group.com.joergsflow.awareness.ios"
+
+    /// Directory holding user-supplied card photos (front/back).
+    /// Stored in the shared App Group container so the widget extension can read the
+    /// same files (it cannot see the app's Documents directory). Falls back to Documents
+    /// if the App Group container is unavailable.
     func cardPhotosDirectory() -> URL {
-        let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("card-photos", isDirectory: true)
+        let base: URL
+        if let shared = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: SettingsManager.cardPhotoAppGroupID) {
+            base = shared.appendingPathComponent("card-photos", isDirectory: true)
+        } else {
+            base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                .appendingPathComponent("card-photos", isDirectory: true)
+        }
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         return base
+    }
+
+    /// One-time migration: move card photos saved in the old Documents location into the
+    /// shared App Group container so the widget can read them. Safe to call repeatedly.
+    func migrateCardPhotosToAppGroupIfNeeded() {
+        let fm = FileManager.default
+        let oldDir = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("card-photos", isDirectory: true)
+        guard fm.fileExists(atPath: oldDir.path),
+              let files = try? fm.contentsOfDirectory(at: oldDir, includingPropertiesForKeys: nil) else { return }
+        let newDir = cardPhotosDirectory()
+        // If the new dir IS the old dir (App Group unavailable), nothing to do.
+        guard newDir.path != oldDir.path else { return }
+        for file in files {
+            let dest = newDir.appendingPathComponent(file.lastPathComponent)
+            if !fm.fileExists(atPath: dest.path) {
+                try? fm.moveItem(at: file, to: dest)
+            }
+        }
     }
 
     /// Local file URL for a card photo (the file may not exist yet).

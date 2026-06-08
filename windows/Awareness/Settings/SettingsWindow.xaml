@@ -153,6 +153,9 @@
                 <StackPanel>
                     <CheckBox x:Name="ManualCardCheck" Content="{x:Static res:Strings.ChooseCardManually}"
                               Margin="0,4,0,6" Checked="OnManualCardChanged" Unchecked="OnManualCardChanged" />
+                    <Button x:Name="PickRandomCardButton" Content="{x:Static res:Strings.PickRandomForToday}"
+                            HorizontalAlignment="Left" Margin="0,0,0,6" Padding="10,4"
+                            Click="OnPickRandomCard" />
                     <ComboBox x:Name="ManualCardCombo" Margin="0,0,0,6"
                               Visibility="Collapsed" SelectionChanged="OnManualCardSelected" />
                     <!-- Per-card front/back photo rows are populated in code-behind -->

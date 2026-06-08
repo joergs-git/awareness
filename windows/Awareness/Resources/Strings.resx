@@ -163,6 +163,7 @@ You can configure everything from the tray icon → Settings.</value></data>
   <data name="PhotoFront" xml:space="preserve"><value>Front</value></data>
   <data name="PhotoBack" xml:space="preserve"><value>Back</value></data>
   <data name="RemovePhoto" xml:space="preserve"><value>Remove</value></data>
+  <data name="PickRandomForToday" xml:space="preserve"><value>Pick random for today</value></data>
   <data name="ReadyToBreathe" xml:space="preserve"><value>Ready to breathe?</value></data>
   <data name="Yes" xml:space="preserve"><value>Yes</value></data>
   <data name="No" xml:space="preserve"><value>No</value></data>

@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import UIKit
 
 // MARK: - Widget Snapshot (mirrors WidgetDataBridge.WidgetSnapshot from the iOS app)
 // Defined separately here so the widget extension doesn't depend on iOS app code.
@@ -25,6 +26,7 @@ struct WidgetSnapshotData: Codable {
 /// Data snapshot for a single widget timeline entry
 struct AwarenessWidgetEntry: TimelineEntry {
     let date: Date
+    let cardID: String
     let cardTitle: String
     let cardShortTitle: String
     let cardColor: Color
@@ -37,6 +39,7 @@ struct AwarenessWidgetEntry: TimelineEntry {
     /// Placeholder entry for widget gallery and loading states
     static let placeholder = AwarenessWidgetEntry(
         date: Date(),
+        cardID: "letting-go",
         cardTitle: "Exercise of Letting Go",
         cardShortTitle: "Letting Go",
         cardColor: Color(red: 0.65, green: 0.42, blue: 0.58),
@@ -46,6 +49,23 @@ struct AwarenessWidgetEntry: TimelineEntry {
         todayCompleted: 3,
         isSnoozed: false
     )
+}
+
+// MARK: - Card Photo Access (shared App Group container)
+
+/// Loads user card photos from the shared App Group container so the widget can show
+/// the same front/back images the app stores. Returns nil when no photo is set.
+enum WidgetCardPhoto {
+    private static let appGroupID = "group.com.joergsflow.awareness.ios"
+
+    static func image(cardID: String, side: String) -> UIImage? {
+        guard let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+            return nil
+        }
+        let url = dir.appendingPathComponent("card-photos/card-\(cardID)-\(side).png")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return UIImage(data: data)
+    }
 }
 
 // MARK: - Timeline Provider
@@ -82,6 +102,7 @@ struct AwarenessWidgetProvider: TimelineProvider {
 
         return AwarenessWidgetEntry(
             date: Date(),
+            cardID: snapshot.cardID,
             cardTitle: snapshot.cardTitle,
             cardShortTitle: snapshot.cardShortTitle,
             cardColor: Color(
@@ -236,12 +257,22 @@ struct MediumWidgetView: View {
                     }
                 }
 
-                // Middle: micro-task text (full, multi-line)
-                Text(entry.microTaskText)
-                    .font(.caption2.italic())
-                    .foregroundColor(.primary.opacity(0.7))
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
+                // Middle: card photos (front + back side by side) when set, else micro-task text
+                if let front = WidgetCardPhoto.image(cardID: entry.cardID, side: "front") {
+                    HStack(spacing: 6) {
+                        miniCard(front)
+                        if let back = WidgetCardPhoto.image(cardID: entry.cardID, side: "back") {
+                            miniCard(back)
+                        }
+                    }
+                    .frame(maxHeight: 56)
+                } else {
+                    Text(entry.microTaskText)
+                        .font(.caption2.italic())
+                        .foregroundColor(.primary.opacity(0.7))
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 Spacer(minLength: 0)
 
@@ -292,6 +323,16 @@ struct MediumWidgetView: View {
         }
         // Tapping anywhere except the Breathe button just opens the app
         .widgetURL(URL(string: "awareness://open"))
+    }
+
+    /// A small rounded card-photo thumbnail for the medium widget.
+    @ViewBuilder
+    private func miniCard(_ image: UIImage) -> some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFill()
+            .frame(maxWidth: .infinity, maxHeight: 56)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 
     private func formatTime(_ date: Date) -> String {

@@ -155,6 +155,17 @@ struct SettingsView: View {
                 Section {
                     Toggle(String(localized: "Choose today's card manually"), isOn: $settings.manualCardSelectionEnabled)
 
+                    // Pin a random card as today's fixed card.
+                    Button {
+                        if let card = PracticeCard.allCards.randomElement() {
+                            settings.manualCardSelectionEnabled = true
+                            settings.manualCardID = card.id
+                            CardAssetSync.shared.pushIfEnabled()
+                        }
+                    } label: {
+                        Label(String(localized: "Pick random for today"), systemImage: "shuffle")
+                    }
+
                     // Per-card rows: pick the manual card and attach front/back photos.
                     ForEach(PracticeCard.allCards) { card in
                         CardRowView(card: card, settings: settings)

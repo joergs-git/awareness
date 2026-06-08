@@ -278,6 +278,22 @@ public partial class SettingsWindow : Window
         _settings.ManualCardID = (string)item.Tag;
     }
 
+    private void OnPickRandomCard(object sender, RoutedEventArgs e)
+    {
+        if (_isLoading) return;
+        var card = PracticeCard.AllCards[Random.Shared.Next(PracticeCard.AllCards.Length)];
+        _settings.ManualCardSelectionEnabled = true;
+        _settings.ManualCardID = card.Id;
+        _ = Awareness.Sync.CardAssetSync.Shared.PushIfEnabledAsync();
+        // Reflect in the UI
+        _isLoading = true;
+        ManualCardCheck.IsChecked = true;
+        int idx = Array.FindIndex(PracticeCard.AllCards, c => c.Id == card.Id);
+        if (idx >= 0) ManualCardCombo.SelectedIndex = idx;
+        _isLoading = false;
+        UpdateDailyCardUI();
+    }
+
     private void UpdateDailyCardUI()
     {
         bool manual = ManualCardCheck.IsChecked == true;

@@ -935,6 +935,15 @@ namespace Awareness.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Pick random for today.
+        /// </summary>
+        public static string PickRandomForToday {
+            get {
+                return ResourceManager.GetString("PickRandomForToday", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to When on, breaks won't interrupt while camera or microphone is active..
         /// </summary>
         public static string SkipDuringMediaUseDescription {

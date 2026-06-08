@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var currentTask: MicroTask?
     @State private var showingCardDetail = false
     @State private var showingTaskDetail = false
+    @State private var showingCardPicker = false
     @State private var breathePulsing = false
     @State private var logoRotation: Double = 0
     @State private var showingOnboarding = false
@@ -37,6 +38,12 @@ struct ContentView: View {
 
     /// Snooze durations offered in the menu (minutes). 0 = "Until I resume"
     private static let snoozeDurations = [10, 20, 30, 60, 120, 0]
+
+    /// True when today's card has a front photo — drives the photo-first home layout.
+    private var hasTodayCardPhoto: Bool {
+        guard let card = todaysCard else { return false }
+        return settings.hasCardPhoto(cardID: card.id, side: .front)
+    }
 
     var body: some View {
         NavigationStack {
@@ -65,13 +72,27 @@ struct ContentView: View {
                 if let card = todaysCard {
                     Section {
                         VStack(spacing: 0) {
-                            // Card banner (tap for detail)
+                            // Card banner. With a card photo, tapping the title starts breathing
+                            // directly; otherwise it opens the card detail.
                             Button {
-                                showingCardDetail = true
+                                if hasTodayCardPhoto {
+                                    showingBlackout = true
+                                } else {
+                                    showingCardDetail = true
+                                }
                             } label: {
                                 practiceCardBanner(card: card)
                             }
                             .buttonStyle(.plain)
+
+                            if hasTodayCardPhoto {
+                                // Card-photo mode: show the front photo inline (tap flips to
+                                // back) in place of the micro-task; the Breathe button is hidden
+                                // since the title itself now starts a break.
+                                HomeCardPhotoView(cardID: card.id, accent: card.color)
+                                    .padding(.top, 12)
+                                    .padding(.horizontal, 16)
+                            } else {
 
                             // Micro-task connected below the card with thin colored bridge
                             if let task = currentTask {
@@ -133,6 +154,7 @@ struct ContentView: View {
                                     breathePulsing = true
                                 }
                             }
+                            } // end else (no card photo)
                         }
                         .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 24, trailing: 0))
                         .listRowBackground(Color.clear)
@@ -439,8 +461,19 @@ struct ContentView: View {
             .modifier(CompactSectionSpacingModifier())
             .scrollContentBackground(.hidden)
             .background(WarmBackground())
-            .navigationTitle(String(localized: "Atempause"))
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // Tappable title (top-left) → daily card picker
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingCardPicker = true
+                    } label: {
+                        Text(String(localized: "Atempause"))
+                            .font(.headline.weight(.semibold))
+                            .foregroundColor(.primary)
+                    }
+                    .accessibilityHint(String(localized: "Choose today's card"))
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingSettings = true
@@ -458,6 +491,15 @@ struct ContentView: View {
                 if let card = todaysCard {
                     PracticeCardDetailView(card: card)
                 }
+            }
+            .sheet(isPresented: $showingCardPicker, onDismiss: {
+                // Reflect the (possibly) newly pinned card immediately
+                todaysCard = settings.todaysPracticeCard()
+                currentTask = settings.currentMicroTask()
+                WidgetDataBridge.shared.updateWidget()
+                CardAssetSync.shared.pushIfEnabled()
+            }) {
+                DailyCardPickerView(settings: settings)
             }
             .sheet(isPresented: $showingTaskDetail) {
                 if let task = currentTask, let card = todaysCard {
@@ -484,6 +526,10 @@ struct ContentView: View {
                 // Small delay to let the permission dialog finish if it's showing
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await checkNotificationStatus()
+
+                // Migrate any card photos from the old Documents location into the App
+                // Group container so the widget can read them.
+                settings.migrateCardPhotosToAppGroupIfNeeded()
 
                 // Load today's practice card and micro-task
                 todaysCard = settings.todaysPracticeCard()
@@ -861,5 +907,187 @@ struct MicroTaskDetailView: View {
                 .padding(.bottom, 40)
             }
         }
+    }
+}
+
+// MARK: - Home Card Photo (inline flip)
+
+/// Inline card photo shown on the home screen when the day's card has a front photo.
+/// Front shows first; tapping flips to the back (page-turn 3D) and back again.
+/// Replaces the micro-task inspiration text in photo-first mode.
+struct HomeCardPhotoView: View {
+    let cardID: String
+    let accent: Color
+
+    @ObservedObject private var settings = SettingsManager.shared
+    @State private var showingBack = false
+
+    private var frontImage: UIImage? { loadImage(side: .front) }
+    private var backImage: UIImage? { loadImage(side: .back) }
+
+    var body: some View {
+        ZStack {
+            cardFace(frontImage, placeholder: "")
+                .opacity(showingBack ? 0 : 1)
+            cardFace(backImage, placeholder: String(localized: "No back photo"))
+                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                .opacity(showingBack ? 1 : 0)
+        }
+        .rotation3DEffect(.degrees(showingBack ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+        .animation(.easeInOut(duration: 0.55), value: showingBack)
+        .frame(maxWidth: .infinity)
+        .frame(maxHeight: 320)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            // Flip only when a back photo exists; otherwise stay on the front.
+            if backImage != nil { showingBack.toggle() }
+        }
+    }
+
+    @ViewBuilder
+    private func cardFace(_ image: UIImage?, placeholder: String) -> some View {
+        if let image = image {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .shadow(color: accent.opacity(0.25), radius: 8, y: 3)
+        } else {
+            RoundedRectangle(cornerRadius: 14)
+                .fill(accent.opacity(0.12))
+                .frame(height: 160)
+                .overlay(
+                    Text(placeholder)
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                )
+        }
+    }
+
+    private func loadImage(side: CardPhotoSide) -> UIImage? {
+        guard settings.hasCardPhoto(cardID: cardID, side: side),
+              let data = try? Data(contentsOf: settings.cardPhotoURL(cardID: cardID, side: side)) else {
+            return nil
+        }
+        return UIImage(data: data)
+    }
+}
+
+// MARK: - Daily Card Picker
+
+/// Sheet opened from the top-left title. Shows the seven cards fanned out (front photo
+/// if set, otherwise a colored title card). Tapping a card pins it as today's card;
+/// "Pick random" pins a random one. Both set the manual selection so the card stays fixed
+/// for the day across devices.
+struct DailyCardPickerView: View {
+    @ObservedObject var settings: SettingsManager
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                WarmBackground().ignoresSafeArea()
+
+                VStack(spacing: 24) {
+                    Text(String(localized: "Today's card"))
+                        .font(.title2.weight(.semibold))
+                        .padding(.top, 8)
+
+                    Text(String(localized: "Pick the card to work with today, or let chance choose. It stays fixed for the day."))
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+
+                    // Fanned-out front cards (horizontally scrollable, slight rotation)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 14) {
+                            ForEach(Array(PracticeCard.allCards.enumerated()), id: \.element.id) { index, card in
+                                cardTile(card)
+                                    .rotationEffect(.degrees(fanAngle(index)))
+                                    .onTapGesture { pick(card) }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 30)
+                    }
+
+                    Button {
+                        if let card = PracticeCard.allCards.randomElement() { pick(card) }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "shuffle")
+                            Text(String(localized: "Pick random"))
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 12)
+                        .background(Capsule().fill(Color(red: 0.55, green: 0.38, blue: 0.72)))
+                    }
+
+                    Spacer()
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(String(localized: "Done")) { dismiss() }
+                }
+            }
+        }
+    }
+
+    /// Small fan rotation centered on the middle card.
+    private func fanAngle(_ index: Int) -> Double {
+        let mid = Double(PracticeCard.allCards.count - 1) / 2.0
+        return (Double(index) - mid) * 4.0
+    }
+
+    /// Pin the chosen card as today's manual card and close.
+    private func pick(_ card: PracticeCard) {
+        settings.manualCardSelectionEnabled = true
+        settings.manualCardID = card.id
+        dismiss()
+    }
+
+    @ViewBuilder
+    private func cardTile(_ card: PracticeCard) -> some View {
+        let selected = settings.manualCardSelectionEnabled && settings.manualCardID == card.id
+        ZStack(alignment: .bottom) {
+            if let img = frontImage(card.id) {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 130, height: 185)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            } else {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(card.color)
+                    .frame(width: 130, height: 185)
+                    .overlay(
+                        Text(card.localizedTitle)
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(8)
+                    )
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(selected ? Color.white : Color.clear, lineWidth: 3)
+        )
+        .shadow(color: card.color.opacity(0.4), radius: 6, y: 3)
+        .scaleEffect(selected ? 1.05 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: selected)
+    }
+
+    private func frontImage(_ cardID: String) -> UIImage? {
+        guard settings.hasCardPhoto(cardID: cardID, side: .front),
+              let data = try? Data(contentsOf: settings.cardPhotoURL(cardID: cardID, side: .front)) else {
+            return nil
+        }
+        return UIImage(data: data)
     }
 }
