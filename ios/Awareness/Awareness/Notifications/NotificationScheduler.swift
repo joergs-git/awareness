@@ -13,6 +13,10 @@ class NotificationScheduler: ObservableObject {
     /// Maximum number of pending notifications to maintain
     private static let maxPending = 30
 
+    /// Hard minimum spacing between consecutive notifications (minutes), independent of the
+    /// user's min-interval setting. Guarantees a device never re-notifies within 5 minutes.
+    private static let minimumGapMinutes: Double = 5
+
     /// Category identifier for awareness notifications
     static let categoryIdentifier = "awareness.blackout"
 
@@ -208,9 +212,18 @@ class NotificationScheduler: ObservableObject {
                 latestDate = fireDate
             }
 
-            // Re-fetch to update next date
+            // Re-fetch to update next date and re-push the refreshed schedule to the watch
+            // so its coordinated set stays aligned with the phone (prevents the watch from
+            // depleting and falling back to its own offset notifications).
             self.center.getPendingNotificationRequests { updated in
                 self.updateNextDate(from: updated)
+                let dates = updated.compactMap { req -> Date? in
+                    (req.trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate()
+                }.sorted()
+                if !dates.isEmpty {
+                    self.scheduledFireDates = dates
+                    WatchConnectivityManager.shared.pushScheduleToWatch(dates)
+                }
             }
         }
     }
@@ -339,8 +352,12 @@ class NotificationScheduler: ObservableObject {
 
     /// Returns a random interval in minutes using effective (guru-adapted or manual) values
     private func randomInterval() -> Double {
-        let minMin = settings.effectiveMinInterval
-        let maxMin = settings.effectiveMaxInterval
+        // Enforce a hard 5-minute floor between consecutive notifications on this device,
+        // independent of the user's min-interval setting, so breaks never stack closer
+        // than 5 min (rule: no re-notify within 5 minutes per device).
+        let floor = NotificationScheduler.minimumGapMinutes
+        let minMin = max(settings.effectiveMinInterval, floor)
+        let maxMin = max(settings.effectiveMaxInterval, minMin)
         guard maxMin > minMin else { return minMin }
         return Double.random(in: minMin...maxMin)
     }
