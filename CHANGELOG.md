@@ -6,6 +6,10 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ## v5.2
 
+### Watch notification dedup + Smart Guru deactivation (iOS/watchOS, build 14)
+- **Fully fixed duplicate break notifications on Apple Watch** — build 13 stopped the *offset* duplicates (foreground top-ups landing ~1 min apart) but the *simultaneous* duplicate remained: the watch still scheduled its own local copies at the same coordinated fire dates the iPhone forwards (mirrors) to the watch, so each break still showed twice. Now, when a companion iPhone app is installed, the watch schedules **no** local break notifications and relies on the mirrored iPhone notification (it still shows the next break time). A truly standalone watch without the companion app keeps scheduling locally, so nothing is lost there.
+- **Fixed Smart Guru re-enabling itself after being switched off** — disabling Smart Guru on the iPhone to use manual settings no longer "springs back" to active. The bidirectional watch sync could echo a stale `smartGuruEnabled = true` back to the iPhone and override the user's choice. The iPhone is now the sole leader for the Smart Guru state (same pattern already used for the daily card and micro-task): only the watch adopts it from the sync, the iPhone never imports it. This also restores manual interval/duration settings that were being overridden by the re-activated guru.
+
 ### Smart Guru re-aimed at the real goal (iOS)
 - **Re-aligned the adaptive scheduler to "breathe more often AND longer"** instead of optimizing for comfort. Several behaviours that worked against the goal were fixed:
   - **Ignored notifications no longer poison the signal** — a phone left unattended (delivered-but-untapped breaks) no longer drags the success rate down and mutes the guru. Frequency now adapts from the *engaged* rate (completed vs dismissed); with no engaged events it holds instead of pushing intervals to the ceiling.

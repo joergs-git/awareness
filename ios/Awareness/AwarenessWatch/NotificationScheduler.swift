@@ -1,6 +1,7 @@
 import Foundation
 import UserNotifications
 import Combine
+import WatchConnectivity
 
 /// watchOS notification scheduler — same architecture as iOS but without UIKit dependencies.
 /// Pre-schedules up to 30 notifications at random intervals within the active time window.
@@ -49,6 +50,19 @@ class NotificationScheduler: ObservableObject {
 
     /// Timestamp of the last coordinated schedule received from iOS
     private var lastCoordinatedScheduleDate: Date?
+
+    /// Whether a companion iPhone with the Awareness app is installed.
+    /// When it is, iOS automatically forwards (mirrors) its own break notifications to
+    /// the paired watch. Scheduling watch-LOCAL copies on top of those — even at the
+    /// same coordinated fire dates — makes the watch show each break twice. So when a
+    /// companion app is present, the watch schedules NO local break notifications and
+    /// relies on the mirrored iPhone notification; it still tracks the next break date
+    /// for display. A truly standalone watch (no companion app) keeps scheduling locally.
+    private var companionDeliversNotifications: Bool {
+        WCSession.isSupported() &&
+        WCSession.default.activationState == .activated &&
+        WCSession.default.isCompanionAppInstalled
+    }
 
     private init() {
         registerCategory()
@@ -110,6 +124,11 @@ class NotificationScheduler: ObservableObject {
             return
         }
 
+        // A companion iPhone forwards its own break notifications to the watch — don't
+        // schedule local duplicates. The coordinated schedule from iOS keeps
+        // nextNotificationDate current for display. Only a standalone watch reaches past here.
+        guard !companionDeliversNotifications else { return }
+
         var lastDate = Date()
         var firstDate: Date?
 
@@ -164,6 +183,14 @@ class NotificationScheduler: ObservableObject {
             return
         }
 
+        // Always surface the iPhone's authoritative next break date for display.
+        nextNotificationDate = futureDates.first
+
+        // When a companion iPhone is present it forwards its own notifications to the
+        // watch; scheduling watch-local copies at the same fire dates would duplicate
+        // them. Only a truly standalone watch schedules locally.
+        guard !companionDeliversNotifications else { return }
+
         var firstDate: Date?
 
         for (i, fireDate) in futureDates.enumerated() {
@@ -200,6 +227,12 @@ class NotificationScheduler: ObservableObject {
 
         // Count any delivered notifications the user didn't respond to
         countDeliveredNotifications()
+
+        // With a companion iPhone present, the watch keeps no local pending queue — the
+        // phone forwards its notifications. Nothing to top up, and the coordinated schedule
+        // already set nextNotificationDate. Return before the standalone top-up logic so an
+        // (always) empty local queue isn't mistaken for an exhausted coordinated set.
+        guard !companionDeliversNotifications else { return }
 
         center.getPendingNotificationRequests { [weak self] requests in
             guard let self = self else { return }
