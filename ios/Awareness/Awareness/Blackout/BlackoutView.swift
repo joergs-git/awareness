@@ -449,7 +449,9 @@ struct CardFlipView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Color.black.ignoresSafeArea()
+            // Light, warm backdrop (not black) so rounded/transparent photo corners blend
+            // cleanly instead of showing hard black/white corners.
+            WarmBackground().ignoresSafeArea()
 
             // Flip card — front and pre-rotated back stacked, container rotates on tap.
             // Edge-to-edge, aspect-fit (no crop): fills the screen as much as possible.
@@ -470,13 +472,13 @@ struct CardFlipView: View {
                 if backImage != nil { showingBack.toggle() }
             }
 
-            // Close button (top-left) — returns to the normal screen.
+            // Close button (top-left) — dark glyph for contrast on the light backdrop.
             Button(action: onClose) {
                 Image(systemName: "xmark")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundColor(.primary.opacity(0.7))
                     .padding(10)
-                    .background(Color.white.opacity(0.12))
+                    .background(.ultraThinMaterial)
                     .clipShape(Circle())
             }
             .padding(20)
@@ -491,7 +493,7 @@ struct CardFlipView: View {
                 .scaledToFit()
         } else {
             Text(placeholder)
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.secondary)
                 .font(.title3)
         }
     }

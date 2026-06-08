@@ -117,8 +117,15 @@
              ============================================================ -->
         <Grid x:Name="CardPhotoPanel"
               Opacity="0"
-              Visibility="Collapsed"
-              Background="Transparent">
+              Visibility="Collapsed">
+            <!-- Light, warm backdrop (not black) so rounded/transparent photo corners
+                 blend cleanly. Matches the app's warm light gradient. -->
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#FFF0E8FA" Offset="0" />
+                    <GradientStop Color="#FFE0D7F0" Offset="1" />
+                </LinearGradientBrush>
+            </Grid.Background>
 
             <Image x:Name="CardPhotoImage"
                    Stretch="Uniform"
@@ -137,8 +144,8 @@
                     Content="✕"
                     Width="36" Height="36"
                     FontSize="16"
-                    Foreground="#D9FFFFFF"
-                    Background="#1FFFFFFF"
+                    Foreground="#B3000000"
+                    Background="#33000000"
                     BorderThickness="0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
