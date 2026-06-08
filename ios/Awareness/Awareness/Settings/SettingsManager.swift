@@ -739,11 +739,16 @@ final class SettingsManager: ObservableObject {
             snoozeUntil = v > 0 ? Date(timeIntervalSince1970: v) : nil
         }
 
-        // Smart Guru sync — watch receives state but doesn't run the algorithm
+        // Smart Guru sync — iOS is the LEADER (it owns the toggle and runs the algorithm);
+        // only the watch adopts the state. Importing it on iOS too would let a stale watch
+        // context echo smartGuruEnabled=true back and re-enable Smart Guru right after the
+        // user manually disabled it — overriding their manual interval/duration settings.
+        #if os(watchOS)
         if let v = context["smartGuruEnabled"] as? Bool { smartGuruEnabled = v }
         if let v = context["guruAdaptiveState"] as? Data {
             defaults.set(v, forKey: Keys.guruAdaptiveState)
         }
+        #endif
 
         // iOS is the LEADER for the daily card, manual selection and micro-task: only the
         // watch adopts these from the context. Guarding with os(watchOS) prevents the watch's
