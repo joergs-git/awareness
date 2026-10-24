@@ -13,7 +13,7 @@ Source: SECURITY-FIX_Atempause.md (audit 2026-10-16). Branch `security/audit-202
 - [x] Versions → 5.2.2 everywhere (macOS build 13, iOS build 16, Windows 5.2.2.0); CHANGELOG; CLAUDE.md
 - [x] Build-verify: macOS `swift build` ✓, iOS scheme (iOS 27.1 sim, incl. watch + widgets) ✓; Windows via CI
 - [x] PostgREST accepts the custom header (curl with `x-sync-key` → HTTP 200)
-- [ ] Commit, merge, tag v5.2.2, GitHub release, Apple archives/uploads, notarized macOS zip
+- [x] Commit, merge, tag v5.2.2, GitHub release (macOS notarized zip + Windows zip attached), iOS build 16 + macOS build 13 uploaded to App Store Connect
 
 ## Results — report per finding ID
 - **P1** — verified: yes (policies `true` for select/insert/update; anon also holds DELETE+TRUNCATE; the
@@ -23,7 +23,7 @@ Source: SECURITY-FIX_Atempause.md (audit 2026-10-16). Branch `security/audit-202
   tests from the audit; verify the Storage API exposes `request.headers` to policies before relying on the
   bucket part. 128-bit keys: not done (optional; ~38-bit passphrase is acceptable once hashes are unreadable).
 - **P2** — verified: yes (two advisor WARN lints). Changed: revoke applied 2026-10-24. Tested: advisor
-  re-check pending (run `get_advisors security` → expect 0 findings). Open: none.
+  re-check 2026-10-24 → 0 findings. Open: none.
 - **Short sync_keys** — verified: 3 rows, all iOS test data from 2026-03-18/19 (started_at 00:00:00/01/02).
   Changed: no (DELETE denied by the tool classifier). Open: run in the SQL editor:
   `delete from public.blackout_events where length(sync_key) < 64;`
