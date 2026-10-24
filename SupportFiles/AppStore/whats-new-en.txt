@@ -1,4 +1,6 @@
-What's New in v5.0.3:
+What's New in v5.2.2:
 
-- Skip breaks when you're away — no more triggers after 5 minutes of inactivity
-- watchOS complication now shows purple yin-yang
+- Apple Watch complication shows today's real progress counter and the time of your next break
+- The complication always mirrors the app's practice card and micro-task instead of picking its own
+- Sync hardening: every sync request now carries your sync key, so the server can isolate your data per key
+- Smaller fixes under the hood

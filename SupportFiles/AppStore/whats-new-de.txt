@@ -1,4 +1,6 @@
-Neu in Version 5.0.3:
+Neu in Version 5.2.2:
 
-- Pausen werden übersprungen wenn du nicht am Rechner bist — keine Auslöser nach 5 Minuten Inaktivität
-- watchOS Komplikation zeigt jetzt lila Yin-Yang
+- Apple-Watch-Komplikation zeigt den echten Tageszähler und die Uhrzeit der nächsten Atempause
+- Die Komplikation übernimmt immer Karte und Mikro-Aufgabe der App, statt eigene auszuwählen
+- Sync-Härtung: Jede Sync-Anfrage trägt jetzt deinen Sync-Schlüssel, damit der Server deine Daten pro Schlüssel isolieren kann
+- Kleinere Verbesserungen unter der Haube
