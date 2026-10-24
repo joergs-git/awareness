@@ -14,3 +14,6 @@ windows/**/.vs/
 **/DerivedData/
 **/*.xcuserdata/
 **/xcuserdata/
+
+# Local security audit notes (not for the public repo)
+SECURITY-FIX_*.md
