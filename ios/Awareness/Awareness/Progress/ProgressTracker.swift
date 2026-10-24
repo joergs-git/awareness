@@ -94,7 +94,14 @@ final class ProgressTracker: ObservableObject {
 
     static let shared = ProgressTracker()
 
+    /// On watchOS the counters live in the App Group suite so the complication extension
+    /// (a separate process that never sees the app's standard defaults) reads the same
+    /// numbers as the watch app. Same approach as SettingsManager. iOS keeps standard defaults.
+    #if os(watchOS)
+    private let defaults: UserDefaults
+    #else
     private let defaults = UserDefaults.standard
+    #endif
 
     // MARK: - UserDefaults Keys
 
@@ -407,9 +414,34 @@ final class ProgressTracker: ObservableObject {
         return records
     }
 
+    #if os(watchOS)
+    /// Copy progress keys from the watch app's standard defaults into the shared App Group
+    /// suite, once per key. Deliberately flag-less: the complication extension may run before
+    /// the app after an update, and its own standard defaults are empty — a flag set there
+    /// would have skipped the real migration inside the app. Copying only keys that are still
+    /// absent in the shared suite is idempotent and safe from both processes.
+    private static func migrateToSharedSuiteIfNeeded(_ shared: UserDefaults) {
+        let standard = UserDefaults.standard
+        for key in [Keys.lifetimeTriggered, Keys.lifetimeCompleted,
+                    Keys.lifetimeAwarenessSum, Keys.lifetimeAwarenessCount,
+                    Keys.dailyRecords,
+                    Keys.lifetimeYes, Keys.lifetimeSomewhat, Keys.lifetimeNo] {
+            if shared.object(forKey: key) == nil, let value = standard.object(forKey: key) {
+                shared.set(value, forKey: key)
+            }
+        }
+    }
+    #endif
+
     // MARK: - Init
 
     private init() {
+        #if os(watchOS)
+        let shared = UserDefaults(suiteName: SettingsManager.appGroupID) ?? .standard
+        ProgressTracker.migrateToSharedSuiteIfNeeded(shared)
+        defaults = shared
+        #endif
+
         lifetimeTriggered = defaults.integer(forKey: Keys.lifetimeTriggered)
         lifetimeCompleted = defaults.integer(forKey: Keys.lifetimeCompleted)
 

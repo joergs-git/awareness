@@ -43,10 +43,8 @@
 		A40002 /* BlackoutVisualType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* BlackoutVisualType.swift */; };
 		A40003 /* TimeWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* TimeWindow.swift */; };
 		A40004 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005 /* SettingsManager.swift */; };
-		A40005 /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30006 /* NotificationScheduler.swift */; };
 		A40006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30008 /* Assets.xcassets */; };
 		A40007 /* AwarenessWatchComplication.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B40099 /* AwarenessWatchComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		A40008 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* HealthKitManager.swift */; };
 		A10019 /* ForegroundScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10019 /* ForegroundScheduler.swift */; };
 		A10017 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* ProgressTracker.swift */; };
 		A10018 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10018 /* ProgressView.swift */; };
@@ -178,7 +176,7 @@
 		B30008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B30009 /* AwarenessWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AwarenessWatch.entitlements; sourceTree = "<group>"; };
 		B30010 /* ComplicationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationProvider.swift; sourceTree = "<group>"; };
-		B30013 /* AwarenessWatchComplication.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AwarenessWatchComplication.entitlements; sourceTree = "<group>"; };
+		B30018 /* AwarenessWatchComplication.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AwarenessWatchComplication.entitlements; sourceTree = "<group>"; };
 		B30012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B30011 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
 		B30016 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
@@ -432,7 +430,7 @@
 			children = (
 				B30010 /* ComplicationProvider.swift */,
 				B30012 /* Info.plist */,
-				B30013 /* AwarenessWatchComplication.entitlements */,
+				B30018 /* AwarenessWatchComplication.entitlements */,
 			);
 			path = Complications;
 			sourceTree = "<group>";
@@ -697,8 +695,6 @@
 				A40002 /* BlackoutVisualType.swift in Sources */,
 				A40003 /* TimeWindow.swift in Sources */,
 				A40004 /* SettingsManager.swift in Sources */,
-				A40005 /* NotificationScheduler.swift in Sources */,
-				A40008 /* HealthKitManager.swift in Sources */,
 				A40009 /* ProgressTracker.swift in Sources */,
 				A40010 /* PracticeCard.swift in Sources */,
 				A40011 /* MicroTask.swift in Sources */,
@@ -860,7 +856,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Awareness/Awareness.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Awareness/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Atempause;
@@ -874,7 +870,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -892,7 +888,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Awareness/Awareness.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Awareness/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Atempause;
@@ -906,7 +902,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -924,7 +920,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AwarenessWatch/AwarenessWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Atempause;
@@ -933,7 +929,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Atempause logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -953,7 +949,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AwarenessWatch/AwarenessWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Atempause;
@@ -962,7 +958,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Atempause logs each mindful pause as Mindful Minutes in Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joergsflow.awareness.ios;
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -981,11 +977,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AwarenessWatch/Complications/AwarenessWatchComplication.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Complication";
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1004,11 +1000,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AwarenessWatch/Complications/AwarenessWatchComplication.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWatch/Complications/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Complication";
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.watch.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1027,11 +1023,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AwarenessWidget/AwarenessWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Widget";
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1048,11 +1044,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AwarenessWidget/AwarenessWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AwarenessWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Atempause Widget";
-				MARKETING_VERSION = 5.2;
+				MARKETING_VERSION = 5.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joergsflow.awareness.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

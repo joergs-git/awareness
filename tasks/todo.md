@@ -1,3 +1,36 @@
+# v5.2.1 — watchOS complication data fixes (iOS/watchOS only)
+
+Context: complication listing issue on device was OS-side (fixed by reboot/reinstall). The remaining
+findings from the 2026-10-24 audit are real data/project defects and are fixed here.
+
+## Plan
+- [x] F1: ProgressTracker uses the watch App Group suite on watchOS (+ one-time migration from standard defaults)
+      so the complication counter shows real today numbers instead of 0
+- [x] F2: Persist the watch's next break date in the App Group (SettingsManager `nextBreakDate`, watchOS only),
+      written by NotificationScheduler; complication reads it, timeline entry flips to "Active" when it passes
+- [x] F3: Complication becomes read-only: `storedPracticeCard()` falls back to the deterministic card without
+      persisting; new `storedMicroTask()` read-only accessor replaces `currentMicroTask()` in the extension
+- [x] F4: pbxproj — unique object ID for the complication entitlements file ref (B30013 was used twice)
+- [x] F5: pbxproj — drop NotificationScheduler.swift + HealthKitManager.swift from the complication target
+      (unreferenced there)
+- [x] F6: Reload complication timelines when the next break date changes (cheap, few times per day)
+- [x] Build-verify: AwarenessWatch scheme (watchOS 27.0 sim) + Awareness scheme (iOS 27.1 sim)
+- [x] Simulator run: extension registers, no crash, no "malformed project" warning
+- [x] Version: iOS pbxproj MARKETING_VERSION 5.2 → 5.2.1 (8 targets), CURRENT_PROJECT_VERSION 14 → 15; CHANGELOG
+- [x] Security/privacy check, commit on bugfix/watch-complication-data, merge to main, push
+- [ ] Apple archive + upload per policy (or report exact command if auth is unavailable)
+
+## Results
+- All six fixes implemented in 4 Swift files + iOS pbxproj; macOS/Windows untouched.
+- AwarenessWatch scheme (watchOS 27.0 sim): BUILD SUCCEEDED, zero warnings (the "malformed project" warning is gone).
+- Awareness scheme (iOS 27.1 sim, builds watch app + both extensions): BUILD SUCCEEDED, only pre-existing warnings.
+- watchOS 27.0 simulator: extension launches and registers both complications; shared suite now carries the
+  practice-card/micro-task keys. nextBreakDate/progress keys use the identical App Group mechanism that the
+  card sync already proved on a real watch (17c0358), so no separate device run was needed.
+- Version 5.2.1 / build 15 (iOS + watchOS + both widget targets). CHANGELOG updated.
+
+---
+
 # v5.2 — Smart Guru Re-Aim, Manual Daily Card, Per-Card Photos
 
 ## (a) Smart Guru — fix goal misalignment (iOS only)
