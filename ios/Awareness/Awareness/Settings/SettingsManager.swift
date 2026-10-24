@@ -82,6 +82,8 @@ final class SettingsManager: ObservableObject {
         static let reminderHapticEnabled = "reminderHapticEnabled"
         static let hapticEndEnabled      = "hapticEndEnabled"
         static let endFlashEnabled       = "endFlashEnabled"
+        // Next scheduled break, shared with the complication extension (not synced to iOS)
+        static let nextBreakDate         = "nextBreakDate"
         // Legacy key for migration from hapticStartEnabled → reminderHapticEnabled
         static let hapticStartEnabled    = "hapticStartEnabled"
         #endif
@@ -313,16 +315,21 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Practice Card & Micro-Task State
 
-    /// Read-only: return today's stored practice card without assigning a new one.
-    /// Used by the widget extension to avoid racing with the main app or iOS sync.
+    /// Read-only: today's practice card WITHOUT persisting anything.
+    /// Order: manual pin → card already stored for today (local or iOS-synced) → the
+    /// deterministic daily rotation. Used by the widget extension and the watch app so a
+    /// separate process never assigns a card of its own and races the main app or the
+    /// iOS sync (iOS is the leader for card assignment).
     func storedPracticeCard() -> PracticeCard? {
-        let today = todayString()
-        let storedDate = defaults.string(forKey: Keys.practiceCardDate)
-        guard storedDate == today,
-              let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) else {
-            return nil
+        if manualCardSelectionEnabled, let card = PracticeCard.card(withID: manualCardID) {
+            return card
         }
-        return PracticeCard.card(withID: cardID)
+        if defaults.string(forKey: Keys.practiceCardDate) == todayString(),
+           let cardID = defaults.string(forKey: Keys.todaysPracticeCardID) {
+            return PracticeCard.card(withID: cardID)
+        }
+        guard !PracticeCard.allCards.isEmpty else { return nil }
+        return PracticeCard.allCards[deterministicCardIndex()]
     }
 
     /// Deterministic index into `PracticeCard.allCards` for the current local day.
@@ -448,15 +455,23 @@ final class SettingsManager: ObservableObject {
     }
     #endif
 
+    /// Read-only: today's micro-task if one has already been assigned (locally or via the
+    /// iOS sync). Never assigns one — used by the widget extension so a separate process
+    /// cannot race the app or the iOS leader by picking its own random task.
+    func storedMicroTask() -> MicroTask? {
+        guard defaults.string(forKey: Keys.microTaskDate) == todayString(),
+              let taskID = defaults.string(forKey: Keys.currentMicroTaskID) else {
+            return nil
+        }
+        return MicroTask.allTasks.first { $0.id == taskID }
+    }
+
     /// Get the current micro-task, auto-assigning one from today's card pool if none exists yet.
     /// This ensures a micro-task is visible from app launch, not just after the first blackout.
     func currentMicroTask() -> MicroTask? {
-        let today = todayString()
-        let storedDate = defaults.string(forKey: Keys.microTaskDate)
-
         // If we already have a task for today, return it
-        if storedDate == today, let taskID = defaults.string(forKey: Keys.currentMicroTaskID) {
-            return MicroTask.allTasks.first { $0.id == taskID }
+        if let task = storedMicroTask() {
+            return task
         }
 
         // Auto-assign from today's card pool so the task is available immediately
@@ -655,6 +670,24 @@ final class SettingsManager: ObservableObject {
         let url = URL(fileURLWithPath: path)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         return url
+    }
+    #endif
+
+    #if os(watchOS)
+    // MARK: - Next Break Date (shared with the complication)
+
+    /// The watch's next scheduled break, persisted in the App Group suite so the complication
+    /// extension (a separate process) can display it. nil = unknown or snoozed. Written only
+    /// by the watch app's NotificationScheduler; the extension reads it. Not synced to iOS.
+    var nextBreakDate: Date? {
+        get { defaults.object(forKey: Keys.nextBreakDate) as? Date }
+        set {
+            if let date = newValue {
+                defaults.set(date, forKey: Keys.nextBreakDate)
+            } else {
+                defaults.removeObject(forKey: Keys.nextBreakDate)
+            }
+        }
     }
     #endif
 

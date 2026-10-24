@@ -4,6 +4,17 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.2.1
+
+### watchOS complication data fixes (iOS/watchOS only; macOS and Windows unchanged at 5.2)
+- **Complication now shows today's real progress counter** — on watchOS the progress tracker moved into the App Group suite shared with the complication extension (existing counters are migrated once). The extension previously read its own empty container, so the counter was always 0 and never displayed.
+- **Complication shows the next break time** — the watch app mirrors its next scheduled break into the App Group and reloads the complication when it changes. The rectangular and inline families now display "Next: HH:mm" (snoozed → "Snoozed"; once the time has passed → "Active" until the app reschedules).
+- **Complication is strictly read-only** — the practice-card complication no longer assigns a card or a micro-task of its own; it reads what the watch app or the iOS leader stored (deterministic daily card as fallback). Removes a race that could show a different task on the watch than on the iPhone until the next sync.
+- **Project hygiene** — fixed a duplicate object ID in the iOS Xcode project (complication entitlements vs ProgressView.swift) that produced a "malformed project" build warning; removed NotificationScheduler and HealthKitManager from the complication target, where they were compiled but never used.
+- Note: a complication missing from the watch-face picker after a watchOS 26/27 update is an OS-side extension-registration issue (reboot the watch or reinstall the watch app via the iPhone Watch app). No app-side cause was found; the extension registers cleanly on a watchOS 27 simulator.
+
+---
+
 ## v5.2
 
 ### Watch notification dedup + Smart Guru deactivation (iOS/watchOS, build 14)

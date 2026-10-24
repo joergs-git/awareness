@@ -2,6 +2,7 @@ import Foundation
 import UserNotifications
 import Combine
 import WatchConnectivity
+import WidgetKit
 
 /// watchOS notification scheduler — same architecture as iOS but without UIKit dependencies.
 /// Pre-schedules up to 30 notifications at random intervals within the active time window.
@@ -38,8 +39,17 @@ class NotificationScheduler: ObservableObject {
     /// Prevents double-counting between willPresent, didReceive, and delivered-check.
     private var countedTriggerIDs = Set<String>()
 
-    /// The approximate date of the next scheduled notification
-    @Published private(set) var nextNotificationDate: Date?
+    /// The approximate date of the next scheduled notification.
+    /// Mirrored into the App Group suite (SettingsManager.nextBreakDate) for the complication
+    /// extension, followed by a timeline reload — only when the value actually changes,
+    /// because WidgetKit reloads are budgeted per day.
+    @Published private(set) var nextNotificationDate: Date? {
+        didSet {
+            guard nextNotificationDate != oldValue else { return }
+            settings.nextBreakDate = nextNotificationDate
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+    }
 
     /// Set to true by WatchConnectivityManager while applying a remote context,
     /// so the settings observer skips spurious rescheduling.

@@ -16,12 +16,20 @@ struct AwarenessTimelineProvider: TimelineProvider {
         )
     }
 
+    /// The next break date shared by the watch app, or nil when it is unknown, already in the
+    /// past (the app has not rescheduled yet) or the user is snoozed.
+    private func upcomingBreakDate(_ settings: SettingsManager, after date: Date) -> Date? {
+        guard !settings.isSnoozed, let next = settings.nextBreakDate, next > date else { return nil }
+        return next
+    }
+
     func getSnapshot(in context: Context, completion: @escaping (AwarenessEntry) -> Void) {
         let settings = SettingsManager.shared
         let tracker = ProgressTracker.shared
+        let now = Date()
         let entry = AwarenessEntry(
-            date: Date(),
-            nextBlackout: nil,
+            date: now,
+            nextBlackout: upcomingBreakDate(settings, after: now),
             isSnoozed: settings.isSnoozed,
             snoozeUntil: settings.snoozeUntil,
             todayCompleted: tracker.todayCompleted,
@@ -35,18 +43,32 @@ struct AwarenessTimelineProvider: TimelineProvider {
         let tracker = ProgressTracker.shared
         let now = Date()
 
-        let entry = AwarenessEntry(
+        let nextBreak = upcomingBreakDate(settings, after: now)
+        var entries = [AwarenessEntry(
             date: now,
-            nextBlackout: nil,
+            nextBlackout: nextBreak,
             isSnoozed: settings.isSnoozed,
             snoozeUntil: settings.snoozeUntil,
             todayCompleted: tracker.todayCompleted,
             todayTriggered: tracker.todayTriggered
-        )
+        )]
+
+        // Once the announced break time has passed, stop showing it. The watch app reloads
+        // this timeline with the following date as soon as it reschedules.
+        if let nextBreak = nextBreak {
+            entries.append(AwarenessEntry(
+                date: nextBreak,
+                nextBlackout: nil,
+                isSnoozed: settings.isSnoozed,
+                snoozeUntil: settings.snoozeUntil,
+                todayCompleted: tracker.todayCompleted,
+                todayTriggered: tracker.todayTriggered
+            ))
+        }
 
         // Refresh every 15 minutes
         let refreshDate = Calendar.current.date(byAdding: .minute, value: 15, to: now)!
-        let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
+        let timeline = Timeline(entries: entries, policy: .after(refreshDate))
         completion(timeline)
     }
 }
@@ -188,8 +210,9 @@ struct PracticeEntry: TimelineEntry {
 
 /// Timeline provider for the practice card complication.
 /// Shows today's practice card title and current micro-task suggestion.
-/// Uses storedPracticeCard() (read-only) to avoid assigning a different random card
-/// than what iOS synced — iOS is the leader for card assignment.
+/// Strictly read-only: storedPracticeCard() / storedMicroTask() never persist anything, so
+/// this extension process cannot assign a card or task of its own and race the watch app
+/// or the iOS sync — iOS is the leader for card and task assignment.
 struct PracticeTimelineProvider: TimelineProvider {
 
     func placeholder(in context: Context) -> PracticeEntry {
@@ -202,10 +225,8 @@ struct PracticeTimelineProvider: TimelineProvider {
 
     func getSnapshot(in context: Context, completion: @escaping (PracticeEntry) -> Void) {
         let settings = SettingsManager.shared
-        // Prefer storedPracticeCard (read-only, respects iOS sync) with
-        // todaysPracticeCard fallback so a card is always shown
-        let card = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
-        let task = settings.currentMicroTask()
+        let card = settings.storedPracticeCard()
+        let task = settings.storedMicroTask()
         // When no micro-task yet (before first blackout), show card prompt as fallback
         let subtitle = task?.localizedText ?? card?.localizedPrompt
         completion(PracticeEntry(
@@ -217,8 +238,8 @@ struct PracticeTimelineProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PracticeEntry>) -> Void) {
         let settings = SettingsManager.shared
-        let card = settings.storedPracticeCard() ?? settings.todaysPracticeCard()
-        let task = settings.currentMicroTask()
+        let card = settings.storedPracticeCard()
+        let task = settings.storedMicroTask()
         let subtitle = task?.localizedText ?? card?.localizedPrompt
         let now = Date()
 
