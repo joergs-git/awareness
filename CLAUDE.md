@@ -101,6 +101,7 @@ Requires watchOS 10+, Xcode 15+.
 - **HealthKit**: iOS logs completed synced events as mindful sessions (if enabled)
 - **Files**: `Sync/SyncKeyManager`, `Sync/SupabaseClient`, `Sync/SyncManager` on each platform; `Sync/SyncWordList.swift` iOS-only
 - **pbxproj IDs**: B10030–B10033 (file refs), A10029–A10032 (build files), D10013 (Sync group)
+- **Security (audit 2026-10)**: every client sends `x-sync-key: <sha256 hash>` on ALL REST + Storage requests through the shared `makeRequest` (Swift) / `MakeRequest` (C#) helper — never build a raw Supabase request. Server-side header-based RLS for the table and the `card-assets` bucket lives in `supabase/security-p1-sync-key-policies.sql` (**NOT applied yet** — apply only once ≥5.2.2 clients are widespread; older clients lose sync the moment it runs). P2 revoke already applied: `supabase/security-p2-revoke-rls-auto-enable.sql`
 
 ## Project Structure
 

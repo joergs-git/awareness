@@ -1,3 +1,35 @@
+# v5.2.2 — Sync security audit (steps 1 + 2)
+
+Source: SECURITY-FIX_Atempause.md (audit 2026-10-16). Branch `security/audit-2026-10`.
+
+## Plan
+- [x] Step 1a: P2 — revoke EXECUTE on `rls_auto_enable()` (applied via Supabase MCP as migration
+      `security_p2_revoke_rls_auto_enable`; file `supabase/security-p2-revoke-rls-auto-enable.sql`)
+- [ ] Step 1b: delete the 3 unhashed test rows from 2026-03-18/19 (DELETE blocked by the tool permission
+      classifier — SQL handed to the user, see Results)
+- [x] Step 2: `x-sync-key` header on every REST + Storage request — macOS, iOS, Windows, via one shared
+      request helper per client
+- [x] P1 migration as a file only (`supabase/security-p1-sync-key-policies.sql`, table + bucket) — NOT applied
+- [x] Versions → 5.2.2 everywhere (macOS build 13, iOS build 16, Windows 5.2.2.0); CHANGELOG; CLAUDE.md
+- [x] Build-verify: macOS `swift build` ✓, iOS scheme (iOS 27.1 sim, incl. watch + widgets) ✓; Windows via CI
+- [x] PostgREST accepts the custom header (curl with `x-sync-key` → HTTP 200)
+- [ ] Commit, merge, tag v5.2.2, GitHub release, Apple archives/uploads, notarized macOS zip
+
+## Results — report per finding ID
+- **P1** — verified: yes (policies `true` for select/insert/update; anon also holds DELETE+TRUNCATE; the
+  `card-assets` bucket has the same open anon policies, which the audit missed). Changed: client half only
+  (header on all requests, all platforms). Tested: builds + curl. Open: apply
+  `supabase/security-p1-sync-key-policies.sql` once ≥5.2.2 clients are widespread, then run the acceptance
+  tests from the audit; verify the Storage API exposes `request.headers` to policies before relying on the
+  bucket part. 128-bit keys: not done (optional; ~38-bit passphrase is acceptable once hashes are unreadable).
+- **P2** — verified: yes (two advisor WARN lints). Changed: revoke applied 2026-10-24. Tested: advisor
+  re-check pending (run `get_advisors security` → expect 0 findings). Open: none.
+- **Short sync_keys** — verified: 3 rows, all iOS test data from 2026-03-18/19 (started_at 00:00:00/01/02).
+  Changed: no (DELETE denied by the tool classifier). Open: run in the SQL editor:
+  `delete from public.blackout_events where length(sync_key) < 64;`
+
+---
+
 # v5.2.1 — watchOS complication data fixes (iOS/watchOS only)
 
 Context: complication listing issue on device was OS-side (fixed by reboot/reinstall). The remaining
