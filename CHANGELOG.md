@@ -4,6 +4,15 @@ All notable changes to Atempause (formerly Awareness reminder), from initial rel
 
 ---
 
+## v5.2.2
+
+### Sync security hardening (all platforms)
+- **Every Supabase request now carries the `x-sync-key` header** (the SHA-256 sync-key hash, the same value stored in `sync_key`), on REST and Storage calls alike, built by one shared request helper per platform. This is the client half of the security audit's P1 fix: once the server policies switch to header-based isolation (`supabase/security-p1-sync-key-policies.sql`, to be applied after this version is widespread), each client can only read and change its own events and card photos. Until then the current policies ignore the header, so nothing changes for users.
+- **Server:** revoked anon/authenticated EXECUTE on the `rls_auto_enable()` helper (audit finding P2, applied 2026-10-24, recorded in `supabase/security-p2-revoke-rls-auto-enable.sql`). Both Supabase security-advisor warnings are resolved.
+- Versions aligned to 5.2.2 on all platforms (macOS build 13, iOS/watchOS build 16, Windows 5.2.2.0).
+
+---
+
 ## v5.2.1
 
 ### watchOS complication data fixes (iOS/watchOS only; macOS and Windows unchanged at 5.2)

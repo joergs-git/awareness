@@ -19,6 +19,29 @@ public class SupabaseClient
 
     private static readonly HttpClient _http = new();
 
+    /// <summary>
+    /// Request header carrying the caller's sync-key hash. Server-side RLS policies compare it
+    /// against the row's sync_key (or the storage object's path prefix), so a client can only
+    /// ever read and change its own data. Sent on every request, REST and Storage alike.
+    /// </summary>
+    private const string SyncKeyHeader = "x-sync-key";
+
+    /// <summary>
+    /// Build a request with the common Supabase headers (apikey, Authorization, x-sync-key).
+    /// The sync-key hash defaults to the locally configured key; callers that already resolved
+    /// it pass it explicitly. Without a configured key no x-sync-key header is sent.
+    /// </summary>
+    private static HttpRequestMessage MakeRequest(HttpMethod method, string url, string? syncKeyHash = null)
+    {
+        var request = new HttpRequestMessage(method, url);
+        request.Headers.Add("apikey", SupabaseAnonKey);
+        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+        var hash = syncKeyHash ?? SyncKeyManager.Shared.HashedSyncKey;
+        if (!string.IsNullOrEmpty(hash))
+            request.Headers.Add(SyncKeyHeader, hash);
+        return request;
+    }
+
     /// <summary>Event payload for uploading to Supabase</summary>
     public class UploadEvent
     {
@@ -49,13 +72,8 @@ public class SupabaseClient
     {
         var json = JsonSerializer.Serialize(ev);
         // on_conflict enables upsert: INSERT or UPDATE when (sync_key, started_at, source) matches
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"{SupabaseUrl}/rest/v1/blackout_events?on_conflict=sync_key,started_at,source")
-        {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-
-        request.Headers.Add("apikey", SupabaseAnonKey);
-        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+        using var request = MakeRequest(HttpMethod.Post, $"{SupabaseUrl}/rest/v1/blackout_events?on_conflict=sync_key,started_at,source", ev.SyncKey);
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         request.Headers.Add("Prefer", "return=minimal");
         request.Headers.Add("Prefer", "resolution=merge-duplicates");
 
@@ -103,9 +121,7 @@ public class SupabaseClient
             + "&order=started_at.desc"
             + "&limit=5";
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("apikey", SupabaseAnonKey);
-        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+        using var request = MakeRequest(HttpMethod.Get, url, syncKeyHash);
 
         var response = await _http.SendAsync(request);
         response.EnsureSuccessStatusCode();
@@ -128,9 +144,7 @@ public class SupabaseClient
             + "&select=id,started_at,duration,completed,awareness,source,created_at"
             + "&order=created_at.asc";
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("apikey", SupabaseAnonKey);
-        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+        using var request = MakeRequest(HttpMethod.Get, url, syncKeyHash);
 
         var response = await _http.SendAsync(request);
         response.EnsureSuccessStatusCode();
@@ -141,7 +155,8 @@ public class SupabaseClient
 
     // MARK: - Storage (card photos)
     // Opt-in card-photo sync. Objects live under "{sync_key_hash}/..." in a private bucket;
-    // RLS restricts each anon client to its own prefix (same trust model as blackout_events).
+    // RLS restricts each anon client to its own prefix via the x-sync-key header (same trust
+    // model as blackout_events).
 
     private const string CardBucket = "card-assets";
 
@@ -160,13 +175,9 @@ public class SupabaseClient
     /// <summary>Upload (upsert) raw bytes to the card-assets bucket at the given path.</summary>
     public async Task UploadStorageObjectAsync(string path, byte[] data, string contentType)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"{SupabaseUrl}/storage/v1/object/{CardBucket}/{path}")
-        {
-            Content = new ByteArrayContent(data)
-        };
+        using var request = MakeRequest(HttpMethod.Post, $"{SupabaseUrl}/storage/v1/object/{CardBucket}/{path}");
+        request.Content = new ByteArrayContent(data);
         request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
-        request.Headers.Add("apikey", SupabaseAnonKey);
-        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
         request.Headers.Add("x-upsert", "true");
 
         var response = await _http.SendAsync(request);
@@ -176,9 +187,7 @@ public class SupabaseClient
     /// <summary>Download an object's bytes. Returns null when the object is absent (404).</summary>
     public async Task<byte[]?> DownloadStorageObjectAsync(string path)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"{SupabaseUrl}/storage/v1/object/{CardBucket}/{path}");
-        request.Headers.Add("apikey", SupabaseAnonKey);
-        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+        using var request = MakeRequest(HttpMethod.Get, $"{SupabaseUrl}/storage/v1/object/{CardBucket}/{path}");
 
         var response = await _http.SendAsync(request);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
@@ -190,12 +199,8 @@ public class SupabaseClient
     public async Task<List<StorageObject>> ListStorageObjectsAsync(string prefix)
     {
         var body = JsonSerializer.Serialize(new { prefix, limit = 100 });
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"{SupabaseUrl}/storage/v1/object/list/{CardBucket}")
-        {
-            Content = new StringContent(body, Encoding.UTF8, "application/json")
-        };
-        request.Headers.Add("apikey", SupabaseAnonKey);
-        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+        using var request = MakeRequest(HttpMethod.Post, $"{SupabaseUrl}/storage/v1/object/list/{CardBucket}");
+        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
         var response = await _http.SendAsync(request);
         response.EnsureSuccessStatusCode();

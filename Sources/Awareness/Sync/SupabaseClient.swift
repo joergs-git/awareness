@@ -13,6 +13,26 @@ final class SupabaseClient {
     private static let supabaseURL = "https://dntkhnjmczkqluwgddir.supabase.co"
     private static let supabaseAnonKey = "sb_publishable_Ncq1smqygsQIQg4kKe7NqA_IR4xg8Kb"
 
+    /// Request header carrying the caller's sync-key hash. Server-side RLS policies compare it
+    /// against the row's `sync_key` (or the storage object's path prefix), so a client can only
+    /// ever read and change its own data. Sent on every request, REST and Storage alike.
+    static let syncKeyHeader = "x-sync-key"
+
+    /// Build a request with the common Supabase headers (apikey, Authorization, x-sync-key).
+    /// `syncKeyHash` defaults to the locally configured key; callers that already resolved
+    /// the hash pass it explicitly. Without a configured key no x-sync-key header is sent.
+    private static func makeRequest(url: URL, method: String,
+                                    syncKeyHash: String? = SyncKeyManager.shared.hashedSyncKey) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        if let hash = syncKeyHash, !hash.isEmpty {
+            request.setValue(hash, forHTTPHeaderField: syncKeyHeader)
+        }
+        return request
+    }
+
     /// Event payload for uploading to Supabase
     struct UploadEvent: Codable {
         let syncKey: String
@@ -69,10 +89,7 @@ final class SupabaseClient {
             throw SyncError.invalidURL
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        var request = Self.makeRequest(url: url, method: "GET", syncKeyHash: syncKeyHash)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -100,10 +117,7 @@ final class SupabaseClient {
             throw SyncError.invalidURL
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        var request = Self.makeRequest(url: url, method: "GET", syncKeyHash: syncKeyHash)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -126,10 +140,7 @@ final class SupabaseClient {
             throw SyncError.invalidURL
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        var request = Self.makeRequest(url: url, method: "POST", syncKeyHash: event.syncKey)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("return=minimal", forHTTPHeaderField: "Prefer")
         request.addValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
@@ -147,7 +158,8 @@ final class SupabaseClient {
 
     // MARK: - Storage (card photos)
     // Opt-in card-photo sync. Objects live under "{sync_key_hash}/..." in a private bucket;
-    // RLS restricts each anon client to its own prefix (same trust model as blackout_events).
+    // RLS restricts each anon client to its own prefix via the x-sync-key header (same trust
+    // model as blackout_events).
 
     static let cardBucket = "card-assets"
 
@@ -163,10 +175,7 @@ final class SupabaseClient {
         guard let url = URL(string: "\(Self.supabaseURL)/storage/v1/object/\(Self.cardBucket)/\(path)") else {
             throw SyncError.invalidURL
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        var request = Self.makeRequest(url: url, method: "POST")
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         request.setValue("true", forHTTPHeaderField: "x-upsert")
         request.httpBody = data
@@ -182,10 +191,7 @@ final class SupabaseClient {
         guard let url = URL(string: "\(Self.supabaseURL)/storage/v1/object/\(Self.cardBucket)/\(path)") else {
             throw SyncError.invalidURL
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        let request = Self.makeRequest(url: url, method: "GET")
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw SyncError.httpError(0) }
@@ -199,10 +205,7 @@ final class SupabaseClient {
         guard let url = URL(string: "\(Self.supabaseURL)/storage/v1/object/list/\(Self.cardBucket)") else {
             throw SyncError.invalidURL
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue(Self.supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        var request = Self.makeRequest(url: url, method: "POST")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: [
             "prefix": prefix,
